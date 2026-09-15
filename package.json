@@ -11,6 +11,7 @@
 		"build": "next build",
 		"start": "next start",
 		"ui:shadcn": "node scripts/ui-shadcn.mjs",
+		"visual:atlas-css-parity": "node scripts/verify-atlas-css-parity.mjs",
 		"lint": "biome lint .",
 		"typecheck": "next typegen && tsc --noEmit",
 		"contracts:check": "node scripts/contracts.mjs check && node scripts/contracts.mjs check --scope=journal",

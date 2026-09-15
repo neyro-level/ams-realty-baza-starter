@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../..");
@@ -21,15 +21,24 @@ const definitions = new Set(
 	[...tokenCss.matchAll(/^\s*(--[a-z0-9_-]+)\s*:/gim)].map((match) => match[1]),
 );
 
-const externalValues = walk(join(root, "src"), new Set([".css"]))
+const componentCssFiles = walk(join(root, "src"), new Set([".css"]))
 	.concat(walk(join(root, "packages"), new Set([".css"])))
-	.filter((path) => path !== tokenSource)
-	.flatMap((path) => {
+	.filter((path) => path !== tokenSource);
+const externalDefinitions = new Set(
+	componentCssFiles.flatMap((path) => {
 		const css = readFileSync(path, "utf8");
-		return [...css.matchAll(/^\s*(--[a-z0-9_-]+)\s*:\s*([^;]+);/gim)]
-			.filter((match) => !match[2].includes("var(--"))
-			.map((match) => `${relative(root, path)}:${match[1]}`);
-	});
+		return [...css.matchAll(/(?:^|[;{])\s*(--[a-z0-9_-]+)\s*:/gim)].map(
+			(match) => match[1],
+		);
+	}),
+);
+const knownDefinitions = new Set([...definitions, ...externalDefinitions]);
+const externalValues = componentCssFiles.flatMap((path) => {
+	const css = readFileSync(path, "utf8");
+	return [...css.matchAll(/^\s*(--[a-z0-9_-]+)\s*:\s*([^;]+);/gim)]
+		.filter((match) => !match[2].includes("var(--"))
+		.map((match) => `${relative(root, path)}:${match[1]}`);
+});
 
 const uiFiles = walk(
 	join(root, "packages/ui/src"),
@@ -51,11 +60,11 @@ for (const path of uiFiles) {
 		/var\((--[a-z0-9_-]+)(?:\s*,\s*([^)]*))?\)/gim,
 	)) {
 		const [, token, fallback] = match;
-		if (definitions.has(token)) continue;
+		if (knownDefinitions.has(token)) continue;
 
 		const fallbackToken = fallback?.match(/var\((--[a-z0-9_-]+)/i)?.[1];
 		const hasSafeFallback = Boolean(
-			fallback && (!fallbackToken || definitions.has(fallbackToken)),
+			fallback && (!fallbackToken || knownDefinitions.has(fallbackToken)),
 		);
 		if (!hasSafeFallback) unresolved.push(`${relative(root, path)}:${token}`);
 	}
@@ -86,6 +95,48 @@ const forbiddenStyles = primitiveStyleFiles.flatMap((path) => {
 	});
 });
 
+const uiSource = uiFiles.map((path) => readFileSync(path, "utf8")).join("\n");
+const allowedExternalHooks = new Set([
+	"home-page",
+	"request-modal__link",
+	"site-primary-action",
+]);
+const pageStyleFailures = componentCssFiles.flatMap((path) => {
+	const css = readFileSync(path, "utf8");
+	const relativePath = relative(root, path);
+	const failures = [];
+	for (const [index, line] of css.split(/\r?\n/).entries()) {
+		if (
+			/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|font-weight:\s*[0-9]+|border-radius:\s*[0-9]+|(?:[0-9]*\.)?[0-9]+(?:ms|s)\b/i.test(
+				line,
+			)
+		) {
+			failures.push(`${relativePath}:${index + 1}:raw design value`);
+		}
+		if (/box-shadow:/.test(line) && !line.includes("var(--")) {
+			failures.push(`${relativePath}:${index + 1}:raw shadow`);
+		}
+		if (/\.(?:journal|leadgen|promo)-/i.test(line)) {
+			failures.push(`${relativePath}:${index + 1}:excluded module selector`);
+		}
+	}
+
+	const selectorCss = css.replace(/^@import.*$/gm, "");
+	const selectors = [
+		...new Set(
+			[...selectorCss.matchAll(/\.([a-z][a-z0-9_-]*)/gi)].map(
+				(match) => match[1],
+			),
+		),
+	];
+	for (const selector of selectors) {
+		if (!uiSource.includes(selector) && !allowedExternalHooks.has(selector)) {
+			failures.push(`${relativePath}:unused selector .${selector}`);
+		}
+	}
+	return failures;
+});
+
 const required = [
 	"--background",
 	"--surface",
@@ -96,6 +147,9 @@ const required = [
 	"--site-type-body",
 	"--site-radius-sm",
 	"--site-radius-lg",
+	"--site-radius-full",
+	"--site-font-weight-medium",
+	"--site-font-weight-bold",
 	"--site-frame-max",
 	"--site-frame-floating-max",
 	"--container-copy-measure",
@@ -124,6 +178,7 @@ const failures = [
 	),
 	...unresolved.map((item) => `unresolved UI token ${item}`),
 	...forbiddenStyles.map((item) => `forbidden primitive style literal ${item}`),
+	...pageStyleFailures.map((item) => `page CSS violation ${item}`),
 ];
 
 if (!tokenCss.includes("@theme inline"))

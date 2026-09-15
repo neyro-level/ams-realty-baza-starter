@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@ams/realtbase-ui/styles.css";
 @source "../../packages/ui/src";
 
 /* Atlas visual baseline: main@4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe. */
@@ -52,11 +53,33 @@
   --error: #9e1c1c;
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.02), 0 8px 24px rgba(0, 0, 0, 0.04);
   --shadow-dialog: 0 28px 80px rgba(24, 22, 24, 0.18);
+  --request-modal-shadow-panel: 0 24px 80px var(--shell-effect-subtle);
+  --request-modal-shadow-avatar: 0 12px 26px var(--shell-effect-strong);
+  --request-modal-shadow-focus: 0 0 0 3px var(--shell-effect-selected);
+  --request-modal-shadow-action: 0 4px 12px var(--shell-effect-emphasis);
+  --request-modal-shadow-action-hover: 0 6px 16px var(--shell-effect-contrast);
+  --home-shadow-action: 0 4px 12px var(--home-action-shadow);
+  --home-shadow-action-hover: 0 6px 16px var(--home-action-shadow-hover);
+  --home-shadow-hero-card: 0 1px 2px var(--home-hero-card-shadow);
+  --home-shadow-service-icon: inset 0 1px 0 var(--home-services-icon-inset), 0 10px 24px var(--home-surface-shadow);
+  --home-shadow-service-card-hover: 0 12px 28px var(--home-surface-shadow);
+  --home-shadow-service-icon-hover: inset 0 1px 0 var(--home-services-icon-inset-hover), 0 14px 30px var(--home-services-shadow-hover);
+  --home-shadow-why-panel: 0 22px 60px var(--home-surface-shadow);
+  --home-shadow-why-photo: 0 18px 46px var(--home-why-photo-shadow);
+  --home-shadow-mobile-card: 0 14px 36px var(--home-mobile-card-shadow), inset 0 1px 0 var(--home-mobile-highlight);
+  --home-shadow-mobile-action: 0 8px 18px var(--home-mobile-action-shadow);
   --site-radius-sm: 8px;
   --site-radius-md: 10px;
   --site-radius-lg: 12px;
   --site-radius-xl: 12px;
+  --site-radius-full: 999px;
   --radius: 8px;
+  --site-font-weight-medium: 500;
+  --site-font-weight-support: 560;
+  --site-font-weight-semibold: 600;
+  --site-font-weight-strong: 650;
+  --site-font-weight-bold: 700;
+  --site-font-weight-extrabold: 800;
   --site-frame-max: 1380px;
   --site-frame-floating-max: calc(var(--site-frame-max) + 40px);
   --site-section-space-desktop: 88px;
@@ -89,10 +112,13 @@
   --media-counter-surface: rgba(24, 24, 26, 0.82);
   --media-control-content: var(--text-dark);
   --motion-duration-fast: 180ms;
+  --motion-duration-short: 200ms;
   --motion-duration-standard: 250ms;
   --motion-duration-medium: 300ms;
+  --motion-duration-extended: 350ms;
   --motion-duration-slow: 500ms;
   --motion-duration-emphasis: 700ms;
+  --motion-duration-loop: 1200ms;
   --motion-ease-standard: ease;
   --motion-ease-balanced: ease-in-out;
   --motion-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);

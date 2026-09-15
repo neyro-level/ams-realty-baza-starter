@@ -132,6 +132,10 @@ Client boundary переносится только когда без него �
 
 Atlas semantic roles для color/surface/text/border/focus/status, typography, containers, section rhythm, radii, media и motion входят в normalization input. Numeric values остаются donor evidence до EPIC 4; они не становятся RealtBase tokens автоматически.
 
+### Normalized CSS parity proof
+
+EPIC 4 сохраняет Atlas geometry и visual treatment без глобального загрязнения route-owned styles: `shell.css`, `request-modal.css` и `site-footer.css` подключаются через package root, а `home-page.css` и выделенный `home-articles.css` экспортируются отдельно для маршрута главной. Скрипт `pnpm visual:atlas-css-parity` сравнивает pinned Atlas до и после подключения нормализованного CSS. Зафиксированный результат: 24/24 pixel-identical кадров для шести сценариев на mobile, tablet, desktop и wide; machine-readable evidence — `docs/research/atlas-css-parity.json`.
+
 ## Media inventory
 
 | Элементы | Факт | Класс |
