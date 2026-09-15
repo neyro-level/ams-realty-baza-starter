@@ -98,6 +98,37 @@ if (
 	);
 }
 
+const rootPackage = JSON.parse(
+	readFileSync(path.join(root, "package.json"), "utf8"),
+);
+if (rootPackage.scripts?.["ui:shadcn"] !== "node scripts/ui-shadcn.mjs") {
+	violations.push("package.json: ui:shadcn must use the project-owned wrapper");
+}
+
+const uiTsConfig = JSON.parse(
+	readFileSync(path.join(root, "packages", "ui", "tsconfig.json"), "utf8"),
+);
+if (
+	uiTsConfig.compilerOptions?.paths?.["@ams/realtbase-ui/*"]?.[0] !==
+	"./src/*"
+) {
+	violations.push(
+		"packages/ui/tsconfig.json: @ams/realtbase-ui alias must resolve inside packages/ui/src",
+	);
+}
+
+const shadcnConfig = JSON.parse(
+	readFileSync(path.join(root, "packages", "ui", "components.json"), "utf8"),
+);
+if (
+	shadcnConfig.aliases?.ui !== "@ams/realtbase-ui/components/ui" ||
+	shadcnConfig.aliases?.utils !== "@ams/realtbase-ui/lib/utils"
+) {
+	violations.push(
+		"packages/ui/components.json: shadcn aliases must resolve to the canonical UI package",
+	);
+}
+
 if (violations.length) {
 	console.error(violations.join("\n"));
 	process.exit(1);

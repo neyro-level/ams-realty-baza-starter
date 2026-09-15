@@ -10,6 +10,7 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
+		"ui:shadcn": "node scripts/ui-shadcn.mjs",
 		"lint": "biome lint .",
 		"typecheck": "next typegen && tsc --noEmit",
 		"contracts:check": "node scripts/contracts.mjs check && node scripts/contracts.mjs check --scope=journal",
