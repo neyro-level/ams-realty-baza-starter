@@ -29,9 +29,12 @@ UI donor
 UX reference
 visual reference
 source проверенных presentation patterns
+source проверенного XML/YRL mapping и normalized data shapes
 ```
 
-Техническая часть создаётся с чистого состояния по Core 5.5.
+Техническая часть создаётся с чистого состояния по Core 5.5, но уже доказанные
+Atlas contracts, XML/YRL mapping, parser behavior и tests используются как
+обязательный implementation baseline. Повторно изобретать их запрещено.
 
 Порядок:
 
@@ -124,7 +127,6 @@ Payload schema
 Payload config
 migrations
 SiteEngine
-Atlas data-access
 Atlas jobs topology
 Atlas worker topology
 Atlas deployment scripts
@@ -136,7 +138,44 @@ demo data
 legacy Core 4 docs
 ```
 
-Технический код Atlas рассматривается только как reference implementation.
+Atlas data-access не копируется целиком, но его public DTO mapping, query behavior
+и field allowlists являются проверяемым baseline для соответствующих частей Base.
+Отклонение допускается только если Core 5.5 требует более строгого решения или
+если оно явно зафиксировано в feasibility map.
+
+## 2.3 Atlas XML/YRL и data baseline
+
+Канонический donor: SourceCraft `integrator-p/atlas-realty-starter`, exact
+`main@4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe`.
+
+До реализации schema/import/Public Gateway обязательно проверить и использовать:
+
+```text
+src/core/ingest/yrl-parser.ts
+src/shared/types/feed-import.ts
+src/project/ingest/registry.ts
+src/payload/collections/Properties.ts
+src/core/data-access/ingest/property-import.ts
+src/core/data-access/public/queries.ts
+src/core/query/public-selects.ts
+tests/fixtures/yrl-secondary.xml
+tests/fixtures/yrl-newbuild.xml
+tests/unit/import-stage1.unit.spec.ts
+tests/int/import-stage1.int.spec.ts
+```
+
+Порядок источников для формы XML-полей и mapping:
+
+```text
+Atlas exact donor implementation and fixtures
+→ текущий CONTRACT_FEASIBILITY и Base DTO
+→ официальный YRL как compatibility/validation reference
+→ отложенное решение только для поля, которого действительно нет в Atlas и donor feed
+```
+
+Перенос «один в один» означает сохранение доказанного поведения и field mapping,
+а не копирование всего repository. Security boundaries, Payload ownership и
+REALTY_BASE capacity contract остаются по Core 5.5.
 
 ---
 
@@ -1211,7 +1250,9 @@ Money:
 integer minor units
 ```
 
-`pricePerMeterMinor` вычисляется только в ingest.
+`pricePerMeterMinor` не вычисляется из цены и площади. Поле заполняется только
+из явно переданного source-поля совместимого feed adapter; для базового YRL без
+такого значения остаётся `null` и не показывается в UI.
 
 Округление:
 
@@ -1219,7 +1260,7 @@ integer minor units
 banker's rounding / round-half-to-even
 ```
 
-UI самостоятельно price-per-meter не пересчитывает.
+UI и ingest price-per-meter не пересчитывают.
 
 ---
 

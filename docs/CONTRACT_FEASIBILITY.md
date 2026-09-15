@@ -1,28 +1,249 @@
 # Contract Feasibility
 
-Статус: `Draft contracts created / feasibility not verified`.
+Статус: `Base DTO feasibility verified for UI extraction`.
 
-Этот документ отвечает только за реализуемость presentation contracts. Draft DTO и их версии принадлежат `packages/contracts`; Base и Journal используют отдельные lock/freeze lifecycle.
+Документ отвечает за реализуемость presentation contracts. DTO принадлежат
+`packages/contracts`; UI получает их через fixture provider, а после подключения
+Payload — через Public Gateway. UI не читает XML/YRL и Payload documents напрямую.
 
-## Gate до freeze v1
+## Зафиксированный входной контракт
 
-Для каждого DTO field должны быть заполнены:
+- основной источник объектов — XML-фид в формате YRL (Яндекс Недвижимость);
+- форма XML-полей и mapping берутся из проверенной реализации Atlas exact
+  `main@4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe`; официальный YRL используется
+  после Atlas как compatibility check;
+- одно объявление `<offer internal-id="...">` соответствует одному объекту;
+- импортируются только реально переданные теги; отсутствующее optional-поле не
+  вычисляется и не выдумывается;
+- допускаются только технические преобразования: parse XML, проверка enum/unit,
+  приведение рублей к integer minor units, безопасная нормализация строки/URL и
+  форматирование уже полученного значения для показа;
+- арифметически производные бизнес-значения, включая цену за м², не вычисляются;
+- проект работает в одной валюте `RUB`; Atlas-compatible aliases `RUR/RUB`
+  нормализуются в `RUB`, другая валюта получает import issue и не конвертируется;
+- изображения из фида остаются `external` по умолчанию; зеркалирование в S3 —
+  отдельное будущее решение;
+- точный образец клиентского фида подключается на этапе parser fixture. До него
+  используется официальный YRL vocabulary и optional-поля скрываются при отсутствии.
 
-| Field | Source | Computation | Query cost | Available in base schema | Decision |
+Atlas implementation evidence:
+
+- `src/core/ingest/yrl-parser.ts` — streaming XML → normalized offer;
+- `src/shared/types/feed-import.ts` — normalized schema;
+- `src/payload/collections/Properties.ts` — persisted fields;
+- `src/core/data-access/public/queries.ts` — Public Gateway mapping/filtering;
+- `tests/fixtures/yrl-secondary.xml` и `yrl-newbuild.xml` — точная форма примеров;
+- `tests/unit/import-stage1.unit.spec.ts` — proof нормализации.
+
+Официальная YRL compatibility reference:
+
+- https://yandex.ru/support/realty/ru/feed/content-requirements
+- https://yandex.ru/support/realty/ru/feed/requirements-sale-housing
+
+## Обозначения стоимости
+
+- `O(1)` — сборка из уже загруженной записи или конфигурации;
+- `1 query` — один запрос Payload/PostgreSQL;
+- `count query` — отдельный `count` с теми же разрешёнными фильтрами;
+- `bounded aggregate` — агрегат по базовому каталогу до ~2 000 активных объектов;
+- `presentation only` — состояние URL/UI, БД не нужна.
+
+## Property и Media
+
+| Field | Source | Computation | Query cost | Base schema | Decision |
 |---|---|---|---|---|---|
-| `TODO` | `TODO` | `TODO` | `TODO` | `TODO` | `NEEDS_OWNER` |
+| `MediaDTO.kind` | тип владельца URL | feed URL → `external`; Payload media → `managed` | `O(1)` | `properties.images`, `media` | VERIFIED |
+| `MediaDTO.src` | Atlas YRL `<picture>` или Payload media URL | URL validation/allowlist only | `O(1)` | да | VERIFIED FROM ATLAS |
+| `MediaDTO.alt` | `properties.title` + порядковый номер | текстовое форматирование, без нового business value | `O(1)` | derived | VERIFIED |
+| `MediaDTO.width` | metadata managed media; feed обычно не передаёт | отсутствует для external, если неизвестно | `O(1)` | optional | VERIFIED |
+| `MediaDTO.height` | metadata managed media; feed обычно не передаёт | отсутствует для external, если неизвестно | `O(1)` | optional | VERIFIED |
+| `PropertyPriceDTO.priceMinor` | YRL `<price><value>` | decimal RUB → integer kopecks; без конвертации валют | `O(1)` | `properties.priceMinor` | VERIFIED |
+| `PropertyPriceDTO.pricePerMeterMinor` | Atlas YRL `<price-per-meter>` | rubles → integer kopecks; не вычисляется из цены/площади | `O(1)` | nullable field approved | VERIFIED FROM ATLAS |
+| `PropertyPriceDTO.currency` | Atlas YRL `<price><currency>` | `RUR/RUB` → canonical `RUB`; other currency rejected | `O(1)` | `properties.currency` | VERIFIED FROM ATLAS + STRICTER VALIDATION |
+| `PropertyPriceDTO.period` | YRL `<price><period>` + deal type | `month` для аренды; `total` для продажи | `O(1)` | derived from stored fields | VERIFIED |
+| `PropertyPriceDTO.label` | остальные поля `price` | locale formatting only | `O(1)` | derived | VERIFIED |
+| `PropertySummaryItemDTO.key` | whitelist доступных характеристик | выбрать только присутствующие поля | `O(1)` | derived | VERIFIED |
+| `PropertySummaryItemDTO.label` | project-owned dictionary по `key` | lookup | `O(1)` | config | VERIFIED |
+| `PropertySummaryItemDTO.value` | прямое stored value площади/этажа/комнат | unit/locale formatting only | `O(1)` | да | VERIFIED |
+| `PropertyCharacteristicDTO.label` | project-owned dictionary YRL/property field | lookup | `O(1)` | config | VERIFIED |
+| `PropertyCharacteristicDTO.value` | прямое stored/imported value | enum/unit formatting only | `O(1)` | да для включённых характеристик | VERIFIED |
+| `PropertyCardDTO.id` | Payload document id | string serialization | `O(1)` | document id | VERIFIED |
+| `PropertyCardDTO.slug` | immutable `properties.slug` | создаётся один раз из source identity по §29A | `O(1)` | `properties.slug` | VERIFIED |
+| `PropertyCardDTO.href` | `slug` | route join `/obekty/{slug}` | `O(1)` | derived | VERIFIED |
+| `PropertyCardDTO.title` | Atlas `<name>`, fallback `<type>`, `<category>` | Atlas fallback chain, без внешнего enrichment | `O(1)` | `properties.title` | VERIFIED FROM ATLAS |
+| `PropertyCardDTO.category` | YRL `<category>` + `<property-type>` | allowlisted enum mapping | `O(1)` | `properties.category` | VERIFIED |
+| `PropertyCardDTO.dealType` | YRL `<type>` | allowlisted `sale/rent` mapping | `O(1)` | `properties.dealType` | VERIFIED |
+| `PropertyCardDTO.price` | YRL `<price>` | null only when category contract permits; otherwise invalid offer | `O(1)` | да | VERIFIED |
+| `PropertyCardDTO.address` | YRL `<location><address>` | safe public-address normalization | `O(1)` | `properties.publicAddress` | VERIFIED |
+| `PropertyCardDTO.city` | YRL `<locality-name>` or parsed new-format address | feed adapter normalization | `O(1)` | `properties.locality` | VERIFIED |
+| `PropertyCardDTO.district` | YRL `<sub-locality-name>`/`<district>` | direct optional mapping | `O(1)` | `properties.district` | VERIFIED |
+| `PropertyCardDTO.primaryMedia` | первое допустимое Atlas YRL `<picture>` | select first, no copy | `O(1)` | `properties.images` | VERIFIED FROM ATLAS |
+| `PropertyCardDTO.summary` | rooms/areas/floor/lot-area | whitelist + formatting, без арифметики | `O(1)` | да | VERIFIED |
+| `PropertyCardDTO.badges` | manual/project presentation rules | Base возвращает `[]`; future badge rules need separate approval | `O(1)` | new field не нужен | VERIFIED / EMPTY IN BASE |
+| `PropertyDetailsDTO.description` | YRL `<description>` | sanitization and allowed `<br>` only | `O(1)` | `properties.description` | VERIFIED |
+| `PropertyDetailsDTO.gallery` | все допустимые Atlas YRL `<picture>` | order-preserving map | `O(1)` | `properties.images` | VERIFIED FROM ATLAS |
+| `PropertyDetailsDTO.characteristics` | direct stored YRL characteristics | whitelist + labels | `O(1)` | approved property fields | VERIFIED |
+| `PropertyDetailsDTO.location.latitude` | YRL `<latitude>` | numeric validation | `O(1)` | `properties.lat` | VERIFIED |
+| `PropertyDetailsDTO.location.longitude` | YRL `<longitude>` | numeric validation | `O(1)` | `properties.lng` | VERIFIED |
+| `PropertyDetailsDTO.related` | same category/city, excluding current id | bounded query, stable sort, limit | `1 query` | existing fields/index decision in EPIC 7 | VERIFIED |
+| `PropertyListDTO.items` | public properties query | select allowlist + DTO map | `1 query` | approved | VERIFIED |
+| `PropertyListDTO.total` | same filter predicate | count | `count query` | approved | VERIFIED |
+| `PropertyListDTO.page` | validated URL query | clamp positive integer | `presentation only` | none | VERIFIED |
+| `PropertyListDTO.pageSize` | project route config | allowlisted constant | `presentation only` | none | VERIFIED |
+| `PropertyListDTO.totalPages` | `total`, `pageSize` | pagination metadata only | `O(1)` | derived | VERIFIED |
+| `PropertyListDTO.appliedFilters` | normalized URL query | see filter table | `presentation only` | none | VERIFIED |
 
-Contract нельзя замораживать, если у поля нет источника, стоимость запроса неясна или оно требует неутверждённой schema dependency.
+## Applied filters
 
-## Уже зафиксированные ограничения
+Applied filters are request state. They never require separate columns by
+themselves. Public Gateway accepts only the allowlist below.
 
-- UI получает DTO, а не raw Payload documents;
-- `MediaDTO` storage-neutral: `external | managed`, `src`, `alt`, optional dimensions;
-- деньги передаются в integer minor units; `pricePerMeterMinor` вычисляется в ingest;
-- public contract не содержит PII, секреты или private operational fields;
-- fixture provider и будущий Payload Gateway обязаны реализовать одинаковый публичный API;
-- фильтры/facets не получают отдельную инфраструктуру без доказанного cost/capacity trigger.
+| Field | Source / mapped property | Computation | Query cost | Decision |
+|---|---|---|---|---|
+| `query` | URL → Atlas `title/addressPublic/district` allowlist | Payload `like` predicates exactly as donor baseline | part of list query | VERIFIED FROM ATLAS |
+| `category` | URL → `properties.category` | enum validation | part of list query | VERIFIED |
+| `dealType` | URL → `properties.dealType` | enum validation | part of list query | VERIFIED |
+| `city` | contract field; Atlas query has no city filter | UI hides until a separate donor-backed mapping exists | none | DEFERRED, NON-BLOCKING |
+| `district` | URL → `properties.district` | normalized exact match | part of list query | VERIFIED |
+| `rooms` | URL → `properties.rooms` | integer allowlist | part of list query | VERIFIED |
+| `isStudio` | contract field; Atlas parser/query has no dedicated mapping | UI hides; do not infer from rooms | none | DEFERRED, NON-BLOCKING |
+| `isExclusive` | URL → no approved source | UI hides and Gateway rejects until separately approved | none | DEFERRED, NON-BLOCKING |
+| `priceFromMinor` | URL → `properties.priceMinor` | rubles input → kopecks | part of list query | VERIFIED |
+| `priceToMinor` | URL → `properties.priceMinor` | rubles input → kopecks | part of list query | VERIFIED |
+| `areaFrom` | URL → `properties.totalArea` | decimal validation only | part of list query | VERIFIED |
+| `areaTo` | URL → `properties.totalArea` | decimal validation only | part of list query | VERIFIED |
+| `kitchenAreaFrom` | contract field; Atlas stores area but does not filter by it | UI hides | none | DEFERRED, NON-BLOCKING |
+| `floorFrom` | contract field; Atlas stores floor but does not filter by range | UI hides | none | DEFERRED, NON-BLOCKING |
+| `floorTo` | contract field; Atlas stores floor but does not filter by range | UI hides | none | DEFERRED, NON-BLOCKING |
+| `lotAreaFrom` | absent from Atlas normalized offer | UI hides | none | DEFERRED, NON-BLOCKING |
+| `lotAreaTo` | absent from Atlas normalized offer | UI hides | none | DEFERRED, NON-BLOCKING |
+| `buildingType` | Atlas URL → `properties.buildingType` | exact match as donor query | part of list query | VERIFIED FROM ATLAS; feed population optional |
+| `renovation` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `landUseType` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `hasElectricity` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `hasGas` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `hasWater` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `hasSewerage` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `commercialType` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `commercialBuildingType` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `entranceType` | absent from Atlas normalized offer/query | UI hides | none | DEFERRED, NON-BLOCKING |
+| `sort` | URL | `newest=publishedAt desc`; price sorts direct; `recommended` stable default | same list query | VERIFIED |
+| `view` | URL/UI (`grid/list/map`) | presentation only | none; map uses returned coordinates | VERIFIED |
 
-## Следующий шаг
+## Filter options and facets
 
-Следующая задача EPIC 2 заполняет таблицу по каждому полю. До статуса `VERIFIED` Base и Journal contract freeze запрещён.
+| Field | Source | Computation | Query cost | Base schema | Decision |
+|---|---|---|---|---|---|
+| `PropertyFilterOptionDTO.value` | distinct normalized stored value | stable URL serialization | bounded aggregate | existing field | VERIFIED |
+| `PropertyFilterOptionDTO.label` | project dictionary or stored public label | lookup | `O(1)` after options query | config | VERIFIED |
+| `PropertyFilterOptionDTO.parentValue` | district → locality relationship | map from same aggregate rows | bounded aggregate | existing location fields | VERIFIED |
+| `categories` | distinct active `category` | options query | bounded aggregate | yes | VERIFIED |
+| `dealTypes` | distinct active `dealType` | options query | bounded aggregate | yes | VERIFIED |
+| `cities` | distinct active `locality` | options query | bounded aggregate | yes | VERIFIED |
+| `districts` | distinct active `district` grouped by locality | options query | bounded aggregate | yes | VERIFIED |
+| `rooms` | distinct active `rooms` | sort numeric | bounded aggregate | yes | VERIFIED |
+| `priceMinor.min` | active `priceMinor` | min aggregate, no synthetic value | bounded aggregate | yes | VERIFIED |
+| `priceMinor.max` | active `priceMinor` | max aggregate, no synthetic value | bounded aggregate | yes | VERIFIED |
+| `buildingTypes` | distinct Atlas `buildingType` when populated | options query | bounded aggregate | donor field exists | VERIFIED FROM ATLAS / EMPTY OTHERWISE |
+| `renovations` | no Atlas source/query | return `[]` | `O(1)` | new field not required | VERIFIED / EMPTY IN BASE |
+| `landUseTypes` | no Atlas source/query | return `[]` | `O(1)` | new field not required | VERIFIED / EMPTY IN BASE |
+| `commercialTypes` | no Atlas source/query | return `[]` | `O(1)` | new field not required | VERIFIED / EMPTY IN BASE |
+| `commercialBuildingTypes` | no Atlas source/query | return `[]` | `O(1)` | new field not required | VERIFIED / EMPTY IN BASE |
+| `entranceTypes` | no Atlas source/query | return `[]` | `O(1)` | new field not required | VERIFIED / EMPTY IN BASE |
+| `applied` | normalized request state | reuse validated object | `presentation only` | none | VERIFIED |
+| `total` | current filter predicate | count | `count query` | yes | VERIFIED |
+| `resultLabel` | `total` | Russian plural formatting only | `O(1)` | derived | VERIFIED |
+
+Facet counts per option are not part of the current DTO. Base performs bounded
+option aggregates only. A dedicated `facet-cache` is added solely after a measured
+latency/capacity trigger.
+
+## Shell, navigation and SEO
+
+| Field | Source | Computation | Query cost | Base schema | Decision |
+|---|---|---|---|---|---|
+| `SiteNavItemDTO.label` | fixture/project navigation config | none | `O(1)` | no new collection | VERIFIED |
+| `SiteNavItemDTO.href` | route map | URL validation | `O(1)` | none | VERIFIED |
+| `SiteNavItemDTO.external` | navigation config | default false | `O(1)` | none | VERIFIED |
+| `SiteNavItemDTO.children` | navigation config | recursive map | `O(n)` bounded menu | none | VERIFIED |
+| `SiteHeaderDTO.brandName` | project identity | none | `O(1)` | config | VERIFIED |
+| `SiteHeaderDTO.homeHref` | route map | none | `O(1)` | config | VERIFIED |
+| `SiteHeaderDTO.logo` | project asset/media | MediaDTO map | `O(1)` | `media` optional | VERIFIED |
+| `SiteHeaderDTO.navigation` | navigation config | map | `O(n)` bounded menu | none | VERIFIED |
+| `SiteHeaderDTO.phone.label` | project contact config | none | `O(1)` | config | VERIFIED |
+| `SiteHeaderDTO.phone.href` | same phone | `tel:` normalization | `O(1)` | derived | VERIFIED |
+| `SiteHeaderDTO.primaryAction.label` | page/site config | none | `O(1)` | config | VERIFIED |
+| `SiteHeaderDTO.primaryAction.href` | route/anchor config | URL validation | `O(1)` | config | VERIFIED |
+| `SiteFooterGroupDTO.title` | navigation config | none | `O(1)` | config | VERIFIED |
+| `SiteFooterGroupDTO.links` | navigation config | SiteNavItemDTO map | `O(n)` bounded menu | none | VERIFIED |
+| `SiteFooterDTO.brandName` | project identity | none | `O(1)` | config | VERIFIED |
+| `SiteFooterDTO.logo` | project asset/media | MediaDTO map | `O(1)` | `media` optional | VERIFIED |
+| `SiteFooterDTO.groups` | navigation config | map | `O(n)` bounded menu | none | VERIFIED |
+| `SiteFooterDTO.contacts` | project contact config | map | `O(n)` bounded | none | VERIFIED |
+| `SiteFooterDTO.legalLinks` | canonical legal route map | map | `O(n)` bounded | `pages` or route files | VERIFIED |
+| `SiteFooterDTO.copyright` | brand + current year | presentation formatting | `O(1)` | config | VERIFIED |
+| `BreadcrumbItemDTO.label` | route/page/property title | none | `O(1)` | existing source | VERIFIED |
+| `BreadcrumbItemDTO.href` | route hierarchy | URL join | `O(1)` | derived | VERIFIED |
+| `BreadcrumbDTO.items` | route hierarchy | bounded ordered map | `O(depth)` | none | VERIFIED |
+| `PageSEOContract.title` | page SEO fields or property title | template formatting | `O(1)` | `pages`/property | VERIFIED |
+| `PageSEOContract.description` | page SEO fields or property description excerpt | safe truncation only | `O(1)` | `pages`/property | VERIFIED |
+| `PageSEOContract.canonicalPath` | canonical route map + slug | URL join | `O(1)` | derived | VERIFIED |
+| `PageSEOContract.indexing` | route policy + publication status | allowlisted rule | `O(1)` | existing status/config | VERIFIED |
+| `PageSEOContract.following` | route policy | allowlisted rule | `O(1)` | config | VERIFIED |
+| `PageSEOContract.openGraph.title` | explicit page field or SEO title | fallback selection | `O(1)` | existing source | VERIFIED |
+| `PageSEOContract.openGraph.description` | explicit page field or SEO description | fallback selection | `O(1)` | existing source | VERIFIED |
+| `PageSEOContract.openGraph.image` | explicit page media or primary property image | fallback selection | `O(1)` | existing source | VERIFIED |
+
+## Lead presentation context
+
+Эта таблица подтверждает источник полей DTO. Полное UI → persistence proof
+выполняется следующей задачей `TASK-02-03`.
+
+| Field | Source | Computation | Query cost | Base schema | Decision |
+|---|---|---|---|---|---|
+| `LeadPropertyContextDTO.id` | current `PropertyDetailsDTO.id` | none | `O(1)` | property id | VERIFIED |
+| `LeadPropertyContextDTO.slug` | current `PropertyDetailsDTO.slug` | none | `O(1)` | `properties.slug` | VERIFIED |
+| `LeadPropertyContextDTO.title` | current `PropertyDetailsDTO.title` | none | `O(1)` | `properties.title` | VERIFIED |
+| `LeadFormContext.formKind` | owning form component/route | enum validation | `presentation only` | persisted mapping in TASK-02-03 | VERIFIED SOURCE |
+| `LeadFormContext.sourcePage` | canonical current pathname | normalize internal path | `presentation only` | persisted mapping in TASK-02-03 | VERIFIED SOURCE |
+| `LeadFormContext.property` | current property route context | copy id/slug/title | `O(1)` | relation mapping in TASK-02-03 | VERIFIED SOURCE |
+| `LeadFormContext.consentVersion` | versioned published consent config | none | `O(1)` | `leads.consentVersion` approved | VERIFIED SOURCE |
+| `LeadFormContext.consentHref` | canonical legal route config | URL validation | `O(1)` | versioned text source; proof in TASK-02-03 | VERIFIED SOURCE |
+| `LeadFormContext.consentRequired` | form policy | boolean; must be true for PII forms | `O(1)` | `leads.consentAccepted` mapping | VERIFIED SOURCE |
+
+## Journal namespace
+
+Journal остаётся отдельным draft namespace и не входит в Base contract freeze.
+Модуль выключен, collection `posts` заранее не создаётся. Его draft fields уже
+имеют карту, но не создают dependency для Base и не блокируют EPIC 3–5.
+
+| Field | Future source | Computation | Query cost | Base schema | Decision |
+|---|---|---|---|---|---|
+| `JournalArticleCardDTO.slug` | future `posts.slug` | immutable public slug | `O(1)` | отсутствует намеренно | DRAFT / MODULE OFF |
+| `JournalArticleCardDTO.href` | future article slug | route join | `O(1)` | derived | DRAFT / MODULE OFF |
+| `JournalArticleCardDTO.title` | future `posts.title` | none | `O(1)` | отсутствует намеренно | DRAFT / MODULE OFF |
+| `JournalArticleCardDTO.excerpt` | future explicit excerpt | safe text normalization | `O(1)` | отсутствует намеренно | DRAFT / MODULE OFF |
+| `JournalArticleCardDTO.publishedAt` | future publication timestamp | ISO serialization | `O(1)` | отсутствует намеренно | DRAFT / MODULE OFF |
+| `JournalListDTO.items` | future public posts query | select allowlist + DTO map | `1 query` | отсутствует намеренно | DRAFT / MODULE OFF |
+| `JournalListDTO.total` | future posts filter predicate | count | `count query` | отсутствует намеренно | DRAFT / MODULE OFF |
+
+## Отложенные вопросы владельцу
+
+Эти ответы улучшают parser fixture, но не блокируют UI extraction:
+
+1. Первый реальный каталог содержит только квартиры или также комнаты, дома,
+   участки, гаражи и коммерцию?
+2. Прислать один обезличенный реальный XML/YRL-файл или URL фида, когда он будет
+   доступен: проверим vendor extensions и фактические optional tags.
+3. Подтвердить правило по цене за м²: если её нет отдельным значением в источнике,
+   поле не показываем. До ответа именно это принято безопасным default.
+4. Частоту обновления и правило снятия исчезнувших объявлений определить перед
+   реализацией ingest в EPIC 8; до этого они не влияют на UI-контракт.
+
+## Итог gate
+
+- все поля Base DTO имеют источник, стоимость и schema decision;
+- отсутствующие в Atlas функции отключены, а не опираются на неутверждённую схему;
+- UI extraction в EPIC 3 не заблокирован;
+- contract freeze остаётся запрещён до отдельного consent proof и визуальной
+  проверки fixture-сайта в EPIC 5.
