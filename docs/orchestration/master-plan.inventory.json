@@ -1,0 +1,3924 @@
+{
+  "schema_version": 1,
+  "beads_prefix": "arb",
+  "source": {
+    "path": "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+    "sha256": "524437b60f2835a8bc9bb10c6cdd2aece08ef525609d6842c2ed48e9aa7483d7",
+    "epic_anchors": [
+      "EPIC 0",
+      "EPIC 1",
+      "EPIC 2",
+      "EPIC 3",
+      "EPIC 4",
+      "EPIC 5",
+      "EPIC 6",
+      "EPIC 7",
+      "EPIC 8",
+      "EPIC 9",
+      "EPIC 10",
+      "EPIC 11",
+      "EPIC 12",
+      "EPIC 13",
+      "EPIC 14",
+      "EPIC 15",
+      "EPIC 16",
+      "EPIC 17",
+      "EPIC 18"
+    ]
+  },
+  "nodes": [
+    {
+      "key": "EPIC-00",
+      "title": "Repository & Governance Foundation",
+      "type": "epic",
+      "source_anchor": "EPIC 0",
+      "goal": "Завершить Repository & Governance Foundation с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 0 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 0 закрыты независимой проверкой."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:pilot"
+      ]
+    },
+    {
+      "key": "TASK-00-01",
+      "title": "Создать репозиторий и workspace foundation",
+      "type": "task",
+      "parent_key": "EPIC-00",
+      "source_anchor": "EPIC 0",
+      "goal": "SourceCraft repository, Next.js, pnpm workspace, TypeScript strict и Tailwind 4 оформлены как единый clean checkout.",
+      "scope": [
+        "Создать репозиторий и workspace foundation"
+      ],
+      "acceptance_criteria": [
+        "Репозиторий существует; workspace устанавливается; strict TypeScript и Tailwind 4 зафиксированы."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:00"
+      ]
+    },
+    {
+      "key": "TASK-00-02",
+      "title": "Создать минимальный проектный канон",
+      "type": "task",
+      "parent_key": "EPIC-00",
+      "source_anchor": "EPIC 0",
+      "goal": "Созданы AGENTS.md и канонические PROJECT, OPERATIONS, DESIGN, CONTRACT_FEASIBILITY с профилем, URL, media, currency и hosting policy.",
+      "scope": [
+        "Создать минимальный проектный канон"
+      ],
+      "acceptance_criteria": [
+        "Документы однозначно отвечают на project/runtime/operations/design/feasibility вопросы без конкурирующих источников."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:00"
+      ]
+    },
+    {
+      "key": "TASK-00-03",
+      "title": "Настроить contracts governance и exact-head guards",
+      "type": "task",
+      "parent_key": "EPIC-00",
+      "source_anchor": "EPIC 0",
+      "goal": "Созданы packages/ui, packages/contracts, contract lock commands, initial architecture/security guards и manual exact-head SourceCraft verify pipeline.",
+      "scope": [
+        "Настроить contracts governance и exact-head guards"
+      ],
+      "acceptance_criteria": [
+        "Contracts check включён в verify; exact-head gate и raw REST boundary mechanically enforced."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:00"
+      ]
+    },
+    {
+      "key": "VERIFY-00",
+      "title": "Независимая проверка Repository & Governance Foundation",
+      "type": "task",
+      "parent_key": "EPIC-00",
+      "source_anchor": "EPIC 0",
+      "goal": "Проверить epic-level acceptance для EPIC 0 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 0; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 0 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-00-01",
+        "TASK-00-02",
+        "TASK-00-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "stage:verify",
+        "epic:00"
+      ]
+    },
+    {
+      "key": "EPIC-01",
+      "title": "Atlas Inventory + Visual Baseline",
+      "type": "epic",
+      "source_anchor": "EPIC 1",
+      "goal": "Завершить Atlas Inventory + Visual Baseline с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 1 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 1 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-00"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:pilot"
+      ]
+    },
+    {
+      "key": "TASK-01-01",
+      "title": "Зафиксировать источник visual baseline",
+      "type": "task",
+      "parent_key": "EPIC-01",
+      "source_anchor": "EPIC 1",
+      "goal": "Владелец выбрал local либо deployed Atlas baseline с exact release/SHA и фиксированными viewport.",
+      "scope": [
+        "Зафиксировать источник visual baseline"
+      ],
+      "acceptance_criteria": [
+        "Выбор источника и exact identity записаны; baseline воспроизводим."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:01"
+      ]
+    },
+    {
+      "key": "TASK-01-02",
+      "title": "Снять UI/UX inventory Atlas",
+      "type": "task",
+      "parent_key": "EPIC-01",
+      "source_anchor": "EPIC 1",
+      "goal": "Инвентаризированы routes, components, primitives, client leaves, CSS, tokens, media, DTO expectations и filters/facet counts.",
+      "scope": [
+        "Снять UI/UX inventory Atlas"
+      ],
+      "acceptance_criteria": [
+        "Каждый элемент классифицирован BASE, MODULE, ATLAS-SPECIFIC, LEGACY или DROP."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:01"
+      ]
+    },
+    {
+      "key": "TASK-01-03",
+      "title": "Снять representative visual proof",
+      "type": "task",
+      "parent_key": "EPIC-01",
+      "source_anchor": "EPIC 1",
+      "goal": "Сняты mobile/tablet/desktop/wide screenshots для главной, каталога, карточки, service page, contacts и lead modal.",
+      "scope": [
+        "Снять representative visual proof"
+      ],
+      "acceptance_criteria": [
+        "Полный согласованный набор baseline screenshots доступен и привязан к exact donor identity."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:01"
+      ]
+    },
+    {
+      "key": "VERIFY-01",
+      "title": "Независимая проверка Atlas Inventory + Visual Baseline",
+      "type": "task",
+      "parent_key": "EPIC-01",
+      "source_anchor": "EPIC 1",
+      "goal": "Проверить epic-level acceptance для EPIC 1 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 1; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 1 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-01-01",
+        "TASK-01-02",
+        "TASK-01-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "stage:verify",
+        "epic:01"
+      ]
+    },
+    {
+      "key": "EPIC-02",
+      "title": "Contracts Draft + Feasibility Map",
+      "type": "epic",
+      "source_anchor": "EPIC 2",
+      "goal": "Завершить Contracts Draft + Feasibility Map с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 2 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 2 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-01"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:pilot"
+      ]
+    },
+    {
+      "key": "TASK-02-01",
+      "title": "Создать draft Base contracts",
+      "type": "task",
+      "parent_key": "EPIC-02",
+      "source_anchor": "EPIC 2",
+      "goal": "Созданы draft DTO для property, filters, media, shell, SEO и lead context; Journal остаётся отдельным draft namespace.",
+      "scope": [
+        "Создать draft Base contracts"
+      ],
+      "acceptance_criteria": [
+        "Draft contracts покрывают fixture UI и не содержат Payload/DB types."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:02"
+      ]
+    },
+    {
+      "key": "TASK-02-02",
+      "title": "Заполнить feasibility map",
+      "type": "task",
+      "parent_key": "EPIC-02",
+      "source_anchor": "EPIC 2",
+      "goal": "Для каждого DTO field определены source, computation, query cost и availability в base schema.",
+      "scope": [
+        "Заполнить feasibility map"
+      ],
+      "acceptance_criteria": [
+        "В CONTRACT_FEASIBILITY нет полей без источника, неясной стоимости или неутверждённой schema dependency."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:02"
+      ]
+    },
+    {
+      "key": "TASK-02-03",
+      "title": "Доказать lead consent mapping",
+      "type": "task",
+      "parent_key": "EPIC-02",
+      "source_anchor": "EPIC 2",
+      "goal": "LeadFormContext consent fields сопоставлены с persisted leads.consent fields и property/form context.",
+      "scope": [
+        "Доказать lead consent mapping"
+      ],
+      "acceptance_criteria": [
+        "Consent contract рендерится в UI и имеет проверяемый persistence mapping."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "epic:02"
+      ]
+    },
+    {
+      "key": "VERIFY-02",
+      "title": "Независимая проверка Contracts Draft + Feasibility Map",
+      "type": "task",
+      "parent_key": "EPIC-02",
+      "source_anchor": "EPIC 2",
+      "goal": "Проверить epic-level acceptance для EPIC 2 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 2; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 2 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-02-01",
+        "TASK-02-02",
+        "TASK-02-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 1,
+      "labels": [
+        "pilot",
+        "stage:verify",
+        "epic:02"
+      ]
+    },
+    {
+      "key": "EPIC-03",
+      "title": "UI Package Extraction",
+      "type": "epic",
+      "source_anchor": "EPIC 3",
+      "goal": "Завершить UI Package Extraction с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 3 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 3 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-02"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:presentation"
+      ]
+    },
+    {
+      "key": "TASK-03-01",
+      "title": "Перенести reusable UI в packages/ui",
+      "type": "task",
+      "parent_key": "EPIC-03",
+      "source_anchor": "EPIC 3",
+      "goal": "Primitives, layout, shared, domain, views, interactive leaves и formatters размещены в package form.",
+      "scope": [
+        "Перенести reusable UI в packages/ui"
+      ],
+      "acceptance_criteria": [
+        "UI package не импортирует Payload, PostgreSQL, ORM или project persistence."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:03"
+      ]
+    },
+    {
+      "key": "TASK-03-02",
+      "title": "Настроить workspace consumption",
+      "type": "task",
+      "parent_key": "EPIC-03",
+      "source_anchor": "EPIC 3",
+      "goal": "Настроены Tailwind @source, transpilePackages и package exports для UI/contracts.",
+      "scope": [
+        "Настроить workspace consumption"
+      ],
+      "acceptance_criteria": [
+        "Production build видит классы packages/ui и корректно обрабатывает client boundaries."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:03"
+      ]
+    },
+    {
+      "key": "TASK-03-03",
+      "title": "Зафиксировать shadcn ownership",
+      "type": "task",
+      "parent_key": "EPIC-03",
+      "source_anchor": "EPIC 3",
+      "goal": "packages/ui/components.json является единственным canonical owner primitives.",
+      "scope": [
+        "Зафиксировать shadcn ownership"
+      ],
+      "acceptance_criteria": [
+        "Второго независимого primitive tree нет; wrapper command пишет в packages/ui."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:03"
+      ]
+    },
+    {
+      "key": "VERIFY-03",
+      "title": "Независимая проверка UI Package Extraction",
+      "type": "task",
+      "parent_key": "EPIC-03",
+      "source_anchor": "EPIC 3",
+      "goal": "Проверить epic-level acceptance для EPIC 3 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 3; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 3 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-03-01",
+        "TASK-03-02",
+        "TASK-03-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 2,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:03"
+      ]
+    },
+    {
+      "key": "EPIC-04",
+      "title": "Design System Normalization",
+      "type": "epic",
+      "source_anchor": "EPIC 4",
+      "goal": "Завершить Design System Normalization с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 4 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 4 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:presentation"
+      ]
+    },
+    {
+      "key": "TASK-04-01",
+      "title": "Нормализовать design tokens",
+      "type": "task",
+      "parent_key": "EPIC-04",
+      "source_anchor": "EPIC 4",
+      "goal": "Design values сведены в src/app/globals.css без изменения визуального языка.",
+      "scope": [
+        "Нормализовать design tokens"
+      ],
+      "acceptance_criteria": [
+        "Цвета, типографика, радиусы, контейнеры, rhythm, easing и mappings имеют один token source."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:04"
+      ]
+    },
+    {
+      "key": "TASK-04-02",
+      "title": "Нормализовать layout и form primitives",
+      "type": "task",
+      "parent_key": "EPIC-04",
+      "source_anchor": "EPIC 4",
+      "goal": "Container, Section, SectionHeader, buttons, forms, media и motion используют semantic tokens.",
+      "scope": [
+        "Нормализовать layout и form primitives"
+      ],
+      "acceptance_criteria": [
+        "Component styles не содержат запрещённых design literals."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:04"
+      ]
+    },
+    {
+      "key": "TASK-04-03",
+      "title": "Очистить page CSS с сохранением parity",
+      "type": "task",
+      "parent_key": "EPIC-04",
+      "source_anchor": "EPIC 4",
+      "goal": "Layout geometry сохранена, redundant/legacy CSS удалён в пределах подтверждённого baseline.",
+      "scope": [
+        "Очистить page CSS с сохранением parity"
+      ],
+      "acceptance_criteria": [
+        "Visual diff не показывает неподтверждённого дрейфа на representative routes/viewports."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:04"
+      ]
+    },
+    {
+      "key": "VERIFY-04",
+      "title": "Независимая проверка Design System Normalization",
+      "type": "task",
+      "parent_key": "EPIC-04",
+      "source_anchor": "EPIC 4",
+      "goal": "Проверить epic-level acceptance для EPIC 4 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 4; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 4 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-04-01",
+        "TASK-04-02",
+        "TASK-04-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 2,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:04"
+      ]
+    },
+    {
+      "key": "EPIC-05",
+      "title": "Fixture Website + Contract Freeze",
+      "type": "epic",
+      "source_anchor": "EPIC 5",
+      "goal": "Завершить Fixture Website + Contract Freeze с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 5 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 5 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-04"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:presentation"
+      ]
+    },
+    {
+      "key": "TASK-05-01",
+      "title": "Собрать fixture website",
+      "type": "task",
+      "parent_key": "EPIC-05",
+      "source_anchor": "EPIC 5",
+      "goal": "Реализованы canonical public, catalog, property, service, legal и 404 routes на fixture provider.",
+      "scope": [
+        "Собрать fixture website"
+      ],
+      "acceptance_criteria": [
+        "Все обязательные routes рендерятся через contracts без Payload dependency."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:05"
+      ]
+    },
+    {
+      "key": "TASK-05-02",
+      "title": "Провести fixture acceptance",
+      "type": "task",
+      "parent_key": "EPIC-05",
+      "source_anchor": "EPIC 5",
+      "goal": "Выполнены visual proof, accessibility, SEO semantics, facet/media decisions и feasibility check.",
+      "scope": [
+        "Провести fixture acceptance"
+      ],
+      "acceptance_criteria": [
+        "Acceptance evidence не содержит blockers; consent contract отрендерен и feasible."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:05"
+      ]
+    },
+    {
+      "key": "TASK-05-03",
+      "title": "Заморозить contracts v1",
+      "type": "task",
+      "parent_key": "EPIC-05",
+      "source_anchor": "EPIC 5",
+      "goal": "Contracts переведены в 1.0.0 frozen state, lock пересобран и создан contracts-v1 tag.",
+      "scope": [
+        "Заморозить contracts v1"
+      ],
+      "acceptance_criteria": [
+        "Lock hash воспроизводим; изменения без version bump/ADR блокируются."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:05"
+      ]
+    },
+    {
+      "key": "VERIFY-05",
+      "title": "Независимая проверка Fixture Website + Contract Freeze",
+      "type": "task",
+      "parent_key": "EPIC-05",
+      "source_anchor": "EPIC 5",
+      "goal": "Проверить epic-level acceptance для EPIC 5 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 5; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 5 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-05-01",
+        "TASK-05-02",
+        "TASK-05-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 2,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:05"
+      ]
+    },
+    {
+      "key": "EPIC-06",
+      "title": "Payload / Security / Cache Foundation",
+      "type": "epic",
+      "source_anchor": "EPIC 6",
+      "goal": "Завершить Payload / Security / Cache Foundation с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 6 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 6 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-05"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:platform"
+      ]
+    },
+    {
+      "key": "TASK-06-01",
+      "title": "Поднять Payload foundation",
+      "type": "task",
+      "parent_key": "EPIC-06",
+      "source_anchor": "EPIC 6",
+      "goal": "Настроены Payload, PostgreSQL adapter, Users/roles/Admin, Media/S3, env validation и migrations foundation.",
+      "scope": [
+        "Поднять Payload foundation"
+      ],
+      "acceptance_criteria": [
+        "Payload остаётся единственным owner CMS/auth/schema/migrations; owner bootstrap работает."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:06"
+      ]
+    },
+    {
+      "key": "TASK-06-02",
+      "title": "Реализовать gateway и REST security boundaries",
+      "type": "task",
+      "parent_key": "EPIC-06",
+      "source_anchor": "EPIC 6",
+      "goal": "Созданы Public/System/Ingest boundaries, Safe Outbound Client, redaction, edge REST deny и Payload access layer.",
+      "scope": [
+        "Реализовать gateway и REST security boundaries"
+      ],
+      "acceptance_criteria": [
+        "Anonymous raw business REST denied; public site path и pinned-version Admin работают."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:06"
+      ]
+    },
+    {
+      "key": "TASK-06-03",
+      "title": "Создать cache/security runtime foundation",
+      "type": "task",
+      "parent_key": "EPIC-06",
+      "source_anchor": "EPIC 6",
+      "goal": "Созданы HTTP invalidator, internal revalidation route, headers, route-aware CSP и GraphQL off.",
+      "scope": [
+        "Создать cache/security runtime foundation"
+      ],
+      "acceptance_criteria": [
+        "Revalidation защищён allowlist/secret/rate limit; public/Admin CSP доказаны production-like."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:06"
+      ]
+    },
+    {
+      "key": "VERIFY-06",
+      "title": "Независимая проверка Payload / Security / Cache Foundation",
+      "type": "task",
+      "parent_key": "EPIC-06",
+      "source_anchor": "EPIC 6",
+      "goal": "Проверить epic-level acceptance для EPIC 6 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 6; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 6 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-06-01",
+        "TASK-06-02",
+        "TASK-06-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:06"
+      ]
+    },
+    {
+      "key": "EPIC-07",
+      "title": "Base Schema",
+      "type": "epic",
+      "source_anchor": "EPIC 7",
+      "goal": "Завершить Base Schema с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 7 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 7 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-06"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:platform"
+      ]
+    },
+    {
+      "key": "TASK-07-01",
+      "title": "Реализовать inventory schema",
+      "type": "task",
+      "parent_key": "EPIC-07",
+      "source_anchor": "EPIC 7",
+      "goal": "Созданы properties, feed-sources, import-runs/issues, pages и redirects с lifecycle/ownership fields.",
+      "scope": [
+        "Реализовать inventory schema"
+      ],
+      "acceptance_criteria": [
+        "Feed/manual identity, immutable slug, manualOverrides, newbuild identity и contentPurgedAt отражены в schema."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:07"
+      ]
+    },
+    {
+      "key": "TASK-07-02",
+      "title": "Реализовать leads schema",
+      "type": "task",
+      "parent_key": "EPIC-07",
+      "source_anchor": "EPIC 7",
+      "goal": "Созданы leads и lead-deliveries с E.164, consent, workflow и delivery state fields.",
+      "scope": [
+        "Реализовать leads schema"
+      ],
+      "acceptance_criteria": [
+        "Agency status отделён от delivery status; PII fields и retention ownership определены."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:07"
+      ]
+    },
+    {
+      "key": "TASK-07-03",
+      "title": "Добавить migrations, guards и indexes",
+      "type": "task",
+      "parent_key": "EPIC-07",
+      "source_anchor": "EPIC 7",
+      "goal": "Созданы partial unique feed identity, delivery uniqueness, required indexes и feed-source delete guard.",
+      "scope": [
+        "Добавить migrations, guards и indexes"
+      ],
+      "acceptance_criteria": [
+        "verify:schema подтверждает constraints/indexes на clean и непустой fixture."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:07"
+      ]
+    },
+    {
+      "key": "VERIFY-07",
+      "title": "Независимая проверка Base Schema",
+      "type": "task",
+      "parent_key": "EPIC-07",
+      "source_anchor": "EPIC 7",
+      "goal": "Проверить epic-level acceptance для EPIC 7 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 7; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 7 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-07-01",
+        "TASK-07-02",
+        "TASK-07-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:07"
+      ]
+    },
+    {
+      "key": "EPIC-08",
+      "title": "Public Gateway",
+      "type": "epic",
+      "source_anchor": "EPIC 8",
+      "goal": "Завершить Public Gateway с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 8 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 8 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-07"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:platform"
+      ]
+    },
+    {
+      "key": "TASK-08-01",
+      "title": "Реализовать catalog queries",
+      "type": "task",
+      "parent_key": "EPIC-08",
+      "source_anchor": "EPIC 8",
+      "goal": "Созданы validated public queries с explicit access, depth, select, limits и publication predicates.",
+      "scope": [
+        "Реализовать catalog queries"
+      ],
+      "acceptance_criteria": [
+        "Raw Payload documents и private fields не выходят за gateway."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:08"
+      ]
+    },
+    {
+      "key": "TASK-08-02",
+      "title": "Реализовать DTO mapping",
+      "type": "task",
+      "parent_key": "EPIC-08",
+      "source_anchor": "EPIC 8",
+      "goal": "Frozen property, shell, breadcrumb и SEO contracts собираются из Payload data.",
+      "scope": [
+        "Реализовать DTO mapping"
+      ],
+      "acceptance_criteria": [
+        "Fixture provider заменён без изменения public UI API."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:08"
+      ]
+    },
+    {
+      "key": "TASK-08-03",
+      "title": "Реализовать facets по принятому решению",
+      "type": "task",
+      "parent_key": "EPIC-08",
+      "source_anchor": "EPIC 8",
+      "goal": "Filters и, если утверждены, bounded count aggregates реализованы без speculative infrastructure.",
+      "scope": [
+        "Реализовать facets по принятому решению"
+      ],
+      "acceptance_criteria": [
+        "Facet behaviour соответствует frozen PropertyFilterDTO и performance budget."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:08"
+      ]
+    },
+    {
+      "key": "VERIFY-08",
+      "title": "Независимая проверка Public Gateway",
+      "type": "task",
+      "parent_key": "EPIC-08",
+      "source_anchor": "EPIC 8",
+      "goal": "Проверить epic-level acceptance для EPIC 8 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 8; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 8 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-08-01",
+        "TASK-08-02",
+        "TASK-08-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:08"
+      ]
+    },
+    {
+      "key": "EPIC-09",
+      "title": "Jobs Foundation",
+      "type": "epic",
+      "source_anchor": "EPIC 9",
+      "goal": "Завершить Jobs Foundation с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 9 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 9 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-08"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:platform"
+      ]
+    },
+    {
+      "key": "TASK-09-01",
+      "title": "Настроить очереди и concurrency",
+      "type": "task",
+      "parent_key": "EPIC-09",
+      "source_anchor": "EPIC 9",
+      "goal": "Включены system, imports, maintenance и lead-deliveries queues с нужными limits и ownership.",
+      "scope": [
+        "Настроить очереди и concurrency"
+      ],
+      "acceptance_criteria": [
+        "Одна queue не получает schedules одновременно из autoRun и CLI."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:09"
+      ]
+    },
+    {
+      "key": "TASK-09-02",
+      "title": "Создать canonical task registry",
+      "type": "task",
+      "parent_key": "EPIC-09",
+      "source_anchor": "EPIC 9",
+      "goal": "Зафиксированы стабильные task slugs и static/programmatic triggers.",
+      "scope": [
+        "Создать canonical task registry"
+      ],
+      "acceptance_criteria": [
+        "Handlers используют registry; imports и deliveries создаются только программно."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:09"
+      ]
+    },
+    {
+      "key": "TASK-09-03",
+      "title": "Реализовать dispatcher и maintenance jobs",
+      "type": "task",
+      "parent_key": "EPIC-09",
+      "source_anchor": "EPIC 9",
+      "goal": "Созданы dispatcher, janitor, retention, catalog lifecycle и delivery recovery schedules.",
+      "scope": [
+        "Реализовать dispatcher и maintenance jobs"
+      ],
+      "acceptance_criteria": [
+        "Due claim не создаёт catch-up storm; ownership и project-defined cron зафиксированы."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:09"
+      ]
+    },
+    {
+      "key": "VERIFY-09",
+      "title": "Независимая проверка Jobs Foundation",
+      "type": "task",
+      "parent_key": "EPIC-09",
+      "source_anchor": "EPIC 9",
+      "goal": "Проверить epic-level acceptance для EPIC 9 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 9; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 9 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-09-01",
+        "TASK-09-02",
+        "TASK-09-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:09"
+      ]
+    },
+    {
+      "key": "EPIC-10",
+      "title": "Import System",
+      "type": "epic",
+      "source_anchor": "EPIC 10",
+      "goal": "Завершить Import System с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 10 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 10 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-09"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:platform"
+      ]
+    },
+    {
+      "key": "TASK-10-01",
+      "title": "Реализовать безопасное получение и parsing feeds",
+      "type": "task",
+      "parent_key": "EPIC-10",
+      "source_anchor": "EPIC 10",
+      "goal": "Созданы conditional GET, streaming parser, Zod normalization и image host validation.",
+      "scope": [
+        "Реализовать безопасное получение и parsing feeds"
+      ],
+      "acceptance_criteria": [
+        "Large feed не буферизуется целиком; disallowed image пропускается и даёт warning issue."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:10"
+      ]
+    },
+    {
+      "key": "TASK-10-02",
+      "title": "Реализовать idempotent multi-feed ingest",
+      "type": "task",
+      "parent_key": "EPIC-10",
+      "source_anchor": "EPIC 10",
+      "goal": "Созданы conditional claim, queued runs, source-isolated upsert, manual ownership и cache invalidation.",
+      "scope": [
+        "Реализовать idempotent multi-feed ingest"
+      ],
+      "acceptance_criteria": [
+        "Повторный import идемпотентен; manual overrides и source isolation доказаны."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:10"
+      ]
+    },
+    {
+      "key": "TASK-10-03",
+      "title": "Реализовать lifecycle, safety и recovery",
+      "type": "task",
+      "parent_key": "EPIC-10",
+      "source_anchor": "EPIC 10",
+      "goal": "Добавлены safe deactivation, retry policy, disable/delete/decommission rules, heartbeat, janitor и unchanged baselines.",
+      "scope": [
+        "Реализовать lifecycle, safety и recovery"
+      ],
+      "acceptance_criteria": [
+        "Bad/truncated feed не очищает каталог; transient retry, stale recovery и 304/same-hash rules доказаны."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:10"
+      ]
+    },
+    {
+      "key": "VERIFY-10",
+      "title": "Независимая проверка Import System",
+      "type": "task",
+      "parent_key": "EPIC-10",
+      "source_anchor": "EPIC 10",
+      "goal": "Проверить epic-level acceptance для EPIC 10 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 10; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 10 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-10-01",
+        "TASK-10-02",
+        "TASK-10-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:10"
+      ]
+    },
+    {
+      "key": "EPIC-11",
+      "title": "Lead Outbox Core",
+      "type": "epic",
+      "source_anchor": "EPIC 11",
+      "goal": "Завершить Lead Outbox Core с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 11 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 11 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-10"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:product"
+      ]
+    },
+    {
+      "key": "TASK-11-01",
+      "title": "Реализовать защищённый lead intake",
+      "type": "task",
+      "parent_key": "EPIC-11",
+      "source_anchor": "EPIC 11",
+      "goal": "Добавлены validation, E.164, consent, honeypot, fill-time, app/Nginx rate limit и idempotency.",
+      "scope": [
+        "Реализовать защищённый lead intake"
+      ],
+      "acceptance_criteria": [
+        "Невалидный/anti-spam request не создаёт lead; raw PII не логируется."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:11"
+      ]
+    },
+    {
+      "key": "TASK-11-02",
+      "title": "Реализовать transactional outbox",
+      "type": "task",
+      "parent_key": "EPIC-11",
+      "source_anchor": "EPIC 11",
+      "goal": "Lead и applicable delivery rows создаются в одной transaction до HTTP success.",
+      "scope": [
+        "Реализовать transactional outbox"
+      ],
+      "acceptance_criteria": [
+        "Channel outage не теряет lead; crash между commit/enqueue восстанавливается."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:11"
+      ]
+    },
+    {
+      "key": "TASK-11-03",
+      "title": "Реализовать delivery state machine",
+      "type": "task",
+      "parent_key": "EPIC-11",
+      "source_anchor": "EPIC 11",
+      "goal": "Добавлены uniqueness, retries=0, waitUntil backoff, heartbeat, stale/orphan recovery, missing-adapter policy, bounded logs и retention.",
+      "scope": [
+        "Реализовать delivery state machine"
+      ],
+      "acceptance_criteria": [
+        "Retryable и permanent errors разделены; config error не зацикливается."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:11"
+      ]
+    },
+    {
+      "key": "VERIFY-11",
+      "title": "Независимая проверка Lead Outbox Core",
+      "type": "task",
+      "parent_key": "EPIC-11",
+      "source_anchor": "EPIC 11",
+      "goal": "Проверить epic-level acceptance для EPIC 11 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 11; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 11 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-11-01",
+        "TASK-11-02",
+        "TASK-11-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:11"
+      ]
+    },
+    {
+      "key": "EPIC-12",
+      "title": "Lead Adapters",
+      "type": "epic",
+      "source_anchor": "EPIC 12",
+      "goal": "Завершить Lead Adapters с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 12 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 12 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-11"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:product"
+      ]
+    },
+    {
+      "key": "TASK-12-01",
+      "title": "Реализовать MAX adapter",
+      "type": "task",
+      "parent_key": "EPIC-12",
+      "source_anchor": "EPIC 12",
+      "goal": "MAX delivery использует stable channelId, safe payload/logging и project routing.",
+      "scope": [
+        "Реализовать MAX adapter"
+      ],
+      "acceptance_criteria": [
+        "Успешная, retryable и permanent delivery доказаны без утечки secrets/PII."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:12"
+      ]
+    },
+    {
+      "key": "TASK-12-02",
+      "title": "Реализовать custom webhook adapter",
+      "type": "task",
+      "parent_key": "EPIC-12",
+      "source_anchor": "EPIC 12",
+      "goal": "Custom webhook использует HTTPS, HMAC, timestamp, replay window и idempotency key.",
+      "scope": [
+        "Реализовать custom webhook adapter"
+      ],
+      "acceptance_criteria": [
+        "Receiver может проверить подпись; duplicate delivery предотвращён."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:12"
+      ]
+    },
+    {
+      "key": "TASK-12-03",
+      "title": "Реализовать один production CRM adapter",
+      "type": "task",
+      "parent_key": "EPIC-12",
+      "source_anchor": "EPIC 12",
+      "goal": "Выбран и реализован один CRM; amoCRM при выборе получает OAuth encrypted-token ADR.",
+      "scope": [
+        "Реализовать один production CRM adapter"
+      ],
+      "acceptance_criteria": [
+        "Adapter имеет recovery/idempotency proof и документированный credential lifecycle."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:12"
+      ]
+    },
+    {
+      "key": "VERIFY-12",
+      "title": "Независимая проверка Lead Adapters",
+      "type": "task",
+      "parent_key": "EPIC-12",
+      "source_anchor": "EPIC 12",
+      "goal": "Проверить epic-level acceptance для EPIC 12 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 12; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 12 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-12-01",
+        "TASK-12-02",
+        "TASK-12-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:12"
+      ]
+    },
+    {
+      "key": "EPIC-13",
+      "title": "SEO + Lifecycle",
+      "type": "epic",
+      "source_anchor": "EPIC 13",
+      "goal": "Завершить SEO + Lifecycle с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 13 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 13 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-12"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:product"
+      ]
+    },
+    {
+      "key": "TASK-13-01",
+      "title": "Реализовать SEO contracts",
+      "type": "task",
+      "parent_key": "EPIC-13",
+      "source_anchor": "EPIC 13",
+      "goal": "Добавлены metadata, canonical, OG, structured data, sitemap, robots и filter whitelist.",
+      "scope": [
+        "Реализовать SEO contracts"
+      ],
+      "acceptance_criteria": [
+        "Indexable surface соответствует canonical URL map; parameter/filter pages контролируются."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:13"
+      ]
+    },
+    {
+      "key": "TASK-13-02",
+      "title": "Реализовать archived lifecycle",
+      "type": "task",
+      "parent_key": "EPIC-13",
+      "source_anchor": "EPIC 13",
+      "goal": "Archived property внутри retention отдаёт 200/noindex, исключается из sitemap и показывает alternatives.",
+      "scope": [
+        "Реализовать archived lifecycle"
+      ],
+      "acceptance_criteria": [
+        "Archived state проверяем и не смешивается с never-existed 404."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:13"
+      ]
+    },
+    {
+      "key": "TASK-13-03",
+      "title": "Реализовать purge/redirect/410 semantics",
+      "type": "task",
+      "parent_key": "EPIC-13",
+      "source_anchor": "EPIC 13",
+      "goal": "После retention lifecycle ставит contentPurgedAt; redirect только explicit, иначе 410.",
+      "scope": [
+        "Реализовать purge/redirect/410 semantics"
+      ],
+      "acceptance_criteria": [
+        "404, archived 200 и 410 различимы по persisted state; auto-similarity redirect отсутствует."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:13"
+      ]
+    },
+    {
+      "key": "VERIFY-13",
+      "title": "Независимая проверка SEO + Lifecycle",
+      "type": "task",
+      "parent_key": "EPIC-13",
+      "source_anchor": "EPIC 13",
+      "goal": "Проверить epic-level acceptance для EPIC 13 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 13; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 13 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-13-01",
+        "TASK-13-02",
+        "TASK-13-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:13"
+      ]
+    },
+    {
+      "key": "EPIC-14",
+      "title": "Admin + Observability",
+      "type": "epic",
+      "source_anchor": "EPIC 14",
+      "goal": "Завершить Admin + Observability с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 14 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 14 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-13"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:product"
+      ]
+    },
+    {
+      "key": "TASK-14-01",
+      "title": "Добавить owner operations в Payload Admin",
+      "type": "task",
+      "parent_key": "EPIC-14",
+      "source_anchor": "EPIC 14",
+      "goal": "Доступны feed health, imports/issues, deliveries, manual retry, suspicious approval и jobs diagnostics.",
+      "scope": [
+        "Добавить owner operations в Payload Admin"
+      ],
+      "acceptance_criteria": [
+        "Операции role-protected, audit-safe и не создают второй Admin framework."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:14"
+      ]
+    },
+    {
+      "key": "TASK-14-02",
+      "title": "Добавить health и alerts",
+      "type": "task",
+      "parent_key": "EPIC-14",
+      "source_anchor": "EPIC 14",
+      "goal": "Реализованы healthz, redacted diagnostics и alerts для feeds/jobs/delivery.",
+      "scope": [
+        "Добавить health и alerts"
+      ],
+      "acceptance_criteria": [
+        "Health отделяет dependency failures; alerts не содержат secrets или PII."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:14"
+      ]
+    },
+    {
+      "key": "TASK-14-03",
+      "title": "Доказать operational recovery flows",
+      "type": "task",
+      "parent_key": "EPIC-14",
+      "source_anchor": "EPIC 14",
+      "goal": "Проверены import approval/recovery, delivery retry/recovery и lifecycle operations по OPERATIONS.",
+      "scope": [
+        "Доказать operational recovery flows"
+      ],
+      "acceptance_criteria": [
+        "Каждый flow имеет воспроизводимый runbook и evidence."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:14"
+      ]
+    },
+    {
+      "key": "VERIFY-14",
+      "title": "Независимая проверка Admin + Observability",
+      "type": "task",
+      "parent_key": "EPIC-14",
+      "source_anchor": "EPIC 14",
+      "goal": "Проверить epic-level acceptance для EPIC 14 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 14; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 14 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-14-01",
+        "TASK-14-02",
+        "TASK-14-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:14"
+      ]
+    },
+    {
+      "key": "EPIC-15",
+      "title": "Full Drift / Security / Regression Audit",
+      "type": "epic",
+      "source_anchor": "EPIC 15",
+      "goal": "Завершить Full Drift / Security / Regression Audit с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 15 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 15 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-14"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:product"
+      ]
+    },
+    {
+      "key": "TASK-15-01",
+      "title": "Проверить architecture и workspace drift",
+      "type": "task",
+      "parent_key": "EPIC-15",
+      "source_anchor": "EPIC 15",
+      "goal": "Сверены contracts, architecture, DTO, package boundaries, UI tokens и generated artifacts.",
+      "scope": [
+        "Проверить architecture и workspace drift"
+      ],
+      "acceptance_criteria": [
+        "Drift классифицирован; blocking deviations исправлены либо вынесены в owner decision."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:15"
+      ]
+    },
+    {
+      "key": "TASK-15-02",
+      "title": "Проверить security boundaries",
+      "type": "task",
+      "parent_key": "EPIC-15",
+      "source_anchor": "EPIC 15",
+      "goal": "Проверены REST edge/access, private fields, outbound HTTP, secrets/PII redaction, CSP и rate limits.",
+      "scope": [
+        "Проверить security boundaries"
+      ],
+      "acceptance_criteria": [
+        "Критические paths не имеют открытых anonymous/raw или privilege-bypass routes."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:15"
+      ]
+    },
+    {
+      "key": "TASK-15-03",
+      "title": "Проверить schema и product regression",
+      "type": "task",
+      "parent_key": "EPIC-15",
+      "source_anchor": "EPIC 15",
+      "goal": "Проверены constraints/indexes, visual parity, accessibility, imports, leads, lifecycle и recovery.",
+      "scope": [
+        "Проверить schema и product regression"
+      ],
+      "acceptance_criteria": [
+        "Все Definition of Success criteria имеют evidence либо явный blocker."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:15"
+      ]
+    },
+    {
+      "key": "VERIFY-15",
+      "title": "Независимая проверка Full Drift / Security / Regression Audit",
+      "type": "task",
+      "parent_key": "EPIC-15",
+      "source_anchor": "EPIC 15",
+      "goal": "Проверить epic-level acceptance для EPIC 15 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 15; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 15 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-15-01",
+        "TASK-15-02",
+        "TASK-15-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:15"
+      ]
+    },
+    {
+      "key": "EPIC-16",
+      "title": "Internal Production RealtBase",
+      "type": "epic",
+      "source_anchor": "EPIC 16",
+      "goal": "Завершить Internal Production RealtBase с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 16 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 16 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-15"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:delivery"
+      ]
+    },
+    {
+      "key": "TASK-16-01",
+      "title": "Подготовить internal production topology",
+      "type": "task",
+      "parent_key": "EPIC-16",
+      "source_anchor": "EPIC 16",
+      "goal": "Подготовлены AMS VPS, Nginx/TLS, internal domain, Managed PostgreSQL, S3 и isolated secrets.",
+      "scope": [
+        "Подготовить internal production topology"
+      ],
+      "acceptance_criteria": [
+        "Topology соответствует one-app/managed-DB/S3 contract и noindex policy."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:16"
+      ]
+    },
+    {
+      "key": "TASK-16-02",
+      "title": "Выпустить exact main artifact",
+      "type": "task",
+      "parent_key": "EPIC-16",
+      "source_anchor": "EPIC 16",
+      "goal": "Из exact SourceCraft main построен immutable release с migrations и единственным JOBS_AUTORUN owner.",
+      "scope": [
+        "Выпустить exact main artifact"
+      ],
+      "acceptance_criteria": [
+        "Release identity воспроизводима; rollback path доступен."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:16"
+      ]
+    },
+    {
+      "key": "TASK-16-03",
+      "title": "Провести live operational proof",
+      "type": "task",
+      "parent_key": "EPIC-16",
+      "source_anchor": "EPIC 16",
+      "goal": "Проверены smoke, DB pool, S3, imports/jobs/leads, backup/restore и monitoring.",
+      "scope": [
+        "Провести live operational proof"
+      ],
+      "acceptance_criteria": [
+        "Live evidence подтверждает отсутствие pool exhaustion и работоспособный restore."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:16"
+      ]
+    },
+    {
+      "key": "VERIFY-16",
+      "title": "Независимая проверка Internal Production RealtBase",
+      "type": "task",
+      "parent_key": "EPIC-16",
+      "source_anchor": "EPIC 16",
+      "goal": "Проверить epic-level acceptance для EPIC 16 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 16; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 16 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-16-01",
+        "TASK-16-02",
+        "TASK-16-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:16"
+      ]
+    },
+    {
+      "key": "EPIC-17",
+      "title": "Clone Workflow",
+      "type": "epic",
+      "source_anchor": "EPIC 17",
+      "goal": "Завершить Clone Workflow с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 17 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 17 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-16"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:delivery"
+      ]
+    },
+    {
+      "key": "TASK-17-01",
+      "title": "Зафиксировать clone input contract",
+      "type": "task",
+      "parent_key": "EPIC-17",
+      "source_anchor": "EPIC 17",
+      "goal": "Определены RealtBase tag/SHA, project decisions и required client configuration.",
+      "scope": [
+        "Зафиксировать clone input contract"
+      ],
+      "acceptance_criteria": [
+        "Clone начинается от exact canonical source и не требует удаления ненужной половины платформы."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:17"
+      ]
+    },
+    {
+      "key": "TASK-17-02",
+      "title": "Автоматизировать client provisioning",
+      "type": "task",
+      "parent_key": "EPIC-17",
+      "source_anchor": "EPIC 17",
+      "goal": "Создаются новый SourceCraft repo, PROJECT/DESIGN, DB, S3, VPS, domain, feeds и channels.",
+      "scope": [
+        "Автоматизировать client provisioning"
+      ],
+      "acceptance_criteria": [
+        "Secrets и infrastructure изолированы per client; steps идемпотентны или recoverable."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:17"
+      ]
+    },
+    {
+      "key": "TASK-17-03",
+      "title": "Доказать staging-to-production clone flow",
+      "type": "task",
+      "parent_key": "EPIC-17",
+      "source_anchor": "EPIC 17",
+      "goal": "Новый client проходит staging, migrations, import/lead checks и controlled production release.",
+      "scope": [
+        "Доказать staging-to-production clone flow"
+      ],
+      "acceptance_criteria": [
+        "Clone evidence связывает exact source SHA, config, artifact и live smoke."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:17"
+      ]
+    },
+    {
+      "key": "VERIFY-17",
+      "title": "Независимая проверка Clone Workflow",
+      "type": "task",
+      "parent_key": "EPIC-17",
+      "source_anchor": "EPIC 17",
+      "goal": "Проверить epic-level acceptance для EPIC 17 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 17; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 17 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-17-01",
+        "TASK-17-02",
+        "TASK-17-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:17"
+      ]
+    },
+    {
+      "key": "EPIC-18",
+      "title": "Analytics Module",
+      "type": "epic",
+      "source_anchor": "EPIC 18",
+      "goal": "Завершить Analytics Module с проверяемым результатом.",
+      "scope": [
+        "Требования раздела EPIC 18 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
+      ],
+      "acceptance_criteria": [
+        "Все implementation tasks и финальная verification-task EPIC 18 закрыты независимой проверкой."
+      ],
+      "depends_on": [
+        "EPIC-17"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "wave:delivery"
+      ]
+    },
+    {
+      "key": "TASK-18-01",
+      "title": "Создать AnalyticsProvider seam",
+      "type": "task",
+      "parent_key": "EPIC-18",
+      "source_anchor": "EPIC 18",
+      "goal": "Определён storage-neutral provider contract без отдельного speculative backend.",
+      "scope": [
+        "Создать AnalyticsProvider seam"
+      ],
+      "acceptance_criteria": [
+        "Base не зависит от Yandex-specific types; module может быть отключён."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:18"
+      ]
+    },
+    {
+      "key": "TASK-18-02",
+      "title": "Реализовать Yandex Metrika provider",
+      "type": "task",
+      "parent_key": "EPIC-18",
+      "source_anchor": "EPIC 18",
+      "goal": "Provider получает approved metrics через secure server-side integration.",
+      "scope": [
+        "Реализовать Yandex Metrika provider"
+      ],
+      "acceptance_criteria": [
+        "Credentials защищены; API errors не нарушают core catalog/leads paths."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:18"
+      ]
+    },
+    {
+      "key": "TASK-18-03",
+      "title": "Собрать operational analytics dashboard",
+      "type": "task",
+      "parent_key": "EPIC-18",
+      "source_anchor": "EPIC 18",
+      "goal": "Payload dashboard показывает local conversion, feed health и delivery health вместе с provider metrics.",
+      "scope": [
+        "Собрать operational analytics dashboard"
+      ],
+      "acceptance_criteria": [
+        "Метрики имеют определения, временные диапазоны и проверяемые sources."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "merge",
+        "release",
+        "production",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 3,
+      "labels": [
+        "implementation",
+        "epic:18"
+      ]
+    },
+    {
+      "key": "VERIFY-18",
+      "title": "Независимая проверка Analytics Module",
+      "type": "task",
+      "parent_key": "EPIC-18",
+      "source_anchor": "EPIC 18",
+      "goal": "Проверить epic-level acceptance для EPIC 18 и закрыть эпик только по достаточному evidence.",
+      "scope": [
+        "Проверка acceptance всех задач EPIC 18; без implementation edits."
+      ],
+      "acceptance_criteria": [
+        "Все критерии EPIC 18 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
+      ],
+      "depends_on": [
+        "TASK-18-01",
+        "TASK-18-02",
+        "TASK-18-03"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test"
+      ],
+      "stop_conditions": [
+        "implementation edit",
+        "insufficient evidence",
+        "assignee equals verifier",
+        "merge",
+        "release",
+        "production"
+      ],
+      "priority": 3,
+      "labels": [
+        "verification",
+        "stage:verify",
+        "epic:18"
+      ]
+    }
+  ]
+}
