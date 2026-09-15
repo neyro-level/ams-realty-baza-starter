@@ -34,4 +34,8 @@
 - избранное и сравнение допустимы без кабинета через localStorage/URL;
 - feed/manual identity и lifecycle объекта реализуются по мастер-плану до публичного каталога.
 
+## Каталог: facet UX
+
+Для базового профиля выбран режим `filters only`: общий результат и число найденных объектов показываются, per-option facet counts в presentation contract не входят. Если approved UX потребует counts до contract freeze, они добавляются отдельным решением и только через bounded aggregate queries.
+
 Финальные SEO index/canonical/redirect решения добавляются сюда при реализации соответствующих маршрутов.

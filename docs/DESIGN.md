@@ -1,6 +1,6 @@
 # Design
 
-Статус: `Foundation / visual baseline source fixed`.
+Статус: `Foundation / Atlas inventory complete / visual capture pending`.
 
 ## Характер
 
@@ -29,6 +29,6 @@ UI использует storage-neutral `MediaDTO`. Для изображени�
 
 Выбран local Atlas donor: SourceCraft `integrator-p/atlas-realty-starter`, exact `main@4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe`, deterministic `SITE_ENGINE=fixture`. Канонические viewport: `390×844`, `768×1024`, `1280×900`, `1440×1000`.
 
-Identity, обязательные сценарии и reproduction contract: `research/ATLAS_BASELINE.md`. Фактический capture остаётся задачей EPIC 1.
+Identity, классифицированный UI/UX inventory, обязательные сценарии и reproduction contract: `research/ATLAS_BASELINE.md`. Фактический capture остаётся задачей EPIC 1.
 
 Одобренных визуальных исключений пока нет.
