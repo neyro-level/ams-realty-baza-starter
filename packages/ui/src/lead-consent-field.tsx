@@ -25,12 +25,12 @@ export function LeadConsentField({
 			data-source-page={context.sourcePage}
 		>
 			<label
-				className="flex items-start gap-3 text-sm leading-6 text-slate-700"
+				className="flex items-start gap-3 text-body leading-step-copy text-[var(--content-default)]"
 				htmlFor={id}
 			>
 				<input
 					aria-describedby={descriptionId}
-					className="mt-1 size-4 shrink-0 accent-slate-950"
+					className="mt-1 size-4 shrink-0 accent-[var(--action-primary)]"
 					id={id}
 					name="consentAccepted"
 					required={context.consentRequired}
@@ -40,7 +40,7 @@ export function LeadConsentField({
 				<span id={descriptionId}>
 					Даю согласие на обработку персональных данных в соответствии с{" "}
 					<a
-						className="font-medium text-slate-950 underline underline-offset-4"
+						className="font-medium text-[var(--content-strong)] underline underline-offset-4"
 						href={context.consentHref}
 						rel="noreferrer"
 						target="_blank"
@@ -50,7 +50,7 @@ export function LeadConsentField({
 					.
 				</span>
 			</label>
-			<p className="text-xs text-slate-500">
+			<p className="text-caption text-[var(--content-subtle)]">
 				Версия согласия: {context.consentVersion}
 			</p>
 		</div>

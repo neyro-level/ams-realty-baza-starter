@@ -35,6 +35,14 @@ const uiFiles = walk(
 	join(root, "packages/ui/src"),
 	new Set([".ts", ".tsx", ".css"]),
 );
+const primitiveStyleFiles = [
+	...walk(
+		join(root, "packages/ui/src/components/ui"),
+		new Set([".ts", ".tsx"]),
+	),
+	join(root, "packages/ui/src/lead-consent-field.tsx"),
+	join(root, "packages/ui/src/views/property/MediaGallery.tsx"),
+];
 const unresolved = [];
 
 for (const path of uiFiles) {
@@ -53,6 +61,31 @@ for (const path of uiFiles) {
 	}
 }
 
+const forbiddenStylePatterns = [
+	/(?:text|bg|border|ring|accent|outline)-(?:white|black|slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)(?:-|\/|\b)/i,
+	/#[0-9a-f]{3,8}\b/i,
+	/rgba?\(/i,
+	/hsla?\(/i,
+	/rounded-\[(?!var\(|inherit\])/i,
+	/backdrop-blur-\[(?!var\()/i,
+	/duration-\[(?!var\()/i,
+	/ease-\[(?!var\()/i,
+];
+const forbiddenStyles = primitiveStyleFiles.flatMap((path) => {
+	const source = readFileSync(path, "utf8");
+	return source.split(/\r?\n/).flatMap((line, index) => {
+		const hasForbiddenLiteral = forbiddenStylePatterns.some((pattern) =>
+			pattern.test(line),
+		);
+		const hasUntokenizedMotion =
+			/\btransition(?:-|\s)/.test(line) &&
+			!line.includes("duration-[var(--motion-duration-");
+		return hasForbiddenLiteral || hasUntokenizedMotion
+			? [`${relative(root, path)}:${index + 1}`]
+			: [];
+	});
+});
+
 const required = [
 	"--background",
 	"--surface",
@@ -66,7 +99,16 @@ const required = [
 	"--site-frame-max",
 	"--site-frame-floating-max",
 	"--container-copy-measure",
+	"--container-narrow-max",
+	"--container-site-max",
+	"--container-wide-max",
 	"--site-section-space-desktop",
+	"--section-space-sm",
+	"--section-space-md",
+	"--section-space-lg",
+	"--control-height-md",
+	"--control-radius",
+	"--focus-ring-soft",
 	"--motion-duration-standard",
 	"--motion-ease-standard",
 	"--motion-ease-emphasized",
@@ -81,6 +123,7 @@ const failures = [
 		(item) => `raw token value outside globals.css ${item}`,
 	),
 	...unresolved.map((item) => `unresolved UI token ${item}`),
+	...forbiddenStyles.map((item) => `forbidden primitive style literal ${item}`),
 ];
 
 if (!tokenCss.includes("@theme inline"))

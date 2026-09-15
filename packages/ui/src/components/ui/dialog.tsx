@@ -18,7 +18,7 @@ export function DialogOverlay({
 		<DialogPrimitive.Overlay
 			data-slot="dialog-overlay"
 			className={cn(
-				"fixed inset-0 z-50 bg-[var(--dialog-effect-primary)] backdrop-blur-[2px]",
+				"fixed inset-0 z-50 bg-[var(--dialog-effect-primary)] backdrop-blur-[var(--overlay-blur)]",
 				className,
 			)}
 			{...props}
@@ -46,7 +46,7 @@ export function DialogContent({
 			<DialogPrimitive.Content
 				data-slot="dialog-content"
 				className={cn(
-					"fixed left-1/2 z-50 grid w-[min(calc(100vw-32px),560px)] -translate-x-1/2 gap-4 rounded-[var(--radius-lg,12px)] border border-[var(--card-border,var(--border))] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-dialog)] outline-none md:p-8",
+					"fixed left-1/2 z-50 grid w-[var(--dialog-width)] -translate-x-1/2 gap-4 rounded-[var(--radius-lg)] border border-[var(--card-border,var(--border))] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-dialog)] outline-none md:p-8",
 					placement === "center" && "top-1/2 -translate-y-1/2",
 					placement === "bottom-mobile" &&
 						"bottom-2 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2",
@@ -57,7 +57,7 @@ export function DialogContent({
 				{children}
 				{showClose ? (
 					<DialogPrimitive.Close
-						className="absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-lg bg-[var(--dialog-surface-primary)] text-[var(--text-secondary)] transition hover:bg-[var(--dialog-surface-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+						className="absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-lg bg-[var(--dialog-surface-primary)] text-[var(--text-secondary)] transition duration-[var(--motion-duration-fast)] ease-site hover:bg-[var(--dialog-surface-secondary)] focus-visible:outline focus-visible:outline-[length:var(--focus-ring-width)] focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
 						aria-label="Закрыть"
 					>
 						<X className="size-5" aria-hidden />

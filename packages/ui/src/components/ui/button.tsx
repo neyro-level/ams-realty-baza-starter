@@ -4,13 +4,14 @@ import * as React from "react";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-	"inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius)] text-body font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+	"inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--control-radius)] text-body font-semibold transition-colors duration-[var(--motion-duration-fast)] ease-site outline-none focus-visible:ring-[length:var(--focus-ring-width)] focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
 	{
 		variants: {
 			variant: {
 				default:
 					"bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]",
-				destructive: "bg-[var(--destructive)] text-white hover:opacity-90",
+				destructive:
+					"bg-[var(--destructive)] text-[var(--content-inverse)] hover:opacity-90",
 				outline:
 					"border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)] hover:text-[var(--primary)]",
 				secondary:
@@ -21,10 +22,10 @@ const buttonVariants = cva(
 				plain: "bg-transparent text-inherit",
 			},
 			size: {
-				sm: "h-9 px-3",
-				default: "h-11 px-5",
-				lg: "h-12 px-6",
-				icon: "size-11",
+				sm: "h-[var(--control-height-sm)] px-[var(--control-padding-sm)]",
+				default: "h-[var(--control-height-md)] px-[var(--control-padding-md)]",
+				lg: "h-[var(--control-height-lg)] px-[var(--control-padding-lg)]",
+				icon: "size-[var(--control-height-md)]",
 			},
 		},
 		defaultVariants: { variant: "default", size: "default" },

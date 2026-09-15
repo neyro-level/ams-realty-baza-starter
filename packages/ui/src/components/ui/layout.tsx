@@ -1,4 +1,5 @@
 import type { ComponentProps, ElementType, ReactNode } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
 type PolymorphicProps<T extends ElementType> = {
@@ -7,19 +8,43 @@ type PolymorphicProps<T extends ElementType> = {
 	className?: string;
 } & Omit<ComponentProps<T>, "as" | "children" | "className">;
 
+const containerVariants = cva(
+	"mx-auto w-full px-[var(--container-gutter-mobile)] md:px-[var(--container-gutter-tablet)] lg:px-[var(--container-gutter-desktop)]",
+	{
+		variants: {
+			size: {
+				narrow: "max-w-[var(--container-narrow-max)]",
+				site: "max-w-[var(--container-site-max)]",
+				wide: "max-w-[var(--container-wide-max)]",
+			},
+		},
+		defaultVariants: { size: "site" },
+	},
+);
+
+const sectionVariants = cva("", {
+	variants: {
+		space: {
+			sm: "py-[var(--section-space-sm)]",
+			md: "py-[var(--section-space-sm)] md:py-[var(--section-space-md)]",
+			lg: "py-[var(--section-space-sm)] md:py-[var(--section-space-md)] lg:py-[var(--section-space-lg)]",
+			hero: "py-[var(--section-space-md)] lg:py-[var(--section-space-hero)]",
+		},
+	},
+	defaultVariants: { space: "lg" },
+});
+
 export function Container<T extends ElementType = "div">({
 	as,
 	className,
+	size,
 	...props
-}: PolymorphicProps<T>) {
+}: PolymorphicProps<T> & VariantProps<typeof containerVariants>) {
 	const Component = as ?? "div";
 	return (
 		<Component
 			data-slot="container"
-			className={cn(
-				"mx-auto w-full max-w-site-frame px-5 md:px-8 lg:px-10",
-				className,
-			)}
+			className={cn(containerVariants({ size }), className)}
 			{...props}
 		/>
 	);
@@ -28,16 +53,14 @@ export function Container<T extends ElementType = "div">({
 export function Section<T extends ElementType = "section">({
 	as,
 	className,
+	space,
 	...props
-}: PolymorphicProps<T>) {
+}: PolymorphicProps<T> & VariantProps<typeof sectionVariants>) {
 	const Component = as ?? "section";
 	return (
 		<Component
 			data-slot="section"
-			className={cn(
-				"py-12 md:py-16 lg:py-[var(--site-section-space-desktop)]",
-				className,
-			)}
+			className={cn(sectionVariants({ space }), className)}
 			{...props}
 		/>
 	);

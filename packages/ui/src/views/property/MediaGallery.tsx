@@ -97,7 +97,7 @@ export function MediaGallery({
 	const controlClass =
 		variant === "light-controls"
 			? "bg-[var(--surface-card)] text-[var(--text-primary)] shadow-[var(--media-gallery-shadow-primary)] hover:bg-[var(--home-articles-chip)]"
-			: "border border-white/70 bg-[var(--surface-dark)]/76 text-white hover:bg-[var(--surface-dark)]";
+			: "border border-[var(--media-control-border)] bg-[var(--media-control-surface)] text-[var(--media-control-content)] hover:bg-[var(--surface-dark)]";
 
 	return (
 		<>
@@ -132,7 +132,7 @@ export function MediaGallery({
 				</CarouselContent>
 
 				{hasMany ? (
-					<span className="absolute left-3 top-3 rounded-lg bg-[var(--surface-dark)]/82 px-3 py-1.5 text-label font-semibold tabular-nums text-white backdrop-blur-sm">
+					<span className="absolute left-3 top-3 rounded-lg bg-[var(--media-counter-surface)] px-3 py-1.5 text-label font-semibold tabular-nums text-[var(--media-control-content)] backdrop-blur-sm">
 						{index + 1} / {safeImages.length}
 					</span>
 				) : null}
@@ -143,7 +143,7 @@ export function MediaGallery({
 							type="button"
 							onClick={() => api?.scrollPrev()}
 							className={cn(
-								"absolute left-3 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-lg transition lg:left-5",
+								"absolute left-3 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-lg transition duration-[var(--motion-duration-fast)] ease-site lg:left-5",
 								controlClass,
 							)}
 							aria-label="Предыдущее фото"
@@ -155,7 +155,7 @@ export function MediaGallery({
 							type="button"
 							onClick={() => api?.scrollNext()}
 							className={cn(
-								"absolute right-3 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-lg transition lg:right-5",
+								"absolute right-3 top-1/2 z-10 inline-flex size-11 -translate-y-1/2 items-center justify-center rounded-lg transition duration-[var(--motion-duration-fast)] ease-site lg:right-5",
 								controlClass,
 							)}
 							aria-label="Следующее фото"

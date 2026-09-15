@@ -143,7 +143,7 @@ export function FieldError({
 		<p
 			data-slot="field-error"
 			className={cn(
-				"text-label leading-step-body text-[var(--accent)]",
+				"text-label leading-step-body text-[var(--status-danger)]",
 				className,
 			)}
 			{...props}

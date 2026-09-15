@@ -46,7 +46,10 @@ export function BreadcrumbLink({
 	return (
 		<Comp
 			data-slot="breadcrumb-link"
-			className={cn("transition hover:text-[var(--text-primary)]", className)}
+			className={cn(
+				"transition duration-[var(--motion-duration-fast)] ease-site hover:text-[var(--text-primary)]",
+				className,
+			)}
 			{...props}
 		/>
 	);

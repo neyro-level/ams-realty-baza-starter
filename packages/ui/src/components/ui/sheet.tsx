@@ -19,7 +19,7 @@ export function SheetOverlay({
 		<DialogPrimitive.Overlay
 			data-slot="sheet-overlay"
 			className={cn(
-				"fixed inset-0 z-50 bg-[var(--sheet-effect-primary)] backdrop-blur-[2px]",
+				"fixed inset-0 z-50 bg-[var(--sheet-effect-primary)] backdrop-blur-[var(--overlay-blur)]",
 				className,
 			)}
 			{...props}
@@ -28,7 +28,7 @@ export function SheetOverlay({
 }
 
 const sheetVariants = cva(
-	"fixed z-50 grid gap-4 bg-[var(--surface-card)] p-6 shadow-[var(--sheet-shadow-primary)] transition ease-in-out sm:p-8",
+	"fixed z-50 grid gap-4 bg-[var(--surface-card)] p-6 shadow-[var(--sheet-shadow-primary)] transition duration-[var(--motion-duration-standard)] ease-site-balanced sm:p-8",
 	{
 		variants: {
 			side: {
@@ -64,7 +64,7 @@ export function SheetContent({
 				{children}
 				{showClose ? (
 					<DialogPrimitive.Close
-						className="absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-lg bg-[var(--sheet-surface-primary)] text-[var(--text-secondary)] transition hover:bg-[var(--sheet-surface-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+						className="absolute right-4 top-4 inline-flex size-10 items-center justify-center rounded-lg bg-[var(--sheet-surface-primary)] text-[var(--text-secondary)] transition duration-[var(--motion-duration-fast)] ease-site hover:bg-[var(--sheet-surface-secondary)] focus-visible:outline focus-visible:outline-[length:var(--focus-ring-width)] focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
 						aria-label="Закрыть"
 					>
 						<X className="size-5" aria-hidden />
