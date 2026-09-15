@@ -23,6 +23,14 @@ function sha256(value) {
 	return createHash("sha256").update(value).digest("hex");
 }
 
+function normalizeText(value) {
+	return value.replace(/\r\n?/g, "\n");
+}
+
+function fileSha256(file) {
+	return sha256(normalizeText(readFileSync(file, "utf8")));
+}
+
 function collect(directory) {
 	if (!existsSync(directory)) return [];
 	return readdirSync(directory, { withFileTypes: true })
@@ -39,16 +47,16 @@ function collect(directory) {
 function buildManifest(metadata) {
 	const files = collect(sourceRoot).map((absolute) => {
 		const relative = path.relative(root, absolute).replaceAll("\\", "/");
-		return { path: relative, sha256: sha256(readFileSync(absolute)) };
+		return { path: relative, sha256: fileSha256(absolute) };
 	});
 	const aggregate = files
 		.map((file) => `${file.path}:${file.sha256}\n`)
 		.join("");
 	return {
-		schemaVersion: 1,
+		schemaVersion: 2,
 		contractVersion: metadata.contractVersion,
 		state: metadata.state,
-		algorithm: "sha256",
+		algorithm: "sha256-normalized-lf",
 		files,
 		aggregateSha256: sha256(aggregate),
 	};
@@ -56,13 +64,27 @@ function buildManifest(metadata) {
 
 if (!existsSync(lockPath)) fail("contracts.lock.json is missing");
 const current = JSON.parse(readFileSync(lockPath, "utf8"));
-if (current.schemaVersion !== 1 || current.algorithm !== "sha256") {
+if (
+	current.schemaVersion !== 2 ||
+	current.algorithm !== "sha256-normalized-lf"
+) {
 	fail("unsupported lock schema or algorithm");
 }
 const expected = buildManifest(current);
 const same = JSON.stringify(current) === JSON.stringify(expected);
 
-if (command === "check") {
+if (command === "test-line-endings") {
+	const lf = "export const value = true;\n";
+	const crlf = lf.replaceAll("\n", "\r\n");
+	const cr = lf.replaceAll("\n", "\r");
+	if (
+		sha256(normalizeText(lf)) !== sha256(normalizeText(crlf)) ||
+		sha256(normalizeText(lf)) !== sha256(normalizeText(cr))
+	) {
+		fail("line-ending normalization is not deterministic");
+	}
+	console.log("contracts: line-ending normalization PASS");
+} else if (command === "check") {
 	if (!same) fail("lock drift detected; run pnpm contracts:diff");
 	console.log(`contracts: PASS (${current.state} ${current.contractVersion})`);
 } else if (command === "diff") {
@@ -110,5 +132,5 @@ if (command === "check") {
 	writeFileSync(lockPath, `${JSON.stringify(frozen, null, "\t")}\n`);
 	console.log(`contracts: frozen at ${version}`);
 } else {
-	fail("use check, diff, lock or freeze");
+	fail("use check, diff, lock, freeze or test-line-endings");
 }

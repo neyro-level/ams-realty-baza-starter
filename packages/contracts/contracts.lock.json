@@ -1,8 +1,8 @@
 {
-	"schemaVersion": 1,
+	"schemaVersion": 2,
 	"contractVersion": "0.1.0",
 	"state": "draft",
-	"algorithm": "sha256",
+	"algorithm": "sha256-normalized-lf",
 	"files": [
 		{
 			"path": "packages/contracts/src/index.ts",

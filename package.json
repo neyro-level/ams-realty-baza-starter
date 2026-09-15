@@ -16,9 +16,10 @@
 		"contracts:lock": "node scripts/contracts.mjs lock",
 		"contracts:diff": "node scripts/contracts.mjs diff",
 		"contracts:freeze": "node scripts/contracts.mjs freeze",
+		"contracts:test": "node scripts/contracts.mjs test-line-endings",
 		"quality:architecture": "dependency-cruiser src packages scripts --config .dependency-cruiser.mjs --output-type err",
 		"quality:guards": "node scripts/quality/architecture-guard.mjs && node scripts/quality/sourcecraft-policy.mjs",
-		"verify": "pnpm contracts:check && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
+		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
 		"verify:foundation": "pnpm verify"
 	},
 	"dependencies": {
