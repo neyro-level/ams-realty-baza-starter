@@ -1,0 +1,5 @@
+{
+	"schemaVersion": 1,
+	"allowedRouteFiles": [],
+	"note": "Every app API route must be explicitly approved here. Raw anonymous business REST remains denied by default."
+}

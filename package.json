@@ -1,0 +1,39 @@
+{
+	"name": "ams-realty-baza-starter",
+	"version": "0.1.0",
+	"private": true,
+	"engines": {
+		"node": ">=24.20.0 <25"
+	},
+	"packageManager": "pnpm@11.5.1",
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "biome lint .",
+		"typecheck": "next typegen && tsc --noEmit",
+		"contracts:check": "node scripts/contracts.mjs check",
+		"contracts:lock": "node scripts/contracts.mjs lock",
+		"contracts:diff": "node scripts/contracts.mjs diff",
+		"contracts:freeze": "node scripts/contracts.mjs freeze",
+		"quality:architecture": "dependency-cruiser src packages scripts --config .dependency-cruiser.mjs --output-type err",
+		"quality:guards": "node scripts/quality/architecture-guard.mjs && node scripts/quality/sourcecraft-policy.mjs",
+		"verify": "pnpm contracts:check && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
+		"verify:foundation": "pnpm verify"
+	},
+	"dependencies": {
+		"next": "16.3.5",
+		"react": "19.2.8",
+		"react-dom": "19.2.8"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.13",
+		"@tailwindcss/postcss": "^4",
+		"@types/node": "^24",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"dependency-cruiser": "18.2.0",
+		"tailwindcss": "^4",
+		"typescript": "^5"
+	}
+}

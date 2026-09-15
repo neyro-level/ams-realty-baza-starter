@@ -1,0 +1,114 @@
+import { createHash } from "node:crypto";
+import {
+	existsSync,
+	readdirSync,
+	readFileSync,
+	statSync,
+	writeFileSync,
+} from "node:fs";
+import path from "node:path";
+
+const root = process.cwd();
+const contractsRoot = path.join(root, "packages", "contracts");
+const sourceRoot = path.join(contractsRoot, "src");
+const lockPath = path.join(contractsRoot, "contracts.lock.json");
+const command = process.argv[2];
+
+function fail(message) {
+	console.error(`contracts: ${message}`);
+	process.exit(1);
+}
+
+function sha256(value) {
+	return createHash("sha256").update(value).digest("hex");
+}
+
+function collect(directory) {
+	if (!existsSync(directory)) return [];
+	return readdirSync(directory, { withFileTypes: true })
+		.flatMap((entry) => {
+			const absolute = path.join(directory, entry.name);
+			return entry.isDirectory() ? collect(absolute) : [absolute];
+		})
+		.filter(
+			(file) => statSync(file).isFile() && /\.(?:ts|tsx|json)$/.test(file),
+		)
+		.sort();
+}
+
+function buildManifest(metadata) {
+	const files = collect(sourceRoot).map((absolute) => {
+		const relative = path.relative(root, absolute).replaceAll("\\", "/");
+		return { path: relative, sha256: sha256(readFileSync(absolute)) };
+	});
+	const aggregate = files
+		.map((file) => `${file.path}:${file.sha256}\n`)
+		.join("");
+	return {
+		schemaVersion: 1,
+		contractVersion: metadata.contractVersion,
+		state: metadata.state,
+		algorithm: "sha256",
+		files,
+		aggregateSha256: sha256(aggregate),
+	};
+}
+
+if (!existsSync(lockPath)) fail("contracts.lock.json is missing");
+const current = JSON.parse(readFileSync(lockPath, "utf8"));
+if (current.schemaVersion !== 1 || current.algorithm !== "sha256") {
+	fail("unsupported lock schema or algorithm");
+}
+const expected = buildManifest(current);
+const same = JSON.stringify(current) === JSON.stringify(expected);
+
+if (command === "check") {
+	if (!same) fail("lock drift detected; run pnpm contracts:diff");
+	console.log(`contracts: PASS (${current.state} ${current.contractVersion})`);
+} else if (command === "diff") {
+	if (same) console.log("contracts: no changes");
+	else {
+		console.log(
+			JSON.stringify({ locked: current, working: expected }, null, 2),
+		);
+		process.exitCode = 1;
+	}
+} else if (command === "lock") {
+	if (current.state === "frozen") {
+		const nextVersion = process.argv
+			.find((arg) => arg.startsWith("--version="))
+			?.split("=")[1];
+		const adr = process.env.CONTRACT_ADR;
+		if (process.env.CONTRACT_CHANGE_APPROVED !== "true")
+			fail("frozen change requires owner approval");
+		if (!nextVersion || nextVersion === current.contractVersion)
+			fail("frozen change requires a version bump");
+		if (!adr || !existsSync(path.resolve(root, adr)))
+			fail("frozen change requires an existing CONTRACT_ADR");
+		expected.contractVersion = nextVersion;
+	}
+	writeFileSync(lockPath, `${JSON.stringify(expected, null, "\t")}\n`);
+	console.log(
+		`contracts: lock updated (${expected.state} ${expected.contractVersion})`,
+	);
+} else if (command === "freeze") {
+	const version = process.argv
+		.find((arg) => arg.startsWith("--version="))
+		?.split("=")[1];
+	const feasibilityPath = path.join(root, "docs", "CONTRACT_FEASIBILITY.md");
+	if (process.env.CONTRACT_FREEZE_APPROVED !== "true")
+		fail("freeze requires owner approval");
+	if (!version || !/^[1-9]\d*\.\d+\.\d+$/.test(version))
+		fail("freeze requires --version=<stable semver>");
+	if (
+		!existsSync(feasibilityPath) ||
+		!/^Статус:\s*`VERIFIED`/m.test(readFileSync(feasibilityPath, "utf8"))
+	) {
+		fail("freeze requires VERIFIED docs/CONTRACT_FEASIBILITY.md");
+	}
+	const frozen = buildManifest({ contractVersion: version, state: "frozen" });
+	writeFileSync(lockPath, `${JSON.stringify(frozen, null, "\t")}\n`);
+	console.log(`contracts: frozen at ${version}`);
+} else {
+	fail("use check, diff, lock or freeze");
+}

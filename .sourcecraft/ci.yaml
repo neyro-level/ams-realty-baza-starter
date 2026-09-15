@@ -1,0 +1,40 @@
+workflows:
+  merge-standard:
+    inputs:
+      expected_commit_sha:
+        type: string
+        required: true
+        description: Full PR head SHA
+    env:
+      EXPECTED_COMMIT_SHA: ${{ inputs.expected_commit_sha }}
+    tasks:
+      - name: verify-exact-head
+        cubes:
+          - name: verify
+            image: node:24.20.0-bookworm
+            script:
+              - corepack enable
+              - corepack prepare pnpm@11.5.1 --activate
+              - node scripts/ci/assert-exact-head.mjs
+              - pnpm install --frozen-lockfile
+              - pnpm verify
+
+  merge-risky:
+    inputs:
+      expected_commit_sha:
+        type: string
+        required: true
+        description: Full PR head SHA
+    env:
+      EXPECTED_COMMIT_SHA: ${{ inputs.expected_commit_sha }}
+    tasks:
+      - name: verify-risky-exact-head
+        cubes:
+          - name: verify
+            image: node:24.20.0-bookworm
+            script:
+              - corepack enable
+              - corepack prepare pnpm@11.5.1 --activate
+              - node scripts/ci/assert-exact-head.mjs
+              - pnpm install --frozen-lockfile
+              - pnpm verify

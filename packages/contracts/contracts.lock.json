@@ -1,0 +1,13 @@
+{
+	"schemaVersion": 1,
+	"contractVersion": "0.1.0",
+	"state": "draft",
+	"algorithm": "sha256",
+	"files": [
+		{
+			"path": "packages/contracts/src/index.ts",
+			"sha256": "eab1d2fe77886eca224e92c0b117a188f9890a21151f0404dc74aab9cb4aede1"
+		}
+	],
+	"aggregateSha256": "91663cf7ef61386658c49d5f62600a4c05fa82580753c794debc48bad59a78aa"
+}
