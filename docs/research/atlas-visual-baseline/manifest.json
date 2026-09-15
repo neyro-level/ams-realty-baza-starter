@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "donor": {
+    "repository": "integrator-p/atlas-realty-starter",
+    "branch": "main",
+    "commit": "4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe",
+    "dataMode": "fixture",
+    "preflight": {
+      "head": "4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe",
+      "originMain": "4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe",
+      "trackedClean": true,
+      "originVerified": true,
+      "visualConfig": "playwright.visual.config.ts",
+      "visualConfigSha256": "8ad8277cbdc7a1892c277e54cefe13bc1a77a498b54c4735a62a152aa30eb6bb"
+    }
+  },
+  "capture": {
+    "capturedAt": "2026-09-15T16:26:55.496Z",
+    "baseUrl": "http://127.0.0.1:3012",
+    "locale": "ru-RU",
+    "colorScheme": "light",
+    "reducedMotion": true,
+    "dynamicMask": "#e7e5e4",
+    "serverLaunchedByScript": true,
+    "siteEngine": "fixture"
+  },
+  "expectedFiles": 24,
+  "files": [
+    {
+      "file": "390/home.png",
+      "route": "/",
+      "state": "default",
+      "viewport": "390x844",
+      "bytes": 679535,
+      "sha256": "2d662deb4869d9222b02d9810bafb3a929194f653776fb0e1b946dd8d024cf87"
+    },
+    {
+      "file": "390/catalog.png",
+      "route": "/nedvizhimost",
+      "state": "default",
+      "viewport": "390x844",
+      "bytes": 574446,
+      "sha256": "d7d7bd8f8f27e3390b2b67a6f27691637ef4b883144b1af9f9839e3fa5ff2089"
+    },
+    {
+      "file": "390/property.png",
+      "route": "/obekty/svetlaya-kvartira-v-centre",
+      "state": "default",
+      "viewport": "390x844",
+      "bytes": 128092,
+      "sha256": "e56da1bea821e01b358b555347bc0f60bdaf83c9e066b568eba4559a3fc0299d"
+    },
+    {
+      "file": "390/commercial-service.png",
+      "route": "/promo/stroitelstvo-domov",
+      "state": "default",
+      "viewport": "390x844",
+      "bytes": 611135,
+      "sha256": "14102d49fddb8b58c03f9e43fbacebc02ff90112bd80035ea861d8147313d861"
+    },
+    {
+      "file": "390/contacts.png",
+      "route": "/kontakty",
+      "state": "default",
+      "viewport": "390x844",
+      "bytes": 86776,
+      "sha256": "01667693e94be27c953e26f86234813426dd420bac9ee8689e781328f51a1095"
+    },
+    {
+      "file": "390/lead-modal-validation.png",
+      "route": "/",
+      "state": "lead-modal-validation",
+      "viewport": "390x844",
+      "bytes": 603868,
+      "sha256": "de078111896ce82cba92aa2f785906320d889bbf30bbee8971f41c20022602e7"
+    },
+    {
+      "file": "768/home.png",
+      "route": "/",
+      "state": "default",
+      "viewport": "768x1024",
+      "bytes": 1470630,
+      "sha256": "00b30c4f7e00d0315402cbe756bdc25f5204cf1fff62e516b8c5ba84db25e2b0"
+    },
+    {
+      "file": "768/catalog.png",
+      "route": "/nedvizhimost",
+      "state": "default",
+      "viewport": "768x1024",
+      "bytes": 829368,
+      "sha256": "9d9fc75093ed491c1e1e8161486d0a00796036bae4b77626bea331a70fb876ad"
+    },
+    {
+      "file": "768/property.png",
+      "route": "/obekty/svetlaya-kvartira-v-centre",
+      "state": "default",
+      "viewport": "768x1024",
+      "bytes": 134355,
+      "sha256": "268c9f8896bbfce20f388c02e72338492c3c1dae18c89de6cb7133cd757359ba"
+    },
+    {
+      "file": "768/commercial-service.png",
+      "route": "/promo/stroitelstvo-domov",
+      "state": "default",
+      "viewport": "768x1024",
+      "bytes": 1293708,
+      "sha256": "9594a139d7312bdcbcb954e01dece5694dd64c88acb1ca08617b716d88e8b1ee"
+    },
+    {
+      "file": "768/contacts.png",
+      "route": "/kontakty",
+      "state": "default",
+      "viewport": "768x1024",
+      "bytes": 151557,
+      "sha256": "ba275e6e71bf735813fcac8f6b28cfde3b3c044f49add6a277ff69f736f12026"
+    },
+    {
+      "file": "768/lead-modal-validation.png",
+      "route": "/",
+      "state": "lead-modal-validation",
+      "viewport": "768x1024",
+      "bytes": 1311202,
+      "sha256": "193ebc406bdb0250e280399034767c3e3fa0d7978de4f941c29c34b1aabf92d1"
+    },
+    {
+      "file": "1280/home.png",
+      "route": "/",
+      "state": "default",
+      "viewport": "1280x900",
+      "bytes": 1341105,
+      "sha256": "1a3643dae605f413125028d2abefb439daadf53637144261cbb4182a9c0c2501"
+    },
+    {
+      "file": "1280/catalog.png",
+      "route": "/nedvizhimost",
+      "state": "default",
+      "viewport": "1280x900",
+      "bytes": 1013708,
+      "sha256": "52bbd68ae911a4df5a439bc62a3e7d7613704fdd806039333d48e77a9ca1ed9e"
+    },
+    {
+      "file": "1280/property.png",
+      "route": "/obekty/svetlaya-kvartira-v-centre",
+      "state": "default",
+      "viewport": "1280x900",
+      "bytes": 236911,
+      "sha256": "ba1eb2a708b058a40016fe0635fc190ae669ee19c1a67314565a19904db981a7"
+    },
+    {
+      "file": "1280/commercial-service.png",
+      "route": "/promo/stroitelstvo-domov",
+      "state": "default",
+      "viewport": "1280x900",
+      "bytes": 1993259,
+      "sha256": "531a5df5a6b856d8d9e6835a109589644efefa3e6811452329fada0c818fe08e"
+    },
+    {
+      "file": "1280/contacts.png",
+      "route": "/kontakty",
+      "state": "default",
+      "viewport": "1280x900",
+      "bytes": 87814,
+      "sha256": "5baf0a7759923e34a0f787b0a52b5c0d216456e954aa3300c77f433f64ed9352"
+    },
+    {
+      "file": "1280/lead-modal-validation.png",
+      "route": "/",
+      "state": "lead-modal-validation",
+      "viewport": "1280x900",
+      "bytes": 1335295,
+      "sha256": "9d4beb4918ddc4b069a0e0305a5e1f73b40392bf8d9446b6e7dd9c4eff8dd95f"
+    },
+    {
+      "file": "1440/home.png",
+      "route": "/",
+      "state": "default",
+      "viewport": "1440x1000",
+      "bytes": 1415965,
+      "sha256": "c82f32c9e34bc0d3d7b8de2433f04bcb41b528f39ca94fc751753aa077b45516"
+    },
+    {
+      "file": "1440/catalog.png",
+      "route": "/nedvizhimost",
+      "state": "default",
+      "viewport": "1440x1000",
+      "bytes": 1069790,
+      "sha256": "41312a44fa5de8c45f6b31c388f3e322e654782eb6886c97ce3face2639fda10"
+    },
+    {
+      "file": "1440/property.png",
+      "route": "/obekty/svetlaya-kvartira-v-centre",
+      "state": "default",
+      "viewport": "1440x1000",
+      "bytes": 243469,
+      "sha256": "f80c3f4ac25b4ab6aaf4d4562ef18c9233b5ed8eabfe8be03e8ac5856787b0f2"
+    },
+    {
+      "file": "1440/commercial-service.png",
+      "route": "/promo/stroitelstvo-domov",
+      "state": "default",
+      "viewport": "1440x1000",
+      "bytes": 2129381,
+      "sha256": "ef3667e0ad1a1e16e5fa8e4516a9f8d49a51cd67aee4263f8b783242ed227fc2"
+    },
+    {
+      "file": "1440/contacts.png",
+      "route": "/kontakty",
+      "state": "default",
+      "viewport": "1440x1000",
+      "bytes": 93447,
+      "sha256": "eaf78d3f3c892aa868fbe74e2160b4f0930d7b04466e4714a8079cd131a72451"
+    },
+    {
+      "file": "1440/lead-modal-validation.png",
+      "route": "/",
+      "state": "lead-modal-validation",
+      "viewport": "1440x1000",
+      "bytes": 1405874,
+      "sha256": "f3beb00430e4b8ca8779234ec4661ce00cb8342e0f705dd75958e24ef7e952b0"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Atlas visual baseline evidence
 
-Статус: `SOURCE FIXED / INVENTORY COMPLETE / CAPTURE PENDING`.
+Статус: `SOURCE FIXED / INVENTORY COMPLETE / CAPTURE COMPLETE`.
 
 ## Donor identity
 
@@ -48,9 +48,16 @@ Donor фиксируется как visual/UX reference и источник pres
 4. Снимать все обязательные сценарии во всех четырёх viewport.
 5. Хранить screenshot manifest с route, viewport, donor SHA и временем capture.
 
-## Граница текущей задачи
+## Capture evidence
 
-Источник, identity, data mode, routes и viewport зафиксированы. Новый комплект screenshots выполняется следующей задачей EPIC 1.
+- Manifest: [`atlas-visual-baseline/manifest.json`](./atlas-visual-baseline/manifest.json).
+- Результат: `24 / 24` full-page PNG, шесть сценариев во всех четырёх viewport.
+- Donor: SourceCraft `integrator-p/atlas-realty-starter`, exact commit `4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe`.
+- Capture: `2026-09-15T16:26:55.496Z`, self-managed fixture server, `ru-RU`, light theme, reduced motion.
+- Integrity: каждый файл имеет размер и SHA-256 в manifest; пустых файлов нет, все 24 хэша уникальны.
+- Визуально проверены representative mobile home, tablet property, desktop lead validation modal и wide commercial service; layout и обязательные состояния читаемы.
+
+Воспроизводимый capture выполняет `scripts/capture-atlas-visual-proof.mjs`. Путь donor передаётся через `ATLAS_DONOR_ROOT`, поэтому workstation-specific absolute path в repository не фиксируется.
 
 ## Классификация extraction
 
