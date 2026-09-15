@@ -196,8 +196,10 @@ latency/capacity trigger.
 
 ## Lead presentation context
 
-Эта таблица подтверждает источник полей DTO. Полное UI → persistence proof
-выполняется следующей задачей `TASK-02-03`.
+`LeadConsentField` из `@ams/realtbase-ui` рендерит checkbox, ссылку на
+версионированный текст и presentation metadata из `LeadFormContext`. Fixture
+страница использует `baseContractFixture.lead`; отправка и Payload намеренно не
+подключены до соответствующих эпиков.
 
 | Field | Source | Computation | Query cost | Base schema | Decision |
 |---|---|---|---|---|---|
@@ -210,6 +212,26 @@ latency/capacity trigger.
 | `LeadFormContext.consentVersion` | versioned published consent config | none | `O(1)` | `leads.consentVersion` approved | VERIFIED SOURCE |
 | `LeadFormContext.consentHref` | canonical legal route config | URL validation | `O(1)` | versioned text source; proof in TASK-02-03 | VERIFIED SOURCE |
 | `LeadFormContext.consentRequired` | form policy | boolean; must be true for PII forms | `O(1)` | `leads.consentAccepted` mapping | VERIFIED SOURCE |
+
+### UI → lead persistence mapping
+
+| UI / trusted context | Server validation | Persisted lead field | Rule |
+|---|---|---|---|
+| checked `consentAccepted` | value must equal `true` when `consentRequired=true` | `leads.consentAccepted=true` | unchecked PII form is rejected before transaction |
+| `consentVersion` | must equal the current published server-side consent version | `leads.consentVersion` | client value is never trusted as authority |
+| successful validated intake | server timestamp inside lead transaction | `leads.consentedAt` | browser timestamp is not accepted |
+| `formKind` | enum allowlist | `leads.formKind` | stored with every lead |
+| `sourcePage` | canonical internal pathname allowlist | `leads.sourcePage` | external/arbitrary URL rejected |
+| `property.id` | existing public property lookup; optional outside property forms | `leads.property` relation | `slug/title` are display context, not duplicate persisted truth |
+| `consentHref` | must resolve to the published legal route for `consentVersion` | versioned consent content source, not lead row | legal text is not duplicated per lead |
+
+`LeadConsentField` exposes context as presentation metadata for inspection, but
+future intake receives authoritative context from trusted server configuration
+and validates any submitted form value. This prevents a modified browser request
+from choosing an obsolete consent version or arbitrary source page.
+
+Юридический текст и production `consentVersion` остаются owner/legal decision в
+`PROJECT.md`. Это не блокирует доказанную форму UI и persistence mapping.
 
 ## Journal namespace
 
