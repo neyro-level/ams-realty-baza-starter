@@ -4,7 +4,11 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./primitives": "./src/primitives.ts",
+		"./views": "./src/views.ts",
+		"./components/*": "./src/components/*.tsx",
+		"./lib/*": "./src/lib/*.ts"
 	},
 	"dependencies": {
 		"@ams/realtbase-contracts": "workspace:*",
