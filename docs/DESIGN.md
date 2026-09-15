@@ -1,6 +1,6 @@
 # Design
 
-Статус: `Foundation / visual baseline pending`.
+Статус: `Foundation / visual baseline source fixed`.
 
 ## Характер
 
@@ -27,6 +27,8 @@ UI использует storage-neutral `MediaDTO`. Для изображени�
 
 ## Visual baseline
 
-`TODO: EPIC 1.` Нужны зафиксированный Atlas release/SHA, источник local/live, deterministic data и screenshots для `/`, каталога, карточки объекта, коммерческой страницы, контактов и lead UI на mobile/tablet/desktop/wide desktop.
+Выбран local Atlas donor: SourceCraft `integrator-p/atlas-realty-starter`, exact `main@4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe`, deterministic `SITE_ENGINE=fixture`. Канонические viewport: `390×844`, `768×1024`, `1280×900`, `1440×1000`.
+
+Identity, обязательные сценарии и reproduction contract: `research/ATLAS_BASELINE.md`. Фактический capture остаётся задачей EPIC 1.
 
 Одобренных визуальных исключений пока нет.

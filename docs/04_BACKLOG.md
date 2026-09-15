@@ -6,12 +6,11 @@
 
 ## NOW
 
-- EPIC 0 — Repository & Governance Foundation.
-- Pilot orchestration: EPIC 0–2, concurrency `1`.
+- EPIC 1 — Atlas Inventory + Visual Baseline.
+- Pilot orchestration: EPIC 0–2, concurrency `1`; EPIC 0 закрыт независимой проверкой.
 
 ## NEXT
 
-- EPIC 1 — Atlas Inventory + Visual Baseline.
 - EPIC 2 — Contracts Draft + Feasibility Map.
 
 ## LATER
@@ -20,5 +19,5 @@
 
 ## Gates
 
-- Merge: отдельная команда владельца + exact-head SourceCraft Gate.
+- Merge: в активной оркестрации разрешён командами `продолжай` / `продолжай дальше`; вне неё нужна отдельная команда владельца. Exact-head SourceCraft Gate обязателен.
 - Production: отдельная команда владельца.
