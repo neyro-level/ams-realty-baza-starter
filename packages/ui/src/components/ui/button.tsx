@@ -1,0 +1,57 @@
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
+import { cn } from "../../lib/utils";
+
+const buttonVariants = cva(
+	"inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius)] text-body font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+	{
+		variants: {
+			variant: {
+				default:
+					"bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover)]",
+				destructive: "bg-[var(--destructive)] text-white hover:opacity-90",
+				outline:
+					"border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:border-[var(--primary)] hover:text-[var(--primary)]",
+				secondary:
+					"bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--muted)]",
+				ghost:
+					"text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
+				link: "text-[var(--primary)] underline-offset-4 hover:underline",
+				plain: "bg-transparent text-inherit",
+			},
+			size: {
+				sm: "h-9 px-3",
+				default: "h-11 px-5",
+				lg: "h-12 px-6",
+				icon: "size-11",
+			},
+		},
+		defaultVariants: { variant: "default", size: "default" },
+	},
+);
+
+export const Button = React.forwardRef<
+	HTMLButtonElement,
+	React.ComponentProps<"button"> &
+		VariantProps<typeof buttonVariants> & { asChild?: boolean }
+>(function Button(
+	{ className, variant, size, asChild = false, ...props },
+	ref,
+) {
+	const Comp = asChild ? Slot : "button";
+	return (
+		<Comp
+			ref={ref}
+			data-slot="button"
+			className={
+				variant === "plain"
+					? className
+					: cn(buttonVariants({ variant, size, className }))
+			}
+			{...props}
+		/>
+	);
+});
+
+export { buttonVariants };
