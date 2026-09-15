@@ -10,9 +10,19 @@ import path from "node:path";
 
 const root = process.cwd();
 const contractsRoot = path.join(root, "packages", "contracts");
-const sourceRoot = path.join(contractsRoot, "src");
-const lockPath = path.join(contractsRoot, "contracts.lock.json");
 const command = process.argv[2];
+const scope = process.argv
+	.find((arg) => arg.startsWith("--scope="))
+	?.split("=")[1] ?? "base";
+if (!['base', 'journal'].includes(scope)) fail("scope must be base or journal");
+const sourceRoot =
+	scope === "journal"
+		? path.join(contractsRoot, "src", "journal")
+		: path.join(contractsRoot, "src");
+const lockPath = path.join(
+	contractsRoot,
+	scope === "journal" ? "journal.lock.json" : "contracts.lock.json",
+);
 
 function fail(message) {
 	console.error(`contracts: ${message}`);
@@ -36,6 +46,7 @@ function collect(directory) {
 	return readdirSync(directory, { withFileTypes: true })
 		.flatMap((entry) => {
 			const absolute = path.join(directory, entry.name);
+			if (scope === "base" && entry.isDirectory() && absolute === path.join(contractsRoot, "src", "journal")) return [];
 			return entry.isDirectory() ? collect(absolute) : [absolute];
 		})
 		.filter(
@@ -86,7 +97,7 @@ if (command === "test-line-endings") {
 	console.log("contracts: line-ending normalization PASS");
 } else if (command === "check") {
 	if (!same) fail("lock drift detected; run pnpm contracts:diff");
-	console.log(`contracts: PASS (${current.state} ${current.contractVersion})`);
+	console.log(`contracts: PASS (${scope} ${current.state} ${current.contractVersion})`);
 } else if (command === "diff") {
 	if (same) console.log("contracts: no changes");
 	else {
@@ -110,9 +121,7 @@ if (command === "test-line-endings") {
 		expected.contractVersion = nextVersion;
 	}
 	writeFileSync(lockPath, `${JSON.stringify(expected, null, "\t")}\n`);
-	console.log(
-		`contracts: lock updated (${expected.state} ${expected.contractVersion})`,
-	);
+	console.log(`contracts: lock updated (${scope} ${expected.state} ${expected.contractVersion})`);
 } else if (command === "freeze") {
 	const version = process.argv
 		.find((arg) => arg.startsWith("--version="))
@@ -130,7 +139,7 @@ if (command === "test-line-endings") {
 	}
 	const frozen = buildManifest({ contractVersion: version, state: "frozen" });
 	writeFileSync(lockPath, `${JSON.stringify(frozen, null, "\t")}\n`);
-	console.log(`contracts: frozen at ${version}`);
+	console.log(`contracts: ${scope} frozen at ${version}`);
 } else {
 	fail("use check, diff, lock, freeze or test-line-endings");
 }

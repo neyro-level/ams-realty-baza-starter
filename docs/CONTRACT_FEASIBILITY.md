@@ -1,8 +1,8 @@
 # Contract Feasibility
 
-Статус: `Draft / contracts not created`.
+Статус: `Draft contracts created / feasibility not verified`.
 
-Этот документ отвечает только за реализуемость presentation contracts. Сами DTO и версии contracts принадлежат будущему `packages/contracts`.
+Этот документ отвечает только за реализуемость presentation contracts. Draft DTO и их версии принадлежат `packages/contracts`; Base и Journal используют отдельные lock/freeze lifecycle.
 
 ## Gate до freeze v1
 
@@ -25,4 +25,4 @@ Contract нельзя замораживать, если у поля нет ис
 
 ## Следующий шаг
 
-EPIC 2 создаёт DTO draft и заполняет таблицу по каждому полю. До этого статус feasibility — `NOT VERIFIED`, contract freeze запрещён.
+Следующая задача EPIC 2 заполняет таблицу по каждому полю. До статуса `VERIFIED` Base и Journal contract freeze запрещён.

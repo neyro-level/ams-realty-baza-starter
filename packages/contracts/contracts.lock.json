@@ -5,9 +5,41 @@
 	"algorithm": "sha256-normalized-lf",
 	"files": [
 		{
+			"path": "packages/contracts/src/common.ts",
+			"sha256": "7e6a23880fac92d8ca41a149c0a723314d20fee6ec3a6f7060ee946dd1ffd51e"
+		},
+		{
+			"path": "packages/contracts/src/filters.ts",
+			"sha256": "b6be9dcd68484671944bdd5960cc05e318b61ea31cdf0258d61646daedf1ec41"
+		},
+		{
+			"path": "packages/contracts/src/fixtures.ts",
+			"sha256": "e6eac7168f7b0020150d3547e80580de667cb472d49590e81d8b61c778e666c3"
+		},
+		{
 			"path": "packages/contracts/src/index.ts",
-			"sha256": "eab1d2fe77886eca224e92c0b117a188f9890a21151f0404dc74aab9cb4aede1"
+			"sha256": "f216ca17fa018bae84cf9c8dd1379d1593cc30e73ab1a64bac9eab85d85b62c4"
+		},
+		{
+			"path": "packages/contracts/src/lead.ts",
+			"sha256": "b1a3636d6286de1438f9cb610a828d9df6e2dd09e9eb066d598c4d6b9aa6c583"
+		},
+		{
+			"path": "packages/contracts/src/media.ts",
+			"sha256": "abb262d6795bf4c1a3cba2f9b3f05fbc2d454dd2cbd77c08ac3419c1500a72ad"
+		},
+		{
+			"path": "packages/contracts/src/property.ts",
+			"sha256": "0609104c318f986680191b2e2ff1b8286b9ce8f8516997e79556cef55ee8d0e3"
+		},
+		{
+			"path": "packages/contracts/src/seo.ts",
+			"sha256": "1f28af6e5477b8b3ad16e83de6654d61dcf269ddf8d7137563a7e35ef99101a2"
+		},
+		{
+			"path": "packages/contracts/src/shell.ts",
+			"sha256": "5bf26382c69e7cf88b4ebfc994357b71bb7569a4b1fffb7d8bfa88375c1e6a54"
 		}
 	],
-	"aggregateSha256": "91663cf7ef61386658c49d5f62600a4c05fa82580753c794debc48bad59a78aa"
+	"aggregateSha256": "63dab8c76969746e8f24824d9cc72dc656f1b9e3c67d8336408f398c299bd144"
 }
