@@ -29,10 +29,13 @@
 		"verify:schema": "node scripts/verify-schema.mjs",
 		"verify:public-gateway": "node scripts/verify-public-gateway.mjs",
 		"verify:jobs-config": "node --experimental-strip-types scripts/verify-jobs-config.mjs",
+		"verify:feed-parser": "node --experimental-strip-types scripts/verify-feed-parser.mjs",
+		"verify:feed-ingest": "node --experimental-strip-types scripts/verify-feed-ingest.mjs",
+		"verify:feed-lifecycle": "node --experimental-strip-types scripts/verify-feed-lifecycle.mjs",
 		"quality:architecture": "dependency-cruiser src packages scripts --config .dependency-cruiser.mjs --output-type err",
 		"quality:design-tokens": "node scripts/quality/design-tokens.mjs",
 		"quality:guards": "node scripts/quality/architecture-guard.mjs && node scripts/quality/design-tokens.mjs && node scripts/quality/sourcecraft-policy.mjs",
-		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm verify:jobs-config && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
+		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm verify:jobs-config && pnpm verify:feed-parser && pnpm verify:feed-ingest && pnpm verify:feed-lifecycle && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
 		"verify:foundation": "pnpm verify"
 	},
 	"dependencies": {
