@@ -5,8 +5,18 @@ export const LeadDeliveries: CollectionConfig = {
 	slug: "lead-deliveries",
 	versions: false,
 	admin: {
+		group: "Operations",
 		useAsTitle: "idempotencyKey",
-		defaultColumns: ["lead", "channelId", "status", "attempts", "nextAttemptAt"],
+		defaultColumns: [
+			"lead",
+			"channelId",
+			"status",
+			"attempts",
+			"nextAttemptAt",
+			"lastErrorKind",
+		],
+		description:
+			"Owner operations: delivery state, manual retry/recovery and safe diagnostics. CRM channel rows may exist, but CRM adapter execution is deferred until owner enables it.",
 	},
 	access: {
 		create: adminsAndOwners,
@@ -28,7 +38,8 @@ export const LeadDeliveries: CollectionConfig = {
 			required: true,
 			index: true,
 			admin: {
-				description: "Immutable logical channel ID. Never reuse for another destination.",
+				description:
+					"Immutable logical channel ID. Never reuse for another destination.",
 			},
 		},
 		{
@@ -70,21 +81,37 @@ export const LeadDeliveries: CollectionConfig = {
 			name: "nextAttemptAt",
 			type: "date",
 			index: true,
+			admin: {
+				description:
+					"Manual retry: set status to pending, clear active claim/job fields if needed, and set the next safe retry time.",
+			},
 		},
 		{
 			name: "jobId",
 			type: "text",
 			index: true,
+			admin: {
+				description:
+					"Payload job identity. Clear only during explicit recovery of an orphaned due delivery.",
+			},
 		},
 		{
 			name: "claimedAt",
 			type: "date",
 			index: true,
+			admin: {
+				description:
+					"Active claim timestamp. Clear only when recovering a stale sending delivery.",
+			},
 		},
 		{
 			name: "heartbeatAt",
 			type: "date",
 			index: true,
+			admin: {
+				description:
+					"Worker heartbeat. Stale heartbeat is used by recovery diagnostics.",
+			},
 		},
 		{
 			name: "deliveredAt",
@@ -114,7 +141,8 @@ export const LeadDeliveries: CollectionConfig = {
 			name: "lastErrorRedacted",
 			type: "textarea",
 			admin: {
-				description: "Redacted diagnostic only. No raw payload, PII, response body, token, or secret.",
+				description:
+					"Redacted diagnostic only. No raw payload, PII, response body, token, or secret.",
 			},
 		},
 		{
@@ -130,7 +158,8 @@ export const LeadDeliveries: CollectionConfig = {
 			name: "attemptLog",
 			type: "array",
 			admin: {
-				description: "Compact safe diagnostics only; raw payload/response, PII and secrets are forbidden.",
+				description:
+					"Compact safe diagnostics only; raw payload/response, PII and secrets are forbidden.",
 			},
 			fields: [
 				{

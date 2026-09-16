@@ -26,16 +26,26 @@ Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, являет�
 
 ## Import operations
 
-- manual import, suspicious approval, stale/orphan recovery и retry описываются после реализации jobs/import foundation;
-- оборванный, плохой или suspicious feed не деактивирует каталог;
-- изменение source identity или parser mapping проходит staging;
-- новый image host требует config review, rebuild и release.
+- Manual import: owner/admin включает `feed-sources.enabled`, проверяет `nextDueAt`, `feedUrlRef`, `safetyThresholdPercent`, `maxDeactivationsPerRun` и запускает dispatch через jobs owner. `feedUrlRef` хранит только ссылку на secret/config, не credential URL.
+- Suspicious approval: если import run получил `status=suspicious`, каталог не деактивируется автоматически. Оператор проверяет `import-runs` и `import-issues`, затем заполняет `feed-sources.deactivationApproval` только metadata: `runId`, `approvedBy`, `approvedAt`, `expiresAt`. Raw XML, PII, feed credentials и токены в approval не записываются.
+- Stale/orphan recovery: `jobsJanitor` переводит stale `running` или orphan `queued` import runs в `interrupted` с redacted diagnostic. После устранения причины owner/admin создаёт новый run; старый run не переписывается задним числом.
+- Retry: повторный import выполняется новым run/job для того же `feedSource`. Bad/truncated feed и suspicious run не деактивируют каталог.
+- Изменение source identity или parser mapping проходит staging.
+- Новый image host требует config review, rebuild и release.
 
 ## Lead operations
 
-- retry/recovery, missing adapter, channel outage и CRM token recovery добавляются до подключения соответствующего канала;
-- внешняя доставка не меняет успешный ответ после сохранения лида в собственной БД;
+- Delivery retry: owner/admin работает с `lead-deliveries`; safe manual retry — `status=pending`, `nextAttemptAt` в безопасное время, stale claim/job fields очищаются только при доказанном orphan/stale состоянии. Raw payload/response, PII и secrets не пишутся в diagnostics.
+- Delivery recovery: `recoverLeadDeliveries` возвращает stale `sending` в `pending` и ставит redacted diagnostic; due pending delivery без `jobId` ставится в queue `lead-deliveries`.
+- Missing adapter/channel outage: delivery остаётся в delivery state machine как retryable/permanent; успешный HTTP intake лида не откатывается после сохранения лида и delivery rows в собственной БД.
+- CRM token recovery не выполняется до подключения CRM adapter. CRM adapter отложен владельцем; текущие recovery flows покрывают messenger/custom webhook и общий delivery state.
 - PII и секреты не пишутся в обычные logs.
+
+## Catalog lifecycle operations
+
+- `catalogLifecycle` применяет retention к archived properties: после `ARCHIVE_RETENTION_DAYS` очищает публичный content (`description`, `images`) и ставит `contentPurgedAt`.
+- Public gateway различает active 200, retained archived 200/noindex, purged 410/noindex и redirect только при explicit redirect path.
+- Lifecycle recovery: если content purge выполнен ошибочно, восстановление допускается только из backup/source-of-truth и отдельной owner-approved recovery task; автоматический similarity redirect запрещён.
 
 ## Диагностика и инцидент
 
@@ -43,4 +53,6 @@ Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, являет�
 
 ## Payload Jobs, S3, CSP и raw REST
 
-Конкретные команды диагностики добавляются вместе с реализацией. До этого любые процедуры имеют статус `TODO`, а не считаются рабочим runbook.
+- Jobs owner: ровно один runtime с `JOBS_AUTORUN=true`; при handover новый runtime сначала стартует с `false`.
+- Health endpoint: `GET /api/internal/healthz` требует `x-ams-health-secret`, возвращает app/database/storage/jobs components и redacted alerts.
+- Raw REST boundary: каждый app API route включается в `config/raw-rest-boundary.json`; anonymous business REST остаётся denied by default.

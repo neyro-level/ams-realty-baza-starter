@@ -4,8 +4,11 @@ import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
 export const FeedSources: CollectionConfig = {
 	slug: "feed-sources",
 	admin: {
+		group: "Operations",
 		useAsTitle: "title",
 		defaultColumns: ["code", "title", "market", "enabled", "nextDueAt"],
+		description:
+			"Owner operations: feed health, schedule, deactivation safety and suspicious-run approval. Store only secret references, never credential URLs.",
 	},
 	hooks: {
 		beforeDelete: [
@@ -52,7 +55,8 @@ export const FeedSources: CollectionConfig = {
 			required: true,
 			unique: true,
 			admin: {
-				description: "Stable source identity used by import jobs and diagnostics.",
+				description:
+					"Stable source identity used by import jobs and diagnostics.",
 			},
 		},
 		{
@@ -112,14 +116,23 @@ export const FeedSources: CollectionConfig = {
 		{
 			name: "lastAttemptAt",
 			type: "date",
+			admin: {
+				description: "Last dispatch attempt time for feed health diagnostics.",
+			},
 		},
 		{
 			name: "lastSuccessfulRunAt",
 			type: "date",
+			admin: {
+				description: "Last successful import completion time.",
+			},
 		},
 		{
 			name: "lastFullRunAt",
 			type: "date",
+			admin: {
+				description: "Last import run that was not skipped as unchanged.",
+			},
 		},
 		{
 			name: "safetyThresholdPercent",
@@ -128,6 +141,10 @@ export const FeedSources: CollectionConfig = {
 			defaultValue: 30,
 			min: 0,
 			max: 100,
+			admin: {
+				description:
+					"Suspicious-run guard: deactivation above this percent requires explicit owner/admin approval.",
+			},
 		},
 		{
 			name: "maxDeactivationsPerRun",
@@ -135,6 +152,10 @@ export const FeedSources: CollectionConfig = {
 			required: true,
 			defaultValue: 50,
 			min: 0,
+			admin: {
+				description:
+					"Hard safety cap for automatic deactivation during one import run.",
+			},
 		},
 		{
 			name: "lastOfferCount",
@@ -156,6 +177,10 @@ export const FeedSources: CollectionConfig = {
 		{
 			name: "deactivationApproval",
 			type: "group",
+			admin: {
+				description:
+					"Audit-safe approval window for a suspicious import run. Only store run/user/time metadata.",
+			},
 			fields: [
 				{
 					name: "runId",

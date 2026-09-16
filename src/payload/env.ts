@@ -5,8 +5,16 @@ const booleanString = z
 	.optional()
 	.transform((value) => value === "true");
 
-const optionalUrl = z.string().url().optional().or(z.literal("").transform(() => undefined));
-const optionalString = z.string().min(1).optional().or(z.literal("").transform(() => undefined));
+const optionalUrl = z
+	.string()
+	.url()
+	.optional()
+	.or(z.literal("").transform(() => undefined));
+const optionalString = z
+	.string()
+	.min(1)
+	.optional()
+	.or(z.literal("").transform(() => undefined));
 const optionalInteger = z.coerce.number().int().positive().optional();
 
 const runtimeEnvSchema = z.object({
@@ -18,6 +26,7 @@ const runtimeEnvSchema = z.object({
 
 	NEXT_PUBLIC_SERVER_URL: optionalUrl,
 	INTERNAL_REVALIDATE_BASE_URL: optionalUrl,
+	INTERNAL_HEALTH_SECRET: optionalString,
 
 	DATABASE_URI: optionalString,
 	DATABASE_POOL_MAX: optionalInteger.default(10),

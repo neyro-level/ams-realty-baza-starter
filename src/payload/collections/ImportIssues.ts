@@ -4,8 +4,11 @@ import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
 export const ImportIssues: CollectionConfig = {
 	slug: "import-issues",
 	admin: {
+		group: "Operations",
 		useAsTitle: "code",
 		defaultColumns: ["severity", "code", "property", "importRun", "createdAt"],
+		description:
+			"Owner operations: import warnings/errors with redacted messages and source links.",
 	},
 	access: {
 		create: adminsAndOwners,
@@ -59,6 +62,10 @@ export const ImportIssues: CollectionConfig = {
 			name: "messageRedacted",
 			type: "textarea",
 			required: true,
+			admin: {
+				description:
+					"Safe issue text only. No raw XML fragment, PII, credentials, tokens or private feed URL.",
+			},
 		},
 		{
 			name: "field",

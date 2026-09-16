@@ -4,8 +4,18 @@ import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
 export const ImportRuns: CollectionConfig = {
 	slug: "import-runs",
 	admin: {
+		group: "Operations",
 		useAsTitle: "id",
-		defaultColumns: ["feedSource", "status", "queuedAt", "heartbeatAt"],
+		defaultColumns: [
+			"feedSource",
+			"status",
+			"queuedAt",
+			"heartbeatAt",
+			"warningCount",
+			"errorCount",
+		],
+		description:
+			"Owner operations: import history, suspicious/interrupted status, heartbeat, safe counters and redacted diagnostics.",
 	},
 	access: {
 		create: adminsAndOwners,
@@ -102,6 +112,10 @@ export const ImportRuns: CollectionConfig = {
 		{
 			name: "lastErrorRedacted",
 			type: "textarea",
+			admin: {
+				description:
+					"Redacted operational diagnostic only. Do not store feed payload, raw response, PII, credentials or tokens.",
+			},
 		},
 	],
 };

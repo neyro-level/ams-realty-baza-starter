@@ -15,8 +15,11 @@ export const Leads: CollectionConfig = {
 	slug: "leads",
 	versions: false,
 	admin: {
+		group: "Operations",
 		useAsTitle: "name",
 		defaultColumns: ["name", "phoneE164", "status", "formKind", "createdAt"],
+		description:
+			"Owner operations: agency workflow status and PII retention. External delivery state lives in Lead Deliveries.",
 	},
 	access: {
 		create: adminsAndOwners,
@@ -47,7 +50,8 @@ export const Leads: CollectionConfig = {
 			index: true,
 			access: piiFieldAccess,
 			admin: {
-				description: "Strictly normalized E.164 phone. Invalid phone must not create a lead.",
+				description:
+					"Strictly normalized E.164 phone. Invalid phone must not create a lead.",
 			},
 		},
 		{
@@ -103,7 +107,8 @@ export const Leads: CollectionConfig = {
 			name: "consent",
 			type: "group",
 			admin: {
-				description: "Immutable intake evidence for personal data processing consent.",
+				description:
+					"Immutable intake evidence for personal data processing consent.",
 			},
 			fields: [
 				{
@@ -173,7 +178,8 @@ export const Leads: CollectionConfig = {
 			type: "date",
 			index: true,
 			admin: {
-				description: "Set when leadRetentionCleanup deleted/anonymized PII for this lead.",
+				description:
+					"Set when leadRetentionCleanup deleted/anonymized PII for this lead.",
 			},
 		},
 		{
