@@ -282,6 +282,8 @@ export interface Property {
   createdAt: string;
 }
 /**
+ * Owner operations: feed health, schedule, deactivation safety and suspicious-run approval. Store only secret references, never credential URLs.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "feed-sources".
  */
@@ -304,15 +306,33 @@ export interface FeedSource {
   enabled?: boolean | null;
   refreshIntervalMinutes: number;
   nextDueAt?: string | null;
+  /**
+   * Last dispatch attempt time for feed health diagnostics.
+   */
   lastAttemptAt?: string | null;
+  /**
+   * Last successful import completion time.
+   */
   lastSuccessfulRunAt?: string | null;
+  /**
+   * Last import run that was not skipped as unchanged.
+   */
   lastFullRunAt?: string | null;
+  /**
+   * Suspicious-run guard: deactivation above this percent requires explicit owner/admin approval.
+   */
   safetyThresholdPercent: number;
+  /**
+   * Hard safety cap for automatic deactivation during one import run.
+   */
   maxDeactivationsPerRun: number;
   lastOfferCount?: number | null;
   lastEtag?: string | null;
   lastModified?: string | null;
   lastFeedHash?: string | null;
+  /**
+   * Audit-safe approval window for a suspicious import run. Only store run/user/time metadata.
+   */
   deactivationApproval?: {
     runId?: (number | null) | ImportRun;
     approvedBy?: (number | null) | User;
@@ -324,6 +344,8 @@ export interface FeedSource {
   createdAt: string;
 }
 /**
+ * Owner operations: import history, suspicious/interrupted status, heartbeat, safe counters and redacted diagnostics.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "import-runs".
  */
@@ -344,6 +366,9 @@ export interface ImportRun {
   warningCount?: number | null;
   errorCount?: number | null;
   feedHash?: string | null;
+  /**
+   * Redacted operational diagnostic only. Do not store feed payload, raw response, PII, credentials or tokens.
+   */
   lastErrorRedacted?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -368,6 +393,8 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * Owner operations: import warnings/errors with redacted messages and source links.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "import-issues".
  */
@@ -379,12 +406,17 @@ export interface ImportIssue {
   externalId?: string | null;
   severity: 'info' | 'warning' | 'error';
   code: string;
+  /**
+   * Safe issue text only. No raw XML fragment, PII, credentials, tokens or private feed URL.
+   */
   messageRedacted: string;
   field?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Owner operations: agency workflow status and PII retention. External delivery state lives in Lead Deliveries.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "leads".
  */
@@ -442,6 +474,8 @@ export interface Lead {
   createdAt: string;
 }
 /**
+ * Owner operations: delivery state, manual retry/recovery and safe diagnostics. CRM channel rows may exist, but CRM adapter execution is deferred until owner enables it.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lead-deliveries".
  */
@@ -458,9 +492,21 @@ export interface LeadDelivery {
    */
   status: 'pending' | 'sending' | 'delivered' | 'failed' | 'abandoned';
   attempts: number;
+  /**
+   * Manual retry: set status to pending, clear active claim/job fields if needed, and set the next safe retry time.
+   */
   nextAttemptAt?: string | null;
+  /**
+   * Payload job identity. Clear only during explicit recovery of an orphaned due delivery.
+   */
   jobId?: string | null;
+  /**
+   * Active claim timestamp. Clear only when recovering a stale sending delivery.
+   */
   claimedAt?: string | null;
+  /**
+   * Worker heartbeat. Stale heartbeat is used by recovery diagnostics.
+   */
   heartbeatAt?: string | null;
   deliveredAt?: string | null;
   idempotencyKey: string;
