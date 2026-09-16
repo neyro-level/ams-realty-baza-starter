@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { publicGatewayPolicy } from "./policy";
 
 export const publicGatewayRequestSchema = z.object({
 	limit: z.number().int().min(1).max(48).default(24),
@@ -13,9 +14,10 @@ export function parsePublicGatewayQuery(input: PublicGatewayRequest): PublicGate
 	return publicGatewayRequestSchema.parse(input);
 }
 
-export const publicGatewayPolicy = {
-	overrideAccess: false,
-	depth: 0,
-	maxLimit: 48,
-	output: "dto",
-} as const;
+export {
+	catalogQuerySchema,
+	findPublicCatalogProperties,
+	publicPropertyPublicationWhere,
+} from "./catalog";
+export type { CatalogQuery, CatalogQueryInput, PublicCatalogResult } from "./catalog";
+export { publicGatewayPolicy } from "./policy";

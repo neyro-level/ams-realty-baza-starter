@@ -1,4 +1,4 @@
-import type { CollectionConfig, FieldAccess } from "payload";
+import type { CollectionConfig, FieldAccess, Where } from "payload";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) => hasRole(req.user, ["owner", "admin"]);
@@ -10,6 +10,14 @@ const privateFieldAccess = {
 	update: fieldAdminsAndOwners,
 };
 
+const publicPropertyReadWhere: Where = {
+	and: [
+		{ status: { equals: "active" } },
+		{ publishedAt: { exists: true } },
+		{ contentPurgedAt: { exists: false } },
+	],
+};
+
 export const Properties: CollectionConfig = {
 	slug: "properties",
 	versions: false,
@@ -19,7 +27,13 @@ export const Properties: CollectionConfig = {
 	},
 	access: {
 		create: adminsAndOwners,
-		read: adminsAndOwners,
+		read: ({ req }) => {
+			if (hasRole(req.user, ["owner", "admin"])) {
+				return true;
+			}
+
+			return publicPropertyReadWhere;
+		},
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},
