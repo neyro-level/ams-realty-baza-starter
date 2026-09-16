@@ -18,11 +18,15 @@
 		},
 		{
 			"path": "packages/contracts/src/index.ts",
-			"sha256": "f216ca17fa018bae84cf9c8dd1379d1593cc30e73ab1a64bac9eab85d85b62c4"
+			"sha256": "46f2d60ff8ee8878e91cda40855db7e473373ed12b6a225a854e1aaf8d957218"
 		},
 		{
 			"path": "packages/contracts/src/lead.ts",
 			"sha256": "b1a3636d6286de1438f9cb610a828d9df6e2dd09e9eb066d598c4d6b9aa6c583"
+		},
+		{
+			"path": "packages/contracts/src/marketing.ts",
+			"sha256": "39459c4f3fbd523349f130eaf32442f2cfd07fa32db51acd4da921918a0b0460"
 		},
 		{
 			"path": "packages/contracts/src/media.ts",
@@ -41,5 +45,5 @@
 			"sha256": "5bf26382c69e7cf88b4ebfc994357b71bb7569a4b1fffb7d8bfa88375c1e6a54"
 		}
 	],
-	"aggregateSha256": "63dab8c76969746e8f24824d9cc72dc656f1b9e3c67d8336408f398c299bd144"
+	"aggregateSha256": "0a49d9dcd7fbe9e288859195d88b7b19799183ca3d5f61d5732aad4719a7ec8e"
 }

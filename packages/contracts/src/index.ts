@@ -26,3 +26,4 @@ export type {
 } from "./shell";
 export type { BreadcrumbDTO, BreadcrumbItemDTO, PageSEOContract } from "./seo";
 export type { LeadFormContext, LeadFormKind, LeadPropertyContextDTO } from "./lead";
+export type { HomePageDTO, MarketingPageDTO, MarketingSectionDTO } from "./marketing";

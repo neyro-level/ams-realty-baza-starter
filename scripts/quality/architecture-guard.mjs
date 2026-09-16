@@ -55,6 +55,35 @@ for (const file of filesUnder("src")) {
 	}
 }
 
+const fixtureRuntimeFiles = [
+	...filesUnder("src/fixture"),
+	...filesUnder("src/components/fixture"),
+	...filesUnder("src/app/(site)"),
+];
+for (const file of fixtureRuntimeFiles) {
+	if (persistenceImport.test(readFileSync(file, "utf8")))
+		report(file, "fixture website imports persistence");
+}
+
+const requiredFixtureRoutes = [
+	"src/app/(site)/page.tsx",
+	"src/app/(site)/nedvizhimost/page.tsx",
+	"src/app/(site)/obekty/[slug]/page.tsx",
+	"src/app/(site)/uslugi/page.tsx",
+	"src/app/(site)/o-kompanii/page.tsx",
+	"src/app/(site)/ipoteka/page.tsx",
+	"src/app/(site)/prodat/page.tsx",
+	"src/app/(site)/sdat/page.tsx",
+	"src/app/(site)/kontakty/page.tsx",
+	"src/app/(site)/politika-konfidencialnosti/page.tsx",
+	"src/app/(site)/soglasie-na-obrabotku-personalnyh-dannyh/page.tsx",
+	"src/app/not-found.tsx",
+];
+for (const route of requiredFixtureRoutes) {
+	if (!existsSync(path.join(root, route)))
+		violations.push(`${route}: required fixture route is missing`);
+}
+
 const boundary = JSON.parse(
 	readFileSync(path.join(root, "config", "raw-rest-boundary.json"), "utf8"),
 );
@@ -109,8 +138,7 @@ const uiTsConfig = JSON.parse(
 	readFileSync(path.join(root, "packages", "ui", "tsconfig.json"), "utf8"),
 );
 if (
-	uiTsConfig.compilerOptions?.paths?.["@ams/realtbase-ui/*"]?.[0] !==
-	"./src/*"
+	uiTsConfig.compilerOptions?.paths?.["@ams/realtbase-ui/*"]?.[0] !== "./src/*"
 ) {
 	violations.push(
 		"packages/ui/tsconfig.json: @ams/realtbase-ui alias must resolve inside packages/ui/src",
