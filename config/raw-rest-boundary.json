@@ -1,5 +1,9 @@
 {
 	"schemaVersion": 1,
-	"allowedRouteFiles": [],
+	"allowedRouteFiles": [
+		"src/app/(payload)/api/[[...slug]]/route.ts",
+		"src/app/(payload)/api/graphql/route.ts",
+		"src/app/(payload)/api/graphql-playground/route.ts"
+	],
 	"note": "Every app API route must be explicitly approved here. Raw anonymous business REST remains denied by default."
 }
