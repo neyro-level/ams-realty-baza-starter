@@ -1,11 +1,5 @@
 import type { JobsConfig } from "payload";
-
-export const payloadJobQueues = {
-	system: "system",
-	imports: "imports",
-	maintenance: "maintenance",
-	leadDeliveries: "lead-deliveries",
-} as const;
+import { payloadJobQueues } from "./registry.ts";
 
 export const payloadJobsAutoRun = [
 	{
