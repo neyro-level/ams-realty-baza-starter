@@ -68,7 +68,13 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    pages: Page;
+    properties: Property;
+    'feed-sources': FeedSource;
+    'import-runs': ImportRun;
+    'import-issues': ImportIssue;
     media: Media;
+    redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -77,7 +83,13 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    properties: PropertiesSelect<false> | PropertiesSelect<true>;
+    'feed-sources': FeedSourcesSelect<false> | FeedSourcesSelect<true>;
+    'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
+    'import-issues': ImportIssuesSelect<false> | ImportIssuesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -145,6 +157,177 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  slug: string;
+  title: string;
+  status: 'draft' | 'published' | 'archived';
+  publishedAt?: string | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "properties".
+ */
+export interface Property {
+  id: number;
+  /**
+   * Required for origin=feed; empty for manual properties.
+   */
+  feedSource?: (number | null) | FeedSource;
+  /**
+   * Required for origin=feed; paired with feedSource by SQL guard.
+   */
+  externalId?: string | null;
+  origin: 'feed' | 'manual';
+  importHash?: string | null;
+  firstSeenAt?: string | null;
+  lastSeenAt?: string | null;
+  lastImportRun?: (number | null) | ImportRun;
+  externalComplexId?: string | null;
+  externalComplexName?: string | null;
+  externalBuildingId?: string | null;
+  externalLayoutId?: string | null;
+  status: 'active' | 'archived';
+  deactivatedAt?: string | null;
+  deactivatedByRun?: (number | null) | ImportRun;
+  needsReview?: boolean | null;
+  publishedAt?: string | null;
+  /**
+   * Set after lifecycle retention purges object content.
+   */
+  contentPurgedAt?: string | null;
+  /**
+   * Public immutable page identity. Feed imports must not rotate it after first publish.
+   */
+  slug: string;
+  market: 'secondary' | 'newbuild';
+  category: 'apartment' | 'house' | 'land' | 'commercial';
+  dealType: 'sale' | 'rent';
+  priceMinor?: number | null;
+  currency?: 'RUB' | null;
+  pricePerMeterMinor?: number | null;
+  rooms?: number | null;
+  totalArea?: number | null;
+  livingArea?: number | null;
+  kitchenArea?: number | null;
+  floor?: number | null;
+  floors?: number | null;
+  region?: string | null;
+  locality?: string | null;
+  district?: string | null;
+  street?: string | null;
+  house?: string | null;
+  publicAddress?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  title: string;
+  description?: string | null;
+  images?:
+    | {
+        kind: 'external' | 'managed';
+        url?: string | null;
+        media?: (number | null) | Media;
+        alt?: string | null;
+        order?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Import-managed fields explicitly owned by manual edits. Slug is not a normal manual override.
+   */
+  manualOverrides?:
+    | {
+        field: string;
+        setAt: string;
+        setBy?: (number | null) | User;
+        id?: string | null;
+      }[]
+    | null;
+  unitNumber?: string | null;
+  cadastralNumber?: string | null;
+  internalComment?: string | null;
+  ownerContact?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feed-sources".
+ */
+export interface FeedSource {
+  id: number;
+  /**
+   * Stable source identity used by import jobs and diagnostics.
+   */
+  code: string;
+  title: string;
+  parser: 'yrl';
+  /**
+   * Authoritative market for imported properties from this feed source.
+   */
+  market: 'secondary' | 'newbuild';
+  /**
+   * Reference to deployment secret/config value. Do not store credential URLs here.
+   */
+  feedUrlRef: string;
+  enabled?: boolean | null;
+  refreshIntervalMinutes: number;
+  nextDueAt?: string | null;
+  lastAttemptAt?: string | null;
+  lastSuccessfulRunAt?: string | null;
+  lastFullRunAt?: string | null;
+  safetyThresholdPercent: number;
+  maxDeactivationsPerRun: number;
+  lastOfferCount?: number | null;
+  lastEtag?: string | null;
+  lastModified?: string | null;
+  lastFeedHash?: string | null;
+  deactivationApproval?: {
+    runId?: (number | null) | ImportRun;
+    approvedBy?: (number | null) | User;
+    approvedAt?: string | null;
+    expiresAt?: string | null;
+    consumedAt?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "import-runs".
+ */
+export interface ImportRun {
+  id: number;
+  feedSource: number | FeedSource;
+  status: 'queued' | 'running' | 'success' | 'unchanged' | 'suspicious' | 'interrupted' | 'failed';
+  queuedAt: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  heartbeatAt?: string | null;
+  jobId?: string | null;
+  offeredCount?: number | null;
+  createdCount?: number | null;
+  updatedCount?: number | null;
+  archivedCount?: number | null;
+  skippedCount?: number | null;
+  warningCount?: number | null;
+  errorCount?: number | null;
+  feedHash?: string | null;
+  lastErrorRedacted?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
@@ -161,6 +344,40 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "import-issues".
+ */
+export interface ImportIssue {
+  id: number;
+  importRun: number | ImportRun;
+  feedSource?: (number | null) | FeedSource;
+  property?: (number | null) | Property;
+  externalId?: string | null;
+  severity: 'info' | 'warning' | 'error';
+  code: string;
+  messageRedacted: string;
+  field?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  /**
+   * Old public path. Must be created explicitly by owner action or approved migration.
+   */
+  from: string;
+  to: string;
+  statusCode: '301' | '302';
+  reason?: string | null;
+  createdBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -191,8 +408,32 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'properties';
+        value: number | Property;
+      } | null)
+    | ({
+        relationTo: 'feed-sources';
+        value: number | FeedSource;
+      } | null)
+    | ({
+        relationTo: 'import-runs';
+        value: number | ImportRun;
+      } | null)
+    | ({
+        relationTo: 'import-issues';
+        value: number | ImportIssue;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'redirects';
+        value: number | Redirect;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -261,6 +502,169 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  status?: T;
+  publishedAt?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "properties_select".
+ */
+export interface PropertiesSelect<T extends boolean = true> {
+  feedSource?: T;
+  externalId?: T;
+  origin?: T;
+  importHash?: T;
+  firstSeenAt?: T;
+  lastSeenAt?: T;
+  lastImportRun?: T;
+  externalComplexId?: T;
+  externalComplexName?: T;
+  externalBuildingId?: T;
+  externalLayoutId?: T;
+  status?: T;
+  deactivatedAt?: T;
+  deactivatedByRun?: T;
+  needsReview?: T;
+  publishedAt?: T;
+  contentPurgedAt?: T;
+  slug?: T;
+  market?: T;
+  category?: T;
+  dealType?: T;
+  priceMinor?: T;
+  currency?: T;
+  pricePerMeterMinor?: T;
+  rooms?: T;
+  totalArea?: T;
+  livingArea?: T;
+  kitchenArea?: T;
+  floor?: T;
+  floors?: T;
+  region?: T;
+  locality?: T;
+  district?: T;
+  street?: T;
+  house?: T;
+  publicAddress?: T;
+  lat?: T;
+  lng?: T;
+  title?: T;
+  description?: T;
+  images?:
+    | T
+    | {
+        kind?: T;
+        url?: T;
+        media?: T;
+        alt?: T;
+        order?: T;
+        id?: T;
+      };
+  manualOverrides?:
+    | T
+    | {
+        field?: T;
+        setAt?: T;
+        setBy?: T;
+        id?: T;
+      };
+  unitNumber?: T;
+  cadastralNumber?: T;
+  internalComment?: T;
+  ownerContact?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feed-sources_select".
+ */
+export interface FeedSourcesSelect<T extends boolean = true> {
+  code?: T;
+  title?: T;
+  parser?: T;
+  market?: T;
+  feedUrlRef?: T;
+  enabled?: T;
+  refreshIntervalMinutes?: T;
+  nextDueAt?: T;
+  lastAttemptAt?: T;
+  lastSuccessfulRunAt?: T;
+  lastFullRunAt?: T;
+  safetyThresholdPercent?: T;
+  maxDeactivationsPerRun?: T;
+  lastOfferCount?: T;
+  lastEtag?: T;
+  lastModified?: T;
+  lastFeedHash?: T;
+  deactivationApproval?:
+    | T
+    | {
+        runId?: T;
+        approvedBy?: T;
+        approvedAt?: T;
+        expiresAt?: T;
+        consumedAt?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "import-runs_select".
+ */
+export interface ImportRunsSelect<T extends boolean = true> {
+  feedSource?: T;
+  status?: T;
+  queuedAt?: T;
+  startedAt?: T;
+  finishedAt?: T;
+  heartbeatAt?: T;
+  jobId?: T;
+  offeredCount?: T;
+  createdCount?: T;
+  updatedCount?: T;
+  archivedCount?: T;
+  skippedCount?: T;
+  warningCount?: T;
+  errorCount?: T;
+  feedHash?: T;
+  lastErrorRedacted?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "import-issues_select".
+ */
+export interface ImportIssuesSelect<T extends boolean = true> {
+  importRun?: T;
+  feedSource?: T;
+  property?: T;
+  externalId?: T;
+  severity?: T;
+  code?: T;
+  messageRedacted?: T;
+  field?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -276,6 +680,19 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects_select".
+ */
+export interface RedirectsSelect<T extends boolean = true> {
+  from?: T;
+  to?: T;
+  statusCode?: T;
+  reason?: T;
+  createdBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

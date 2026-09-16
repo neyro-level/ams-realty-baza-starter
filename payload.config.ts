@@ -2,7 +2,13 @@ import { postgresAdapter } from "@payloadcms/db-postgres";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
 import sharp from "sharp";
+import { FeedSources } from "./src/payload/collections/FeedSources.ts";
+import { ImportIssues } from "./src/payload/collections/ImportIssues.ts";
+import { ImportRuns } from "./src/payload/collections/ImportRuns.ts";
 import { Media } from "./src/payload/collections/Media.ts";
+import { Pages } from "./src/payload/collections/Pages.ts";
+import { Properties } from "./src/payload/collections/Properties.ts";
+import { Redirects } from "./src/payload/collections/Redirects.ts";
 import { Users } from "./src/payload/collections/Users.ts";
 import { isS3Configured, runtimeEnv } from "./src/payload/env.ts";
 
@@ -16,7 +22,16 @@ export default buildConfig({
 	admin: {
 		user: Users.slug,
 	},
-	collections: [Users, Media],
+	collections: [
+		Users,
+		Pages,
+		Properties,
+		FeedSources,
+		ImportRuns,
+		ImportIssues,
+		Media,
+		Redirects,
+	],
 	cors: runtimeEnv.NEXT_PUBLIC_SERVER_URL ? [runtimeEnv.NEXT_PUBLIC_SERVER_URL] : [],
 	csrf: runtimeEnv.NEXT_PUBLIC_SERVER_URL ? [runtimeEnv.NEXT_PUBLIC_SERVER_URL] : [],
 	db: postgresAdapter({
