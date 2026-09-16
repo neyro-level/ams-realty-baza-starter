@@ -10,6 +10,7 @@ const registryModule = await import(
 	pathToFileURL(join(root, "src/payload/jobs/registry.ts")).href
 );
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const tasksSource = readFileSync(join(root, "src/payload/jobs/tasks.ts"), "utf8");
 
 const expectedQueues = new Map([
 	["system", { limit: 5, disableScheduling: false, staticTasks: ["dispatchDueFeeds"] }],
@@ -116,6 +117,31 @@ for (const entry of registry) {
 
 	if (entry.trigger === "static" && !entry.cron) {
 		throw new Error(`Static task "${entry.slug}" must declare cron.`);
+	}
+}
+
+for (const slug of expectedTaskSlugs) {
+	if (!tasksSource.includes(`payloadJobTaskSlugs.${slug}`)) {
+		throw new Error(`Missing Payload task handler for "${slug}".`);
+	}
+}
+
+for (const entry of registry) {
+	const slugReference = `payloadJobTaskSlugs.${entry.slug}`;
+	const slugIndex = tasksSource.indexOf(slugReference);
+
+	if (slugIndex === -1) {
+		throw new Error(`Missing Payload task handler for "${entry.slug}".`);
+	}
+
+	const taskSlice = tasksSource.slice(slugIndex, tasksSource.indexOf("\n\t},", slugIndex));
+
+	if (entry.trigger === "programmatic" && taskSlice.includes("schedule:")) {
+		throw new Error(`Programmatic task "${entry.slug}" must not declare schedule.`);
+	}
+
+	if (entry.trigger === "static" && !taskSlice.includes("schedule:")) {
+		throw new Error(`Static task "${entry.slug}" must declare schedule.`);
 	}
 }
 
