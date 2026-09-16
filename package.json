@@ -28,10 +28,11 @@
 		"payload:migrate:create": "payload migrate:create",
 		"verify:schema": "node scripts/verify-schema.mjs",
 		"verify:public-gateway": "node scripts/verify-public-gateway.mjs",
+		"verify:jobs-config": "node --experimental-strip-types scripts/verify-jobs-config.mjs",
 		"quality:architecture": "dependency-cruiser src packages scripts --config .dependency-cruiser.mjs --output-type err",
 		"quality:design-tokens": "node scripts/quality/design-tokens.mjs",
 		"quality:guards": "node scripts/quality/architecture-guard.mjs && node scripts/quality/design-tokens.mjs && node scripts/quality/sourcecraft-policy.mjs",
-		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
+		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm verify:jobs-config && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
 		"verify:foundation": "pnpm verify"
 	},
 	"dependencies": {

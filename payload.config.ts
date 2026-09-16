@@ -13,6 +13,7 @@ import { Properties } from "./src/payload/collections/Properties.ts";
 import { Redirects } from "./src/payload/collections/Redirects.ts";
 import { Users } from "./src/payload/collections/Users.ts";
 import { isS3Configured, runtimeEnv } from "./src/payload/env.ts";
+import { payloadJobsAutoRun } from "./src/payload/jobs/queues.ts";
 
 const databaseUri =
 	runtimeEnv.DATABASE_URI ??
@@ -48,6 +49,11 @@ export default buildConfig({
 	}),
 	graphQL: {
 		disable: true,
+	},
+	jobs: {
+		enableConcurrencyControl: true,
+		autoRun: payloadJobsAutoRun,
+		shouldAutoRun: async () => runtimeEnv.JOBS_AUTORUN,
 	},
 	plugins: [
 		s3Storage({
