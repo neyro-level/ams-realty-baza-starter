@@ -5,6 +5,8 @@ import sharp from "sharp";
 import { FeedSources } from "./src/payload/collections/FeedSources.ts";
 import { ImportIssues } from "./src/payload/collections/ImportIssues.ts";
 import { ImportRuns } from "./src/payload/collections/ImportRuns.ts";
+import { LeadDeliveries } from "./src/payload/collections/LeadDeliveries.ts";
+import { Leads } from "./src/payload/collections/Leads.ts";
 import { Media } from "./src/payload/collections/Media.ts";
 import { Pages } from "./src/payload/collections/Pages.ts";
 import { Properties } from "./src/payload/collections/Properties.ts";
@@ -29,6 +31,8 @@ export default buildConfig({
 		FeedSources,
 		ImportRuns,
 		ImportIssues,
+		Leads,
+		LeadDeliveries,
 		Media,
 		Redirects,
 	],

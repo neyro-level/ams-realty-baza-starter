@@ -73,6 +73,8 @@ export interface Config {
     'feed-sources': FeedSource;
     'import-runs': ImportRun;
     'import-issues': ImportIssue;
+    leads: Lead;
+    'lead-deliveries': LeadDelivery;
     media: Media;
     redirects: Redirect;
     'payload-kv': PayloadKv;
@@ -88,6 +90,8 @@ export interface Config {
     'feed-sources': FeedSourcesSelect<false> | FeedSourcesSelect<true>;
     'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
     'import-issues': ImportIssuesSelect<false> | ImportIssuesSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
+    'lead-deliveries': LeadDeliveriesSelect<false> | LeadDeliveriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -364,6 +368,112 @@ export interface ImportIssue {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  name: string;
+  /**
+   * Optional operator/audit value. Canonical integration and dedup identity is phoneE164.
+   */
+  phoneRaw?: string | null;
+  /**
+   * Strictly normalized E.164 phone. Invalid phone must not create a lead.
+   */
+  phoneE164: string;
+  email?: string | null;
+  message?: string | null;
+  formKind: 'property_request' | 'callback' | 'consultation' | 'generic';
+  sourcePage: string;
+  referrer?: string | null;
+  property?: (number | null) | Property;
+  utm?: {
+    source?: string | null;
+    medium?: string | null;
+    campaign?: string | null;
+    content?: string | null;
+    term?: string | null;
+  };
+  /**
+   * Immutable intake evidence for personal data processing consent.
+   */
+  consent: {
+    accepted: boolean;
+    version: string;
+    consentedAt: string;
+  };
+  /**
+   * Agency workflow status only. External delivery state lives in lead-deliveries.
+   */
+  status: 'new' | 'in_progress' | 'processed' | 'rejected';
+  idempotencyKey: string;
+  retentionMode: 'delete' | 'anonymize';
+  /**
+   * Optional per-row retention boundary. Project default leadRetentionDays remains canonical unless set.
+   */
+  retentionUntil?: string | null;
+  /**
+   * Set when leadRetentionCleanup deleted/anonymized PII for this lead.
+   */
+  piiPurgedAt?: string | null;
+  /**
+   * Optional irreversible keyed/HMAC marker. Raw IP/User-Agent are intentionally not stored.
+   */
+  fraudFingerprint?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-deliveries".
+ */
+export interface LeadDelivery {
+  id: number;
+  lead: number | Lead;
+  /**
+   * Immutable logical channel ID. Never reuse for another destination.
+   */
+  channelId: string;
+  channelKind: 'messenger' | 'crm';
+  /**
+   * Delivery state only. Agency workflow status is stored on the lead record.
+   */
+  status: 'pending' | 'sending' | 'delivered' | 'failed' | 'abandoned';
+  attempts: number;
+  nextAttemptAt?: string | null;
+  jobId?: string | null;
+  claimedAt?: string | null;
+  heartbeatAt?: string | null;
+  deliveredAt?: string | null;
+  idempotencyKey: string;
+  externalRef?: string | null;
+  lastErrorKind?: ('retryable' | 'permanent') | null;
+  /**
+   * Redacted diagnostic only. No raw payload, PII, response body, token, or secret.
+   */
+  lastErrorRedacted?: string | null;
+  abandonedReason?: ('exhausted' | 'permanent' | 'manual') | null;
+  /**
+   * Compact safe diagnostics only; raw payload/response, PII and secrets are forbidden.
+   */
+  attemptLog?:
+    | {
+        attemptedAt: string;
+        safeCode?: string | null;
+        outcome: 'delivered' | 'retryable' | 'permanent' | 'skipped';
+        redactedNote?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Set when leadRetentionCleanup purges/anonymizes linked delivery diagnostics with the lead.
+   */
+  diagnosticsPurgedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -426,6 +536,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'import-issues';
         value: number | ImportIssue;
+      } | null)
+    | ({
+        relationTo: 'leads';
+        value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'lead-deliveries';
+        value: number | LeadDelivery;
       } | null)
     | ({
         relationTo: 'media';
@@ -660,6 +778,78 @@ export interface ImportIssuesSelect<T extends boolean = true> {
   code?: T;
   messageRedacted?: T;
   field?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  name?: T;
+  phoneRaw?: T;
+  phoneE164?: T;
+  email?: T;
+  message?: T;
+  formKind?: T;
+  sourcePage?: T;
+  referrer?: T;
+  property?: T;
+  utm?:
+    | T
+    | {
+        source?: T;
+        medium?: T;
+        campaign?: T;
+        content?: T;
+        term?: T;
+      };
+  consent?:
+    | T
+    | {
+        accepted?: T;
+        version?: T;
+        consentedAt?: T;
+      };
+  status?: T;
+  idempotencyKey?: T;
+  retentionMode?: T;
+  retentionUntil?: T;
+  piiPurgedAt?: T;
+  fraudFingerprint?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-deliveries_select".
+ */
+export interface LeadDeliveriesSelect<T extends boolean = true> {
+  lead?: T;
+  channelId?: T;
+  channelKind?: T;
+  status?: T;
+  attempts?: T;
+  nextAttemptAt?: T;
+  jobId?: T;
+  claimedAt?: T;
+  heartbeatAt?: T;
+  deliveredAt?: T;
+  idempotencyKey?: T;
+  externalRef?: T;
+  lastErrorKind?: T;
+  lastErrorRedacted?: T;
+  abandonedReason?: T;
+  attemptLog?:
+    | T
+    | {
+        attemptedAt?: T;
+        safeCode?: T;
+        outcome?: T;
+        redactedNote?: T;
+        id?: T;
+      };
+  diagnosticsPurgedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
