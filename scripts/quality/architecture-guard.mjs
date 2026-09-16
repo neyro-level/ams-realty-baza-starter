@@ -95,6 +95,38 @@ for (const file of routeFiles) {
 	if (!allowed.has(file))
 		violations.push(`${file}: app API route is not in raw REST allowlist`);
 }
+if (
+	!Array.isArray(boundary.anonymousDenyCollections) ||
+	!boundary.anonymousDenyCollections.includes("media")
+) {
+	violations.push(
+		"config/raw-rest-boundary.json: anonymous raw REST deny collections must include media",
+	);
+}
+if (
+	!Array.isArray(boundary.anonymousAuthAllowPaths) ||
+	!boundary.anonymousAuthAllowPaths.includes("/api/users/login")
+) {
+	violations.push(
+		"config/raw-rest-boundary.json: Payload auth allowlist must preserve /api/users/login",
+	);
+}
+const proxyPath = path.join(root, "src", "proxy.ts");
+if (!existsSync(proxyPath)) {
+	violations.push("src/proxy.ts: raw REST edge boundary is missing");
+} else {
+	const proxy = readFileSync(proxyPath, "utf8");
+	if (!proxy.includes("anonymousDenyCollections")) {
+		violations.push(
+			"src/proxy.ts: raw REST edge boundary must read anonymousDenyCollections",
+		);
+	}
+	if (!proxy.includes("notFound")) {
+		violations.push(
+			"src/proxy.ts: anonymous raw REST denial must return notFound",
+		);
+	}
+}
 
 const globals = readFileSync(
 	path.join(root, "src", "app", "globals.css"),

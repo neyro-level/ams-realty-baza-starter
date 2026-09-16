@@ -5,5 +5,14 @@
 		"src/app/(payload)/api/graphql/route.ts",
 		"src/app/(payload)/api/graphql-playground/route.ts"
 	],
+	"anonymousDenyCollections": ["media"],
+	"anonymousAuthAllowPaths": [
+		"/api/users/login",
+		"/api/users/logout",
+		"/api/users/refresh-token",
+		"/api/users/forgot-password",
+		"/api/users/reset-password",
+		"/api/users/verify"
+	],
 	"note": "Every app API route must be explicitly approved here. Raw anonymous business REST remains denied by default."
 }
