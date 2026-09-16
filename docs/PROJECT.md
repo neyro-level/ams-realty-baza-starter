@@ -13,6 +13,8 @@
 | Time zone | `Europe/Moscow` / `TZ=Europe/Moscow` |
 | Currency | `RUB`, одна валюта, integer minor units |
 | Production hosting | один client = один Timeweb VPS + один Timeweb Managed PostgreSQL + один Timeweb S3 bucket + свой домен + свой secrets scope |
+| Secrets source of truth | Secret Master, self-hosted Infisical: `https://infisical.ams24.ru` |
+| Legacy secret source | Doppler только как legacy/import source до миграции старых секретов |
 | Reference environment | AMS VPS + internal domain + отдельные Managed PostgreSQL/S3 + `noindex` |
 | Jobs owner | один application runtime; production `JOBS_AUTORUN=true` только у него |
 | Dispatcher interval | `5` минут |
@@ -45,4 +47,4 @@ Canonical URL map и reserved namespaces: `02_PRODUCT_STRUCTURE.md`.
 | `INTERNAL_REVALIDATE_BASE_URL` and cache proof status | `TODO: before cache activation`; current status `NOT VERIFIED` |
 | Extended-profile triggers | `TODO: evaluate only after measured capacity/topology need`; current profile remains `REALTY_BASE` |
 
-Секретные значения принадлежат Doppler и никогда не записываются в этот документ.
+Секретные значения принадлежат Secret Master и никогда не записываются в этот документ, markdown, логи или git. Новые пароли, API tokens, SSH keys, database credentials и service credentials создаются и хранятся в Secret Master. Doppler больше не является canonical для AMS RealBaza и используется только как legacy/import source, если старые секреты ещё не перенесены. Для доступа к секретам использовать trigger `подключись к секрет мастеру`; для Git-доступов SourceCraft/GitHub — trigger `подключись к гид-сервису`.

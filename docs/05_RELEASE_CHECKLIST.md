@@ -8,6 +8,7 @@
 - source documents и runtime не расходятся;
 - релевантные локальные проверки завершены;
 - секреты, PII и generated artifacts не попали в diff;
+- новые или изменённые секреты заведены в Secret Master, а не в Doppler, git, markdown или logs;
 - rollback impact описан, если изменение затрагивает runtime/data.
 
 ## Перед merge
@@ -25,6 +26,7 @@
 - staging обязателен для migration, parser/source identity, auth/access и major upgrade;
 - migration, backup/restore, jobs ownership и rollback проверены по риску;
 - готов immutable artifact; build на production host запрещён;
+- production secrets берутся из Secret Master; Doppler допустим только как временный legacy/import source для ещё не перенесённых значений;
 - после rollout выполнен live smoke изменённого сценария;
 - production URL, health и rollback point зафиксированы.
 

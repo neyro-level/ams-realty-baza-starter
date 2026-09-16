@@ -5,6 +5,7 @@
 - Контур: Windows 11, SourceCraft primary.
 - Platform: AMS Realty Platform Core Standard 5.5, `AMS_PROFILE=REALTY_BASE`, режим `BUILD`.
 - Delivery: `COMMERCIAL`.
+- Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
 - Master plan: `AMS_PROJECT_ARCHITECTURE_v1.0.md`.
 - Operational graph: локальный stealth Beads; `.beads` не коммитится.
@@ -24,6 +25,7 @@
 - Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.
 - Автономность не отменяет COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.
 - Production выполняется только по отдельной явной команде владельца.
+- Новые пароли, API tokens, SSH keys, database credentials и service credentials хранятся только в Secret Master. Для доступа к секретам использовать trigger `подключись к секрет мастеру`; для Git-доступов SourceCraft/GitHub — trigger `подключись к гид-сервису`. Значения секретов не печатать в чат, markdown, логи или git.
 - До contract freeze UI работает через presentation contracts и fixture provider.
 - Payload не диктует форму UI; public data проходит через Gateway и DTO.
 - Новая инфраструктура или модуль добавляются только по доказанному trigger.

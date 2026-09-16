@@ -18,6 +18,12 @@
 
 `TODO: после provisioning.` Требуются automatic Managed PostgreSQL backup, S3 versioning/backup policy и фактическая restore rehearsal до первого production release.
 
+## Secrets и доступы
+
+Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, является canonical source of truth для секретов и доступов AMS RealBaza. Все новые пароли, API tokens, SSH keys, database credentials и service credentials создаются и хранятся там. Doppler считается только legacy/import source, если старые секреты ещё не перенесены.
+
+Операционное правило: значения секретов не выводить в чат, markdown, логи или git. Для работы с секретами использовать trigger `подключись к секрет мастеру`. Для Git-доступов SourceCraft/GitHub использовать trigger `подключись к гид-сервису`. SourceCraft — основной Git-сервис; GitHub — зеркало, если проект явно не говорит обратное.
+
 ## Import operations
 
 - manual import, suspicious approval, stale/orphan recovery и retry описываются после реализации jobs/import foundation;

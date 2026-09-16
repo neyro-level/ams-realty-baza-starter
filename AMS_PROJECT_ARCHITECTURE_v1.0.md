@@ -5,7 +5,8 @@
 **Профиль:** `AMS_PROFILE=REALTY_BASE`  
 **Архитектурный стандарт:** AMS Realty Platform Core Standard 5.5 — Solo + AI  
 **Модель:** solo owner / project manager + AI  
-**Primary repository:** SourceCraft  
+**Primary repository:** SourceCraft
+**Secrets source of truth:** Secret Master / self-hosted Infisical — `https://infisical.ams24.ru`
 **Назначение:** каноническая базовая платформа AMS для сайтов агентств недвижимости с каталогом, Payload Admin, безопасным multi-feed импортом и надёжной доставкой лидов.
 
 ## Delivery Profile
@@ -2415,6 +2416,8 @@ expiresAt
 Raw rotating tokens недоступны Admin.
 
 Encryption key хранится только в secret storage.
+
+Для AMS RealBaza canonical secret storage — Secret Master, self-hosted Infisical `https://infisical.ams24.ru`. Doppler больше не является canonical и используется только как legacy/import source, если старые секреты ещё не перенесены. Новые пароли, API tokens, SSH keys, database credentials и service credentials хранятся в Secret Master. Значения секретов запрещено печатать в чат, markdown, логи или git.
 
 Такой механизм требует ADR как encrypted-secret exception.
 
