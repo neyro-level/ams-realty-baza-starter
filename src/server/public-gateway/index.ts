@@ -1,6 +1,5 @@
 import "server-only";
 import { z } from "zod";
-import { publicGatewayPolicy } from "./policy";
 
 export const publicGatewayRequestSchema = z.object({
 	limit: z.number().int().min(1).max(48).default(24),
@@ -10,17 +9,12 @@ export const publicGatewayRequestSchema = z.object({
 export type PublicGatewayRequest = z.input<typeof publicGatewayRequestSchema>;
 export type PublicGatewayQuery = z.output<typeof publicGatewayRequestSchema>;
 
-export function parsePublicGatewayQuery(input: PublicGatewayRequest): PublicGatewayQuery {
+export function parsePublicGatewayQuery(
+	input: PublicGatewayRequest,
+): PublicGatewayQuery {
 	return publicGatewayRequestSchema.parse(input);
 }
 
-export {
-	catalogQuerySchema,
-	findPublicCatalogFacets,
-	findPublicCatalogProperties,
-	findPublicPropertyBySlug,
-	publicPropertyPublicationWhere,
-} from "./catalog";
 export type {
 	CatalogQuery,
 	CatalogQueryInput,
@@ -28,10 +22,22 @@ export type {
 	PublicCatalogResult,
 } from "./catalog";
 export {
+	catalogQuerySchema,
+	findPublicCatalogFacets,
+	findPublicCatalogProperties,
+	findPublicPropertyBySlug,
+	findPublicPropertyLifecycleBySlug,
+	findPublicSitemapProperties,
+	publicPropertyDetailsWhere,
+	publicPropertyPublicationWhere,
+	publicPropertyRetainedArchivedWhere,
+} from "./catalog";
+export { publicGatewayPolicy } from "./policy";
+export {
 	getPublicCatalog,
 	getPublicHomePage,
 	getPublicMarketingPage,
 	getPublicProperty,
 	getPublicShell,
+	getPublicSitemapEntries,
 } from "./provider";
-export { publicGatewayPolicy } from "./policy";

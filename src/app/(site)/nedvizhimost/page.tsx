@@ -1,18 +1,34 @@
 import { CatalogPageView } from "@/components/fixture/FixturePages";
-import { toMetadata } from "@/fixture/metadata";
 import { getPublicCatalog } from "@/server/public-gateway";
+import {
+	buildCatalogMetadata,
+	buildCatalogSeoDecision,
+	type CatalogSearchParams,
+} from "@/server/seo/catalog";
+import {
+	buildCatalogItemListJsonLd,
+	JsonLdScript,
+} from "@/server/seo/structured-data";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = toMetadata({
-	title: "Каталог недвижимости — AMS Realty Baza Starter",
-	description: "Каталог опубликованных объектов недвижимости.",
-	canonicalPath: "/nedvizhimost",
-	indexing: "index",
-	following: "follow",
-});
+export async function generateMetadata({
+	searchParams,
+}: PageProps<"/nedvizhimost">) {
+	return buildCatalogMetadata((await searchParams) as CatalogSearchParams);
+}
 
-export default async function CatalogPage() {
-	const catalog = await getPublicCatalog();
-	return <CatalogPageView list={catalog.list} filters={catalog.filters} />;
+export default async function CatalogPage({
+	searchParams,
+}: PageProps<"/nedvizhimost">) {
+	const decision = buildCatalogSeoDecision(
+		(await searchParams) as CatalogSearchParams,
+	);
+	const catalog = await getPublicCatalog(decision.query);
+	return (
+		<>
+			<JsonLdScript data={buildCatalogItemListJsonLd(catalog.list)} />
+			<CatalogPageView list={catalog.list} filters={catalog.filters} />
+		</>
+	);
 }

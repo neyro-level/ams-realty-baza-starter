@@ -41,6 +41,7 @@ const publicPropertySelect = {
 		alt: true,
 		order: true,
 	},
+	updatedAt: true,
 } satisfies PropertiesSelect<true>;
 
 const publicPropertyFacetSelect = {
@@ -55,9 +56,19 @@ const publicPropertyFacetSelect = {
 	floor: true,
 } satisfies PropertiesSelect<true>;
 
-const propertyCategorySchema = z.enum(["apartment", "house", "land", "commercial"]);
+const propertyCategorySchema = z.enum([
+	"apartment",
+	"house",
+	"land",
+	"commercial",
+]);
 const propertyDealTypeSchema = z.enum(["sale", "rent"]);
-const propertySortSchema = z.enum(["recommended", "newest", "priceAsc", "priceDesc"]);
+const propertySortSchema = z.enum([
+	"recommended",
+	"newest",
+	"priceAsc",
+	"priceDesc",
+]);
 const propertyViewSchema = z.enum(["grid", "list", "map"]);
 
 const optionalPositiveInt = z.coerce.number().int().positive().optional();
@@ -92,6 +103,7 @@ export type PublicCatalogProperty = Pick<
 	Property,
 	| "id"
 	| "slug"
+	| "status"
 	| "market"
 	| "category"
 	| "dealType"
@@ -112,10 +124,21 @@ export type PublicCatalogProperty = Pick<
 	| "title"
 	| "description"
 	| "images"
+	| "updatedAt"
 >;
 
 type PublicCatalogSelectedProperty = PublicCatalogProperty &
 	Pick<Property, "status" | "publishedAt" | "contentPurgedAt">;
+
+export type PublicPropertyLifecycleLookup =
+	| { found: false }
+	| {
+			found: true;
+			status: Property["status"];
+			publishedAt?: string | null;
+			contentPurgedAt?: string | null;
+			explicitRedirectPath?: string | null;
+	  };
 
 export type PublicCatalogResult = {
 	items: readonly PublicCatalogProperty[];
@@ -165,6 +188,18 @@ export const publicPropertyPublicationWhere: Where = {
 	],
 };
 
+export const publicPropertyRetainedArchivedWhere: Where = {
+	and: [
+		{ status: { equals: "archived" } },
+		{ publishedAt: { exists: true } },
+		{ contentPurgedAt: { exists: false } },
+	],
+};
+
+export const publicPropertyDetailsWhere: Where = {
+	or: [publicPropertyPublicationWhere, publicPropertyRetainedArchivedWhere],
+};
+
 function buildCatalogWhere(query: CatalogQuery): Where {
 	const and: Where[] = [publicPropertyPublicationWhere];
 
@@ -184,9 +219,12 @@ function buildCatalogWhere(query: CatalogQuery): Where {
 	if (query.city) and.push({ locality: { equals: query.city } });
 	if (query.district) and.push({ district: { equals: query.district } });
 	if (query.rooms?.length) and.push({ rooms: { in: query.rooms } });
-	if (query.priceFromMinor) and.push({ priceMinor: { greater_than_equal: query.priceFromMinor } });
-	if (query.priceToMinor) and.push({ priceMinor: { less_than_equal: query.priceToMinor } });
-	if (query.areaFrom) and.push({ totalArea: { greater_than_equal: query.areaFrom } });
+	if (query.priceFromMinor)
+		and.push({ priceMinor: { greater_than_equal: query.priceFromMinor } });
+	if (query.priceToMinor)
+		and.push({ priceMinor: { less_than_equal: query.priceToMinor } });
+	if (query.areaFrom)
+		and.push({ totalArea: { greater_than_equal: query.areaFrom } });
 	if (query.areaTo) and.push({ totalArea: { less_than_equal: query.areaTo } });
 
 	return { and };
@@ -200,14 +238,19 @@ function sortForCatalog(sort: PropertySort): string {
 			return "priceMinor";
 		case "priceDesc":
 			return "-priceMinor";
-		case "recommended":
 		default:
 			return "-publishedAt";
 	}
 }
 
 function withoutPaginationOnlyFilters(query: CatalogQuery): Where {
-	const { page: _page, limit: _limit, sort: _sort, view: _view, ...filterInput } = query;
+	const {
+		page: _page,
+		limit: _limit,
+		sort: _sort,
+		view: _view,
+		...filterInput
+	} = query;
 	return buildCatalogWhere({
 		...filterInput,
 		page: 1,
@@ -217,10 +260,13 @@ function withoutPaginationOnlyFilters(query: CatalogQuery): Where {
 	});
 }
 
-function toPublicCatalogProperty(property: PublicCatalogSelectedProperty): PublicCatalogProperty {
+function toPublicCatalogProperty(
+	property: PublicCatalogSelectedProperty,
+): PublicCatalogProperty {
 	return {
 		id: property.id,
 		slug: property.slug,
+		status: property.status,
 		market: property.market,
 		category: property.category,
 		dealType: property.dealType,
@@ -240,6 +286,7 @@ function toPublicCatalogProperty(property: PublicCatalogSelectedProperty): Publi
 		lng: property.lng,
 		title: property.title,
 		description: property.description,
+		updatedAt: property.updatedAt,
 		images:
 			property.images?.map((image) => ({
 				kind: image.kind,
@@ -249,6 +296,29 @@ function toPublicCatalogProperty(property: PublicCatalogSelectedProperty): Publi
 				id: image.id,
 			})) ?? null,
 	};
+}
+
+export async function findPublicSitemapProperties(
+	payload: Payload,
+): Promise<readonly Pick<PublicCatalogProperty, "slug" | "updatedAt">[]> {
+	const result = await payload.find({
+		collection: "properties",
+		where: publicPropertyPublicationWhere,
+		depth: 0,
+		limit: 1000,
+		page: 1,
+		sort: "-updatedAt",
+		select: {
+			slug: true,
+			updatedAt: true,
+		},
+		overrideAccess: publicGatewayPolicy.overrideAccess,
+	});
+
+	return result.docs.map((property) => ({
+		slug: property.slug,
+		updatedAt: property.updatedAt,
+	}));
 }
 
 export async function findPublicCatalogProperties(
@@ -298,7 +368,7 @@ export async function findPublicPropertyBySlug(payload: Payload, slug: string) {
 	const result = await payload.find({
 		collection: "properties",
 		where: {
-			and: [publicPropertyPublicationWhere, { slug: { equals: slug } }],
+			and: [publicPropertyDetailsWhere, { slug: { equals: slug } }],
 		},
 		depth: publicGatewayPolicy.depth,
 		limit: 1,
@@ -311,6 +381,38 @@ export async function findPublicPropertyBySlug(payload: Payload, slug: string) {
 	if (!property) return null;
 
 	return toPublicCatalogProperty(property as PublicCatalogSelectedProperty);
+}
+
+export async function findPublicPropertyLifecycleBySlug(
+	payload: Payload,
+	slug: string,
+): Promise<PublicPropertyLifecycleLookup> {
+	const result = await payload.find({
+		collection: "properties",
+		where: { slug: { equals: slug } },
+		depth: 0,
+		limit: 1,
+		page: 1,
+		select: {
+			status: true,
+			publishedAt: true,
+			contentPurgedAt: true,
+		},
+		overrideAccess: publicGatewayPolicy.overrideAccess,
+	});
+
+	const property = result.docs[0] as
+		| Pick<Property, "status" | "publishedAt" | "contentPurgedAt">
+		| undefined;
+	if (!property) return { found: false };
+
+	return {
+		found: true,
+		status: property.status,
+		publishedAt: property.publishedAt,
+		contentPurgedAt: property.contentPurgedAt,
+		explicitRedirectPath: null,
+	};
 }
 
 export async function findPublicCatalogFacets(

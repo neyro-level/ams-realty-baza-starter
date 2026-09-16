@@ -7,6 +7,7 @@ import { publicGatewayPolicy } from "./policy";
 export type PublicPageRecord = {
 	slug: string;
 	title: string;
+	updatedAt: string;
 	seo: PageSEOContract;
 };
 
@@ -30,7 +31,10 @@ function pageSeo(
 	};
 }
 
-export async function findPublicPage(payload: Payload, slug: string): Promise<PublicPageRecord | null> {
+export async function findPublicPage(
+	payload: Payload,
+	slug: string,
+): Promise<PublicPageRecord | null> {
 	const result = await payload.find({
 		collection: "pages",
 		where: {
@@ -46,6 +50,7 @@ export async function findPublicPage(payload: Payload, slug: string): Promise<Pu
 		select: {
 			slug: true,
 			title: true,
+			updatedAt: true,
 			seo: {
 				title: true,
 				description: true,
@@ -61,6 +66,7 @@ export async function findPublicPage(payload: Payload, slug: string): Promise<Pu
 	return {
 		slug: page.slug,
 		title: page.title,
+		updatedAt: page.updatedAt,
 		seo: pageSeo(
 			page.slug,
 			page.seo?.title || page.title,
@@ -70,11 +76,16 @@ export async function findPublicPage(payload: Payload, slug: string): Promise<Pu
 	};
 }
 
-export async function findPublicPages(payload: Payload): Promise<readonly PublicPageRecord[]> {
+export async function findPublicPages(
+	payload: Payload,
+): Promise<readonly PublicPageRecord[]> {
 	const result = await payload.find({
 		collection: "pages",
 		where: {
-			and: [{ status: { equals: "published" } }, { publishedAt: { exists: true } }],
+			and: [
+				{ status: { equals: "published" } },
+				{ publishedAt: { exists: true } },
+			],
 		},
 		depth: publicGatewayPolicy.depth,
 		limit: 24,
@@ -83,6 +94,7 @@ export async function findPublicPages(payload: Payload): Promise<readonly Public
 		select: {
 			slug: true,
 			title: true,
+			updatedAt: true,
 			seo: {
 				title: true,
 				description: true,
@@ -95,6 +107,7 @@ export async function findPublicPages(payload: Payload): Promise<readonly Public
 	return result.docs.map((page) => ({
 		slug: page.slug,
 		title: page.title,
+		updatedAt: page.updatedAt,
 		seo: pageSeo(
 			page.slug,
 			page.seo?.title || page.title,
@@ -102,4 +115,37 @@ export async function findPublicPages(payload: Payload): Promise<readonly Public
 			page.seo?.noindex,
 		),
 	}));
+}
+
+export async function findPublicSitemapPages(
+	payload: Payload,
+): Promise<readonly { slug: string; updatedAt: string }[]> {
+	const result = await payload.find({
+		collection: "pages",
+		where: {
+			and: [
+				{ status: { equals: "published" } },
+				{ publishedAt: { exists: true } },
+			],
+		},
+		depth: 0,
+		limit: 100,
+		page: 1,
+		sort: "slug",
+		select: {
+			slug: true,
+			updatedAt: true,
+			seo: {
+				noindex: true,
+			},
+		},
+		overrideAccess: publicGatewayPolicy.overrideAccess,
+	});
+
+	return result.docs
+		.filter((page) => !page.seo?.noindex)
+		.map((page) => ({
+			slug: page.slug,
+			updatedAt: page.updatedAt,
+		}));
 }

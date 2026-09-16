@@ -1,11 +1,16 @@
 import "server-only";
 
+import { resolvePropertyPageLifecycle } from "@/server/seo/property";
 import {
+	type CatalogQueryInput,
 	findPublicCatalogFacets,
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
+	findPublicPropertyLifecycleBySlug,
+	findPublicSitemapProperties,
 } from "./catalog";
 import {
+	type PublicPropertyDetailsDTO,
 	toHomePageDTO,
 	toMarketingPageDTO,
 	toPropertyDetailsDTO,
@@ -13,17 +18,36 @@ import {
 	toPropertyListDTO,
 	toShellDTO,
 } from "./dto";
-import { findPublicPage, findPublicPages } from "./pages";
+import {
+	findPublicPage,
+	findPublicPages,
+	findPublicSitemapPages,
+} from "./pages";
 import { getPublicGatewayPayload } from "./payload";
+
+export type PublicPropertyPageState =
+	| {
+			lifecycle: { kind: "gone"; statusCode: 410; robots: "noindex" };
+	  }
+	| {
+			lifecycle: { kind: "redirect"; statusCode: 308; destination: string };
+	  }
+	| {
+			lifecycle:
+				| { kind: "active"; statusCode: 200 }
+				| { kind: "archived"; statusCode: 200; robots: "noindex" };
+			property: PublicPropertyDetailsDTO;
+	  };
 
 export async function getPublicShell() {
 	const payload = await getPublicGatewayPayload();
 	return toShellDTO(await findPublicPages(payload));
 }
 
-export async function getPublicCatalog() {
+export async function getPublicCatalog(
+	query: CatalogQueryInput = { limit: 24, page: 1 },
+) {
 	const payload = await getPublicGatewayPayload();
-	const query = { limit: 24, page: 1 } as const;
 	const [result, facets] = await Promise.all([
 		findPublicCatalogProperties(payload, query),
 		findPublicCatalogFacets(payload, query),
@@ -33,6 +57,31 @@ export async function getPublicCatalog() {
 		list: toPropertyListDTO(result),
 		filters: toPropertyFilterDTO(result, facets),
 	} as const;
+}
+
+export async function getPublicSitemapEntries() {
+	const payload = await getPublicGatewayPayload();
+	const [pages, properties] = await Promise.all([
+		findPublicSitemapPages(payload),
+		findPublicSitemapProperties(payload),
+	]);
+
+	return [
+		...pages.map((page) => ({
+			path: page.slug === "home" ? "/" : `/${page.slug}`,
+			lastModified: page.updatedAt,
+			changeFrequency: "weekly" as const,
+			priority: page.slug === "home" ? 1 : 0.6,
+			indexable: true,
+		})),
+		...properties.map((property) => ({
+			path: `/obekty/${property.slug}`,
+			lastModified: property.updatedAt,
+			changeFrequency: "daily" as const,
+			priority: 0.8,
+			indexable: true,
+		})),
+	];
 }
 
 export async function getPublicHomePage() {
@@ -53,8 +102,22 @@ export async function getPublicHomePage() {
 	} as const;
 }
 
-export async function getPublicProperty(slug: string) {
+export async function getPublicProperty(
+	slug: string,
+): Promise<PublicPropertyPageState | null> {
 	const payload = await getPublicGatewayPayload();
+	const lifecycle = resolvePropertyPageLifecycle(
+		await findPublicPropertyLifecycleBySlug(payload, slug),
+	);
+	switch (lifecycle.kind) {
+		case "missing":
+			return null;
+		case "gone":
+			return { lifecycle };
+		case "redirect":
+			return { lifecycle };
+	}
+
 	const property = await findPublicPropertyBySlug(payload, slug);
 	if (!property) return null;
 	const relatedResult = await findPublicCatalogProperties(payload, {
@@ -63,9 +126,14 @@ export async function getPublicProperty(slug: string) {
 		category: property.category,
 		city: property.locality ?? undefined,
 	});
-	const related = relatedResult.items.filter((item) => item.slug !== property.slug).slice(0, 3);
+	const related = relatedResult.items
+		.filter((item) => item.slug !== property.slug)
+		.slice(0, 3);
 
-	return toPropertyDetailsDTO(property, related);
+	return {
+		lifecycle,
+		property: toPropertyDetailsDTO(property, related),
+	} as const;
 }
 
 export async function getPublicMarketingPage(slug: string) {

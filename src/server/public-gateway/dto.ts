@@ -31,6 +31,15 @@ function compact<T>(items: (T | null | undefined | false)[]): T[] {
 	return items.filter(Boolean) as T[];
 }
 
+export type PublicPropertyLifecycle = {
+	status: "active" | "archived";
+	isArchived: boolean;
+};
+
+export type PublicPropertyDetailsDTO = PropertyDetailsDTO & {
+	lifecycle: PublicPropertyLifecycle;
+};
+
 export function toPropertyCardDTO(property: PublicCatalogProperty): PropertyCardDTO {
 	const address =
 		property.publicAddress ||
@@ -86,12 +95,16 @@ export function toPropertyCardDTO(property: PublicCatalogProperty): PropertyCard
 export function toPropertyDetailsDTO(
 	property: PublicCatalogProperty,
 	related: readonly PublicCatalogProperty[],
-): PropertyDetailsDTO {
+): PublicPropertyDetailsDTO {
 	const card = toPropertyCardDTO(property);
 
 	return {
 		...card,
 		description: property.description || "Описание объекта уточняется.",
+		lifecycle: {
+			status: property.status,
+			isArchived: property.status === "archived",
+		},
 		gallery:
 			property.images
 				?.filter((image) => image.url)
