@@ -20,8 +20,9 @@
 ## Invariants
 
 - Один независимый stream = одна branch/worktree = один Pull Request.
-- В активной оркестрации мастер-плана команды владельца `продолжай`, `продолжай дальше` и эквивалентные заранее разрешают полный автономный цикл: WORK → review → exact-head Gate → merge в `main` → следующая READY task. Повторное подтверждение перед каждым merge не требуется.
-- Автономность не отменяет независимый review, COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.
+- В активной оркестрации мастер-плана команды владельца `продолжай`, `продолжай дальше` и эквивалентные заранее разрешают автономный цикл: WORK → commit/push → Pull Request → exact-head Gate перед merge при готовности потока → merge в `main` → следующая READY task. Повторное подтверждение перед каждым merge не требуется.
+- Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.
+- Автономность не отменяет COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.
 - Production выполняется только по отдельной явной команде владельца.
 - До contract freeze UI работает через presentation contracts и fixture provider.
 - Payload не диктует форму UI; public data проходит через Gateway и DTO.

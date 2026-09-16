@@ -37,7 +37,7 @@
         "Требования раздела EPIC 0 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 0 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [],
       "required_context": [
@@ -190,47 +190,6 @@
       ]
     },
     {
-      "key": "VERIFY-00",
-      "title": "Независимая проверка Repository & Governance Foundation",
-      "type": "task",
-      "parent_key": "EPIC-00",
-      "source_anchor": "EPIC 0",
-      "goal": "Проверить epic-level acceptance для EPIC 0 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 0; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 0 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-00-01",
-        "TASK-00-02",
-        "TASK-00-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 1,
-      "labels": [
-        "pilot",
-        "stage:verify",
-        "epic:00"
-      ]
-    },
-    {
       "key": "EPIC-01",
       "title": "Atlas Inventory + Visual Baseline",
       "type": "epic",
@@ -240,7 +199,7 @@
         "Требования раздела EPIC 1 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 1 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-00"
@@ -395,47 +354,6 @@
       ]
     },
     {
-      "key": "VERIFY-01",
-      "title": "Независимая проверка Atlas Inventory + Visual Baseline",
-      "type": "task",
-      "parent_key": "EPIC-01",
-      "source_anchor": "EPIC 1",
-      "goal": "Проверить epic-level acceptance для EPIC 1 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 1; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 1 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-01-01",
-        "TASK-01-02",
-        "TASK-01-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 1,
-      "labels": [
-        "pilot",
-        "stage:verify",
-        "epic:01"
-      ]
-    },
-    {
       "key": "EPIC-02",
       "title": "Contracts Draft + Feasibility Map",
       "type": "epic",
@@ -445,7 +363,7 @@
         "Требования раздела EPIC 2 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 2 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-01"
@@ -600,47 +518,6 @@
       ]
     },
     {
-      "key": "VERIFY-02",
-      "title": "Независимая проверка Contracts Draft + Feasibility Map",
-      "type": "task",
-      "parent_key": "EPIC-02",
-      "source_anchor": "EPIC 2",
-      "goal": "Проверить epic-level acceptance для EPIC 2 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 2; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 2 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-02-01",
-        "TASK-02-02",
-        "TASK-02-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 1,
-      "labels": [
-        "pilot",
-        "stage:verify",
-        "epic:02"
-      ]
-    },
-    {
       "key": "EPIC-03",
       "title": "UI Package Extraction",
       "type": "epic",
@@ -650,7 +527,7 @@
         "Требования раздела EPIC 3 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 3 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-02"
@@ -805,47 +682,6 @@
       ]
     },
     {
-      "key": "VERIFY-03",
-      "title": "Независимая проверка UI Package Extraction",
-      "type": "task",
-      "parent_key": "EPIC-03",
-      "source_anchor": "EPIC 3",
-      "goal": "Проверить epic-level acceptance для EPIC 3 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 3; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 3 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-03-01",
-        "TASK-03-02",
-        "TASK-03-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 2,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:03"
-      ]
-    },
-    {
       "key": "EPIC-04",
       "title": "Design System Normalization",
       "type": "epic",
@@ -855,7 +691,7 @@
         "Требования раздела EPIC 4 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 4 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-03"
@@ -1010,47 +846,6 @@
       ]
     },
     {
-      "key": "VERIFY-04",
-      "title": "Независимая проверка Design System Normalization",
-      "type": "task",
-      "parent_key": "EPIC-04",
-      "source_anchor": "EPIC 4",
-      "goal": "Проверить epic-level acceptance для EPIC 4 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 4; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 4 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-04-01",
-        "TASK-04-02",
-        "TASK-04-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 2,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:04"
-      ]
-    },
-    {
       "key": "EPIC-05",
       "title": "Fixture Website + Contract Freeze",
       "type": "epic",
@@ -1060,7 +855,7 @@
         "Требования раздела EPIC 5 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 5 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-04"
@@ -1215,47 +1010,6 @@
       ]
     },
     {
-      "key": "VERIFY-05",
-      "title": "Независимая проверка Fixture Website + Contract Freeze",
-      "type": "task",
-      "parent_key": "EPIC-05",
-      "source_anchor": "EPIC 5",
-      "goal": "Проверить epic-level acceptance для EPIC 5 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 5; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 5 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-05-01",
-        "TASK-05-02",
-        "TASK-05-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 2,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:05"
-      ]
-    },
-    {
       "key": "EPIC-06",
       "title": "Payload / Security / Cache Foundation",
       "type": "epic",
@@ -1265,7 +1019,7 @@
         "Требования раздела EPIC 6 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 6 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-05"
@@ -1420,47 +1174,6 @@
       ]
     },
     {
-      "key": "VERIFY-06",
-      "title": "Независимая проверка Payload / Security / Cache Foundation",
-      "type": "task",
-      "parent_key": "EPIC-06",
-      "source_anchor": "EPIC 6",
-      "goal": "Проверить epic-level acceptance для EPIC 6 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 6; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 6 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-06-01",
-        "TASK-06-02",
-        "TASK-06-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:06"
-      ]
-    },
-    {
       "key": "EPIC-07",
       "title": "Base Schema",
       "type": "epic",
@@ -1470,7 +1183,7 @@
         "Требования раздела EPIC 7 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 7 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-06"
@@ -1625,47 +1338,6 @@
       ]
     },
     {
-      "key": "VERIFY-07",
-      "title": "Независимая проверка Base Schema",
-      "type": "task",
-      "parent_key": "EPIC-07",
-      "source_anchor": "EPIC 7",
-      "goal": "Проверить epic-level acceptance для EPIC 7 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 7; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 7 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-07-01",
-        "TASK-07-02",
-        "TASK-07-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:07"
-      ]
-    },
-    {
       "key": "EPIC-08",
       "title": "Public Gateway",
       "type": "epic",
@@ -1675,7 +1347,7 @@
         "Требования раздела EPIC 8 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 8 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-07"
@@ -1830,47 +1502,6 @@
       ]
     },
     {
-      "key": "VERIFY-08",
-      "title": "Независимая проверка Public Gateway",
-      "type": "task",
-      "parent_key": "EPIC-08",
-      "source_anchor": "EPIC 8",
-      "goal": "Проверить epic-level acceptance для EPIC 8 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 8; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 8 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-08-01",
-        "TASK-08-02",
-        "TASK-08-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:08"
-      ]
-    },
-    {
       "key": "EPIC-09",
       "title": "Jobs Foundation",
       "type": "epic",
@@ -1880,7 +1511,7 @@
         "Требования раздела EPIC 9 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 9 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-08"
@@ -2035,47 +1666,6 @@
       ]
     },
     {
-      "key": "VERIFY-09",
-      "title": "Независимая проверка Jobs Foundation",
-      "type": "task",
-      "parent_key": "EPIC-09",
-      "source_anchor": "EPIC 9",
-      "goal": "Проверить epic-level acceptance для EPIC 9 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 9; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 9 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-09-01",
-        "TASK-09-02",
-        "TASK-09-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:09"
-      ]
-    },
-    {
       "key": "EPIC-10",
       "title": "Import System",
       "type": "epic",
@@ -2085,7 +1675,7 @@
         "Требования раздела EPIC 10 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 10 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-09"
@@ -2240,47 +1830,6 @@
       ]
     },
     {
-      "key": "VERIFY-10",
-      "title": "Независимая проверка Import System",
-      "type": "task",
-      "parent_key": "EPIC-10",
-      "source_anchor": "EPIC 10",
-      "goal": "Проверить epic-level acceptance для EPIC 10 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 10; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 10 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-10-01",
-        "TASK-10-02",
-        "TASK-10-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:10"
-      ]
-    },
-    {
       "key": "EPIC-11",
       "title": "Lead Outbox Core",
       "type": "epic",
@@ -2290,7 +1839,7 @@
         "Требования раздела EPIC 11 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 11 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-10"
@@ -2445,47 +1994,6 @@
       ]
     },
     {
-      "key": "VERIFY-11",
-      "title": "Независимая проверка Lead Outbox Core",
-      "type": "task",
-      "parent_key": "EPIC-11",
-      "source_anchor": "EPIC 11",
-      "goal": "Проверить epic-level acceptance для EPIC 11 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 11; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 11 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-11-01",
-        "TASK-11-02",
-        "TASK-11-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:11"
-      ]
-    },
-    {
       "key": "EPIC-12",
       "title": "Lead Adapters",
       "type": "epic",
@@ -2495,7 +2003,7 @@
         "Требования раздела EPIC 12 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 12 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-11"
@@ -2650,47 +2158,6 @@
       ]
     },
     {
-      "key": "VERIFY-12",
-      "title": "Независимая проверка Lead Adapters",
-      "type": "task",
-      "parent_key": "EPIC-12",
-      "source_anchor": "EPIC 12",
-      "goal": "Проверить epic-level acceptance для EPIC 12 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 12; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 12 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-12-01",
-        "TASK-12-02",
-        "TASK-12-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:12"
-      ]
-    },
-    {
       "key": "EPIC-13",
       "title": "SEO + Lifecycle",
       "type": "epic",
@@ -2700,7 +2167,7 @@
         "Требования раздела EPIC 13 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 13 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-12"
@@ -2855,47 +2322,6 @@
       ]
     },
     {
-      "key": "VERIFY-13",
-      "title": "Независимая проверка SEO + Lifecycle",
-      "type": "task",
-      "parent_key": "EPIC-13",
-      "source_anchor": "EPIC 13",
-      "goal": "Проверить epic-level acceptance для EPIC 13 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 13; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 13 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-13-01",
-        "TASK-13-02",
-        "TASK-13-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:13"
-      ]
-    },
-    {
       "key": "EPIC-14",
       "title": "Admin + Observability",
       "type": "epic",
@@ -2905,7 +2331,7 @@
         "Требования раздела EPIC 14 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 14 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-13"
@@ -3060,47 +2486,6 @@
       ]
     },
     {
-      "key": "VERIFY-14",
-      "title": "Независимая проверка Admin + Observability",
-      "type": "task",
-      "parent_key": "EPIC-14",
-      "source_anchor": "EPIC 14",
-      "goal": "Проверить epic-level acceptance для EPIC 14 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 14; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 14 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-14-01",
-        "TASK-14-02",
-        "TASK-14-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:14"
-      ]
-    },
-    {
       "key": "EPIC-15",
       "title": "Full Drift / Security / Regression Audit",
       "type": "epic",
@@ -3110,7 +2495,7 @@
         "Требования раздела EPIC 15 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 15 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-14"
@@ -3265,47 +2650,6 @@
       ]
     },
     {
-      "key": "VERIFY-15",
-      "title": "Независимая проверка Full Drift / Security / Regression Audit",
-      "type": "task",
-      "parent_key": "EPIC-15",
-      "source_anchor": "EPIC 15",
-      "goal": "Проверить epic-level acceptance для EPIC 15 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 15; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 15 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-15-01",
-        "TASK-15-02",
-        "TASK-15-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:15"
-      ]
-    },
-    {
       "key": "EPIC-16",
       "title": "Internal Production RealtBase",
       "type": "epic",
@@ -3315,7 +2659,7 @@
         "Требования раздела EPIC 16 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 16 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-15"
@@ -3470,47 +2814,6 @@
       ]
     },
     {
-      "key": "VERIFY-16",
-      "title": "Независимая проверка Internal Production RealtBase",
-      "type": "task",
-      "parent_key": "EPIC-16",
-      "source_anchor": "EPIC 16",
-      "goal": "Проверить epic-level acceptance для EPIC 16 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 16; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 16 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-16-01",
-        "TASK-16-02",
-        "TASK-16-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:16"
-      ]
-    },
-    {
       "key": "EPIC-17",
       "title": "Clone Workflow",
       "type": "epic",
@@ -3520,7 +2823,7 @@
         "Требования раздела EPIC 17 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 17 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-16"
@@ -3675,47 +2978,6 @@
       ]
     },
     {
-      "key": "VERIFY-17",
-      "title": "Независимая проверка Clone Workflow",
-      "type": "task",
-      "parent_key": "EPIC-17",
-      "source_anchor": "EPIC 17",
-      "goal": "Проверить epic-level acceptance для EPIC 17 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 17; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 17 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-17-01",
-        "TASK-17-02",
-        "TASK-17-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:17"
-      ]
-    },
-    {
       "key": "EPIC-18",
       "title": "Analytics Module",
       "type": "epic",
@@ -3725,7 +2987,7 @@
         "Требования раздела EPIC 18 документа AMS_PROJECT_ARCHITECTURE_v1.0.md."
       ],
       "acceptance_criteria": [
-        "Все implementation tasks и финальная verification-task EPIC 18 закрыты независимой проверкой."
+        "Все implementation tasks эпика закрыты по acceptance criteria, с локальным evidence и SourceCraft Gate перед merge; независимая проверка запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope."
       ],
       "depends_on": [
         "EPIC-17"
@@ -3878,47 +3140,11 @@
         "implementation",
         "epic:18"
       ]
-    },
-    {
-      "key": "VERIFY-18",
-      "title": "Независимая проверка Analytics Module",
-      "type": "task",
-      "parent_key": "EPIC-18",
-      "source_anchor": "EPIC 18",
-      "goal": "Проверить epic-level acceptance для EPIC 18 и закрыть эпик только по достаточному evidence.",
-      "scope": [
-        "Проверка acceptance всех задач EPIC 18; без implementation edits."
-      ],
-      "acceptance_criteria": [
-        "Все критерии EPIC 18 подтверждены командами, артефактами и diff/runtime evidence; verifier не совпадает с assignee."
-      ],
-      "depends_on": [
-        "TASK-18-01",
-        "TASK-18-02",
-        "TASK-18-03"
-      ],
-      "required_context": [
-        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
-        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md"
-      ],
-      "allowed_actions": [
-        "read",
-        "test"
-      ],
-      "stop_conditions": [
-        "implementation edit",
-        "insufficient evidence",
-        "assignee equals verifier",
-        "merge",
-        "release",
-        "production"
-      ],
-      "priority": 3,
-      "labels": [
-        "verification",
-        "stage:verify",
-        "epic:18"
-      ]
     }
-  ]
+  ],
+  "review_policy": {
+    "independent_review": "owner-triggered-or-explicit-high-risk-only",
+    "pull_request": "does-not-trigger-review-ci-or-gate",
+    "merge": "requires-one-exact-head-sourcecraft-gate-for-commercial-profile"
+  }
 }

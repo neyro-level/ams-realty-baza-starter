@@ -7,7 +7,7 @@
 ## NOW
 
 - EPIC 1 — Atlas Inventory + Visual Baseline.
-- Pilot orchestration: EPIC 0–2, concurrency `1`; EPIC 0 закрыт независимой проверкой.
+- Pilot orchestration завершён; дальнейшая оркестрация идёт по READY-задачам Beads. Независимая проверка не является стандартным финальным шагом эпика и запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope.
 
 ## NEXT
 

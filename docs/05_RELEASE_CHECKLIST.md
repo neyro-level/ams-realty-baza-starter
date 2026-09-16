@@ -12,7 +12,7 @@
 
 ## Перед merge
 
-- выполнен независимый review exact head SHA;
+- независимый review exact head SHA выполнен только если владелец явно запросил review/audit или scope заранее помечен как high-risk/high-complexity;
 - PR основан на актуальном `main` и не содержит чужого scope;
 - риск классифицирован как `STANDARD` или `RISKY`;
 - один ручной SourceCraft Merge Gate зелёный на exact head SHA;
