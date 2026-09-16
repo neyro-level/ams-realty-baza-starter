@@ -1,6 +1,7 @@
 {
 	"schemaVersion": 1,
 	"allowedRouteFiles": [
+		"src/app/api/internal/revalidate/route.ts",
 		"src/app/(payload)/api/[[...slug]]/route.ts",
 		"src/app/(payload)/api/graphql/route.ts",
 		"src/app/(payload)/api/graphql-playground/route.ts"
