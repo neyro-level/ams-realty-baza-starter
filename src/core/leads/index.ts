@@ -1,4 +1,31 @@
 export {
+	buildCustomWebhookHeaders,
+	buildCustomWebhookLeadPayload,
+	type CustomWebhookAcceptanceFailureReason,
+	type CustomWebhookAcceptanceResult,
+	type CustomWebhookHeaders,
+	type CustomWebhookIdempotencyRegistry,
+	type CustomWebhookLeadPayload,
+	type CustomWebhookTransport,
+	type CustomWebhookTransportRequest,
+	type CustomWebhookTransportResponse,
+	type CustomWebhookVerificationResult,
+	classifyCustomWebhookResponse,
+	sendCustomWebhookLead,
+	serializeCustomWebhookPayload,
+	signCustomWebhookBody,
+	verifyAndRegisterCustomWebhookRequest,
+	verifyCustomWebhookRequest,
+} from "./adapters/custom-webhook.ts";
+export {
+	buildMaxLeadPayload,
+	classifyMaxResponse,
+	type MaxLeadPayload,
+	type MaxTransport,
+	type MaxTransportResponse,
+	sendMaxLead,
+} from "./adapters/max.ts";
+export {
 	appendAttemptLog,
 	claimLeadDeliveryForSending,
 	completeLeadDeliveryAttempt,
