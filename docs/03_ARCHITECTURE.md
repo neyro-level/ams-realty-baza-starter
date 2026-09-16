@@ -49,6 +49,19 @@ Reusable UI не импортирует Payload, DB clients или persistence t
 
 Один клиент получает отдельные application VPS, Managed PostgreSQL, S3 bucket, домен и Secret Master secrets scope. Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, является source of truth для секретов AMS RealBaza. Doppler не является canonical и допускается только как legacy/import source до переноса старых секретов. Новые пароли, API tokens, SSH keys, database credentials и service credentials хранятся в Secret Master; значения секретов не попадают в чат, markdown, логи или git. Git-доступы SourceCraft/GitHub подключаются отдельным trigger `подключись к гид-сервису`; SourceCraft остаётся основным Git-сервисом, GitHub — зеркалом, если проект явно не говорит обратное.
 
+Internal production target for RealtBase foundation:
+
+```text
+domain: start-baza.ams24.ru
+hosting: AMS/Timeweb application VPS, exact server identity pending provisioning
+database: Timeweb Managed PostgreSQL, separate instance/database, not app-server PostgreSQL
+storage: Timeweb S3 bucket for Payload Media
+secrets: isolated project-specific Secret Master scope, not ams-server/prod fallback
+indexing: noindex until owner explicitly promotes the instance
+jobs: exactly one application runtime with JOBS_AUTORUN=true
+cache: CACHE_INVALIDATION_MODE=http
+```
+
 Production использует immutable artifact, не собирается на сервере и выпускается только из clean canonical `main` на известном SHA. Процедуры принадлежат `OPERATIONS.md`.
 
 Полная архитектурная спецификация: `../AMS_PROJECT_ARCHITECTURE_v1.0.md`. Не дублировать её детализацию в этом файле.

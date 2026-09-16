@@ -6,6 +6,18 @@
 
 ## Deploy и rollback
 
+Internal production target:
+
+```text
+domain: start-baza.ams24.ru
+provider: Timeweb / AMS server contour
+runtime: one application runtime, immutable artifact only
+database: Timeweb Managed PostgreSQL, separate from app server
+storage: Timeweb S3 bucket for Payload Media
+secrets: isolated project-specific Secret Master scope
+indexing: noindex until owner explicitly promotes the instance
+```
+
 `TODO: оформить после выбора exact Timeweb runtime и immutable artifact format.` Обязательные границы: отдельная команда владельца, clean SourceCraft `main`, exact SHA, отсутствие build на production host, один rollout и live smoke. Известный рабочий artifact сохраняется для rollback.
 
 При handover jobs сначала новый runtime стартует с `JOBS_AUTORUN=false`; старый jobs owner выключается до controlled restart нового с `true`. Два jobs-active runtime недопустимы.
@@ -23,6 +35,8 @@
 Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, является canonical source of truth для секретов и доступов AMS RealBaza. Все новые пароли, API tokens, SSH keys, database credentials и service credentials создаются и хранятся там. Doppler считается только legacy/import source, если старые секреты ещё не перенесены.
 
 Операционное правило: значения секретов не выводить в чат, markdown, логи или git. Для работы с секретами использовать trigger `подключись к секрет мастеру`. Для Git-доступов SourceCraft/GitHub использовать trigger `подключись к гид-сервису`. SourceCraft — основной Git-сервис; GitHub — зеркало, если проект явно не говорит обратное.
+
+Runtime secret scope for this application must be project-specific. `ams-server/prod` may identify the shared AMS server access contour, but it is not a fallback for application `DATABASE_URI`, Payload secret, S3 credentials, revalidation secret, health secret or lead channel credentials. If the project scope does not exist yet, provisioning it is a separate owner-authorized Secret Master mutation.
 
 ## Import operations
 

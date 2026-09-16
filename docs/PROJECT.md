@@ -16,6 +16,8 @@
 | Secrets source of truth | Secret Master, self-hosted Infisical: `https://infisical.ams24.ru` |
 | Legacy secret source | Doppler только как legacy/import source до миграции старых секретов |
 | Reference environment | AMS VPS + internal domain + отдельные Managed PostgreSQL/S3 + `noindex` |
+| Internal production domain | `start-baza.ams24.ru` |
+| Runtime Secret Master scope | `TODO: provision project-specific Secret Master scope`; do not reuse `ams-server/prod` for app runtime secrets |
 | Jobs owner | один application runtime; production `JOBS_AUTORUN=true` только у него |
 | Dispatcher interval | `5` минут |
 | Manual/CMS media | Payload Media -> Timeweb S3 |
@@ -29,7 +31,8 @@ Canonical URL map и reserved namespaces: `02_PRODUCT_STRUCTURE.md`.
 
 | Параметр | Статус |
 |---|---|
-| Production и staging domains | `TODO: owner decision` |
+| Internal production domain | `start-baza.ams24.ru`; `noindex` до отдельного решения владельца |
+| Public/client production and staging domains | `TODO: owner decision` |
 | Feed sources, parser mapping и refresh intervals | `TODO: source onboarding` |
 | Feed lifecycle/delete policy | `TODO: before first feed` |
 | safety threshold, max deactivations, approval TTL | `TODO: before first import` |
@@ -41,6 +44,7 @@ Canonical URL map и reserved namespaces: `02_PRODUCT_STRUCTURE.md`.
 | archiveRetentionDays и leadRetentionDays | `TODO: legal/owner decision`; silent default запрещён |
 | DATABASE_POOL_MAX и provider connection limit | `TODO: after Managed PostgreSQL plan selection` |
 | S3 bucket/region and DB region | `TODO: infrastructure provisioning` |
+| Runtime Secret Master project/env/path | `TODO: provision isolated project scope`; required names are documented in `.env.example`, values never in git |
 | Backup, restore and monitoring targets | `TODO: before release readiness` |
 | Admin access policy | `TODO: before Payload Admin activation` |
 | CSP and raw REST edge allowlist | `TODO: before Payload foundation verification` |

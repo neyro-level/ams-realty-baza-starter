@@ -23,6 +23,8 @@
 
 - есть отдельная команда владельца на release;
 - canonical `main` чистый, итоговый SHA известен;
+- target domain для internal production: `start-baza.ams24.ru`, режим `noindex`;
+- server identity, Managed PostgreSQL, S3 bucket и isolated Secret Master scope подтверждены без переноса секретов в git/logs;
 - staging обязателен для migration, parser/source identity, auth/access и major upgrade;
 - migration, backup/restore, jobs ownership и rollback проверены по риску;
 - готов immutable artifact; build на production host запрещён;
