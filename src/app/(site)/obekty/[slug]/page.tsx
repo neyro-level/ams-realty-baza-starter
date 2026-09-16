@@ -3,17 +3,15 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PropertyPageView } from "@/components/fixture/FixturePages";
 import { toMetadata } from "@/fixture/metadata";
-import { fixtureProperties, getFixtureProperty } from "@/fixture/provider";
+import { getPublicProperty } from "@/server/public-gateway";
 
-export function generateStaticParams() {
-	return fixtureProperties.map(({ slug }) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
 	params,
 }: PageProps<"/obekty/[slug]">): Promise<Metadata> {
 	const { slug } = await params;
-	const property = await getFixtureProperty(slug);
+	const property = await getPublicProperty(slug);
 	if (!property) return {};
 	return toMetadata({
 		title: `${property.title} — AMS Realty Baza Starter`,
@@ -28,7 +26,7 @@ export default async function PropertyPage({
 	params,
 }: PageProps<"/obekty/[slug]">) {
 	const { slug } = await params;
-	const property = await getFixtureProperty(slug);
+	const property = await getPublicProperty(slug);
 	if (!property) notFound();
 	const leadPage: MarketingPageDTO = {
 		slug: property.slug,

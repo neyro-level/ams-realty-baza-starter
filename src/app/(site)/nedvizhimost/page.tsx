@@ -1,15 +1,18 @@
 import { CatalogPageView } from "@/components/fixture/FixturePages";
 import { toMetadata } from "@/fixture/metadata";
-import { fixtureHome, getFixtureCatalog } from "@/fixture/provider";
+import { getPublicCatalog } from "@/server/public-gateway";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = toMetadata({
-	...fixtureHome.seo,
 	title: "Каталог недвижимости — AMS Realty Baza Starter",
-	description: "Fixture-каталог объектов недвижимости.",
+	description: "Каталог опубликованных объектов недвижимости.",
 	canonicalPath: "/nedvizhimost",
+	indexing: "index",
+	following: "follow",
 });
 
 export default async function CatalogPage() {
-	const catalog = await getFixtureCatalog();
+	const catalog = await getPublicCatalog();
 	return <CatalogPageView list={catalog.list} filters={catalog.filters} />;
 }

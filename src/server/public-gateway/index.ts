@@ -17,7 +17,15 @@ export function parsePublicGatewayQuery(input: PublicGatewayRequest): PublicGate
 export {
 	catalogQuerySchema,
 	findPublicCatalogProperties,
+	findPublicPropertyBySlug,
 	publicPropertyPublicationWhere,
 } from "./catalog";
 export type { CatalogQuery, CatalogQueryInput, PublicCatalogResult } from "./catalog";
+export {
+	getPublicCatalog,
+	getPublicHomePage,
+	getPublicMarketingPage,
+	getPublicProperty,
+	getPublicShell,
+} from "./provider";
 export { publicGatewayPolicy } from "./policy";

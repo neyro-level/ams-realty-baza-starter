@@ -1,14 +1,16 @@
 import { HomePageView } from "@/components/fixture/FixturePages";
 import { toMetadata } from "@/fixture/metadata";
-import { fixtureHome, fixtureProperties } from "@/fixture/provider";
+import { getPublicHomePage } from "@/server/public-gateway";
 
-export const metadata = toMetadata(fixtureHome.seo);
+export const dynamic = "force-dynamic";
 
-export default function HomePage() {
-	const featured =
-		fixtureProperties.find(
-			(item) => item.id === fixtureHome.featuredPropertyId,
-		) ?? fixtureProperties[0];
-	if (!featured) return null;
-	return <HomePageView page={fixtureHome} featured={featured} />;
+export async function generateMetadata() {
+	const home = await getPublicHomePage();
+	return toMetadata(home.page.seo);
+}
+
+export default async function HomePage() {
+	const home = await getPublicHomePage();
+	if (!home.featured) return null;
+	return <HomePageView page={home.page} featured={home.featured} />;
 }

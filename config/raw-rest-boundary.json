@@ -6,7 +6,17 @@
 		"src/app/(payload)/api/graphql/route.ts",
 		"src/app/(payload)/api/graphql-playground/route.ts"
 	],
-	"anonymousDenyCollections": ["media"],
+	"anonymousDenyCollections": [
+		"pages",
+		"properties",
+		"feed-sources",
+		"import-runs",
+		"import-issues",
+		"leads",
+		"lead-deliveries",
+		"media",
+		"redirects"
+	],
 	"anonymousAuthAllowPaths": [
 		"/api/users/login",
 		"/api/users/logout",

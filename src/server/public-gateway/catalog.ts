@@ -252,3 +252,22 @@ export async function findPublicCatalogProperties(
 		},
 	};
 }
+
+export async function findPublicPropertyBySlug(payload: Payload, slug: string) {
+	const result = await payload.find({
+		collection: "properties",
+		where: {
+			and: [publicPropertyPublicationWhere, { slug: { equals: slug } }],
+		},
+		depth: publicGatewayPolicy.depth,
+		limit: 1,
+		page: 1,
+		select: publicPropertySelect,
+		overrideAccess: publicGatewayPolicy.overrideAccess,
+	});
+
+	const property = result.docs[0];
+	if (!property) return null;
+
+	return toPublicCatalogProperty(property as PublicCatalogSelectedProperty);
+}

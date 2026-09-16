@@ -4,6 +4,7 @@ const catalogSource = readFileSync("src/server/public-gateway/catalog.ts", "utf8
 const gatewaySource = readFileSync("src/server/public-gateway/index.ts", "utf8");
 const policySource = readFileSync("src/server/public-gateway/policy.ts", "utf8");
 const propertiesSource = readFileSync("src/payload/collections/Properties.ts", "utf8");
+const rawRestBoundary = JSON.parse(readFileSync("config/raw-rest-boundary.json", "utf8"));
 
 const forbiddenPublicFields = [
 	"feedSource",
@@ -58,6 +59,24 @@ const requiredPredicateSnippets = [
 for (const snippet of requiredPredicateSnippets) {
 	if (!catalogSource.includes(snippet) || !propertiesSource.includes(snippet)) {
 		throw new Error(`Publication predicate missing from gateway/access: ${snippet}`);
+	}
+}
+
+const requiredRawRestDeniedCollections = [
+	"pages",
+	"properties",
+	"feed-sources",
+	"import-runs",
+	"import-issues",
+	"leads",
+	"lead-deliveries",
+	"media",
+	"redirects",
+];
+
+for (const collection of requiredRawRestDeniedCollections) {
+	if (!rawRestBoundary.anonymousDenyCollections.includes(collection)) {
+		throw new Error(`Raw anonymous REST is not denied for ${collection}`);
 	}
 }
 

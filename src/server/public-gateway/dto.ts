@@ -1,0 +1,246 @@
+import "server-only";
+
+import type {
+	HomePageDTO,
+	MarketingPageDTO,
+	PropertyCardDTO,
+	PropertyDetailsDTO,
+	PropertyFilterDTO,
+	PropertyListDTO,
+	SiteFooterDTO,
+	SiteHeaderDTO,
+} from "@ams/realtbase-contracts";
+import type { PublicCatalogProperty, PublicCatalogResult } from "./catalog";
+import type { PublicPageRecord } from "./pages";
+
+const brandName = "AMS Realty Baza Starter";
+const logo = {
+	kind: "managed" as const,
+	src: "/fixture/logo.svg",
+	alt: brandName,
+	width: 160,
+	height: 40,
+};
+
+function rub(priceMinor: number) {
+	return `${new Intl.NumberFormat("ru-RU").format(priceMinor / 100)} ₽`;
+}
+
+function compact<T>(items: (T | null | undefined | false)[]): T[] {
+	return items.filter(Boolean) as T[];
+}
+
+export function toPropertyCardDTO(property: PublicCatalogProperty): PropertyCardDTO {
+	const address =
+		property.publicAddress ||
+		[property.locality, property.district].filter(Boolean).join(", ") ||
+		"Адрес уточняется";
+
+	return {
+		id: String(property.id),
+		slug: property.slug,
+		href: `/obekty/${property.slug}`,
+		title: property.title,
+		category: property.category,
+		dealType: property.dealType,
+		price: property.priceMinor
+			? {
+					priceMinor: property.priceMinor,
+					pricePerMeterMinor: property.pricePerMeterMinor ?? undefined,
+					currency: property.currency ?? "RUB",
+					period: property.dealType === "rent" ? "month" : "total",
+					label: rub(property.priceMinor),
+				}
+			: null,
+		address,
+		city: property.locality || "Город не указан",
+		district: property.district ?? undefined,
+		primaryMedia:
+			property.images?.find((image) => image.url)?.url
+				? {
+						kind: "external",
+						src: property.images.find((image) => image.url)?.url ?? "",
+						alt: property.images.find((image) => image.url)?.alt || property.title,
+					}
+				: null,
+		summary: compact([
+			property.rooms
+				? { key: "rooms" as const, label: "Комнаты", value: String(property.rooms) }
+				: null,
+			property.totalArea
+				? { key: "area" as const, label: "Площадь", value: `${property.totalArea} м²` }
+				: null,
+			property.floor
+				? {
+						key: "floor" as const,
+						label: "Этаж",
+						value: property.floors ? `${property.floor} из ${property.floors}` : String(property.floor),
+					}
+				: null,
+		]),
+		badges: [],
+	};
+}
+
+export function toPropertyDetailsDTO(
+	property: PublicCatalogProperty,
+	related: readonly PublicCatalogProperty[],
+): PropertyDetailsDTO {
+	const card = toPropertyCardDTO(property);
+
+	return {
+		...card,
+		description: property.description || "Описание объекта уточняется.",
+		gallery:
+			property.images
+				?.filter((image) => image.url)
+				.map((image) => ({
+					kind: "external" as const,
+					src: image.url ?? "",
+					alt: image.alt || property.title,
+				})) ?? [],
+		characteristics: compact([
+			property.totalArea ? { label: "Общая площадь", value: `${property.totalArea} м²` } : null,
+			property.livingArea ? { label: "Жилая площадь", value: `${property.livingArea} м²` } : null,
+			property.kitchenArea ? { label: "Кухня", value: `${property.kitchenArea} м²` } : null,
+			property.rooms ? { label: "Комнаты", value: String(property.rooms) } : null,
+			property.floor
+				? {
+						label: "Этаж",
+						value: property.floors ? `${property.floor} из ${property.floors}` : String(property.floor),
+					}
+				: null,
+		]),
+		location:
+			typeof property.lat === "number" && typeof property.lng === "number"
+				? { latitude: property.lat, longitude: property.lng }
+				: undefined,
+		related: related.map(toPropertyCardDTO),
+	};
+}
+
+export function toPropertyListDTO(result: PublicCatalogResult): PropertyListDTO {
+	return {
+		items: result.items.map(toPropertyCardDTO),
+		total: result.total,
+		page: result.page,
+		pageSize: result.pageSize,
+		totalPages: result.totalPages,
+		appliedFilters: result.applied,
+	};
+}
+
+export function toPropertyFilterDTO(result: PublicCatalogResult): PropertyFilterDTO {
+	const cards = result.items;
+	const rooms = [...new Set(cards.map((item) => item.rooms).filter((room): room is number => Boolean(room)))].sort(
+		(a, b) => a - b,
+	);
+	const prices = cards.map((item) => item.priceMinor).filter((price): price is number => Boolean(price));
+	const cities = [...new Set(cards.map((item) => item.locality).filter((city): city is string => Boolean(city)))];
+	const districts = [
+		...new Set(cards.map((item) => item.district).filter((district): district is string => Boolean(district))),
+	];
+
+	return {
+		categories: [{ value: "apartment", label: "Квартиры" }],
+		dealTypes: [{ value: "sale", label: "Продажа" }],
+		cities: cities.map((city) => ({ value: city, label: city })),
+		districts: districts.map((district) => ({ value: district, label: district })),
+		rooms,
+		priceMinor: {
+			min: prices.length ? Math.min(...prices) : null,
+			max: prices.length ? Math.max(...prices) : null,
+		},
+		buildingTypes: [],
+		renovations: [],
+		landUseTypes: [],
+		commercialTypes: [],
+		commercialBuildingTypes: [],
+		entranceTypes: [],
+		applied: result.applied,
+		total: result.total,
+		resultLabel: `${result.total} ${result.total === 1 ? "объект" : "объектов"}`,
+	};
+}
+
+export function toShellDTO(pages: readonly PublicPageRecord[]) {
+	const navigation = pages
+		.filter((page) => page.slug !== "home")
+		.slice(0, 6)
+		.map((page) => ({ label: page.title, href: `/${page.slug}` }));
+	const fallbackNavigation = [{ label: "Недвижимость", href: "/nedvizhimost" }];
+	const links = navigation.length ? navigation : fallbackNavigation;
+
+	const header: SiteHeaderDTO = {
+		brandName,
+		homeHref: "/",
+		logo,
+		navigation: links,
+		phone: { label: "+7 (000) 000-00-00", href: "tel:+70000000000" },
+		primaryAction: { label: "Подобрать объект", href: "/nedvizhimost" },
+	};
+
+	const footer: SiteFooterDTO = {
+		brandName,
+		logo,
+		groups: [{ title: "Разделы", links }],
+		contacts: [{ label: "+7 (000) 000-00-00", href: "tel:+70000000000" }],
+		legalLinks: [],
+		copyright: `© ${brandName}`,
+	};
+
+	return { header, footer } as const;
+}
+
+export function toHomePageDTO(page: PublicPageRecord | null): HomePageDTO {
+	return {
+		slug: "home",
+		eyebrow: "Недвижимость без лишней неопределённости",
+		title: page?.title || "Проверенная недвижимость",
+		lead: page?.seo.description || "Подбираем объекты по вашим критериям и сопровождаем путь до сделки.",
+		seo:
+			page?.seo ?? {
+				title: `${brandName} — недвижимость`,
+				description: "Подбор недвижимости и сопровождение сделки.",
+				canonicalPath: "/",
+				indexing: "index",
+				following: "follow",
+			},
+		breadcrumbs: { items: [{ label: "Главная" }] },
+		sections: [
+			{
+				title: "Понятный процесс",
+				text: "Сначала фиксируем задачу, затем сравниваем подходящие предложения.",
+				items: ["Уточняем задачу и бюджет", "Проверяем документы", "Сопровождаем сделку"],
+			},
+		],
+		leadContext: {
+			formKind: "general",
+			sourcePage: "/",
+			consentVersion: "pd-2026-01",
+			consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
+			consentRequired: true,
+		},
+		featuredPropertyId: "",
+		serviceLinks: [{ label: "Купить", href: "/nedvizhimost", description: "Объекты из каталога" }],
+	};
+}
+
+export function toMarketingPageDTO(page: PublicPageRecord): MarketingPageDTO {
+	return {
+		slug: page.slug,
+		eyebrow: "Страница",
+		title: page.title,
+		lead: page.seo.description,
+		seo: page.seo,
+		breadcrumbs: { items: [{ label: "Главная", href: "/" }, { label: page.title }] },
+		sections: [],
+		leadContext: {
+			formKind: "general",
+			sourcePage: page.seo.canonicalPath,
+			consentVersion: "pd-2026-01",
+			consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
+			consentRequired: true,
+		},
+	};
+}
