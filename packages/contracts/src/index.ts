@@ -1,5 +1,5 @@
-export const contractVersion = "0.1.0" as const;
-export const contractState = "draft" as const;
+export const contractVersion = "1.0.0" as const;
+export const contractState = "frozen" as const;
 
 export type { PropertyCategory, PropertyDealType } from "./common";
 export type { MediaDTO } from "./media";

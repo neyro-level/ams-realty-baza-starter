@@ -23,6 +23,8 @@ const lockPath = path.join(
 	contractsRoot,
 	scope === "journal" ? "journal.lock.json" : "contracts.lock.json",
 );
+const packagePath = path.join(contractsRoot, "package.json");
+const publicIndexPath = path.join(contractsRoot, "src", "index.ts");
 
 function fail(message) {
 	console.error(`contracts: ${message}`);
@@ -73,6 +75,36 @@ function buildManifest(metadata) {
 	};
 }
 
+function readConstExport(file, name) {
+	const source = readFileSync(file, "utf8");
+	const match = source.match(
+		new RegExp(`export\\s+const\\s+${name}\\s*=\\s*["']([^"']+)["']\\s+as\\s+const`),
+	);
+	return match?.[1];
+}
+
+function assertBaseMetadata(current) {
+	if (scope !== "base") return;
+	const packageJson = JSON.parse(readFileSync(packagePath, "utf8"));
+	const publicVersion = readConstExport(publicIndexPath, "contractVersion");
+	const publicState = readConstExport(publicIndexPath, "contractState");
+	if (packageJson.version !== current.contractVersion) {
+		fail(
+			`package version ${packageJson.version} does not match lock ${current.contractVersion}`,
+		);
+	}
+	if (publicVersion !== current.contractVersion) {
+		fail(
+			`public contractVersion ${publicVersion ?? "missing"} does not match lock ${current.contractVersion}`,
+		);
+	}
+	if (publicState !== current.state) {
+		fail(
+			`public contractState ${publicState ?? "missing"} does not match lock ${current.state}`,
+		);
+	}
+}
+
 if (!existsSync(lockPath)) fail("contracts.lock.json is missing");
 const current = JSON.parse(readFileSync(lockPath, "utf8"));
 if (
@@ -97,6 +129,7 @@ if (command === "test-line-endings") {
 	console.log("contracts: line-ending normalization PASS");
 } else if (command === "check") {
 	if (!same) fail("lock drift detected; run pnpm contracts:diff");
+	assertBaseMetadata(current);
 	console.log(`contracts: PASS (${scope} ${current.state} ${current.contractVersion})`);
 } else if (command === "diff") {
 	if (same) console.log("contracts: no changes");

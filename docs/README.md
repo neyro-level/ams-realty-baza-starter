@@ -15,6 +15,7 @@
 | Эксплуатационные процедуры | `OPERATIONS.md` |
 | Визуальная система и UI-правила | `DESIGN.md` |
 | Реализуемость presentation contracts | `CONTRACT_FEASIBILITY.md` |
+| Fixture acceptance перед freeze contracts | `research/FIXTURE_ACCEPTANCE.md` |
 
 ## Нормативные источники
 

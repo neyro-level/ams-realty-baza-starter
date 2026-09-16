@@ -1,6 +1,6 @@
 # Contract Feasibility
 
-Статус: `Base DTO feasibility verified for UI extraction`.
+Статус: `VERIFIED`.
 
 Документ отвечает за реализуемость presentation contracts. DTO принадлежат
 `packages/contracts`; UI получает их через fixture provider, а после подключения
@@ -267,5 +267,5 @@ Journal остаётся отдельным draft namespace и не входит
 - все поля Base DTO имеют источник, стоимость и schema decision;
 - отсутствующие в Atlas функции отключены, а не опираются на неутверждённую схему;
 - UI extraction в EPIC 3 не заблокирован;
-- contract freeze остаётся запрещён до отдельного consent proof и визуальной
-  проверки fixture-сайта в EPIC 5.
+- consent proof и визуальная проверка fixture-сайта пройдены в
+  `research/FIXTURE_ACCEPTANCE.md`; contract freeze разблокирован.

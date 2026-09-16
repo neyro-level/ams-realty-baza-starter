@@ -80,7 +80,7 @@ export function SiteShell({
 							<p className="text-body font-extrabold tracking-caps">
 								{footer.brandName}
 							</p>
-							<p className="mt-3 max-w-sm text-label leading-step-copy text-[var(--text-dark-muted)]">
+							<p className="mt-3 max-w-sm text-label leading-step-copy text-[var(--text-dark)]">
 								Fixture-сайт работает на presentation contracts. Контакты и
 								юридические тексты демонстрационные.
 							</p>
@@ -89,7 +89,7 @@ export function SiteShell({
 							{footer.groups.map((group) => (
 								<nav key={group.title} aria-label={group.title}>
 									<p className="mb-3 text-label font-bold">{group.title}</p>
-									<div className="grid gap-2 text-label text-[var(--text-dark-muted)]">
+									<div className="grid gap-2 text-label text-[var(--text-dark)]">
 										{group.links.map((link) => (
 											<Link
 												key={link.href}
@@ -104,7 +104,7 @@ export function SiteShell({
 							))}
 						</div>
 					</div>
-					<div className="mt-10 flex flex-col gap-3 border-t border-[var(--dark-border)] pt-6 text-caption text-[var(--text-dark-muted)] md:flex-row md:items-center md:justify-between">
+					<div className="mt-10 flex flex-col gap-3 border-t border-[var(--dark-border)] pt-6 text-caption text-[var(--text-dark)] md:flex-row md:items-center md:justify-between">
 						<p>{footer.copyright}</p>
 						<nav
 							className="flex flex-wrap gap-4"

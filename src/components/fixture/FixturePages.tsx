@@ -26,7 +26,7 @@ function Breadcrumbs({ items }: MarketingPageDTO["breadcrumbs"]) {
 	return (
 		<nav
 			aria-label="Хлебные крошки"
-			className="mb-6 flex flex-wrap gap-2 text-caption text-content-subtle"
+			className="mb-6 flex flex-wrap gap-2 text-caption text-content-default"
 		>
 			{items.map((item, index) => (
 				<span key={`${item.href ?? "current"}-${item.label}`}>
@@ -136,16 +136,27 @@ export function MarketingPageView({ page }: { page: MarketingPageDTO }) {
 	);
 }
 
-export function PropertyCard({ property }: { property: PropertyCardDTO }) {
+export function PropertyCard({
+	property,
+	headingLevel = "h3",
+}: {
+	property: PropertyCardDTO;
+	headingLevel?: "h2" | "h3";
+}) {
+	const heading = (
+		<Link href={property.href} className="group-hover:text-action-primary">
+			{property.title}
+		</Link>
+	);
 	return (
 		<Card className="group overflow-hidden shadow-[var(--shadow-card)] transition-transform hover:-translate-y-1">
 			<Link
 				href={property.href}
 				className="block aspect-[3/2] bg-surface-subtle"
-				aria-label={`Открыть объект: ${property.title}`}
 			>
-				<div className="flex h-full items-center justify-center text-label text-content-subtle">
-					Фотография из XML-фида
+				<div className="flex h-full items-center justify-center text-label text-content-default">
+					<span className="sr-only">Открыть объект: {property.title}</span>
+					<span aria-hidden>Фотография из XML-фида</span>
 				</div>
 			</Link>
 			<CardHeader>
@@ -154,14 +165,13 @@ export function PropertyCard({ property }: { property: PropertyCardDTO }) {
 						<Badge key={badge}>{badge}</Badge>
 					))}
 				</div>
-				<CardTitle>
-					<Link
-						href={property.href}
-						className="group-hover:text-action-primary"
-					>
-						{property.title}
-					</Link>
-				</CardTitle>
+				{headingLevel === "h2" ? (
+					<h2 className="text-lead font-semibold leading-tight-copy">
+						{heading}
+					</h2>
+				) : (
+					<CardTitle>{heading}</CardTitle>
+				)}
 				<CardDescription>{property.address}</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -171,7 +181,7 @@ export function PropertyCard({ property }: { property: PropertyCardDTO }) {
 				<dl className="mt-4 grid grid-cols-2 gap-3 text-label">
 					{property.summary.map((item) => (
 						<div key={item.key}>
-							<dt className="text-content-subtle">{item.label}</dt>
+							<dt className="text-content-default">{item.label}</dt>
 							<dd className="mt-1 font-semibold">{item.value}</dd>
 						</div>
 					))}
@@ -216,7 +226,7 @@ export function HomePageView({
 							</Button>
 						</div>
 					</div>
-					<PropertyCard property={featured} />
+					<PropertyCard property={featured} headingLevel="h2" />
 				</Container>
 			</Section>
 			<Section>
@@ -254,14 +264,16 @@ export function HomePageView({
 					/>
 					<ol className="mt-8 grid gap-4 md:grid-cols-3">
 						{page.sections[0]?.items?.map((item, index) => (
-							<Card key={item}>
-								<CardHeader>
-									<p className="text-display-small font-extrabold text-action-primary">
-										0{index + 1}
-									</p>
-									<CardTitle>{item}</CardTitle>
-								</CardHeader>
-							</Card>
+							<li key={item}>
+								<Card>
+									<CardHeader>
+										<p className="text-display-small font-extrabold text-action-primary">
+											0{index + 1}
+										</p>
+										<CardTitle>{item}</CardTitle>
+									</CardHeader>
+								</Card>
+							</li>
 						))}
 					</ol>
 				</Container>
@@ -339,13 +351,13 @@ export function PropertyPageView({
 		<main>
 			<Section space="hero">
 				<Container>
-					<nav className="mb-6 text-caption text-content-subtle">
+					<nav className="mb-6 text-caption text-content-default">
 						<Link href="/">Главная</Link> /{" "}
 						<Link href="/nedvizhimost">Недвижимость</Link> / {property.title}
 					</nav>
 					<div className="grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">
 						<div>
-							<div className="flex aspect-[16/9] items-center justify-center rounded-[var(--radius-lg)] bg-surface-subtle text-content-subtle">
+							<div className="flex aspect-[16/9] items-center justify-center rounded-[var(--radius-lg)] bg-surface-subtle text-content-default">
 								Галерея заполняется тегами picture из XML-фида
 							</div>
 							<h1 className="mt-8 text-display-small font-extrabold leading-heading">
@@ -357,7 +369,7 @@ export function PropertyPageView({
 							<dl className="mt-8 grid gap-4 sm:grid-cols-2">
 								{property.characteristics.map((item) => (
 									<div key={item.label} className="border-b border-border pb-3">
-										<dt className="text-label text-content-subtle">
+										<dt className="text-label text-content-default">
 											{item.label}
 										</dt>
 										<dd className="mt-1 font-semibold">{item.value}</dd>
@@ -368,9 +380,9 @@ export function PropertyPageView({
 						<aside>
 							<Card className="sticky top-32 shadow-[var(--shadow-card)]">
 								<CardHeader>
-									<CardTitle className="text-display-small">
+									<h2 className="text-display-small font-semibold leading-tight-copy">
 										{property.price?.label ?? "Цена по запросу"}
-									</CardTitle>
+									</h2>
 									<CardDescription>{property.address}</CardDescription>
 								</CardHeader>
 								<CardContent>

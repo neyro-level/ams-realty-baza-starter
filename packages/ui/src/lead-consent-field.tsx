@@ -50,7 +50,7 @@ export function LeadConsentField({
 					.
 				</span>
 			</label>
-			<p className="text-caption text-[var(--content-subtle)]">
+			<p className="text-caption text-[var(--content-default)]">
 				Версия согласия: {context.consentVersion}
 			</p>
 		</div>
