@@ -43,6 +43,18 @@ const publicPropertySelect = {
 	},
 } satisfies PropertiesSelect<true>;
 
+const publicPropertyFacetSelect = {
+	category: true,
+	dealType: true,
+	rooms: true,
+	priceMinor: true,
+	locality: true,
+	district: true,
+	totalArea: true,
+	kitchenArea: true,
+	floor: true,
+} satisfies PropertiesSelect<true>;
+
 const propertyCategorySchema = z.enum(["apartment", "house", "land", "commercial"]);
 const propertyDealTypeSchema = z.enum(["sale", "rent"]);
 const propertySortSchema = z.enum(["recommended", "newest", "priceAsc", "priceDesc"]);
@@ -127,6 +139,24 @@ export type PublicCatalogResult = {
 	};
 };
 
+export type PublicCatalogFacetsResult = {
+	items: readonly Pick<
+		PublicCatalogProperty,
+		| "category"
+		| "dealType"
+		| "rooms"
+		| "priceMinor"
+		| "locality"
+		| "district"
+		| "totalArea"
+		| "kitchenArea"
+		| "floor"
+	>[];
+	limit: number;
+	total: number;
+	bounded: true;
+};
+
 export const publicPropertyPublicationWhere: Where = {
 	and: [
 		{ status: { equals: "active" } },
@@ -174,6 +204,17 @@ function sortForCatalog(sort: PropertySort): string {
 		default:
 			return "-publishedAt";
 	}
+}
+
+function withoutPaginationOnlyFilters(query: CatalogQuery): Where {
+	const { page: _page, limit: _limit, sort: _sort, view: _view, ...filterInput } = query;
+	return buildCatalogWhere({
+		...filterInput,
+		page: 1,
+		limit: publicGatewayPolicy.maxLimit,
+		sort: "recommended",
+		view: "grid",
+	});
 }
 
 function toPublicCatalogProperty(property: PublicCatalogSelectedProperty): PublicCatalogProperty {
@@ -270,4 +311,39 @@ export async function findPublicPropertyBySlug(payload: Payload, slug: string) {
 	if (!property) return null;
 
 	return toPublicCatalogProperty(property as PublicCatalogSelectedProperty);
+}
+
+export async function findPublicCatalogFacets(
+	payload: Payload,
+	input: CatalogQueryInput,
+): Promise<PublicCatalogFacetsResult> {
+	const query = catalogQuerySchema.parse(input);
+	const limit = 500;
+	const result = await payload.find({
+		collection: "properties",
+		where: withoutPaginationOnlyFilters(query),
+		depth: publicGatewayPolicy.depth,
+		limit,
+		page: 1,
+		sort: "locality",
+		select: publicPropertyFacetSelect,
+		overrideAccess: publicGatewayPolicy.overrideAccess,
+	});
+
+	return {
+		items: result.docs.map((property) => ({
+			category: property.category,
+			dealType: property.dealType,
+			rooms: property.rooms,
+			priceMinor: property.priceMinor,
+			locality: property.locality,
+			district: property.district,
+			totalArea: property.totalArea,
+			kitchenArea: property.kitchenArea,
+			floor: property.floor,
+		})),
+		limit,
+		total: result.totalDocs,
+		bounded: true,
+	};
 }

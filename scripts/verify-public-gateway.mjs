@@ -62,6 +62,19 @@ for (const snippet of requiredPredicateSnippets) {
 	}
 }
 
+const facetSnippets = [
+	"const publicPropertyFacetSelect",
+	"export async function findPublicCatalogFacets",
+	"const limit = 500",
+	"bounded: true",
+];
+
+for (const snippet of facetSnippets) {
+	if (!catalogSource.includes(snippet)) {
+		throw new Error(`Public Gateway facet implementation missing: ${snippet}`);
+	}
+}
+
 const requiredRawRestDeniedCollections = [
 	"pages",
 	"properties",

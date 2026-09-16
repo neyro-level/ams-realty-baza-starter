@@ -11,6 +11,7 @@ import type {
 	SiteHeaderDTO,
 } from "@ams/realtbase-contracts";
 import type { PublicCatalogProperty, PublicCatalogResult } from "./catalog";
+import type { PublicCatalogFacetsResult } from "./catalog";
 import type { PublicPageRecord } from "./pages";
 
 const brandName = "AMS Realty Baza Starter";
@@ -130,8 +131,23 @@ export function toPropertyListDTO(result: PublicCatalogResult): PropertyListDTO 
 	};
 }
 
-export function toPropertyFilterDTO(result: PublicCatalogResult): PropertyFilterDTO {
-	const cards = result.items;
+const categoryLabels = {
+	apartment: "Квартиры",
+	house: "Дома",
+	land: "Участки",
+	commercial: "Коммерческая",
+} as const;
+
+const dealTypeLabels = {
+	sale: "Продажа",
+	rent: "Аренда",
+} as const;
+
+export function toPropertyFilterDTO(
+	result: PublicCatalogResult,
+	facets?: PublicCatalogFacetsResult,
+): PropertyFilterDTO {
+	const cards = facets?.items ?? result.items;
 	const rooms = [...new Set(cards.map((item) => item.rooms).filter((room): room is number => Boolean(room)))].sort(
 		(a, b) => a - b,
 	);
@@ -140,10 +156,18 @@ export function toPropertyFilterDTO(result: PublicCatalogResult): PropertyFilter
 	const districts = [
 		...new Set(cards.map((item) => item.district).filter((district): district is string => Boolean(district))),
 	];
+	const categories = [...new Set(cards.map((item) => item.category))];
+	const dealTypes = [...new Set(cards.map((item) => item.dealType))];
 
 	return {
-		categories: [{ value: "apartment", label: "Квартиры" }],
-		dealTypes: [{ value: "sale", label: "Продажа" }],
+		categories: categories.map((category) => ({
+			value: category,
+			label: categoryLabels[category],
+		})),
+		dealTypes: dealTypes.map((dealType) => ({
+			value: dealType,
+			label: dealTypeLabels[dealType],
+		})),
 		cities: cities.map((city) => ({ value: city, label: city })),
 		districts: districts.map((district) => ({ value: district, label: district })),
 		rooms,

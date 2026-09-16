@@ -1,6 +1,10 @@
 import "server-only";
 
-import { findPublicCatalogProperties, findPublicPropertyBySlug } from "./catalog";
+import {
+	findPublicCatalogFacets,
+	findPublicCatalogProperties,
+	findPublicPropertyBySlug,
+} from "./catalog";
 import {
 	toHomePageDTO,
 	toMarketingPageDTO,
@@ -19,11 +23,15 @@ export async function getPublicShell() {
 
 export async function getPublicCatalog() {
 	const payload = await getPublicGatewayPayload();
-	const result = await findPublicCatalogProperties(payload, { limit: 24, page: 1 });
+	const query = { limit: 24, page: 1 } as const;
+	const [result, facets] = await Promise.all([
+		findPublicCatalogProperties(payload, query),
+		findPublicCatalogFacets(payload, query),
+	]);
 
 	return {
 		list: toPropertyListDTO(result),
-		filters: toPropertyFilterDTO(result),
+		filters: toPropertyFilterDTO(result, facets),
 	} as const;
 }
 
