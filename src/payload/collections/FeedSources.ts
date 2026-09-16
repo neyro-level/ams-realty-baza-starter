@@ -7,6 +7,38 @@ export const FeedSources: CollectionConfig = {
 		useAsTitle: "title",
 		defaultColumns: ["code", "title", "market", "enabled", "nextDueAt"],
 	},
+	hooks: {
+		beforeDelete: [
+			async ({ id, req }) => {
+				const [properties, importRuns, importIssues] = await Promise.all([
+					req.payload.count({
+						collection: "properties",
+						where: { feedSource: { equals: id } },
+						req,
+					}),
+					req.payload.count({
+						collection: "import-runs",
+						where: { feedSource: { equals: id } },
+						req,
+					}),
+					req.payload.count({
+						collection: "import-issues",
+						where: { feedSource: { equals: id } },
+						req,
+					}),
+				]);
+
+				const linkedRows =
+					properties.totalDocs + importRuns.totalDocs + importIssues.totalDocs;
+
+				if (linkedRows > 0) {
+					throw new Error(
+						`Feed source ${id} cannot be deleted while linked properties/import history exist.`,
+					);
+				}
+			},
+		],
+	},
 	access: {
 		create: adminsAndOwners,
 		read: adminsAndOwners,

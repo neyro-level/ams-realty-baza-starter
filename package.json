@@ -26,6 +26,7 @@
 		"payload:generate:importmap": "payload generate:importmap",
 		"payload:migrate": "payload migrate",
 		"payload:migrate:create": "payload migrate:create",
+		"verify:schema": "node scripts/verify-schema.mjs",
 		"quality:architecture": "dependency-cruiser src packages scripts --config .dependency-cruiser.mjs --output-type err",
 		"quality:design-tokens": "node scripts/quality/design-tokens.mjs",
 		"quality:guards": "node scripts/quality/architecture-guard.mjs && node scripts/quality/design-tokens.mjs && node scripts/quality/sourcecraft-policy.mjs",
