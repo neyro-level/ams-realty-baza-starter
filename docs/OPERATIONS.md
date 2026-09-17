@@ -18,7 +18,18 @@ secrets: isolated project-specific Secret Master scope
 indexing: noindex until owner explicitly promotes the instance
 ```
 
-`TODO: оформить после выбора exact Timeweb runtime и immutable artifact format.` Обязательные границы: отдельная команда владельца, clean SourceCraft `main`, exact SHA, отсутствие build на production host, один rollout и live smoke. Известный рабочий artifact сохраняется для rollback.
+Immutable artifact format: full Next.js Docker image built from `Dockerfile` outside the production host. Server runtime uses `deploy/compose/start-baza.compose.yml`; public proxy uses `deploy/nginx/start-baza.ams24.ru.conf`. Release identity is recorded by `pnpm release:manifest`; generated `.release/` files are local evidence and are not committed. Обязательные границы: отдельная команда владельца, clean SourceCraft `main`, exact SHA, отсутствие build на production host, один rollout и live smoke. Известный рабочий artifact сохраняется для rollback.
+
+Release sequence:
+
+1. Confirm clean canonical SourceCraft `main` and exact full SHA.
+2. Run `pnpm release:manifest` for local release identity evidence.
+3. Build one Docker image from the exact SHA outside the production host and tag it with the full SHA.
+4. Run Payload migrations from the same image against the project-specific Managed PostgreSQL.
+5. Start/recreate exactly one application runtime with `JOBS_AUTORUN=true`; no parallel jobs owner is allowed.
+6. Route `start-baza.ams24.ru` through Nginx/TLS to this runtime with `noindex` preserved.
+7. Check `/api/internal/healthz` with the configured health secret and run the changed live smoke.
+8. Keep the previous image tag and env snapshot available for rollback.
 
 При handover jobs сначала новый runtime стартует с `JOBS_AUTORUN=false`; старый jobs owner выключается до controlled restart нового с `true`. Два jobs-active runtime недопустимы.
 

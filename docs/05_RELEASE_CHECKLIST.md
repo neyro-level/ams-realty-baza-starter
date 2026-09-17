@@ -27,7 +27,7 @@
 - server identity, Managed PostgreSQL, S3 bucket и isolated Secret Master scope подтверждены без переноса секретов в git/logs;
 - staging обязателен для migration, parser/source identity, auth/access и major upgrade;
 - migration, backup/restore, jobs ownership и rollback проверены по риску;
-- готов immutable artifact; build на production host запрещён;
+- готов immutable Docker artifact из exact `main`; build на production host запрещён;
 - production secrets берутся из Secret Master; Doppler допустим только как временный legacy/import source для ещё не перенесённых значений;
 - после rollout выполнен live smoke изменённого сценария;
 - production URL, health и rollback point зафиксированы.
