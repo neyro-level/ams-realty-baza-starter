@@ -1,9 +1,8 @@
 export const privatePropertyFields = [
 	"unitNumber",
 	"cadastralNumber",
-	"ownerName",
-	"ownerPhone",
-	"internalNotes",
+	"internalComment",
+	"ownerContact",
 ] as const;
 
 export type PrivatePropertyField = (typeof privatePropertyFields)[number];
