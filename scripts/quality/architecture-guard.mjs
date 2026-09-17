@@ -195,6 +195,103 @@ if (
 	);
 }
 
+const baseline = JSON.parse(
+	readFileSync(path.join(root, "docs", "guard-baseline.json"), "utf8"),
+);
+if (baseline.frozen !== true) {
+	violations.push("docs/guard-baseline.json must be frozen");
+}
+if (!Array.isArray(baseline.knownExceptions) || baseline.knownExceptions.length !== 0) {
+	violations.push("docs/guard-baseline.json knownExceptions must stay empty");
+}
+
+const approvedSql =
+	/^src\/core\/data-access\/(?:system|ingest)\/sql\//;
+const migrationSql = /^src\/payload\/migrations\//;
+for (const file of filesUnder("src")) {
+	const name = relative(file);
+	const content = readFileSync(file, "utf8");
+	if (
+		(/db\.execute\s*\(|\bsql`/.test(content) ||
+			/from\s+["']pg["']/.test(content)) &&
+		!approvedSql.test(name) &&
+		!migrationSql.test(name)
+	) {
+		report(file, "low-level SQL is only allowed in approved sql layers or migrations");
+	}
+	if (
+		/collection:\s*["']payload-jobs["']/.test(content) &&
+		!name.startsWith("src/core/data-access/system/jobs/") &&
+		!name.startsWith("src/payload/payload-types.ts")
+	) {
+		report(file, "payload-jobs access is only allowed in system/jobs");
+	}
+	if (
+		/\bfetch\s*\(/.test(content) &&
+		name !== "src/server/security/safe-outbound-client.ts"
+	) {
+		report(file, "direct fetch is forbidden outside Safe Outbound Client");
+	}
+}
+
+for (const file of [
+	...filesUnder("src/core/ingest"),
+	...filesUnder("src/payload/jobs"),
+	...filesUnder("src/core/cache"),
+]) {
+	if (/from\s+["']next\//.test(readFileSync(file, "utf8"))) {
+		report(file, "top-level next/* import in ingest/job/cache graph");
+	}
+}
+
+const payloadConfig = readFileSync(path.join(root, "payload.config.ts"), "utf8");
+if (/cors:\s*["']\*["']/.test(payloadConfig) || /origin:\s*["']\*["']/.test(payloadConfig)) {
+	violations.push("payload.config.ts: wildcard CORS is forbidden");
+}
+
+const classified = new Set(Object.keys(boundary.classifiedCollections ?? {}));
+const requiredCollections = [
+	"users",
+	"pages",
+	"properties",
+	"feed-sources",
+	"import-runs",
+	"import-issues",
+	"leads",
+	"lead-deliveries",
+	"media",
+	"redirects",
+	"payload-jobs",
+];
+for (const slug of requiredCollections) {
+	if (!classified.has(slug)) {
+		violations.push(`config/raw-rest-boundary.json: collection ${slug} is unclassified`);
+	}
+}
+if (boundary.classifiedCollections?.media !== "deny-anonymous") {
+	violations.push("media must be classified deny-anonymous in raw-rest-boundary.json");
+}
+
+for (const file of routeFiles) {
+	if (/\/jobs(?:\/|$)/.test(file) && !file.includes("payload")) {
+		violations.push(`${file}: public jobs endpoint is forbidden`);
+	}
+}
+
+const reserved = ["/novostroyki", "/komplex", "/journal"];
+for (const prefix of reserved) {
+	const appHit = filesUnder("src/app").some((file) =>
+		relative(file).includes(prefix.slice(1)),
+	);
+	if (appHit) {
+		violations.push(`reserved namespace ${prefix} must not be occupied by a static app route`);
+	}
+}
+
+if (!existsSync(path.join(root, "src", "core", "data-access", "system", "jobs", "inspect.ts"))) {
+	violations.push("src/core/data-access/system/jobs module is missing");
+}
+
 if (violations.length) {
 	console.error(violations.join("\n"));
 	process.exit(1);

@@ -3,7 +3,12 @@ import { adminsAndOwners, hasRole, ownersOnly, userRoles } from "../access/roles
 
 export const Users: CollectionConfig = {
 	slug: "users",
-	auth: true,
+	auth: {
+		maxLoginAttempts: 5,
+		lockTime: 10 * 60 * 1000,
+		verify: false,
+		useAPIKey: false,
+	},
 	admin: {
 		useAsTitle: "email",
 		defaultColumns: ["email", "roles", "updatedAt"],

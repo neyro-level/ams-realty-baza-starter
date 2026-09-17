@@ -6,11 +6,11 @@ const anonymousDenyCollections = new Set(
 );
 const anonymousAuthAllowPaths = new Set(rawRestBoundary.anonymousAuthAllowPaths);
 
-function hasAuthSignal(request: NextRequest): boolean {
-	return Boolean(
-		request.headers.get("authorization") ||
-			request.headers.get("cookie")?.includes("payload-token"),
-	);
+function hasPayloadSessionCookie(request: NextRequest): boolean {
+	const token = request.cookies.get("payload-token")?.value;
+	if (!token) return false;
+	const parts = token.split(".");
+	return parts.length === 3 && parts.every((part) => part.length > 8);
 }
 
 function isAnonymousRawCollectionPath(pathname: string): boolean {
@@ -26,7 +26,7 @@ function isAnonymousRawCollectionPath(pathname: string): boolean {
 export function proxy(request: NextRequest) {
 	if (
 		isAnonymousRawCollectionPath(request.nextUrl.pathname) &&
-		!hasAuthSignal(request)
+		!hasPayloadSessionCookie(request)
 	) {
 		return NextResponse.json({ error: "notFound" }, { status: 404 });
 	}

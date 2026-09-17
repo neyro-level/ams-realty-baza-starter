@@ -3,7 +3,8 @@ type SystemOperation =
 	| "controlled-maintenance"
 	| "system-job"
 	| "migration-helper"
-	| "trusted-inspection";
+	| "trusted-inspection"
+	| "payload-jobs-inspect";
 
 export function systemOverrideAccess(operation: SystemOperation) {
 	return {
