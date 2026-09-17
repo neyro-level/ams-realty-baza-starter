@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { PropertyCardDto } from "../../contracts/property";
+import type { PropertyCardDto } from "../../view-models/property";
 import type { SiteImageRenderer, SiteLinkRenderer } from "../../lib/adapters";
 
 export type PropertyCardCollectionActionProps = {

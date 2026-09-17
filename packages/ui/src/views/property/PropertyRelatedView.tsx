@@ -1,5 +1,5 @@
 import { Building2, MapPin } from "lucide-react";
-import type { PropertyRelatedItemDto } from "../../contracts/property";
+import type { PropertyRelatedItemDto } from "../../view-models/property";
 import type { SiteImageRenderer, SiteLinkRenderer } from "../../lib/adapters";
 
 export function PropertyRelatedView({

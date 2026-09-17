@@ -7,7 +7,7 @@ import { Card } from "../../components/ui/card";
 import type {
 	PropertyDetailRowDto,
 	PropertyDetailSummaryItemDto,
-} from "../../contracts/property";
+} from "../../view-models/property";
 
 const SUMMARY_ICONS = {
 	area: Ruler,

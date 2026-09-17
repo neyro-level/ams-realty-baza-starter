@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, Building2 } from "lucide-react";
 import type { ReactNode } from "react";
-import type { SitemapListingPageDTO } from "../../contracts/content";
+import type { SitemapListingPageDTO } from "../../view-models/content";
 import type { SiteLinkRenderer } from "../../lib/adapters";
 
 export function HtmlSitemapListingView({

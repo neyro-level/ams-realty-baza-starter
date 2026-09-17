@@ -14,7 +14,7 @@ import {
 	BreadcrumbSeparator,
 } from "../../components/ui/breadcrumb";
 import { Card } from "../../components/ui/card";
-import type { LegalDocumentDTO } from "../../contracts/content";
+import type { LegalDocumentDTO } from "../../view-models/content";
 import type { SiteLinkRenderer } from "../../lib/adapters";
 
 type LegalHubViewProps = {

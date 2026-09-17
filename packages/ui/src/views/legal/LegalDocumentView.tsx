@@ -10,7 +10,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Separator } from "../../components/ui/separator";
-import type { LegalDocumentDTO } from "../../contracts/content";
+import type { LegalDocumentDTO } from "../../view-models/content";
 import type { SiteLinkRenderer } from "../../lib/adapters";
 
 type LegalDocumentViewProps = {

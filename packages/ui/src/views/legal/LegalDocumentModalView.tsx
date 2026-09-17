@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
-import type { LegalDocumentSectionDTO } from "../../contracts/content";
+import type { LegalDocumentSectionDTO } from "../../view-models/content";
 
 type LegalDocumentModalViewProps = {
 	title: string;

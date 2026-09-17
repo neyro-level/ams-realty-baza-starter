@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type {
 	JournalArticleCardDTO,
 	JournalCategoryLinkDTO,
-} from "../../contracts/content";
+} from "../../view-models/content";
 import type { SiteImageRenderer, SiteLinkRenderer } from "../../lib/adapters";
 
 export function HomeArticlesPreviewView({

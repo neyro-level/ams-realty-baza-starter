@@ -26,6 +26,12 @@ function report(file, rule) {
 	violations.push(`${relative(file)}: ${rule}`);
 }
 
+if (existsSync(path.join(root, "packages", "ui", "src", "contracts"))) {
+	violations.push(
+		"packages/ui/src/contracts: duplicate DTO folder is forbidden; use packages/contracts and view-models",
+	);
+}
+
 const persistenceImport =
 	/from\s+["'](?:payload|@payloadcms\/[^"']+|pg|prisma|@prisma\/[^"']+)["']/;
 for (const file of filesUnder("packages/ui")) {

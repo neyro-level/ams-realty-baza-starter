@@ -31,6 +31,18 @@ export default {
 			from: { path: "^packages/contracts/" },
 			to: { path: "^(?:next/|payload|@payloadcms/|pg$|prisma$|@prisma/)" },
 		},
+		{
+			name: "ui-does-not-import-app-persistence",
+			severity: "error",
+			from: { path: "^packages/ui/" },
+			to: { path: "^src/(?:payload|project)/" },
+		},
+		{
+			name: "core-does-not-import-ui",
+			severity: "error",
+			from: { path: "^src/core/" },
+			to: { path: "^packages/ui/" },
+		},
 	],
 	options: {
 		doNotFollow: { path: ["node_modules"] },
