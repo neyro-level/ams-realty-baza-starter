@@ -31,13 +31,7 @@ const runtimeEnvSchema = z.object({
 	DATABASE_URI: optionalString,
 	DATABASE_POOL_MAX: optionalInteger.default(10),
 	PAYLOAD_SECRET: optionalString,
-
-	S3_ENDPOINT: optionalUrl,
-	S3_REGION: optionalString,
-	S3_BUCKET: optionalString,
-	S3_ACCESS_KEY: optionalString,
-	S3_SECRET_KEY: optionalString,
-	S3_FORCE_PATH_STYLE: booleanString.default(true),
+	MEDIA_DIR: optionalString,
 
 	OUTBOUND_ALLOWED_HOSTS: optionalString,
 	EXTERNAL_IMAGE_HOSTS: optionalString,
@@ -53,13 +47,6 @@ export const runtimeEnv = runtimeEnvSchema.parse(process.env);
 
 export const isPayloadRuntimeConfigured =
 	Boolean(runtimeEnv.DATABASE_URI) && Boolean(runtimeEnv.PAYLOAD_SECRET);
-
-export const isS3Configured =
-	Boolean(runtimeEnv.S3_ENDPOINT) &&
-	Boolean(runtimeEnv.S3_REGION) &&
-	Boolean(runtimeEnv.S3_BUCKET) &&
-	Boolean(runtimeEnv.S3_ACCESS_KEY) &&
-	Boolean(runtimeEnv.S3_SECRET_KEY);
 
 export function requirePayloadRuntime() {
 	if (!runtimeEnv.DATABASE_URI) {

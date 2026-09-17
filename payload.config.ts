@@ -1,5 +1,4 @@
 import { postgresAdapter } from "@payloadcms/db-postgres";
-import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 import { FeedSources } from "./src/payload/collections/FeedSources.ts";
@@ -12,7 +11,7 @@ import { Pages } from "./src/payload/collections/Pages.ts";
 import { Properties } from "./src/payload/collections/Properties.ts";
 import { Redirects } from "./src/payload/collections/Redirects.ts";
 import { Users } from "./src/payload/collections/Users.ts";
-import { isS3Configured, runtimeEnv } from "./src/payload/env.ts";
+import { runtimeEnv } from "./src/payload/env.ts";
 import { payloadJobsAutoRun } from "./src/payload/jobs/queues.ts";
 import { payloadJobTasks } from "./src/payload/jobs/tasks.ts";
 
@@ -57,24 +56,6 @@ export default buildConfig({
 		tasks: payloadJobTasks,
 		shouldAutoRun: async () => runtimeEnv.JOBS_AUTORUN,
 	},
-	plugins: [
-		s3Storage({
-			enabled: isS3Configured,
-			collections: {
-				media: true,
-			},
-			bucket: runtimeEnv.S3_BUCKET ?? "not-configured",
-			config: {
-				credentials: {
-					accessKeyId: runtimeEnv.S3_ACCESS_KEY ?? "not-configured",
-					secretAccessKey: runtimeEnv.S3_SECRET_KEY ?? "not-configured",
-				},
-				endpoint: runtimeEnv.S3_ENDPOINT,
-				forcePathStyle: runtimeEnv.S3_FORCE_PATH_STYLE,
-				region: runtimeEnv.S3_REGION ?? "auto",
-			},
-		}),
-	],
 	secret: payloadSecret,
 	serverURL: runtimeEnv.NEXT_PUBLIC_SERVER_URL,
 	sharp,

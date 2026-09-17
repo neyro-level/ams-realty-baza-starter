@@ -19,7 +19,7 @@ const alerts = buildOperationalAlerts({
 		abandoned: 1,
 	},
 	storage: {
-		s3Configured: false,
+		localMediaReady: false,
 	},
 });
 
@@ -64,7 +64,7 @@ assert.deepEqual(
 			abandoned: 0,
 		},
 		storage: {
-			s3Configured: true,
+			localMediaReady: true,
 		},
 	}),
 	[],

@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Active / Foundation`.
+Статус: `Active / Hardening` — утверждён master plan `AMS-REALTBASE-HARDENING` v2.
 
 ## Канонические документы
 
@@ -20,9 +20,10 @@
 
 ## Нормативные источники
 
-- `../AMS_PROJECT_ARCHITECTURE_v1.0.md` — полный утверждённый мастер-план, требования эпиков и acceptance.
+- `docs/AMS_MASTER_PLAN №2.md` — действующий утверждённый мастер-план hardening (`AMS-REALTBASE-HARDENING` v2).
+- `../AMS_PROJECT_ARCHITECTURE_v1.0.md` — историческая спецификация demo/template контура v1.0.
 - `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` — платформенные инварианты Core 5.5.
-- `research/ATLAS_BASELINE.md` — evidence точного Atlas donor, UI inventory и обязательных visual scenarios для EPIC 1; файлы и integrity manifest находятся в `research/atlas-visual-baseline/`.
+- `research/ATLAS_BASELINE.md` — evidence точного Atlas donor, UI inventory и обязательных visual scenarios.
 - локальный stealth Beads — производный dependency graph; не заменяет `04_BACKLOG.md`.
 
-При расхождении конкретное решение ищется в профильном документе из таблицы, а общий инвариант — в Core 5.5. Не создавать второй документ для той же области без ADR.
+При расхождении конкретное решение ищется в профильном документе из таблицы, а общий инвариант — в Core 5.5.

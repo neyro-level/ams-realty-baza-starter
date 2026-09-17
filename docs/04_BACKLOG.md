@@ -1,24 +1,19 @@
 # Backlog
 
-Статус: `Active`.
+Статус: `Active / Hardening` — `AMS-REALTBASE-HARDENING` v2 APPROVED.
 
-Требования и acceptance эпиков находятся в `../AMS_PROJECT_ARCHITECTURE_v1.0.md`. Этот файл хранит только верхнеуровневый фокус; атомарные задачи и зависимости ведутся локально в stealth Beads.
+Требования и acceptance эпиков находятся в `AMS_MASTER_PLAN №2.md`. Этот файл хранит только верхнеуровневый фокус; атомарные задачи и зависимости ведутся локально в stealth Task Manager (Beads).
 
-## NOW
+## Фокус
 
-- EPIC 1 — Atlas Inventory + Visual Baseline.
-- EPIC 19 — Atlas Demo Catalog Import: перенести donor snapshot Atlas `.atlas-import/yandex/catalog.json` как 60 опубликованных объектов и 20 краснодарских ЖК в текущий starter catalog, с production import proof.
-- Pilot orchestration завершён; дальнейшая оркестрация идёт по READY-задачам Beads. Независимая проверка не является стандартным финальным шагом эпика и запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope.
+Интеграционная ветка `hardening/realtbase-starter`. Текущая задача: EPIC 0 — правдивая local topology, ADR, knobs, verify commands.
 
-## NEXT
+## Политика доставки
 
-- EPIC 2 — Contracts Draft + Feasibility Map.
+- Эпики: MERGE_AFTER_GATE в `hardening/realtbase-starter`.
+- Checkpoints: PR в `main` после COMMERCIAL Gate.
+- Production только отдельной командой владельца.
 
-## LATER
+## Исторический v1.0
 
-- EPIC 3–18 по dependency graph и build order мастер-плана.
-
-## Gates
-
-- Merge: в активной оркестрации разрешён командами `продолжай` / `продолжай дальше`; вне неё нужна отдельная команда владельца. Exact-head SourceCraft Gate обязателен.
-- Production: отдельная команда владельца.
+Master plan v1.0 заключён 2026-09-17. EPIC 17 и EPIC 18 сознательно не реализовывались.
