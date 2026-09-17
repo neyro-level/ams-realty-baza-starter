@@ -7,6 +7,7 @@
 ## NOW
 
 - EPIC 1 — Atlas Inventory + Visual Baseline.
+- EPIC 19 — Atlas Demo Catalog Import: перенести donor snapshot Atlas `.atlas-import/yandex/catalog.json` как 60 опубликованных объектов и 20 краснодарских ЖК в текущий starter catalog, с production import proof.
 - Pilot orchestration завершён; дальнейшая оркестрация идёт по READY-задачам Beads. Независимая проверка не является стандартным финальным шагом эпика и запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope.
 
 ## NEXT

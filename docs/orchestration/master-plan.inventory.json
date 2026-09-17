@@ -23,7 +23,8 @@
       "EPIC 15",
       "EPIC 16",
       "EPIC 17",
-      "EPIC 18"
+      "EPIC 18",
+      "EPIC 19"
     ]
   },
   "nodes": [
@@ -3139,6 +3140,97 @@
       "labels": [
         "implementation",
         "epic:18"
+      ]
+    },
+    {
+      "key": "EPIC-19",
+      "title": "Atlas Demo Catalog Import",
+      "type": "epic",
+      "source_anchor": "EPIC 19",
+      "goal": "Перенести утверждённый demo catalog из Atlas в AMS RealtBase Starter и доказать 60 объектов + 20 краснодарских ЖК в production.",
+      "scope": [
+        "Atlas donor snapshot .atlas-import/yandex/catalog.json: 60 properties and 20 complexes.",
+        "Импорт в текущую Payload/PostgreSQL модель без второго backend и без раскрытия секретов.",
+        "Медиа демо-каталога доступны публичному сайту из project-owned static assets."
+      ],
+      "acceptance_criteria": [
+        "В проект добавлен idempotent import script для Atlas demo catalog.",
+        "В локальной/целевой БД создаются или обновляются ровно 60 demo properties и 20 Krasnodar newbuild complex records.",
+        "Повторный запуск импорта не создаёт дубликаты.",
+        "Production содержит импортированные 60 + 20 записи и публичный каталог/карточка открываются с demo media."
+      ],
+      "depends_on": [
+        "EPIC-16"
+      ],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md",
+        "src/demo-data/atlas-yandex/catalog.json"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:delivery",
+        "implementation",
+        "epic:19",
+        "delivery:merge-after-gate"
+      ]
+    },
+    {
+      "key": "TASK-19-01",
+      "title": "Импортировать Atlas demo catalog 60/20",
+      "type": "task",
+      "parent_key": "EPIC-19",
+      "source_anchor": "EPIC 19",
+      "goal": "Atlas donor catalog перенесён в AMS RealtBase Starter как production-ready demo data set.",
+      "scope": [
+        "Перенести donor snapshot и media из Atlas.",
+        "Сопоставить 60 properties и 20 residential complexes с текущей коллекцией properties.",
+        "Выполнить import/verify локально и на AMS Server production DB."
+      ],
+      "acceptance_criteria": [
+        "Импорт создаёт/обновляет 60 объектов вторички/земли/домов/коммерции и 20 newbuild-записей ЖК Краснодара.",
+        "Public catalog считает импортированные записи активными и опубликованными.",
+        "Demo media URLs открываются из production domain.",
+        "Evidence ledger фиксирует локальный и production counts без вывода секретов."
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_PROJECT_ARCHITECTURE_v1.0.md",
+        "src/demo-data/atlas-yandex/catalog.json",
+        "public/atlas-demo/yandex/media"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push",
+        "create_pr"
+      ],
+      "stop_conditions": [
+        "schema migration required",
+        "destructive migration",
+        "new secret",
+        "paid external action"
+      ],
+      "priority": 2,
+      "labels": [
+        "implementation",
+        "epic:19"
       ]
     }
   ],

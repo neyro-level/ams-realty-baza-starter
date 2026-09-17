@@ -3385,6 +3385,18 @@ feed health
 delivery health
 ```
 
+## EPIC 19 — Atlas Demo Catalog Import
+
+```text
+Atlas donor catalog snapshot
+60 Krasnodar demo properties
+20 Krasnodar residential complexes represented in the starter catalog
+local PostgreSQL import
+production PostgreSQL import
+public media availability
+idempotent re-run proof
+```
+
 ---
 
 # 83. Build order
@@ -3414,6 +3426,7 @@ PRESENTATION FOUNDATION FROZEN
 16 Internal production
 17 Clone workflow
 18 Analytics
+19 Atlas demo catalog import
 ```
 
 ---
@@ -3458,6 +3471,7 @@ anti-spam/rate limits proven
 redirect after retention is explicit; default is 410
 Managed PostgreSQL works
 connection pool budget proven without exhaustion
+Atlas demo catalog imports exactly 60 properties and 20 Krasnodar residential complexes into the starter catalog
 S3 works
 backup/restore proven
 SourceCraft exact-head merge guard enforced

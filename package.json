@@ -22,6 +22,8 @@
 		"contracts:journal:freeze": "node scripts/contracts.mjs freeze --scope=journal",
 		"contracts:test": "node scripts/contracts.mjs test-line-endings",
 		"payload:bootstrap-owner": "payload run scripts/payload-bootstrap-owner.ts",
+		"payload:import:atlas-demo": "payload run scripts/import-atlas-demo-data.ts",
+		"payload:verify:atlas-demo": "payload run scripts/import-atlas-demo-data.ts -- --verify-only",
 		"payload:generate:types": "payload generate:types",
 		"payload:generate:importmap": "payload generate:importmap",
 		"payload:migrate": "payload migrate",
