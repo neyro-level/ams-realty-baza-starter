@@ -4,7 +4,7 @@ import type {
 	HtmlSitemapPageDTO,
 	SitemapColumnDTO,
 	SitemapLinkDTO,
-} from "../../contracts/content";
+} from "../../view-models/content";
 import type { SiteLinkRenderer } from "../../lib/adapters";
 
 export function HtmlSitemapView({

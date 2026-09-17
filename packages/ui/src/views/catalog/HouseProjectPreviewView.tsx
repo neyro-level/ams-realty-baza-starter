@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import { Badge } from "../../components/ui/badge";
 import { Card } from "../../components/ui/card";
-import type { HouseProjectPreviewDTO } from "../../contracts/content";
+import type { HouseProjectPreviewDTO } from "../../view-models/content";
 import type { SiteLinkRenderer } from "../../lib/adapters";
 
 export function HouseProjectPreviewView({

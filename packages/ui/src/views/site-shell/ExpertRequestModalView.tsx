@@ -11,7 +11,7 @@ import { Button } from "../../components/ui/button";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
 import { Input } from "../../components/ui/input";
-import type { RequestAvatar } from "../../contracts/request";
+import type { RequestAvatar } from "../../view-models/request";
 import type { SiteImageRenderer } from "../../lib/adapters";
 
 type ExpertRequestModalViewProps = {

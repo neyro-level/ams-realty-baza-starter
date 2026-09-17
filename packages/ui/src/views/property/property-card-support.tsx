@@ -1,4 +1,4 @@
-import type { PropertyCardDto } from "../../contracts/property";
+import type { PropertyCardDto } from "../../view-models/property";
 import { formatRublePrice } from "../../lib/realty-format";
 import type { PropertyCardViewProps } from "./property-card.types";
 

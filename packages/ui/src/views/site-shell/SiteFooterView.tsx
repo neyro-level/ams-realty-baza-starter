@@ -9,7 +9,7 @@ import type {
 	SiteFooterMetaViewDto,
 	SiteNavLinkViewDto,
 	SiteSocialLinkViewDto,
-} from "../../contracts/site-shell";
+} from "../../view-models/site-shell";
 import type { SiteLinkRenderer } from "../../lib/adapters";
 
 type SiteFooterViewProps = {

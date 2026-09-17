@@ -1,7 +1,7 @@
 import type {
 	SiteHeaderNavItemViewDto,
 	SiteNavLinkViewDto,
-} from "../../contracts/site-shell";
+} from "../../view-models/site-shell";
 
 export type SiteHeaderNavItemDto = SiteHeaderNavItemViewDto;
 export type SiteNavLinkDto = SiteNavLinkViewDto;

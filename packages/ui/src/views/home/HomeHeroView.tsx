@@ -1,5 +1,5 @@
 import { RequestModalButton } from "../../components/shared/site-overlay-context";
-import type { HomeFeaturedPropertyDTO } from "../../contracts/content";
+import type { HomeFeaturedPropertyDTO } from "../../view-models/content";
 import type { SiteImageRenderer, SiteLinkRenderer } from "../../lib/adapters";
 
 export type HomeHeroContentDto = {

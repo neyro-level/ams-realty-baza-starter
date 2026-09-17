@@ -17,7 +17,7 @@ import type {
 	CatalogFacetsDto,
 	CatalogQueryDto,
 	CatalogViewDto,
-} from "../../contracts/catalog";
+} from "../../view-models/catalog";
 import type { SiteLinkRenderer } from "../../lib/adapters";
 
 export type CatalogTabViewDto = {

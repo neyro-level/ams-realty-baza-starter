@@ -1,5 +1,5 @@
 import { Card } from "../../components/ui/card";
-import type { CorporateRelatedServiceDTO } from "../../contracts/content";
+import type { CorporateRelatedServiceDTO } from "../../view-models/content";
 import type { SiteLinkRenderer } from "../../lib/adapters";
 
 export function CorporateRelatedServicesView({

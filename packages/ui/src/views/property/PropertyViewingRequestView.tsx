@@ -9,7 +9,7 @@ import { Input } from "../../components/ui/input";
 import type {
 	PropertyViewingDateDto,
 	PublicFormResultDto,
-} from "../../contracts/property";
+} from "../../view-models/property";
 
 export function PropertyViewingRequestView({
 	dates,

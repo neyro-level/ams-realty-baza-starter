@@ -7,7 +7,21 @@
 		"src/app/(payload)/api/graphql/route.ts",
 		"src/app/(payload)/api/graphql-playground/route.ts"
 	],
+	"classifiedCollections": {
+		"users": "admin-auth",
+		"pages": "deny-anonymous",
+		"properties": "deny-anonymous",
+		"feed-sources": "deny-anonymous",
+		"import-runs": "deny-anonymous",
+		"import-issues": "deny-anonymous",
+		"leads": "deny-anonymous",
+		"lead-deliveries": "deny-anonymous",
+		"media": "deny-anonymous",
+		"redirects": "deny-anonymous",
+		"payload-jobs": "system-only"
+	},
 	"anonymousDenyCollections": [
+		"users",
 		"pages",
 		"properties",
 		"feed-sources",

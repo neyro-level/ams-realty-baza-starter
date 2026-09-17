@@ -1,6 +1,6 @@
 export const uiPackageName = "@ams/realtbase-ui" as const;
 
-export * from "./contracts/content";
+export * from "./view-models/content";
 export { LeadConsentField } from "./lead-consent-field";
 export * from "./lib/adapters";
 export * from "./lib/realty-format";
