@@ -32,7 +32,7 @@ export type OperationalHealthSnapshot = {
 		abandoned: number;
 	};
 	storage: {
-		s3Configured: boolean;
+		localMediaReady: boolean;
 	};
 };
 
@@ -112,12 +112,12 @@ export function buildOperationalAlerts(
 		});
 	}
 
-	if (!snapshot.storage.s3Configured) {
+	if (!snapshot.storage.localMediaReady) {
 		alerts.push({
-			code: "storage_s3_not_configured",
-			severity: "info",
+			code: "storage_media_dir_unavailable",
+			severity: "critical",
 			component: "storage",
-			message: "S3 storage is not configured for this runtime.",
+			message: "Local media directory is not available.",
 		});
 	}
 

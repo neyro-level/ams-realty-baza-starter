@@ -10,6 +10,7 @@ const architecture = read("docs/03_ARCHITECTURE.md");
 const operations = read("docs/OPERATIONS.md");
 const releaseChecklist = read("docs/05_RELEASE_CHECKLIST.md");
 const envExample = read(".env.example");
+const payloadConfig = read("payload.config.ts");
 
 for (const file of [
 	["docs/PROJECT.md", project],
@@ -28,25 +29,24 @@ for (const file of [
 }
 
 for (const required of [
-	"Timeweb Managed PostgreSQL",
-	"Timeweb S3",
+	"local PostgreSQL",
+	"MEDIA_DIR",
 	"Secret Master",
 	"JOBS_AUTORUN=true",
-	"CACHE_INVALIDATION_MODE=http",
 ]) {
 	assert.ok(
 		`${project}\n${architecture}\n${operations}`.includes(required),
-		`production topology missing ${required}`,
+		`starter topology missing ${required}`,
 	);
 }
 
 assert.ok(
-	operations.includes("not a fallback for application `DATABASE_URI`"),
-	"Operations must forbid reusing ams-server/prod as application runtime secret fallback",
+	!payloadConfig.includes("storage-s3"),
+	"payload.config.ts must not import storage-s3",
 );
 assert.ok(
-	project.includes("TODO: provision isolated project scope"),
-	"Project document must keep secret scope provisioning as an explicit pending mutation",
+	operations.includes("offsite"),
+	"Operations must require offsite backup copy",
 );
 
 for (const requiredEnv of [
@@ -55,16 +55,26 @@ for (const requiredEnv of [
 	"PAYLOAD_SECRET=",
 	"REVALIDATE_SECRET=",
 	"INTERNAL_HEALTH_SECRET=",
-	"S3_ENDPOINT=",
-	"S3_BUCKET=",
-	"S3_ACCESS_KEY=",
-	"S3_SECRET_KEY=",
+	"MEDIA_DIR=",
 	"JOBS_AUTORUN=false",
 	"CACHE_INVALIDATION_MODE=http",
 ]) {
 	assert.ok(
 		envExample.includes(requiredEnv),
 		`.env.example missing ${requiredEnv}`,
+	);
+}
+
+for (const forbiddenEnv of [
+	"S3_ENDPOINT=",
+	"S3_BUCKET=",
+	"S3_ACCESS_KEY=",
+	"S3_SECRET_KEY=",
+]) {
+	assert.equal(
+		envExample.includes(forbiddenEnv),
+		false,
+		`.env.example must not require starter S3 env ${forbiddenEnv}`,
 	);
 }
 

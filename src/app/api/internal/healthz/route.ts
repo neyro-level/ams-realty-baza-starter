@@ -1,7 +1,8 @@
 import { getPayload } from "payload";
 import configPromise from "../../../../../payload.config.ts";
 import { buildOperationalAlerts } from "../../../../core/operations/alerts.ts";
-import { isS3Configured, runtimeEnv } from "../../../../payload/env.ts";
+import { isLocalMediaReady } from "../../../../core/storage/local-fs.ts";
+import { runtimeEnv } from "../../../../payload/env.ts";
 import {
 	programmaticPayloadJobTasks,
 	staticPayloadJobTasks,
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
 		app: { status: "ok" as const },
 		database: { status: "unknown" as "ok" | "down" | "unknown" },
 		storage: {
-			status: isS3Configured ? ("ok" as const) : ("not_configured" as const),
+			status: isLocalMediaReady() ? ("ok" as const) : ("down" as const),
 		},
 		jobs: {
 			status: "ok" as const,
@@ -139,7 +140,7 @@ export async function GET(request: Request) {
 				abandoned: abandonedDeliveries.totalDocs,
 			},
 			storage: {
-				s3Configured: isS3Configured,
+				localMediaReady: isLocalMediaReady(),
 			},
 		});
 		const status = alerts.some((alert) => alert.severity === "critical")
