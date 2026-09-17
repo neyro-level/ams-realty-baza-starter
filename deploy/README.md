@@ -3,9 +3,10 @@
 Target: `start-baza.ams24.ru`.
 
 This folder contains only non-secret deployment templates. Runtime values must be
-materialized from the project-specific Secret Master scope into
-`/etc/ams/realtbase/start-baza.env` on the server. Do not commit or paste secret
-values.
+materialized into `/etc/ams/realtbase/start-baza.env` on the server. Do not
+commit or paste secret values. For this starter deployment, the owner-approved
+database is local PostgreSQL on AMS Server, not a paid Timeweb Managed
+PostgreSQL instance.
 
 Release shape:
 
@@ -20,4 +21,5 @@ Release shape:
 
 Rollback: switch `AMS_REALTBASE_IMAGE` back to the previous known-good immutable
 tag and restart the compose project. Database rollback is separate and requires
-restore evidence before destructive changes.
+restore evidence before destructive changes. Local PostgreSQL backups live
+outside the app container and must be protected by server backup policy.

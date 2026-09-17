@@ -3,24 +3,25 @@ services:
     image: ${AMS_REALTBASE_IMAGE:?Set immutable image tag}
     container_name: ams-realty-baza
     restart: unless-stopped
+    network_mode: host
     env_file:
       - /etc/ams/realtbase/start-baza.env
     environment:
+      COREPACK_HOME: /tmp/corepack
+      HOME: /tmp
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"
       HOSTNAME: 0.0.0.0
-      PORT: "3000"
+      PORT: "3036"
       AMS_PROFILE: REALTY_BASE
       NEXT_PUBLIC_SERVER_URL: https://start-baza.ams24.ru
-      INTERNAL_REVALIDATE_BASE_URL: http://127.0.0.1:3000
+      INTERNAL_REVALIDATE_BASE_URL: http://127.0.0.1:3036
       CACHE_INVALIDATION_MODE: http
       PAYLOAD_DB_PUSH: "false"
-    ports:
-      - "127.0.0.1:3036:3000"
     healthcheck:
       test:
         - CMD-SHELL
-        - node -e "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        - node -e "fetch('http://127.0.0.1:3036').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
       interval: 30s
       timeout: 5s
       retries: 5

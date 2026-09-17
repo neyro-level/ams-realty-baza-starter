@@ -18,6 +18,8 @@ RUN pnpm exec next build --webpack
 FROM node:24.20.0-bookworm-slim AS runtime
 
 ENV NODE_ENV=production \
+	COREPACK_HOME=/tmp/corepack \
+	HOME=/tmp \
 	NEXT_TELEMETRY_DISABLED=1 \
 	HOSTNAME=0.0.0.0 \
 	PORT=3000

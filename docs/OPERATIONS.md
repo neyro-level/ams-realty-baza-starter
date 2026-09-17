@@ -12,7 +12,7 @@ Internal production target:
 domain: start-baza.ams24.ru
 provider: Timeweb / AMS server contour
 runtime: one application runtime, immutable artifact only
-database: Timeweb Managed PostgreSQL, separate from app server
+database: local PostgreSQL 18 on AMS Server for this owner-approved starter deployment
 storage: Timeweb S3 bucket for Payload Media
 secrets: isolated project-specific Secret Master scope
 indexing: noindex until owner explicitly promotes the instance
@@ -20,12 +20,21 @@ indexing: noindex until owner explicitly promotes the instance
 
 Immutable artifact format: full Next.js Docker image built from `Dockerfile` outside the production host. Server runtime uses `deploy/compose/start-baza.compose.yml`; public proxy uses `deploy/nginx/start-baza.ams24.ru.conf`. Release identity is recorded by `pnpm release:manifest`; generated `.release/` files are local evidence and are not committed. Обязательные границы: отдельная команда владельца, clean SourceCraft `main`, exact SHA, отсутствие build на production host, один rollout и live smoke. Известный рабочий artifact сохраняется для rollback.
 
+Owner decision for the starter project: use the existing local PostgreSQL 18 on AMS Server instead of buying a separate Timeweb Managed PostgreSQL instance. Runtime database identity:
+
+```text
+database: ams_realtbase_prod
+role: ams_realtbase_app
+env file: /etc/ams/realtbase/start-baza.env
+backup rehearsal: pg_dump custom format -> temporary restore database -> migration count check
+```
+
 Release sequence:
 
 1. Confirm clean canonical SourceCraft `main` and exact full SHA.
 2. Run `pnpm release:manifest` for local release identity evidence.
 3. Build one Docker image from the exact SHA outside the production host and tag it with the full SHA.
-4. Run Payload migrations from the same image against the project-specific Managed PostgreSQL.
+4. Run Payload migrations from the same image against the local AMS Server PostgreSQL database.
 5. Start/recreate exactly one application runtime with `JOBS_AUTORUN=true`; no parallel jobs owner is allowed.
 6. Route `start-baza.ams24.ru` through Nginx/TLS to this runtime with `noindex` preserved.
 7. Check `/api/internal/healthz` with the configured health secret and run the changed live smoke.
@@ -39,7 +48,7 @@ Release sequence:
 
 ## Backup и restore
 
-`TODO: после provisioning.` Требуются automatic Managed PostgreSQL backup, S3 versioning/backup policy и фактическая restore rehearsal до первого production release.
+Local PostgreSQL backup rehearsal for the starter deployment: `pg_dump -Fc` of `ams_realtbase_prod`, restore into a temporary database, verify migration count, then drop the temporary database. Managed PostgreSQL backup and S3 versioning become mandatory again when the starter is promoted to an isolated commercial client deployment.
 
 ## Secrets и доступы
 
@@ -47,7 +56,7 @@ Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, являет�
 
 Операционное правило: значения секретов не выводить в чат, markdown, логи или git. Для работы с секретами использовать trigger `подключись к секрет мастеру`. Для Git-доступов SourceCraft/GitHub использовать trigger `подключись к гид-сервису`. SourceCraft — основной Git-сервис; GitHub — зеркало, если проект явно не говорит обратное.
 
-Runtime secret scope for this application must be project-specific. `ams-server/prod` may identify the shared AMS server access contour, but it is not a fallback for application `DATABASE_URI`, Payload secret, S3 credentials, revalidation secret, health secret or lead channel credentials. If the project scope does not exist yet, provisioning it is a separate owner-authorized Secret Master mutation.
+Runtime secret scope for this application should be project-specific in Secret Master when the starter project is promoted beyond the current owner-operated AMS Server deployment. Current runtime values are materialized in `/etc/ams/realtbase/start-baza.env` with root-only permissions; values must not be printed to chat, markdown, logs or git. `ams-server/prod` may identify the shared AMS server access contour, but it is not a fallback for application `DATABASE_URI`, Payload secret, S3 credentials, revalidation secret, health secret or lead channel credentials.
 
 ## Import operations
 
