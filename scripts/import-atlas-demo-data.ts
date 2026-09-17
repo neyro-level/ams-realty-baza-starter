@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { getPayload } from "payload";
 import config from "../payload.config.ts";
 import { requirePayloadRuntime } from "../src/payload/env.ts";
-import { systemOverrideAccess } from "../src/server/system-gateway/payload-access.ts";
+import { systemOverrideAccess } from "../src/server/system-gateway/overrides.ts";
 
 type AtlasPhoto = {
 	path: string;
