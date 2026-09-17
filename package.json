@@ -29,6 +29,7 @@
 		"payload:migrate": "payload migrate",
 		"payload:migrate:create": "payload migrate:create",
 		"verify:schema": "node scripts/verify-schema.mjs",
+		"verify:daily": "pnpm contracts:test && pnpm contracts:check && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint",
 		"verify:public-gateway": "node scripts/verify-public-gateway.mjs",
 		"verify:jobs-config": "node --experimental-strip-types scripts/verify-jobs-config.mjs",
 		"verify:feed-parser": "node --experimental-strip-types scripts/verify-feed-parser.mjs",

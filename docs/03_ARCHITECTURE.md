@@ -12,7 +12,7 @@ Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge требуется один ручной exact-head SourceCraft Gate по риску изменения. Push и Pull Request не запускают CI, независимый review или аудит автоматически. В активной оркестрации команда владельца `продолжай` или `продолжай дальше` разрешает автономно создавать PR, проводить Gate и merge каждого готового потока без повторных вопросов. Независимый reviewer запускается только по явному триггеру владельца или для отдельно зафиксированного high-risk/high-complexity scope. Production всегда требует отдельной явной команды владельца.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Программа `AMS-REALTBASE-HARDENING` использует `MERGE_AFTER_GATE` в `hardening/realtbase-starter` и checkpoint-PR в `main`. Production только отдельной командой владельца.
 
 ## Stack и ownership
 
@@ -20,7 +20,7 @@ Secrets source=Secret Master / self-hosted Infisical
 - Payload CMS — единственный владелец application schema;
 - PostgreSQL через `@payloadcms/db-postgres`; второй ORM запрещён;
 - Zod, pnpm, Tailwind CSS 4, shadcn/ui, Lucide;
-- Payload Jobs, streaming SAX parser, Timeweb S3, Nginx, SourceCraft.
+- Payload Jobs, streaming SAX parser, **local persistent media** (S3 plugin not used by starter), Nginx, SourceCraft.
 
 Фактические версии определяют `package.json`, lockfile и runtime files. Major upgrade требует отдельного решения и targeted proof.
 
@@ -45,23 +45,23 @@ Reusable UI не импортирует Payload, DB clients или persistence t
 - `REALTY_BASE`: один application runtime с `JOBS_AUTORUN=true`;
 - cache default — HTTP invalidation; in-process разрешён только после proof.
 
-## Production contract
+## Starter vs client clone
 
-Один клиент получает отдельные application VPS, Managed PostgreSQL, S3 bucket, домен и Secret Master secrets scope. Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, является source of truth для секретов AMS RealBaza. Doppler не является canonical и допускается только как legacy/import source до переноса старых секретов. Новые пароли, API tokens, SSH keys, database credentials и service credentials хранятся в Secret Master; значения секретов не попадают в чат, markdown, логи или git. Git-доступы SourceCraft/GitHub подключаются отдельным trigger `подключись к гид-сервису`; SourceCraft остаётся основным Git-сервисом, GitHub — зеркалом, если проект явно не говорит обратное.
-
-Internal production target for RealtBase foundation:
+Starter (этот репозиторий, `start-baza.ams24.ru`):
 
 ```text
-domain: start-baza.ams24.ru
-hosting: AMS/Timeweb application VPS, exact server identity pending provisioning
-database: Timeweb Managed PostgreSQL, separate instance/database, not app-server PostgreSQL
-storage: Timeweb S3 bucket for Payload Media
-secrets: isolated project-specific Secret Master scope, not ams-server/prod fallback
-indexing: noindex until owner explicitly promotes the instance
-jobs: exactly one application runtime with JOBS_AUTORUN=true
-cache: CACHE_INVALIDATION_MODE=http
+hosting: AMS Server
+database: local PostgreSQL, migrations only, PAYLOAD_DB_PUSH=false
+storage: persistent MEDIA_DIR, no S3 runtime
+jobs: exactly one JOBS_AUTORUN=true
+cache: http
+indexing: noindex
 ```
 
-Production использует immutable artifact, не собирается на сервере и выпускается только из clean canonical `main` на известном SHA. Процедуры принадлежат `OPERATIONS.md`.
+ADR: `docs/adr/ADR-LOCAL-STARTER-STORAGE.md`.
+
+Реальный клиентский clone получает отдельные VPS/DB/S3/домен/секреты по своему решению. S3 и Managed PostgreSQL не возвращаются в starter без owner decision.
+
+Production starter release использует immutable artifact из clean `main`. Процедуры — `OPERATIONS.md`.
 
 Полная архитектурная спецификация: `../AMS_PROJECT_ARCHITECTURE_v1.0.md`. Не дублировать её детализацию в этом файле.

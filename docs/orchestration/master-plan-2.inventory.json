@@ -1,0 +1,2345 @@
+{
+	"schema_version": 2,
+	"beads_prefix": "rbs",
+	"source": {
+		"plan_id": "AMS-REALTBASE-HARDENING",
+		"path": "docs/AMS_MASTER_PLAN №2.md",
+		"version": "v2",
+		"status": "APPROVED",
+		"approved_by": "owner",
+		"approved_at": "2026-09-18T00:03:00+03:00",
+		"sha256": "14279bf0b6089347410209ec5a260ce660c755e3131809aadeaa5a43869ef744",
+		"epic_anchors": [
+			"EPIC 0",
+			"EPIC 1",
+			"EPIC 2",
+			"EPIC 3",
+			"EPIC 4",
+			"EPIC 5",
+			"EPIC 6",
+			"EPIC 7",
+			"EPIC 8",
+			"EPIC 9",
+			"EPIC 10"
+		]
+	},
+	"nodes": [
+		{
+			"key": "EPIC-00",
+			"title": "Source of Truth, local topology, jobs ownership",
+			"type": "epic",
+			"source_anchor": "EPIC 0",
+			"goal": "Документы и runtime topology starter совпадают: local PostgreSQL, local media, one jobs runner, verify commands, 18A matrix.",
+			"scope": [
+				"EPIC 0 sections 0.1–0.13"
+			],
+			"acceptance_criteria": [
+				"docs/runtime не противоречат",
+				"S3 runtime отсутствует",
+				"verify:* существуют",
+				"18A matrix created"
+			],
+			"depends_on": [],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 0,
+			"labels": [
+				"wave:foundation",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-00-01",
+			"title": "Sync starter canon, project.config, verify commands, 18A matrix",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-00",
+			"source_anchor": "EPIC 0",
+			"goal": "PROJECT/OPERATIONS/architecture/ADR/env example/verify scripts/18A matrix описывают local topology и knobs.",
+			"scope": [
+				"0.1",
+				"0.2",
+				"0.10",
+				"0.11",
+				"0.12",
+				"0.13",
+				"0.5–0.7",
+				"0.9"
+			],
+			"acceptance_criteria": [
+				"ADR-LOCAL-STARTER-STORAGE существует",
+				"project.config.ts содержит knobs включая dispatchBatchSize и staleDataSlaMinutes",
+				"pnpm verify:daily/verify/verify:schema существуют",
+				"docs/proofs/18A-matrix.md содержит A–G, B1=NOT-CLAIMED"
+			],
+			"required_checks": [
+				"file exists checks",
+				"pnpm verify:daily --help or script exists"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-00-02",
+			"title": "Remove S3 runtime and add local media adapter",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-00",
+			"source_anchor": "EPIC 0",
+			"goal": "Starter не использует S3; Payload Media пишет в persistent MEDIA_DIR через storage boundary.",
+			"scope": [
+				"0.3",
+				"0.4",
+				"media access rules"
+			],
+			"acceptance_criteria": [
+				"нет s3Storage runtime",
+				"MEDIA_DIR config",
+				"media.read public / writes owner-only documented in code"
+			],
+			"required_checks": [
+				"rg storage-s3 payload.config.ts",
+				"typecheck if env/config changed"
+			],
+			"depends_on": [
+				"TASK-00-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-00-03",
+			"title": "Record version-sensitive Payload/Next proof",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-00",
+			"source_anchor": "EPIC 0",
+			"goal": "Pinned-version assumptions for Local API, jobs, Next 16 recorded in docs/proofs/epic-0/version-sensitive.md.",
+			"scope": [
+				"0.8"
+			],
+			"acceptance_criteria": [
+				"proof file exists with official-doc citations and dates"
+			],
+			"required_checks": [
+				"file exists"
+			],
+			"depends_on": [
+				"TASK-00-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-00-DELIVERY",
+			"title": "Deliver EPIC 0 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-00",
+			"source_anchor": "EPIC 0",
+			"goal": "PR merged into hardening/realtbase-starter at exact head after review/gate.",
+			"scope": [
+				"create/merge PR"
+			],
+			"acceptance_criteria": [
+				"PR URL",
+				"merged into hardening/realtbase-starter"
+			],
+			"required_checks": [
+				"PR source/target/head SHA"
+			],
+			"depends_on": [
+				"TASK-00-01",
+				"TASK-00-02",
+				"TASK-00-03"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-01",
+			"title": "Canonical structure, contracts, guards",
+			"type": "epic",
+			"source_anchor": "EPIC 1",
+			"goal": "Guards, contracts, approved SQL, bootstrap, media access and schema completeness in place.",
+			"scope": [
+				"EPIC 1"
+			],
+			"acceptance_criteria": [
+				"guards fail-closed",
+				"one contracts source",
+				"owner bootstrap",
+				"media access"
+			],
+			"depends_on": [
+				"EPIC-00"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-01-01",
+			"title": "Canonical structure and single contracts source",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-01",
+			"source_anchor": "EPIC 1",
+			"goal": "packages/contracts is the only DTO source; UI does not duplicate contracts; dependency direction guarded.",
+			"scope": [
+				"1.1",
+				"1.2",
+				"1.3"
+			],
+			"acceptance_criteria": [
+				"no duplicate DTO in packages/ui/src/contracts",
+				"dependency guard configured"
+			],
+			"required_checks": [
+				"pnpm quality:architecture"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-01-02",
+			"title": "Mechanical guards, SQL paths, REST, bootstrap, media access",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-01",
+			"source_anchor": "EPIC 1",
+			"goal": "Core 18.4/23 guards, approved SQL, jobs module, owner bootstrap, media access, reserved namespaces.",
+			"scope": [
+				"1.4",
+				"1.5",
+				"1.6",
+				"1.7",
+				"1.8",
+				"1.9",
+				"1.10",
+				"1.11",
+				"1.16",
+				"1.17",
+				"1.18",
+				"1.15"
+			],
+			"acceptance_criteria": [
+				"guard-baseline.json frozen",
+				"system/jobs module exists",
+				"self-registration off",
+				"media.read public"
+			],
+			"required_checks": [
+				"pnpm quality:guards"
+			],
+			"depends_on": [
+				"TASK-01-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-01-03",
+			"title": "Field access and schema completeness",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-01",
+			"source_anchor": "EPIC 1",
+			"goal": "Private fields field-access protected; collections complete via migrations.",
+			"scope": [
+				"1.13",
+				"1.14"
+			],
+			"acceptance_criteria": [
+				"private field access tests or documented access",
+				"migration for missing fields if needed"
+			],
+			"required_checks": [
+				"pnpm verify:schema if migration"
+			],
+			"depends_on": [
+				"TASK-01-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-01-DELIVERY",
+			"title": "Deliver EPIC 1 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-01",
+			"source_anchor": "EPIC 1",
+			"goal": "EPIC 1 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-01-01",
+				"TASK-01-02",
+				"TASK-01-03"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:foundation",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-02",
+			"title": "Safe feed fetch and SAX parser",
+			"type": "epic",
+			"source_anchor": "EPIC 2",
+			"goal": "Safe outbound fetch, conditional GET, streaming SAX parser, mapping, derived calculator.",
+			"scope": [
+				"EPIC 2",
+				"MAIN CHECKPOINT 1 as first task"
+			],
+			"acceptance_criteria": [
+				"parser not regex",
+				"304 supported",
+				"derived fields shared"
+			],
+			"depends_on": [
+				"EPIC-01"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-02-01",
+			"title": "Main checkpoint 1",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-02",
+			"source_anchor": "EPIC 2",
+			"goal": "hardening merged to main with verify:daily + EPIC 0–1 proofs + verify:schema.",
+			"scope": [
+				"MAIN CHECKPOINT 1"
+			],
+			"acceptance_criteria": [
+				"verify:daily ran",
+				"verify:schema ran",
+				"PR merged to main"
+			],
+			"required_checks": [
+				"pnpm verify:daily",
+				"pnpm verify:schema"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-02-02",
+			"title": "Safe fetch, 304, streaming hash",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-02",
+			"source_anchor": "EPIC 2",
+			"goal": "Production feed fetch uses Safe Outbound Client with 304 and streaming SHA-256.",
+			"scope": [
+				"2.1",
+				"2.2",
+				"2.3"
+			],
+			"acceptance_criteria": [
+				"no direct fetch in feed path",
+				"304 → unchanged"
+			],
+			"required_checks": [
+				"verify:feed-parser or targeted script"
+			],
+			"depends_on": [
+				"TASK-02-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-02-03",
+			"title": "SAX parser, mapping, derived calculator",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-02",
+			"source_anchor": "EPIC 2",
+			"goal": "Streaming SAX parser with safety limits; market from feedSource; shared derived fields.",
+			"scope": [
+				"2.4",
+				"2.5",
+				"2.6",
+				"2.7",
+				"2.8"
+			],
+			"acceptance_criteria": [
+				"regex parser not production",
+				"critical anomaly → suspicious",
+				"one derived calculator"
+			],
+			"required_checks": [
+				"verify:feed-parser"
+			],
+			"depends_on": [
+				"TASK-02-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-02-DELIVERY",
+			"title": "Deliver EPIC 2 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-02",
+			"source_anchor": "EPIC 2",
+			"goal": "EPIC 2 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-02-01",
+				"TASK-02-02",
+				"TASK-02-03"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-03",
+			"title": "Real import runtime",
+			"type": "epic",
+			"source_anchor": "EPIC 3",
+			"goal": "Atomic claims, real importFeed, safe deactivation, jobs config, HTTP cache proof.",
+			"scope": [
+				"EPIC 3"
+			],
+			"acceptance_criteria": [
+				"importFeed not stub",
+				"atomic claim",
+				"18A A/B2/C/D updated"
+			],
+			"depends_on": [
+				"EPIC-02"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-03-01",
+			"title": "Atomic claims, dispatcher, importFeed, heartbeat",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-03",
+			"source_anchor": "EPIC 3",
+			"goal": "SQL claims and real importFeed pipeline with heartbeat.",
+			"scope": [
+				"3.1",
+				"3.3",
+				"3.4",
+				"3.5",
+				"3.6"
+			],
+			"acceptance_criteria": [
+				"no find-then-update claim",
+				"heartbeat outside ingest tx"
+			],
+			"required_checks": [
+				"verify:feed-ingest"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-03-02",
+			"title": "Ingest repo, idempotency, deactivation, market, baseline",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-03",
+			"source_anchor": "EPIC 3",
+			"goal": "Persistence ingest with isolation, bulk lastSeenAt, safe deactivation, exact baseline rules.",
+			"scope": [
+				"3.7",
+				"3.8",
+				"3.9",
+				"3.10",
+				"3.11",
+				"3.12",
+				"3.13",
+				"3.14",
+				"3.17"
+			],
+			"acceptance_criteria": [
+				"interrupted ≠ deactivation",
+				"source isolation"
+			],
+			"required_checks": [
+				"verify:feed-lifecycle"
+			],
+			"depends_on": [
+				"TASK-03-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-03-03",
+			"title": "Jobs config, schedules, HTTP cache, owner ops",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-03",
+			"source_anchor": "EPIC 3",
+			"goal": "Canonical jobs queues, maintenance schedules, HTTP cache self-call, owner operations via system/jobs.",
+			"scope": [
+				"3.18",
+				"3.19",
+				"3.20",
+				"3.21",
+				"3.15",
+				"3.16"
+			],
+			"acceptance_criteria": [
+				"disableScheduling map",
+				"18A B2 artifact",
+				"no generic payload-jobs CRUD"
+			],
+			"required_checks": [
+				"verify:jobs-config",
+				"verify:owner-operations"
+			],
+			"depends_on": [
+				"TASK-03-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-03-DELIVERY",
+			"title": "Deliver EPIC 3 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-03",
+			"source_anchor": "EPIC 3",
+			"goal": "EPIC 3 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-03-01",
+				"TASK-03-02",
+				"TASK-03-03"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-04",
+			"title": "Manual ownership, lifecycle, SEO data",
+			"type": "epic",
+			"source_anchor": "EPIC 4",
+			"goal": "Actor-aware ownership, 410/redirects, sitemap sharding, facets SQL, SEO contract.",
+			"scope": [
+				"EPIC 4"
+			],
+			"acceptance_criteria": [
+				"import does not create manualOverrides",
+				"real 410 or redirect",
+				"facets full dataset"
+			],
+			"depends_on": [
+				"EPIC-03"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-04-01",
+			"title": "Manual ownership and derived fields",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-04",
+			"source_anchor": "EPIC 4",
+			"goal": "Ownership writer actor-aware; return-to-feed; shared derived calculator on manual edit.",
+			"scope": [
+				"4.1",
+				"4.2",
+				"4.3",
+				"4.4",
+				"4.5",
+				"4.6",
+				"4.13"
+			],
+			"acceptance_criteria": [
+				"import #1/#2 no manualOverrides",
+				"return-to-feed works"
+			],
+			"required_checks": [
+				"targeted ownership tests"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-04-02",
+			"title": "Lifecycle, sitemap, facets, SEO",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-04",
+			"source_anchor": "EPIC 4",
+			"goal": "Lifecycle 410/redirects, sitemap sharding, SQL facets, empty states, SEO whitelist.",
+			"scope": [
+				"4.7",
+				"4.8",
+				"4.9",
+				"4.10",
+				"4.11",
+				"4.12",
+				"4.14",
+				"4.15",
+				"4.16"
+			],
+			"acceptance_criteria": [
+				"no homepage redirect",
+				"no hard 1000 sitemap limit",
+				"facets SQL aggregation"
+			],
+			"required_checks": [
+				"verify:seo-contracts"
+			],
+			"depends_on": [
+				"TASK-04-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-04-DELIVERY",
+			"title": "Deliver EPIC 4 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-04",
+			"source_anchor": "EPIC 4",
+			"goal": "EPIC 4 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-04-01",
+				"TASK-04-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-05",
+			"title": "Public lead intake and outbox",
+			"type": "epic",
+			"source_anchor": "EPIC 5",
+			"goal": "POST /api/public/leads with transactional outbox; sweeper is primary scheduler.",
+			"scope": [
+				"EPIC 5",
+				"MAIN CHECKPOINT 2 first"
+			],
+			"acceptance_criteria": [
+				"one lead + deliveries in one tx",
+				"duplicate submit stable"
+			],
+			"depends_on": [
+				"EPIC-04"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-05-01",
+			"title": "Main checkpoint 2",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-05",
+			"source_anchor": "EPIC 5",
+			"goal": "Wave EPIC 2–4 checkpointed to main.",
+			"scope": [
+				"MAIN CHECKPOINT 2"
+			],
+			"acceptance_criteria": [
+				"verify:daily",
+				"verify:schema",
+				"merged to main"
+			],
+			"required_checks": [
+				"pnpm verify:daily",
+				"pnpm verify:schema"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-05-02",
+			"title": "Public intake, outbox, sweeper",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-05",
+			"source_anchor": "EPIC 5",
+			"goal": "Canonical public lead endpoint and transactional outbox; sweeper primary.",
+			"scope": [
+				"5.1",
+				"5.2",
+				"5.3",
+				"5.4",
+				"5.5",
+				"5.6",
+				"5.7",
+				"5.8",
+				"5.9"
+			],
+			"acceptance_criteria": [
+				"generic Payload leads create not public",
+				"idempotent submit"
+			],
+			"required_checks": [
+				"verify:lead-intake",
+				"verify:lead-outbox"
+			],
+			"depends_on": [
+				"TASK-05-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-05-DELIVERY",
+			"title": "Deliver EPIC 5 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-05",
+			"source_anchor": "EPIC 5",
+			"goal": "EPIC 5 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-05-01",
+				"TASK-05-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-06",
+			"title": "Real lead delivery",
+			"type": "epic",
+			"source_anchor": "EPIC 6",
+			"goal": "deliverLead with atomic claim, adapters, recovery, waitUntil backoff.",
+			"scope": [
+				"EPIC 6"
+			],
+			"acceptance_criteria": [
+				"deliverLead not stub",
+				"waitUntil backoff",
+				"HMAC webhook"
+			],
+			"depends_on": [
+				"EPIC-05"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-06-01",
+			"title": "deliverLead claim, state machine, adapters",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-06",
+			"source_anchor": "EPIC 6",
+			"goal": "Atomic delivery claim and working MAX/webhook adapters with idempotency keys.",
+			"scope": [
+				"6.1",
+				"6.2",
+				"6.3",
+				"6.3A",
+				"6.4",
+				"6.5",
+				"6.6",
+				"6.7",
+				"6.8",
+				"6.9",
+				"6.9A",
+				"6.10"
+			],
+			"acceptance_criteria": [
+				"empty RETURNING → no HTTP",
+				"retries=0 platform"
+			],
+			"required_checks": [
+				"verify:lead-delivery-state",
+				"verify:max-adapter",
+				"verify:custom-webhook-adapter"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-06-02",
+			"title": "Recovery, orphan, manual retry",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-06",
+			"source_anchor": "EPIC 6",
+			"goal": "Stale/orphan recovery via system/jobs; controlled manual retry.",
+			"scope": [
+				"6.11",
+				"6.12",
+				"6.13"
+			],
+			"acceptance_criteria": [
+				"future waitUntil not orphan",
+				"no generic jobs CRUD"
+			],
+			"required_checks": [
+				"verify:operational-recovery"
+			],
+			"depends_on": [
+				"TASK-06-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-06-DELIVERY",
+			"title": "Deliver EPIC 6 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-06",
+			"source_anchor": "EPIC 6",
+			"goal": "EPIC 6 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-06-01",
+				"TASK-06-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-07",
+			"title": "Retention, media, runtime, observability",
+			"type": "epic",
+			"source_anchor": "EPIC 7",
+			"goal": "Retention modes, PII-free jobs, fail-fast runtime, alerts, one jobs runner proof.",
+			"scope": [
+				"EPIC 7"
+			],
+			"acceptance_criteria": [
+				"delete and anonymize",
+				"build without secrets",
+				"independent alert channel"
+			],
+			"depends_on": [
+				"EPIC-06"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-07-01",
+			"title": "Retention and PII-free jobs",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-07",
+			"source_anchor": "EPIC 7",
+			"goal": "Lead retention delete|anonymize without silent defaults; jobs/logs without PII.",
+			"scope": [
+				"7.1",
+				"7.2",
+				"7.3",
+				"7.4"
+			],
+			"acceptance_criteria": [
+				"missing policy → no destructive cleanup + alert"
+			],
+			"required_checks": [
+				"verify:security-boundaries"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-07-02",
+			"title": "Media finalize, env, headers, alerts, jobs proof",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-07",
+			"source_anchor": "EPIC 7",
+			"goal": "Local media finalized; env fail-fast; security headers; alerts including cache SLA and backup; one jobs runner.",
+			"scope": [
+				"7.5",
+				"7.6",
+				"7.7",
+				"7.7A",
+				"7.8",
+				"7.9",
+				"7.10",
+				"7.11",
+				"7.12"
+			],
+			"acceptance_criteria": [
+				"staleDataSlaMinutes alert",
+				"backup failure alerts",
+				"JOBS_AUTORUN exactly once documented/proof"
+			],
+			"required_checks": [
+				"verify:health-alerts"
+			],
+			"depends_on": [
+				"TASK-07-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-07-DELIVERY",
+			"title": "Deliver EPIC 7 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-07",
+			"source_anchor": "EPIC 7",
+			"goal": "EPIC 7 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-07-01",
+				"TASK-07-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:leads",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-08",
+			"title": "One canonical UI path",
+			"type": "epic",
+			"source_anchor": "EPIC 8",
+			"goal": "Production routes use packages/ui; real images; one LeadForm; no fixture presentation.",
+			"scope": [
+				"EPIC 8",
+				"MAIN CHECKPOINT 3 first"
+			],
+			"acceptance_criteria": [
+				"no fixture production imports",
+				"LeadForm states"
+			],
+			"depends_on": [
+				"EPIC-07"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:ui",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-08-01",
+			"title": "Main checkpoint 3",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-08",
+			"source_anchor": "EPIC 8",
+			"goal": "Wave EPIC 5–7 checkpointed to main.",
+			"scope": [
+				"MAIN CHECKPOINT 3"
+			],
+			"acceptance_criteria": [
+				"verify:daily",
+				"merged to main"
+			],
+			"required_checks": [
+				"pnpm verify:daily"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:ui",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-08-02",
+			"title": "Canonical UI composition and LeadForm",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-08",
+			"source_anchor": "EPIC 8",
+			"goal": "Move production UI out of fixture; semantic sections; production copy; canonical LeadForm.",
+			"scope": [
+				"8.1",
+				"8.2",
+				"8.3",
+				"8.4",
+				"8.5",
+				"8.11"
+			],
+			"acceptance_criteria": [
+				"no src/components/fixture production imports",
+				"REPORT ONLY drift after 8.3"
+			],
+			"required_checks": [
+				"lint of app routes"
+			],
+			"depends_on": [
+				"TASK-08-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:ui",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-08-03",
+			"title": "Images, gallery, primitives",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-08",
+			"source_anchor": "EPIC 8",
+			"goal": "Shared image host source; real cards; gallery used or removed; CVA primitives.",
+			"scope": [
+				"8.6",
+				"8.7",
+				"8.8",
+				"8.9",
+				"8.10"
+			],
+			"acceptance_criteria": [
+				"no wildcard remotePatterns",
+				"no text image placeholder"
+			],
+			"required_checks": [
+				"quality:design-tokens"
+			],
+			"depends_on": [
+				"TASK-08-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:ui",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-08-DELIVERY",
+			"title": "Deliver EPIC 8 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-08",
+			"source_anchor": "EPIC 8",
+			"goal": "EPIC 8 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-08-01",
+				"TASK-08-02",
+				"TASK-08-03"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:ui",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-09",
+			"title": "Design system cleanup and visual proof",
+			"type": "epic",
+			"source_anchor": "EPIC 9",
+			"goal": "Token taxonomy, dead tokens 0, DESIGN.md complete, visual proof.",
+			"scope": [
+				"EPIC 9"
+			],
+			"acceptance_criteria": [
+				"dead tokens 0",
+				"DESIGN.md completeness"
+			],
+			"depends_on": [
+				"EPIC-08"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:ui",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-09-01",
+			"title": "Tokens, design guard, visual proof, DESIGN.md",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-09",
+			"source_anchor": "EPIC 9",
+			"goal": "Classify tokens, add dead-token guard, visual proof, complete DESIGN.md.",
+			"scope": [
+				"9.1",
+				"9.2",
+				"9.3",
+				"9.4",
+				"9.5",
+				"9.6",
+				"9.7",
+				"9.8"
+			],
+			"acceptance_criteria": [
+				"design guard green",
+				"visual proof artifacts"
+			],
+			"required_checks": [
+				"pnpm quality:design-tokens"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:ui",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-09-DELIVERY",
+			"title": "Deliver EPIC 9 to hardening",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-09",
+			"source_anchor": "EPIC 9",
+			"goal": "EPIC 9 merged to hardening.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged"
+			],
+			"required_checks": [
+				"PR SHA"
+			],
+			"depends_on": [
+				"TASK-09-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:ui",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-10",
+			"title": "System verification and starter freeze",
+			"type": "epic",
+			"source_anchor": "EPIC 10",
+			"goal": "Integration suites, clone readiness, empty guard baseline, freeze SHA. No production.",
+			"scope": [
+				"EPIC 10",
+				"MAIN CHECKPOINT 4 first",
+				"FINAL MAIN CHECKPOINT"
+			],
+			"acceptance_criteria": [
+				"pnpm verify PASS",
+				"clone diff core/packages = 0",
+				"18A matrix complete"
+			],
+			"depends_on": [
+				"EPIC-09"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:freeze",
+				"approval:owner-approved"
+			]
+		},
+		{
+			"key": "TASK-10-01",
+			"title": "Main checkpoint 4",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-10",
+			"source_anchor": "EPIC 10",
+			"goal": "Wave EPIC 8–9 checkpointed to main.",
+			"scope": [
+				"MAIN CHECKPOINT 4"
+			],
+			"acceptance_criteria": [
+				"verify:daily",
+				"merged to main"
+			],
+			"required_checks": [
+				"pnpm verify:daily"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:freeze",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-10-02",
+			"title": "Test infra and import/lead/security/migration suites",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-10",
+			"source_anchor": "EPIC 10",
+			"goal": "Real integration infrastructure and mandatory suites including 18.5 tests.",
+			"scope": [
+				"10.1",
+				"10.2",
+				"10.3",
+				"10.4",
+				"10.5",
+				"10.6"
+			],
+			"acceptance_criteria": [
+				"interrupted ≠ deactivation tested",
+				"leads publicly inaccessible",
+				"waitUntil backoff"
+			],
+			"required_checks": [
+				"pnpm verify"
+			],
+			"depends_on": [
+				"TASK-10-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:freeze",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-10-03",
+			"title": "Media, perf, a11y, clone, E2E, cache, docs",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-10",
+			"source_anchor": "EPIC 10",
+			"goal": "Remaining freeze proofs including Core perf PASS/FAIL and clone readiness.",
+			"scope": [
+				"10.7",
+				"10.8",
+				"10.9",
+				"10.10",
+				"10.11",
+				"10.12",
+				"10.13",
+				"10.14",
+				"10.15",
+				"10.16",
+				"10.17"
+			],
+			"acceptance_criteria": [
+				"Core LCP/CLS/p95 PASS or documented FAIL with blocker",
+				"git diff src/core = 0 in clone test"
+			],
+			"required_checks": [
+				"pnpm verify",
+				"pnpm verify:schema"
+			],
+			"depends_on": [
+				"TASK-10-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:freeze",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-10-04",
+			"title": "Drift audit REPORT ONLY and 18A matrix close",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-10",
+			"source_anchor": "EPIC 10",
+			"goal": "Full drift audit report-only; 18A matrix A/B2/C/D/E/F/G PASS, B1 NOT-CLAIMED.",
+			"scope": [
+				"10.18",
+				"0.13"
+			],
+			"acceptance_criteria": [
+				"report exists",
+				"matrix closed"
+			],
+			"required_checks": [
+				"file exists"
+			],
+			"depends_on": [
+				"TASK-10-03"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:freeze",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-10-DELIVERY",
+			"title": "Final freeze PR to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-10",
+			"source_anchor": "EPIC 10",
+			"goal": "Final hardening → main merge after verify + verify:schema. Production not executed.",
+			"scope": [
+				"FINAL MAIN CHECKPOINT"
+			],
+			"acceptance_criteria": [
+				"merged to main",
+				"production not run"
+			],
+			"required_checks": [
+				"pnpm verify",
+				"pnpm verify:schema"
+			],
+			"depends_on": [
+				"TASK-10-01",
+				"TASK-10-02",
+				"TASK-10-03",
+				"TASK-10-04"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №2.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:freeze",
+				"work:delivery"
+			]
+		}
+	]
+}

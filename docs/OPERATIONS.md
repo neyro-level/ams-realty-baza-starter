@@ -13,7 +13,7 @@ domain: start-baza.ams24.ru
 provider: Timeweb / AMS server contour
 runtime: one application runtime, immutable artifact only
 database: local PostgreSQL 18 on AMS Server for this owner-approved starter deployment
-storage: Timeweb S3 bucket for Payload Media
+storage: persistent MEDIA_DIR, no S3 runtime
 secrets: isolated project-specific Secret Master scope
 indexing: noindex until owner explicitly promotes the instance
 ```
@@ -48,7 +48,17 @@ Release sequence:
 
 ## Backup и restore
 
-Local PostgreSQL backup rehearsal for the starter deployment: `pg_dump -Fc` of `ams_realtbase_prod`, restore into a temporary database, verify migration count, then drop the temporary database. Managed PostgreSQL backup and S3 versioning become mandatory again when the starter is promoted to an isolated commercial client deployment.
+Starter backup = согласованная пара в одном window: `pg_dump -Fc` + archive `MEDIA_DIR`.
+
+Обязательно: автоматическое расписание, ретенция минимум 7 daily, offsite/второй носитель вне диска AMS Server, проверка целостности последней копии, alert при backup failure. Restore rehearsal проверяет DB + media references. Disk-full — critical; backup только на том же диске недостаточен.
+
+## Staging contour
+
+Отдельная PostgreSQL database, отдельный `MEDIA_DIR`, отдельные secrets. Production PII dump → staging запрещён.
+
+## Disk monitoring
+
+Warning при <20% free, critical при <10% на data volume.
 
 ## Secrets и доступы
 
@@ -77,7 +87,7 @@ Runtime secret scope for this application should be project-specific in Secret M
 
 ## Catalog lifecycle operations
 
-- `catalogLifecycle` применяет retention к archived properties: после `ARCHIVE_RETENTION_DAYS` очищает публичный content (`description`, `images`) и ставит `contentPurgedAt`.
+- `catalogLifecycle` применяет retention к archived properties только если `archiveRetentionDays` задан в `project.config.ts`; иначе destructive cleanup не выполняется и поднимается alert.
 - Public gateway различает active 200, retained archived 200/noindex, purged 410/noindex и redirect только при explicit redirect path.
 - Lifecycle recovery: если content purge выполнен ошибочно, восстановление допускается только из backup/source-of-truth и отдельной owner-approved recovery task; автоматический similarity redirect запрещён.
 
@@ -85,8 +95,9 @@ Runtime secret scope for this application should be project-specific in Secret M
 
 До release должны быть проверяемые health/alerts для site, DB, overdue feed, interrupted import, lead backlog/abandoned, backup failure и critical integration failure. Incident procedure: зафиксировать SHA и симптомы, остановить опасный mutating path, сохранить evidence, выполнить approved recovery/rollback и подтвердить live state.
 
-## Payload Jobs, S3, CSP и raw REST
+## Payload Jobs, media, CSP и raw REST
 
 - Jobs owner: ровно один runtime с `JOBS_AUTORUN=true`; при handover новый runtime сначала стартует с `false`.
-- Health endpoint: `GET /api/internal/healthz` требует `x-ams-health-secret`, возвращает app/database/storage/jobs components и redacted alerts.
-- Raw REST boundary: каждый app API route включается в `config/raw-rest-boundary.json`; anonymous business REST остаётся denied by default.
+- Media: persistent `MEDIA_DIR`, Nginx alias, не S3.
+- Health endpoint: `GET /api/internal/healthz` требует `x-ams-health-secret`.
+- Raw REST boundary: `config/raw-rest-boundary.json`.
