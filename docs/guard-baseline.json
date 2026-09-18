@@ -10,5 +10,13 @@
 		"wildcardRemoteImages": "wildcard remote image hosts",
 		"publicJobsEndpoint": "public jobs API route"
 	},
-	"knownExceptions": []
+	"knownExceptions": [],
+	"uiCore18": {
+		"duplicateButtonInImportedCss": "FAIL",
+		"importedCssOver10kb": "FAIL",
+		"unimportedAtlasDumpSize": "not gated",
+		"sitePrimaryActionInRuntimeCss": "FAIL",
+		"secondTokenFile": "FAIL",
+		"uiBrowserPersistence": "FAIL"
+	}
 }
