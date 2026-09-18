@@ -39,7 +39,6 @@
   display: none;
 }
 
-.home-btn-primary,
 .site-primary-action {
   display: inline-flex;
   min-height: 48px;
@@ -59,7 +58,6 @@
     border-color var(--motion-duration-medium) var(--motion-ease-standard);
 }
 
-.home-btn-primary,
 .site-primary-action {
   border: none;
   background: var(--accent);
@@ -67,7 +65,6 @@
   box-shadow: var(--home-shadow-action);
 }
 
-.home-btn-primary:hover,
 .site-primary-action:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
@@ -934,7 +931,7 @@
   }
 
   .home-hero__actions,
-  .home-btn-primary {
+  .site-primary-action {
     width: 100%;
   }
 

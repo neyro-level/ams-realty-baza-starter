@@ -1,16 +1,58 @@
 # Design
 
-Статус: `Foundation / Atlas inventory complete / visual capture pending`.
+Статус: `Hardening / REALTY_BASE / EPIC 9`.
 
 ## Характер
 
 Цель — visual parity with Atlas при архитектурной очистке. Это не редизайн. Изменение визуального решения требует явного owner approval.
+
+Anti-goals: новый visual language без owner approval; вторая primitive foundation; raw hex/rgb в компонентах; wildcard image hosts; хранение десятков мегабайт скриншотов в каждом clone.
 
 ## Source of truth
 
 `src/app/globals.css` — единственный источник значений design system: semantic colors, surfaces, typography scale/weights, radii, containers, section rhythm, easing, shadcn mappings и fonts.
 
 Другой CSS может описывать grid, flex, positioning, sizing relationships и responsive composition, но получает design values через `var(--*)`. Component-specific literals не образуют второй набор токенов.
+
+## Token taxonomy
+
+| Class | Meaning |
+|---|---|
+| CORE | Required semantic tokens enforced by `scripts/quality/design-tokens.mjs` (`--background`, section rhythm, radii, motion, fonts). |
+| SHADCN | `@theme inline` mappings that expose CORE/PROJECT values to Tailwind utilities. |
+| PROJECT | Starter/Atlas page tokens with live `var(--*)` usage in `packages/ui` or `src`. |
+| MODULE-RESERVED | Unused prefixes kept for documented future modules: `journal`, `promo`, `compare`, `new-building`, `careers`, `employee`, `spasibo`, `agency`, `about-company`, `sale`, `catalog-buyer`, `session`, `reviews`, `contacts`, `deferred-yandex`, `route-status`, `request-cta`, `leadgen`, `corporate-landing`. Journal DTO remains contract-only in `packages/contracts`. |
+| DEAD | No `var(--token)` and not a `@theme` key and not MODULE-RESERVED. Guard requires count = 0. |
+
+ACTIVE = CORE ∪ SHADCN ∪ PROJECT. Documented RESERVED is not dead.
+
+## Page-level CSS policy
+
+Reusable visual rhythm goes through tokens and `Section` / `Container` variants. Page CSS may keep geometry (grid, flex, positioning, responsive relationships, intrinsic sizing). Forbidden: a second control pattern (`.home-btn-primary`); journal tokens outside journal module files.
+
+## Geometry vs design-values
+
+Numeric colors, type sizes, weights, radii, shadows and durations live in `globals.css`. Component CSS consumes them. Repeated section spacing uses `--section-space-*` / `--site-section-space-desktop`.
+
+## Approved exceptions
+
+- Feed images Variant B (unoptimized + allowlist), see Media.
+- Atlas home page CSS remains for the richer clone path; starter public routes compose shadcn primitives.
+- Visual deviations vs Atlas donor: simpler starter shell/cards (REPORT ONLY after EPIC 8.3). Not a silent redesign.
+
+## Representative pages and viewports
+
+Pages: `/`, `/nedvizhimost`, `/obekty/[slug]`, `/uslugi`.  
+Viewports: `390×844`, `768×1024`, `1280×900`, `1440×1000`.  
+Proof artifacts: `docs/proofs/epic-9/` (manifest + provenance, no bulk PNG in clone).
+
+## Visual baseline provenance
+
+Local Atlas donor: SourceCraft `integrator-p/atlas-realty-starter`, exact `main@4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe`, `SITE_ENGINE=fixture`. Inventory: `docs/research/ATLAS_BASELINE.md`. Capture PNGs live in donor/external storage, not in this starter clone.
+
+## Allowed specialized UI dependencies
+
+`embla-carousel-react`, `yet-another-react-lightbox`, Lucide, Radix/shadcn primitives already in `packages/ui`. New specialized UI deps need a project trigger.
 
 ## Компоненты и композиция
 
@@ -26,11 +68,3 @@
 UI использует storage-neutral `MediaDTO`. Для изображений задаются stable aspect ratio, `sizes`, lazy loading ниже critical area и fallback. Target: mobile LCP не хуже 2.5 s, CLS не выше 0.1. Motion по умолчанию — CSS/Tailwind transform/opacity с `prefers-reduced-motion`; icons — Lucide.
 
 Feed image rendering (EPIC 8.7, measured for one-server starter): **Variant B**. External feed photos stay `unoptimized` with exact `EXTERNAL_IMAGE_HOSTS` allowlist, `sizes`, explicit aspect ratio, lazy below fold and `fetchPriority=high` on the LCP candidate. Local `/media` CMS files may use Next optimizer. Next `images.remotePatterns` are generated from the same `parseAllowedImageHosts` source as ingest validation; wildcards are forbidden. Safe outbound image fetch, if added, must use `getApprovedImageOutboundHosts()`.
-
-## Visual baseline
-
-Выбран local Atlas donor: SourceCraft `integrator-p/atlas-realty-starter`, exact `main@4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe`, deterministic `SITE_ENGINE=fixture`. Канонические viewport: `390×844`, `768×1024`, `1280×900`, `1440×1000`.
-
-Identity, классифицированный UI/UX inventory, обязательные сценарии и reproduction contract: `research/ATLAS_BASELINE.md`. Фактический capture остаётся задачей EPIC 1.
-
-Одобренных визуальных исключений пока нет.

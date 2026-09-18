@@ -1,0 +1,17 @@
+{
+  "schema": "ams-starter-visual-proof/v1",
+  "donor": {
+    "repository": "integrator-p/atlas-realty-starter",
+    "sha": "4fc5d8a2cfcd29b1431ce9541db72ba0280a4cbe"
+  },
+  "viewports": [
+    { "name": "mobile", "width": 390, "height": 844 },
+    { "name": "tablet", "width": 768, "height": 1024 },
+    { "name": "desktop", "width": 1280, "height": 900 },
+    { "name": "wide", "width": 1440, "height": 1000 }
+  ],
+  "routes": ["/", "/nedvizhimost", "/uslugi"],
+  "capturesInClone": false,
+  "captureDirectory": "docs/proofs/epic-9/captures/",
+  "notes": "Bulk PNG stay outside the starter clone. Run capture-starter-visual-proof.mjs against a local BASE_URL to fill hashes."
+}

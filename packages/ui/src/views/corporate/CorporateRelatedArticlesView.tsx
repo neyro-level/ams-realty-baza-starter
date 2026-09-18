@@ -12,7 +12,7 @@ export function CorporateRelatedArticlesView({
 	if (!articles.length) return null;
 	return (
 		<section
-			className="bg-[var(--journal-surface)] py-10 lg:py-14"
+			className="bg-[var(--surface-subtle)] py-10 lg:py-14"
 			aria-labelledby="related-articles-title"
 		>
 			<div className="mx-auto max-w-site-frame px-5">

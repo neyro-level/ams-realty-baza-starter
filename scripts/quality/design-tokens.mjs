@@ -44,6 +44,7 @@ const uiFiles = walk(
 	join(root, "packages/ui/src"),
 	new Set([".ts", ".tsx", ".css"]),
 );
+const uiCodeFiles = uiFiles.filter((path) => !path.endsWith(".css"));
 const primitiveStyleFiles = [
 	...walk(
 		join(root, "packages/ui/src/components/ui"),
@@ -95,7 +96,7 @@ const forbiddenStyles = primitiveStyleFiles.flatMap((path) => {
 	});
 });
 
-const uiSource = uiFiles.map((path) => readFileSync(path, "utf8")).join("\n");
+const uiSource = uiCodeFiles.map((path) => readFileSync(path, "utf8")).join("\n");
 const allowedExternalHooks = new Set([
 	"home-page",
 	"request-modal__link",
@@ -135,6 +136,75 @@ const pageStyleFailures = componentCssFiles.flatMap((path) => {
 		}
 	}
 	return failures;
+});
+
+const reservedPrefixes = [
+	"--journal-",
+	"--promo-",
+	"--compare-",
+	"--new-building-",
+	"--careers-",
+	"--employee-",
+	"--spasibo-",
+	"--agency-",
+	"--about-company-",
+	"--sale-",
+	"--catalog-buyer-",
+	"--session-",
+	"--reviews-",
+	"--contacts-",
+	"--deferred-yandex-",
+	"--route-status-",
+	"--request-cta-",
+	"--leadgen-",
+	"--corporate-landing-",
+];
+
+function isReservedToken(token) {
+	return reservedPrefixes.some((prefix) => token.startsWith(prefix));
+}
+
+const themeBlock = tokenCss.match(/@theme inline[\s\S]*?\{([\s\S]*?)\}/)?.[1] ?? "";
+const themeKeys = new Set(
+	[...themeBlock.matchAll(/^\s*(--[a-z0-9_-]+)\s*:/gim)].map((match) => match[1]),
+);
+const codeCorpus = [
+	...walk(join(root, "src"), new Set([".css", ".ts", ".tsx"])),
+	...walk(join(root, "packages"), new Set([".css", ".ts", ".tsx"])),
+	...walk(join(root, "scripts"), new Set([".mjs", ".ts"])),
+]
+	.filter((path) => path !== tokenSource)
+	.map((path) => ({ path, text: readFileSync(path, "utf8") }));
+
+const deadTokens = [...definitions].filter((token) => {
+	if (themeKeys.has(token) || isReservedToken(token)) return false;
+	const needle = `var(${token}`;
+	return !codeCorpus.some((file) => file.text.includes(needle)) &&
+		!tokenCss.includes(needle);
+});
+
+const moduleDrift = codeCorpus.flatMap((file) => {
+	const relativePath = relative(root, file.path).replaceAll("\\", "/");
+	if (
+		relativePath.includes("/journal") ||
+		relativePath.endsWith("globals.css") ||
+		relativePath.includes("token-taxonomy")
+	) {
+		return [];
+	}
+	const hits = [
+		...file.text.matchAll(/var\((--journal-[a-z0-9_-]+)/gi),
+	].map((match) => match[1]);
+	return hits.map(
+		(token) => `${relativePath}:${token}: journal token outside journal module`,
+	);
+});
+
+const secondControl = componentCssFiles.flatMap((path) => {
+	const css = readFileSync(path, "utf8");
+	return css.includes(".home-btn-primary")
+		? [`${relative(root, path)}: second control pattern .home-btn-primary`]
+		: [];
 });
 
 const required = [
@@ -179,6 +249,9 @@ const failures = [
 	...unresolved.map((item) => `unresolved UI token ${item}`),
 	...forbiddenStyles.map((item) => `forbidden primitive style literal ${item}`),
 	...pageStyleFailures.map((item) => `page CSS violation ${item}`),
+	...deadTokens.map((token) => `dead token ${token}`),
+	...moduleDrift,
+	...secondControl,
 ];
 
 if (!tokenCss.includes("@theme inline"))

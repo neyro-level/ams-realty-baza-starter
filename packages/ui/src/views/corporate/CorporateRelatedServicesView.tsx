@@ -26,7 +26,7 @@ export function CorporateRelatedServicesView({
 					{links.map((link) => (
 						<Card
 							key={link.href}
-							className="rounded-lg border-[var(--border)] bg-[var(--surface-card-soft)] p-0 shadow-none transition hover:border-[var(--journal-border-hover)] hover:bg-[var(--accent-soft)]"
+							className="rounded-lg border-[var(--border)] bg-[var(--surface-card-soft)] p-0 shadow-none transition hover:border-[var(--border)] hover:bg-[var(--accent-soft)]"
 						>
 							<LinkRenderer href={link.href} className="group block p-5">
 								<span className="block text-body-emphasis font-extrabold leading-card text-[var(--text-primary)] transition group-hover:text-[var(--accent)]">
