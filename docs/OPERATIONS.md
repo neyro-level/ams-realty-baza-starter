@@ -1,8 +1,28 @@
 # Operations
 
-Статус: `Skeleton / production not provisioned`.
+Статус: `Live owner-operated demo on AMS Server`. Контур `start-baza.ams24.ru` уже существует. Этот файл описывает факт и rollout, а не «первый сервер с нуля». PII retention days остаются `NEEDS_OWNER`; starter demo не объявляется PII-production-ready.
 
 Этот файл хранит только проектные runbooks. Архитектурные инварианты находятся в `03_ARCHITECTURE.md`, а release gates — в `05_RELEASE_CHECKLIST.md`.
+
+## Live contour (AMS Server)
+
+```text
+Timeweb server: AMS Server
+SSH: ams / ams-deploy
+hostname: ams-market-virtual-claud
+domain: start-baza.ams24.ru
+container: ams-realty-baza
+compose: deploy/compose/start-baza.compose.yml
+nginx: deploy/nginx/start-baza.ams24.ru.conf
+listen: 127.0.0.1:3036 behind Nginx/TLS
+env file: /etc/ams/realtbase/start-baza.env (root-only; values not printed)
+database: local PostgreSQL ams_realtbase_prod
+media: /var/lib/ams/realtbase/media (MEDIA_DIR)
+jobs: exactly one runtime JOBS_AUTORUN=true
+index: X-Robots-Tag noindex,nofollow
+```
+
+Не покупать Timeweb Managed PostgreSQL, S3 или новый VPS для этого starter. `ams-server/prod` — доступ к хосту, не fallback application credentials.
 
 ## Deploy и rollback
 

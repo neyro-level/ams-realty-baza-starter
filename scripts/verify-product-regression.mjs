@@ -114,9 +114,9 @@ assert.ok(
 const releaseChecklist = read("docs/05_RELEASE_CHECKLIST.md");
 assert.ok(
 	releaseChecklist.includes(
-		"Пока production infrastructure и данные не созданы",
+		"Checklist PASS for a given SHA requires immutable image + live smoke",
 	),
-	"production-only Definition of Success items must remain explicit future blockers",
+	"production-only Definition of Success items must remain explicit SHA blockers",
 );
 assert.ok(
 	releaseChecklist.includes("production secrets берутся из Secret Master"),

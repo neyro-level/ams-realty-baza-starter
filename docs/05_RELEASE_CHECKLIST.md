@@ -1,6 +1,6 @@
 # Release Checklist
 
-Статус: `Foundation / release not ready`.
+Статус: `Owner-operated demo contour exists; EPIC-21 rollout uses exact main`. PII retention days remain `NEEDS_OWNER`.
 
 ## Перед Pull Request
 
@@ -33,4 +33,4 @@
 - после rollout выполнен live smoke изменённого сценария;
 - production URL, health и rollback point зафиксированы.
 
-Пока production infrastructure и данные не созданы, этот checklist не может иметь статус PASS.
+Live demo infrastructure on AMS Server exists (`start-baza.ams24.ru`). Checklist PASS for a given SHA requires immutable image + live smoke on that SHA, not only the existence of the contour.
