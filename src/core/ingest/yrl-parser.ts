@@ -75,7 +75,6 @@ export async function parseYrlFeed({
 	const failCritical = (message: string) => {
 		stats.criticalStructuralAnomaly = true;
 		stopError = new Error(message);
-		parser.onerror = () => undefined;
 	};
 
 	parser.on("doctype", () => {
