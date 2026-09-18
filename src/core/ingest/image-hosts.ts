@@ -75,6 +75,14 @@ export function toNextImageRemotePatterns(
 		.map((hostname) => ({ protocol: "https" as const, hostname }));
 }
 
+export function buildImageCspSrc(hosts: ReadonlySet<string>): string {
+	const extras = [...hosts]
+		.filter((hostname) => hostname && !hostname.includes("*"))
+		.sort()
+		.map((hostname) => `https://${hostname}`);
+	return ["'self'", "data:", "blob:", ...extras].join(" ");
+}
+
 export function isLocalCmsMediaSrc(src: string): boolean {
 	return src.startsWith("/") && !src.startsWith("//");
 }

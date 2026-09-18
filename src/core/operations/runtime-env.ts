@@ -1,9 +1,16 @@
+import { parseLeadChannelIds } from "../leads/channels.ts";
+
 export type RuntimeEnvMode = "build" | "migrate" | "runtime" | "development";
 
 const buildPhases = new Set([
 	"phase-production-build",
 	"phase-development-build",
 ]);
+
+const knownChannelCredentials: Record<string, readonly string[]> = {
+	max: ["MAX_BOT_TOKEN", "MAX_CHAT_ID"],
+	"custom-webhook": ["CUSTOM_WEBHOOK_URL", "CUSTOM_WEBHOOK_HMAC_SECRET"],
+};
 
 export function detectRuntimeEnvMode(
 	env: NodeJS.ProcessEnv = process.env,
@@ -43,6 +50,30 @@ export function requiredKeysForMode(mode: RuntimeEnvMode): string[] {
 	];
 }
 
+function collectConditionalRuntimeKeys(env: NodeJS.ProcessEnv): string[] {
+	const missing: string[] = [];
+	const cacheMode = env.CACHE_INVALIDATION_MODE?.trim() || "http";
+	if (cacheMode === "http" && !env.REVALIDATE_SECRET?.trim()) {
+		missing.push("REVALIDATE_SECRET");
+	}
+
+	if (env.PAYLOAD_DB_PUSH === "true") {
+		missing.push("PAYLOAD_DB_PUSH");
+	}
+
+	for (const channel of parseLeadChannelIds(env.LEAD_CHANNELS)) {
+		const refs = knownChannelCredentials[channel];
+		if (!refs) continue;
+		for (const key of refs) {
+			if (!env[key]?.trim() && !missing.includes(key)) {
+				missing.push(key);
+			}
+		}
+	}
+
+	return missing;
+}
+
 export function evaluateRuntimeEnv(
 	env: NodeJS.ProcessEnv = process.env,
 	mode: RuntimeEnvMode = detectRuntimeEnvMode(env),
@@ -58,6 +89,14 @@ export function evaluateRuntimeEnv(
 
 	if (mode === "runtime" && env.AMS_PROFILE?.trim() && env.AMS_PROFILE !== "REALTY_BASE") {
 		missing.push("AMS_PROFILE");
+	}
+
+	if (mode === "runtime") {
+		for (const key of collectConditionalRuntimeKeys(env)) {
+			if (!missing.includes(key)) {
+				missing.push(key);
+			}
+		}
 	}
 
 	return { ok: missing.length === 0, mode, missing };

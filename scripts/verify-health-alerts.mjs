@@ -228,6 +228,61 @@ assert.ok(
 		"runtime",
 	).missing.includes("MEDIA_DIR"),
 );
+
+const productionLike = {
+	NODE_ENV: "production",
+	AMS_PROFILE: "REALTY_BASE",
+	TZ: "Europe/Moscow",
+	DATABASE_URI: "postgresql://127.0.0.1:5432/ams_realtbase",
+	PAYLOAD_SECRET: "fixture-runtime-payload-secret-at-least-32-chars",
+	NEXT_PUBLIC_SERVER_URL: "https://start-baza.ams24.ru",
+	MEDIA_DIR: "/var/lib/ams-realty-baza/media",
+	REVALIDATE_SECRET: "fixture-runtime-revalidate-secret-32chars",
+};
+assert.equal(evaluateRuntimeEnv(productionLike, "runtime").ok, true);
+assert.ok(
+	evaluateRuntimeEnv(
+		{ ...productionLike, PAYLOAD_DB_PUSH: "true" },
+		"runtime",
+	).missing.includes("PAYLOAD_DB_PUSH"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{ ...productionLike, REVALIDATE_SECRET: "" },
+		"runtime",
+	).missing.includes("REVALIDATE_SECRET"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{ ...productionLike, LEAD_CHANNELS: "max" },
+		"runtime",
+	).missing.includes("MAX_BOT_TOKEN"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{
+			...productionLike,
+			LEAD_CHANNELS: "custom-webhook",
+			CUSTOM_WEBHOOK_URL: "https://hooks.example.test/leads",
+		},
+		"runtime",
+	).missing.includes("CUSTOM_WEBHOOK_HMAC_SECRET"),
+);
+assert.equal(
+	evaluateRuntimeEnv(
+		{
+			NEXT_PHASE: "phase-production-build",
+			PAYLOAD_SECRET: undefined,
+		},
+		"build",
+	).ok,
+	true,
+);
+assert.ok(
+	!evaluateRuntimeEnv(productionLike, "runtime").missing.some((key) =>
+		key.startsWith("S3"),
+	),
+);
 assert.equal(importStaleThresholdMs(5 * 60_000), 15 * 60_000);
 assert.equal(importStaleThresholdMs(10 * 60_000), 30 * 60_000);
 assert.equal(queuedImportOrphanThresholdMs(5), 15 * 60_000);

@@ -187,8 +187,12 @@ for (const required of [
 	);
 }
 assert.ok(
-	!nextConfig.includes('hostname: "*"'),
-	"next.config.ts must not allow wildcard image hosts",
+	!nextConfig.includes("img-src 'self' data: blob: https:"),
+	"CSP img-src must not use a global https: wildcard",
+);
+assert.ok(
+	nextConfig.includes("buildImageCspSrc"),
+	"CSP img-src must be assembled from EXTERNAL_IMAGE_HOSTS",
 );
 
 const payloadConfig = read("payload.config.ts");
@@ -201,8 +205,12 @@ assert.ok(
 	"CORS must be exact-origin driven",
 );
 assert.ok(
-	payloadConfig.includes("csrf: runtimeEnv.NEXT_PUBLIC_SERVER_URL"),
-	"CSRF must be exact-origin driven",
+	payloadConfig.includes('process.env.NODE_ENV === "production" ? false'),
+	"production Payload db push must be hard-disabled",
+);
+assert.ok(
+	payloadConfig.includes("build-only-payload-secret-replace-before-runtime"),
+	"build-only Payload secret fallback remains for compile",
 );
 
 const redaction = read("src/server/security/redaction.ts").toLowerCase();

@@ -50,12 +50,23 @@ function isPrivateIPv4(address: string): boolean {
 
 function isPrivateIPv6(address: string): boolean {
 	const normalized = address.toLowerCase();
+	const mappedIpv4 = normalized.match(/:ffff:(\d+\.\d+\.\d+\.\d+)$/)?.[1];
+	if (mappedIpv4) return isPrivateIPv4(mappedIpv4);
 	return (
 		normalized === "::1" ||
+		normalized === "0:0:0:0:0:0:0:1" ||
 		normalized.startsWith("fc") ||
 		normalized.startsWith("fd") ||
 		normalized.startsWith("fe80:")
 	);
+}
+
+function isUnsafeHostLiteral(host: string): boolean {
+	const normalized = host.toLowerCase();
+	if (normalized === "localhost" || normalized.endsWith(".localhost")) return true;
+	const version = isIP(host);
+	if (version === 0) return false;
+	return isUnsafeAddress(host);
 }
 
 function isUnsafeAddress(address: string): boolean {
@@ -82,6 +93,10 @@ async function assertSafeDestination(url: URL, options: SafeOutboundOptions): Pr
 	);
 	if (approvedExactOrigins.has(url.origin.toLowerCase())) {
 		return;
+	}
+
+	if (isUnsafeHostLiteral(host)) {
+		throw new Error(`Outbound host resolves to a private or link-local address: ${host}`);
 	}
 
 	const resolver = options.resolveAddresses ?? ((name: string) => lookup(name, { all: true, verbatim: true }));

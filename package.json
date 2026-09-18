@@ -48,7 +48,7 @@
 		"verify:owner-operations": "node --experimental-strip-types scripts/verify-owner-operations.mjs",
 		"verify:health-alerts": "node --experimental-strip-types scripts/verify-health-alerts.mjs",
 		"verify:operational-recovery": "node --experimental-strip-types scripts/verify-operational-recovery.mjs",
-		"verify:security-boundaries": "node --experimental-strip-types scripts/verify-security-boundaries.mjs",
+		"verify:security-boundaries": "node --experimental-strip-types scripts/verify-security-boundaries.mjs && node --experimental-strip-types scripts/verify-safe-outbound.mjs && node --experimental-strip-types scripts/verify-secrets-guard.mjs",
 		"verify:product-regression": "node scripts/verify-product-regression.mjs",
 		"verify:production-topology": "node scripts/verify-production-topology.mjs",
 		"verify:release-artifact": "node scripts/verify-release-artifact.mjs",

@@ -17,7 +17,7 @@ import { payloadJobTasks } from "./src/payload/jobs/tasks.ts";
 
 const databaseUri =
 	runtimeEnv.DATABASE_URI ??
-	"postgresql://payload:not-configured@127.0.0.1:5432/ams_realtbase_not_configured";
+	"postgresql://127.0.0.1:5432/ams_realtbase_not_configured";
 const payloadSecret =
 	runtimeEnv.PAYLOAD_SECRET ?? "build-only-payload-secret-replace-before-runtime";
 
@@ -46,7 +46,8 @@ export default buildConfig({
 			connectionString: databaseUri,
 			max: runtimeEnv.DATABASE_POOL_MAX,
 		},
-		push: runtimeEnv.PAYLOAD_DB_PUSH,
+		push:
+			process.env.NODE_ENV === "production" ? false : runtimeEnv.PAYLOAD_DB_PUSH,
 	}),
 	graphQL: {
 		disable: true,
