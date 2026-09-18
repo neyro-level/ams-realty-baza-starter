@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { createSafeFeedOutboundFetch } from "../src/server/security/safe-outbound-client.ts";
 import {
 	buildConditionalFeedHeaders,
+	calculatePropertyDerivedFields,
 	fetchConditionalFeed,
 	parseAllowedImageHosts,
 	parseYrlFeed,
@@ -14,7 +15,7 @@ const feed = buildLargeFeed(180);
 const parsed = await parseYrlFeed({
 	stream: chunkUtf8(feed, 127),
 	allowedImageHosts,
-	maxRetainedChars: 64 * 1024,
+	collectOffers: true,
 });
 
 assert.equal(parsed.offers.length, 180);
@@ -100,6 +101,34 @@ const consumed = await new Response(fetched.body).text();
 assert.equal(consumed, bodyText);
 assert.equal(await fetched.sha256, expectedHash);
 assert.equal(fetched.etag, '"body-etag-next"');
+
+const dtd = await parseYrlFeed({
+	stream: chunkUtf8(
+		`<?xml version="1.0"?><!DOCTYPE realty-feed [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><realty-feed><offer id="x"><type>продажа</type></offer></realty-feed>`,
+		32,
+	),
+	allowedImageHosts,
+	collectOffers: true,
+});
+assert.equal(dtd.stats.criticalStructuralAnomaly, true);
+assert.equal(dtd.stats.parserCompleted, false);
+
+const marketProbe = await parseYrlFeed({
+	stream: chunkUtf8(
+		`<?xml version="1.0"?><realty-feed><offer id="m1"><title>Market probe</title><market>newbuild</market><type>продажа</type><category>квартира</category><price><value>1000000</value><currency>RUR</currency></price><area><value>50</value><unit>sqm</unit></area></offer></realty-feed>`,
+		64,
+	),
+	allowedImageHosts,
+	collectOffers: true,
+});
+assert.equal(marketProbe.stats.parserCompleted, true);
+assert.equal(marketProbe.offers[0].externalId, "m1");
+assert.equal(marketProbe.offers[0].totalArea, 50);
+assert.equal("market" in marketProbe.offers[0], false);
+assert.deepEqual(
+	calculatePropertyDerivedFields({ priceMinor: 10_000_000_00, totalArea: 50 }),
+	{ pricePerMeterMinor: 20_000_000 },
+);
 
 console.log("verify-feed-parser: ok");
 

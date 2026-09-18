@@ -1,4 +1,9 @@
 export {
+	calculatePropertyDerivedFields,
+	type PropertyDerivedFields,
+	type PropertyDerivedInput,
+} from "./derived-fields.ts";
+export {
 	buildConditionalFeedHeaders,
 	type FetchFeedResult,
 	fetchConditionalFeed,
