@@ -104,8 +104,10 @@ export async function claimDueFeedSources(
 			SELECT source.id
 			FROM feed_sources AS source
 			WHERE source.enabled = true
-				AND source.next_due_at IS NOT NULL
-				AND source.next_due_at <= ${now}::timestamptz
+				AND (
+					source.next_due_at IS NULL
+					OR source.next_due_at <= ${now}::timestamptz
+				)
 			ORDER BY source.next_due_at ASC
 			LIMIT ${batchSize}
 			FOR UPDATE SKIP LOCKED

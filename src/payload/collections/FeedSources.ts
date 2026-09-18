@@ -1,5 +1,7 @@
 import type { CollectionConfig, PayloadRequest } from "payload";
 import { queueManualFeedImport, approveSuspiciousDeactivation } from "../../core/ingest/owner-feed-operations.ts";
+import { normalizeEnabledFeedNextDueAt } from "../../core/ingest/feed-schedule.ts";
+import { getRuntimeClock } from "../../core/time/clock.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 export const FeedSources: CollectionConfig = {
@@ -12,6 +14,24 @@ export const FeedSources: CollectionConfig = {
 			"Owner operations: feed health, schedule, deactivation safety and suspicious-run approval. Store only secret references, never credential URLs.",
 	},
 	hooks: {
+		beforeChange: [
+			({ data, originalDoc }) => {
+				const enabled =
+					typeof data.enabled === "boolean"
+						? data.enabled
+						: Boolean(originalDoc?.enabled);
+				const nextDueAt =
+					data.nextDueAt !== undefined
+						? (data.nextDueAt as string | null)
+						: ((originalDoc?.nextDueAt as string | null | undefined) ?? null);
+				data.nextDueAt = normalizeEnabledFeedNextDueAt({
+					enabled,
+					nextDueAt,
+					nowIso: getRuntimeClock().nowIso(),
+				});
+				return data;
+			},
+		],
 		beforeDelete: [
 			async ({ id, req }) => {
 				const [properties, importRuns, importIssues] = await Promise.all([
@@ -150,6 +170,10 @@ export const FeedSources: CollectionConfig = {
 			name: "nextDueAt",
 			type: "date",
 			index: true,
+			admin: {
+				description:
+					"Required when the source is enabled. Create/enable without a value sets now; dispatcher does not skip null rows.",
+			},
 		},
 		{
 			name: "lastAttemptAt",

@@ -65,8 +65,8 @@ DECLARE
 	fixture_feed_source_id integer;
 	fixture_lead_id integer;
 BEGIN
-	INSERT INTO feed_sources (code, title, parser, market, feed_url_ref, enabled)
-	VALUES ('verify-schema-feed', 'Verify schema feed', 'yrl', 'secondary', 'VERIFY_SCHEMA_FEED_URL', true)
+	INSERT INTO feed_sources (code, title, parser, market, feed_url_ref, enabled, next_due_at)
+	VALUES ('verify-schema-feed', 'Verify schema feed', 'yrl', 'secondary', 'VERIFY_SCHEMA_FEED_URL', true, NOW())
 	RETURNING id INTO fixture_feed_source_id;
 
 	INSERT INTO properties (

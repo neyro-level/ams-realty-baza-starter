@@ -235,4 +235,75 @@ assert.deepEqual(
 );
 assert.equal(computeTransientRetryAt(nowIso), "2026-09-16T12:15:00.000Z");
 
+const {
+	normalizeEnabledFeedNextDueAt,
+	isEnabledFeedDue,
+	computeScheduleAfterClaim,
+} = await import("../src/core/ingest/feed-schedule.ts");
+
+assert.equal(
+	normalizeEnabledFeedNextDueAt({
+		enabled: true,
+		nextDueAt: null,
+		nowIso,
+	}),
+	nowIso,
+);
+assert.equal(
+	normalizeEnabledFeedNextDueAt({
+		enabled: true,
+		nextDueAt: "2026-09-20T00:00:00.000Z",
+		nowIso,
+	}),
+	"2026-09-20T00:00:00.000Z",
+);
+assert.equal(
+	normalizeEnabledFeedNextDueAt({
+		enabled: false,
+		nextDueAt: null,
+		nowIso,
+	}),
+	null,
+);
+assert.equal(
+	isEnabledFeedDue({
+		enabled: true,
+		nextDueAt: null,
+		nowIso,
+	}),
+	true,
+	"enabled source with null nextDueAt remains due",
+);
+assert.equal(
+	isEnabledFeedDue({
+		enabled: true,
+		nextDueAt: "2026-09-16T11:00:00.000Z",
+		nowIso,
+	}),
+	true,
+);
+assert.equal(
+	isEnabledFeedDue({
+		enabled: true,
+		nextDueAt: "2026-09-16T13:00:00.000Z",
+		nowIso,
+	}),
+	false,
+);
+
+const missed = computeScheduleAfterClaim({
+	now: new Date(nowIso),
+	previousNextDueAt: "2026-09-01T12:00:00.000Z",
+	refreshIntervalMinutes: 1440,
+});
+assert.equal(missed, "2026-09-17T12:00:00.000Z");
+assert.equal(
+	computeScheduleAfterClaim({
+		now: new Date(nowIso),
+		previousNextDueAt: "2026-09-16T11:50:00.000Z",
+		refreshIntervalMinutes: 60,
+	}),
+	"2026-09-16T13:00:00.000Z",
+);
+
 console.log("verify-feed-lifecycle: ok");

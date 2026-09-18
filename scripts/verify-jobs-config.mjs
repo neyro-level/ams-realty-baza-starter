@@ -198,6 +198,11 @@ if (!tasksSource.includes("claimDueFeedSources")) {
 	throw new Error("dispatchDueFeeds must use atomic claimDueFeedSources.");
 }
 
+const ingestSql = readFileSync(join(root, "src/core/data-access/ingest/sql/index.ts"), "utf8");
+if (!ingestSql.includes("source.next_due_at IS NULL")) {
+	throw new Error("claimDueFeedSources must include enabled sources with null nextDueAt.");
+}
+
 if (!tasksSource.includes("claimQueuedImportRun")) {
 	throw new Error("importFeed must claim queued runs atomically.");
 }

@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
 	dispatchDueFeeds,
 	ingestNormalizedFeed,
+	isEnabledFeedDue,
 	runImportFeed,
 	startImportHeartbeat,
 } from "../src/core/ingest/index.ts";
@@ -264,6 +266,62 @@ const httpFail = await postBatchedHttpRevalidate({
 });
 assert.equal(httpFail.ok, false);
 assert.equal(httpFail.warning, true);
+
+assert.equal(
+	isEnabledFeedDue({
+		enabled: true,
+		nextDueAt: null,
+		nowIso: "2026-09-18T06:00:00.000Z",
+	}),
+	true,
+);
+const nullDueDispatch = await dispatchDueFeeds({
+	now: new Date("2026-09-18T06:00:00.000Z"),
+	claimDueFeedSources: async () =>
+		isEnabledFeedDue({
+			enabled: true,
+			nextDueAt: null,
+			nowIso: "2026-09-18T06:00:00.000Z",
+		})
+			? [
+					{
+						id: "null-due",
+						code: "n",
+						market: "secondary",
+						feedUrlRef: "FEED_N_URL",
+						refreshIntervalMinutes: 60,
+						nextDueAt: "2026-09-18T06:00:00.000Z",
+						safetyThresholdPercent: 30,
+						maxDeactivationsPerRun: 50,
+						enabled: true,
+					},
+				]
+			: [],
+	createQueuedImportRun: async ({ feedSourceId }) => ({ id: `run-${feedSourceId}` }),
+	enqueueImportFeed: async () => ({ id: "job-null" }),
+	attachJobId: async () => undefined,
+});
+assert.equal(nullDueDispatch.dispatched.length, 1);
+
+const importRuntime = readFileSync("src/core/ingest/import-feed-runtime.ts", "utf8");
+const ownerFeed = readFileSync("src/core/ingest/owner-feed-operations.ts", "utf8");
+assert.ok(
+	importRuntime.includes("safetyThresholdPercent: source.safetyThresholdPercent"),
+	"import runtime must use source safetyThresholdPercent",
+);
+assert.ok(
+	importRuntime.includes("maxDeactivationsPerRun: source.maxDeactivationsPerRun"),
+	"import runtime must use source maxDeactivationsPerRun",
+);
+assert.equal(
+	ownerFeed.includes("safetyThresholdPercent: 0"),
+	false,
+	"manual import must not bypass safety knobs",
+);
+assert.ok(
+	ownerFeed.includes('task: "importFeed"'),
+	"manual import must enqueue the same importFeed job",
+);
 
 console.log("verify-feed-ingest: ok");
 

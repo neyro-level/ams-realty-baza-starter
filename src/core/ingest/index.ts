@@ -8,6 +8,11 @@ export {
 	startImportHeartbeat,
 } from "./dispatch-due-feeds.ts";
 export {
+	computeScheduleAfterClaim,
+	isEnabledFeedDue,
+	normalizeEnabledFeedNextDueAt,
+} from "./feed-schedule.ts";
+export {
 	parseFeedUrlRef,
 	parseImageHostEnv,
 	runImportFeed,
