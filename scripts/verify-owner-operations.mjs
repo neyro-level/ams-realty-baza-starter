@@ -147,4 +147,28 @@ const payloadConfig = readFileSync(join(root, "payload.config.ts"), "utf8");
 assert.equal(payloadConfig.includes("slug: \"payload-jobs\""), false);
 assert.equal(payloadConfig.includes("jobsCollectionOverrides"), false);
 
+const propertiesSource = readFileSync(
+	join(root, "src", "payload", "collections", "Properties.ts"),
+	"utf8",
+);
+assert.equal(
+	propertiesSource.includes("systemOverrideAccess"),
+	false,
+	"return-to-feed must use request access, not systemOverrideAccess",
+);
+assert.ok(
+	propertiesSource.includes("overrideAccess: false"),
+	"return-to-feed must pin request access",
+);
+
+const ownerFeed = readFileSync(
+	join(root, "src", "core", "ingest", "owner-feed-operations.ts"),
+	"utf8",
+);
+assert.equal(
+	ownerFeed.includes("systemOverrideAccess"),
+	false,
+	"owner feed operations must not call systemOverrideAccess",
+);
+
 console.log("verify-owner-operations: ok");

@@ -1,17 +1,18 @@
-import type { Payload } from "payload";
-import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
+import type { Payload, PayloadRequest } from "payload";
 import { appendAttemptLog } from "./delivery-state.ts";
 
-const access = systemOverrideAccess("system-job");
+const requestAccess = { overrideAccess: false as const };
 
 export async function retryLeadDelivery({
 	payload,
+	req,
 	deliveryId,
 	actorUserId,
 	nowIso,
 	enqueue,
 }: {
 	payload: Payload;
+	req?: PayloadRequest;
 	deliveryId: string;
 	actorUserId: string;
 	nowIso: string;
@@ -21,7 +22,8 @@ export async function retryLeadDelivery({
 		collection: "lead-deliveries",
 		id: deliveryId,
 		depth: 0,
-		...access,
+		req,
+		...requestAccess,
 	});
 
 	if (delivery.status === "sending") {
@@ -58,7 +60,8 @@ export async function retryLeadDelivery({
 			lastErrorKind: null,
 			attemptLog,
 		},
-		...access,
+		req,
+		...requestAccess,
 	});
 
 	const jobId = await enqueue(String(delivery.id));
@@ -66,7 +69,8 @@ export async function retryLeadDelivery({
 		collection: "lead-deliveries",
 		id: deliveryId,
 		data: { jobId },
-		...access,
+		req,
+		...requestAccess,
 	});
 	return { jobId };
 }

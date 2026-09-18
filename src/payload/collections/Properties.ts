@@ -7,7 +7,6 @@ import {
 	returnFieldToFeed,
 	shouldRecordManualOwnership,
 } from "../../core/ingest/manual-ownership.ts";
-import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) => hasRole(req.user, ["owner", "admin"]);
@@ -49,7 +48,8 @@ export const Properties: CollectionConfig = {
 					collection: "properties",
 					id,
 					depth: 0,
-					...systemOverrideAccess("system-job"),
+					req,
+					overrideAccess: false,
 				});
 				const next = returnFieldToFeed(
 					doc.manualOverrides as
@@ -72,9 +72,9 @@ export const Properties: CollectionConfig = {
 										: Number(marker.setBy),
 						})),
 					},
-					...systemOverrideAccess("system-job"),
+					req,
+					overrideAccess: false,
 					context: {
-						...systemOverrideAccess("system-job").context,
 						source: "system",
 					},
 				});

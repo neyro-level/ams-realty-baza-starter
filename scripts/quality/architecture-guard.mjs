@@ -54,6 +54,20 @@ for (const file of filesUnder("src")) {
 	) {
 		report(file, "overrideAccess:true outside System Gateway");
 	}
+	if (
+		content.includes("systemOverrideAccess") &&
+		!(
+			name.startsWith("src/server/system-gateway/") ||
+			name.startsWith("src/core/data-access/system/") ||
+			name.startsWith("src/payload/jobs/") ||
+			name.startsWith("src/core/data-access/leads/") ||
+			name.startsWith("src/server/public-gateway/") ||
+			name === "src/core/ingest/payload-feed-ingest-repository.ts" ||
+			name === "src/core/leads/deliver-lead.ts"
+		)
+	) {
+		report(file, "systemOverrideAccess import outside System Gateway whitelist");
+	}
 	if (/hostname\s*:\s*["']\*+["']/.test(content))
 		report(file, "wildcard image hostname");
 	if (/(?:token|secret|password)\s*[:=]\s*["'][^"']{12,}["']/i.test(content)) {

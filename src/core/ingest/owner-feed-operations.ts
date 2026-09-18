@@ -1,23 +1,26 @@
-import type { Payload } from "payload";
+import type { PayloadRequest } from "payload";
 import { projectConfig } from "../../project/project.config.ts";
-import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
+import { systemQueueJob } from "../../server/system-gateway/jobs.ts";
+
+const requestAccess = { overrideAccess: false as const };
 
 export async function queueManualFeedImport(
-	payload: Payload,
+	req: PayloadRequest,
 	input: { feedSourceId: string; now?: Date },
 ): Promise<{ importRunId: string; jobId: string }> {
 	const now = input.now ?? new Date();
-	const source = await payload.findByID({
+	const source = await req.payload.findByID({
 		collection: "feed-sources",
 		id: input.feedSourceId,
 		depth: 0,
-		...systemOverrideAccess("system-job"),
+		req,
+		...requestAccess,
 	});
 	if (!source.enabled) {
 		throw new Error("Manual import requires an enabled feed source.");
 	}
 
-	const created = await payload.create({
+	const created = await req.payload.create({
 		collection: "import-runs",
 		data: {
 			feedSource: Number(source.id),
@@ -25,31 +28,33 @@ export async function queueManualFeedImport(
 			queuedAt: now.toISOString(),
 			heartbeatAt: now.toISOString(),
 		},
-		...systemOverrideAccess("system-job"),
+		req,
+		...requestAccess,
 	});
 	const importRunId = String(created.id);
-	const queued = (await payload.jobs.queue({
-		task: "importFeed",
+	const queued = (await systemQueueJob({
+		req,
+		task: "importFeed" as never,
 		queue: "imports",
 		input: {
 			feedSourceId: String(source.id),
 			importRunId,
-		},
-		...systemOverrideAccess("system-job"),
+		} as never,
 	})) as { id: number | string };
 
-	await payload.update({
+	await req.payload.update({
 		collection: "import-runs",
 		id: importRunId,
 		data: { jobId: String(queued.id) },
-		...systemOverrideAccess("system-job"),
+		req,
+		...requestAccess,
 	});
 
 	return { importRunId, jobId: String(queued.id) };
 }
 
 export async function approveSuspiciousDeactivation(
-	payload: Payload,
+	req: PayloadRequest,
 	input: {
 		feedSourceId: string;
 		importRunId: string;
@@ -58,11 +63,12 @@ export async function approveSuspiciousDeactivation(
 	},
 ): Promise<{ expiresAt: string }> {
 	const now = input.now ?? new Date();
-	const run = await payload.findByID({
+	const run = await req.payload.findByID({
 		collection: "import-runs",
 		id: input.importRunId,
 		depth: 0,
-		...systemOverrideAccess("system-job"),
+		req,
+		...requestAccess,
 	});
 	if (run.status !== "suspicious") {
 		throw new Error("Deactivation approval is only valid for a suspicious import run.");
@@ -79,7 +85,7 @@ export async function approveSuspiciousDeactivation(
 		now.getTime() + projectConfig.approvalTtlMinutes * 60_000,
 	).toISOString();
 
-	await payload.update({
+	await req.payload.update({
 		collection: "feed-sources",
 		id: input.feedSourceId,
 		data: {
@@ -91,7 +97,8 @@ export async function approveSuspiciousDeactivation(
 				consumedAt: null,
 			},
 		},
-		...systemOverrideAccess("system-job"),
+		req,
+		...requestAccess,
 	});
 
 	return { expiresAt };

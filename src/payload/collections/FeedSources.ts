@@ -19,16 +19,19 @@ export const FeedSources: CollectionConfig = {
 						collection: "properties",
 						where: { feedSource: { equals: id } },
 						req,
+						overrideAccess: false,
 					}),
 					req.payload.count({
 						collection: "import-runs",
 						where: { feedSource: { equals: id } },
 						req,
+						overrideAccess: false,
 					}),
 					req.payload.count({
 						collection: "import-issues",
 						where: { feedSource: { equals: id } },
 						req,
+						overrideAccess: false,
 					}),
 				]);
 
@@ -58,7 +61,7 @@ export const FeedSources: CollectionConfig = {
 					return Response.json({ error: "forbidden" }, { status: 403 });
 				}
 				const id = String(req.routeParams?.id ?? "");
-				const result = await queueManualFeedImport(req.payload, { feedSourceId: id });
+				const result = await queueManualFeedImport(req, { feedSourceId: id });
 				return Response.json(result);
 			},
 		},
@@ -74,7 +77,7 @@ export const FeedSources: CollectionConfig = {
 				if (!body?.importRunId || !req.user?.id) {
 					return Response.json({ error: "invalid_payload" }, { status: 400 });
 				}
-				const result = await approveSuspiciousDeactivation(req.payload, {
+				const result = await approveSuspiciousDeactivation(req, {
 					feedSourceId: id,
 					importRunId: String(body.importRunId),
 					approvedByUserId: String(req.user.id),

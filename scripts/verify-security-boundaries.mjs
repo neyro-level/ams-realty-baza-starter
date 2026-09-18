@@ -267,6 +267,18 @@ for (const file of [
 	);
 }
 
+assert.equal(
+	read("src/payload/collections/Properties.ts").includes("systemOverrideAccess"),
+	false,
+	"Properties return-to-feed must not import systemOverrideAccess",
+);
+assert.ok(
+	read("scripts/quality/architecture-guard.mjs").includes(
+		"systemOverrideAccess import outside System Gateway whitelist",
+	),
+	"architecture guard must fail business imports of systemOverrideAccess",
+);
+
 const healthAlerts = read("scripts/verify-health-alerts.mjs");
 for (const forbidden of ["token", "secret", "password", "phone", "email"]) {
 	assert.ok(

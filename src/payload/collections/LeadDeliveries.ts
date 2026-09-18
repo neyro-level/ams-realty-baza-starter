@@ -1,6 +1,6 @@
 import type { CollectionConfig, PayloadRequest } from "payload";
 import { retryLeadDelivery } from "../../core/leads/owner-delivery-operations.ts";
-import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
+import { systemQueueJob } from "../../server/system-gateway/jobs.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 export const LeadDeliveries: CollectionConfig = {
@@ -41,16 +41,16 @@ export const LeadDeliveries: CollectionConfig = {
 				try {
 					const result = await retryLeadDelivery({
 						payload: req.payload,
+						req,
 						deliveryId: id,
 						actorUserId: String(req.user?.id ?? "unknown"),
 						nowIso: new Date().toISOString(),
 						enqueue: async (leadDeliveryId) => {
-							const queued = (await req.payload.jobs.queue({
-								task: "deliverLead",
-								queue: "lead-deliveries",
-								input: { leadDeliveryId },
+							const queued = (await systemQueueJob({
 								req,
-								...systemOverrideAccess("system-job"),
+								task: "deliverLead" as never,
+								queue: "lead-deliveries",
+								input: { leadDeliveryId } as never,
 							})) as { id: number | string };
 							return String(queued.id);
 						},
