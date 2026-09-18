@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { submitPublicLead } from "../../../../server/public-gateway/leads.ts";
+import { submitPublicLead } from "../../../../core/data-access/public/leads.ts";
 
 export const runtime = "nodejs";
 

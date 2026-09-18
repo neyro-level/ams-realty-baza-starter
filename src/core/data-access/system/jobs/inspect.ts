@@ -1,6 +1,6 @@
 import "server-only";
 import type { Payload } from "payload";
-import { systemOverrideAccess } from "../../../../server/system-gateway/overrides.ts";
+import { systemOverrideAccess } from "../overrides.ts";
 
 export async function inspectPayloadJob(payload: Payload, id: string) {
 	return payload.findByID({

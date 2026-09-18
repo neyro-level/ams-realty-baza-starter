@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { SiteShellView } from "@ams/realtbase-ui";
-import { getPublicShell } from "@/server/public-gateway";
+import { getPublicShell } from "@/core/data-access/public";
 
 export const dynamic = "force-dynamic";
 

@@ -5,7 +5,7 @@ Anonymous generic business REST is deny for every `anonymousDenyCollections` slu
 ## Mechanical guard
 
 - `config/raw-rest-boundary.json` denylist is the allowlist-of-denied collections.
-- `src/server/security/anonymous-raw-rest.ts` classifies `/api/:collection` paths.
+- `src/core/security/anonymous-raw-rest.ts` classifies `/api/:collection` paths.
 - `src/proxy.ts` returns 404 `notFound` without a Payload session cookie.
 - Collection `access.read` for deny-anonymous files is `adminsAndOwners` / `ownersOnly`; `read: () => true` fails `verify:security-boundaries` and `quality:guards`.
 

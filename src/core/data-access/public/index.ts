@@ -32,7 +32,7 @@ export {
 	publicPropertyPublicationWhere,
 	publicPropertyRetainedArchivedWhere,
 } from "./catalog";
-export { publicGatewayReadAccess } from "../system-gateway/public-read";
+export { publicGatewayReadAccess } from "../system/public-read";
 export { publicGatewayPolicy } from "./policy";
 export {
 	getPublicCatalog,

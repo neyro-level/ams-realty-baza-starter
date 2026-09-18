@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 
-const catalogSource = readFileSync("src/server/public-gateway/catalog.ts", "utf8");
-const gatewaySource = readFileSync("src/server/public-gateway/index.ts", "utf8");
-const policySource = readFileSync("src/server/public-gateway/policy.ts", "utf8");
-const accessSource = readFileSync("src/server/system-gateway/public-read.ts", "utf8");
+const catalogSource = readFileSync("src/core/data-access/public/catalog.ts", "utf8");
+const gatewaySource = readFileSync("src/core/data-access/public/index.ts", "utf8");
+const policySource = readFileSync("src/core/data-access/public/policy.ts", "utf8");
+const accessSource = readFileSync("src/core/data-access/system/public-read.ts", "utf8");
 const propertiesSource = readFileSync("src/payload/collections/Properties.ts", "utf8");
 const pagesSource = readFileSync("src/payload/collections/Pages.ts", "utf8");
 const mediaSource = readFileSync("src/payload/collections/Media.ts", "utf8");

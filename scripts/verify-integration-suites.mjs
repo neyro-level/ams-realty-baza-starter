@@ -27,8 +27,8 @@ import { decideFeedRunCompletion, runImportFeed } from "../src/core/ingest/index
 import {
 	createSafeFeedOutboundFetch,
 	safeOutboundFetch,
-} from "../src/server/security/safe-outbound-client.ts";
-import { parseTestApprovedOrigins } from "../src/server/security/test-destinations.ts";
+} from "../src/core/security/safe-outbound-client.ts";
+import { parseTestApprovedOrigins } from "../src/core/security/test-destinations.ts";
 
 loadLocalEnv();
 

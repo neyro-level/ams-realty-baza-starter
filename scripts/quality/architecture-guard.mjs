@@ -50,18 +50,17 @@ for (const file of filesUnder("src")) {
 	const name = relative(file);
 	if (
 		/overrideAccess\s*:\s*true/.test(content) &&
-		!name.startsWith("src/server/system-gateway/")
+		!name.startsWith("src/core/data-access/system/")
 	) {
 		report(file, "overrideAccess:true outside System Gateway");
 	}
 	if (
 		content.includes("systemOverrideAccess") &&
 		!(
-			name.startsWith("src/server/system-gateway/") ||
 			name.startsWith("src/core/data-access/system/") ||
 			name.startsWith("src/payload/jobs/") ||
 			name.startsWith("src/core/data-access/leads/") ||
-			name.startsWith("src/server/public-gateway/") ||
+			name.startsWith("src/core/data-access/public/") ||
 			name === "src/core/ingest/payload-feed-ingest-repository.ts" ||
 			name === "src/core/leads/deliver-lead.ts"
 		)
@@ -161,7 +160,7 @@ const proxyPath = path.join(root, "src", "proxy.ts");
 const anonymousRestHelperPath = path.join(
 	root,
 	"src",
-	"server",
+	"core",
 	"security",
 	"anonymous-raw-rest.ts",
 );
@@ -181,10 +180,10 @@ if (!existsSync(proxyPath)) {
 	}
 }
 if (!existsSync(anonymousRestHelperPath)) {
-	violations.push("src/server/security/anonymous-raw-rest.ts: denylist helper is missing");
+	violations.push("src/core/security/anonymous-raw-rest.ts: denylist helper is missing");
 } else if (!readFileSync(anonymousRestHelperPath, "utf8").includes("anonymousDenyCollections")) {
 	violations.push(
-		"src/server/security/anonymous-raw-rest.ts: helper must read anonymousDenyCollections",
+		"src/core/security/anonymous-raw-rest.ts: helper must read anonymousDenyCollections",
 	);
 }
 
@@ -282,7 +281,7 @@ for (const file of filesUnder("src")) {
 	}
 	if (
 		/\bfetch\s*\(/.test(content) &&
-		name !== "src/server/security/safe-outbound-client.ts"
+		name !== "src/core/security/safe-outbound-client.ts"
 	) {
 		report(file, "direct fetch is forbidden outside Safe Outbound Client");
 	}
@@ -377,10 +376,22 @@ if (existsSync(path.join(root, "src", "core", "data-access", "public", "sql"))) 
 	violations.push("src/core/data-access/public/sql: public raw SQL layer must be removed");
 }
 
-const publicReadRoots = [
+for (const leftover of [
 	"src/server/public-gateway",
-	"src/app/(site)",
+	"src/server/system-gateway",
+	"src/server/security",
+	"src/server/seo",
+	"src/server/http",
+	"src/server/ingest-gateway",
+]) {
+	if (existsSync(path.join(root, leftover))) {
+		violations.push(`${leftover}: moved under src/core; leftover path must be removed`);
+	}
+}
+
+const publicReadRoots = [
 	"src/core/data-access/public",
+	"src/app/(site)",
 ];
 const publicSqlForbidden =
 	/drizzle\.execute|from\s+["']@payloadcms\/db-postgres\/drizzle["']|payload\.db|db\.drizzle/;

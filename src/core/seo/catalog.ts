@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { CatalogQueryInput } from "@/server/public-gateway";
+import type { CatalogQueryInput } from "@/core/data-access/public";
 import { projectConfig } from "../../project/project.config.ts";
 import { absoluteUrl, siteBrandName } from "./site.ts";
 

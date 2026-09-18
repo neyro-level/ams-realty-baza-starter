@@ -34,7 +34,7 @@ public UI
   -> Payload-owned schema
 ```
 
-Reusable UI не импортирует Payload, DB clients или persistence types. Configurable outbound HTTP проходит через Safe Outbound Client; raw anonymous business REST закрывается на edge и Payload boundary.
+Reusable UI не импортирует Payload, DB clients или persistence types. Configurable outbound HTTP проходит через Safe Outbound Client; raw anonymous business REST закрывается на edge и Payload boundary. Public Gateway: `src/core/data-access/public`. System Gateway: `src/core/data-access/system`.
 
 ## Data, jobs и cache
 

@@ -32,13 +32,13 @@ import {
 } from "../../core/ingest/import-feed-runtime.ts";
 import { projectConfig } from "../../project/project.config.ts";
 import { getRuntimeClock } from "../../core/time/clock.ts";
-import { systemQueueJob } from "../../server/system-gateway/jobs.ts";
-import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
+import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
+import { systemOverrideAccess } from "../../core/data-access/system/overrides.ts";
 import {
 	createSafeFeedOutboundFetch,
 	parseOutboundHostList,
-} from "../../server/security/safe-outbound-client.ts";
-import { parseTestApprovedOrigins } from "../../server/security/test-destinations.ts";
+} from "../../core/security/safe-outbound-client.ts";
+import { parseTestApprovedOrigins } from "../../core/security/test-destinations.ts";
 import { runtimeEnv } from "../env.ts";
 import {
 	payloadJobQueues,

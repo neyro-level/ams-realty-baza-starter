@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { safeOutboundFetch } from "../src/server/security/safe-outbound-client.ts";
+import { safeOutboundFetch } from "../src/core/security/safe-outbound-client.ts";
 
 const publicHost = "feeds.example.test";
 const publicUrl = `https://${publicHost}/feed.xml`;

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { createSafeFeedOutboundFetch } from "../src/server/security/safe-outbound-client.ts";
+import { createSafeFeedOutboundFetch } from "../src/core/security/safe-outbound-client.ts";
 import {
 	buildConditionalFeedHeaders,
 	calculatePropertyDerivedFields,

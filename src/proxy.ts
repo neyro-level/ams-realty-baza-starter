@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { anonymousRawRestEdgeDecision } from "./server/security/anonymous-raw-rest.ts";
+import { anonymousRawRestEdgeDecision } from "./core/security/anonymous-raw-rest.ts";
 
 export function proxy(request: NextRequest) {
 	const denial = anonymousRawRestEdgeDecision(

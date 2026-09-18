@@ -100,7 +100,7 @@ requireIncludes(
 	"raw REST edge boundary must use the configured denylist helper",
 );
 requireIncludes(
-	"src/server/security/anonymous-raw-rest.ts",
+	"src/core/security/anonymous-raw-rest.ts",
 	"anonymousDenyCollections",
 	"anonymous REST helper must read the configured denylist",
 );
@@ -213,7 +213,7 @@ assert.ok(
 	"build-only Payload secret fallback remains for compile",
 );
 
-const redaction = read("src/server/security/redaction.ts").toLowerCase();
+const redaction = read("src/core/security/redaction.ts").toLowerCase();
 for (const sensitive of [
 	"password",
 	"secret",
@@ -228,7 +228,7 @@ for (const sensitive of [
 	);
 }
 
-const outbound = read("src/server/security/safe-outbound-client.ts");
+const outbound = read("src/core/security/safe-outbound-client.ts");
 for (const required of [
 	"allowedHosts",
 	"approvedHttpHosts",
@@ -243,8 +243,8 @@ for (const required of [
 }
 
 const overrideAllowlist = new Set([
-	"src/server/system-gateway/overrides.ts",
-	"src/server/system-gateway/public-read.ts",
+	"src/core/data-access/system/overrides.ts",
+	"src/core/data-access/system/public-read.ts",
 	"scripts/quality/architecture-guard.mjs",
 	"scripts/verify-security-boundaries.mjs",
 ]);
@@ -323,7 +323,7 @@ assert.match(
 );
 
 const { isAnonymousDeniedRawRestPath, anonymousRawRestEdgeDecision } = await import(
-	"../src/server/security/anonymous-raw-rest.ts"
+	"../src/core/security/anonymous-raw-rest.ts"
 );
 for (const slug of ["properties", "pages", "leads", "lead-deliveries", "users"]) {
 	assert.equal(

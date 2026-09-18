@@ -1,4 +1,4 @@
-import type { SafeOutboundStreamResult } from "../../server/security/safe-outbound-client.ts";
+import type { SafeOutboundStreamResult } from "../security/safe-outbound-client.ts";
 
 export type ConditionalFeedState = {
 	etag?: string | null;

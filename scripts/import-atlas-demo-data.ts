@@ -5,7 +5,7 @@ import { getPayload } from "payload";
 import config from "../payload.config.ts";
 import { requirePayloadRuntime } from "../src/payload/env.ts";
 import { calculatePropertyDerivedFields } from "../src/core/ingest/derived-fields.ts";
-import { systemOverrideAccess } from "../src/server/system-gateway/overrides.ts";
+import { systemOverrideAccess } from "../src/core/data-access/system/overrides.ts";
 
 type AtlasPhoto = {
 	path: string;

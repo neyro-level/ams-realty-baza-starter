@@ -1,5 +1,5 @@
 import type { Payload, PayloadRequest } from "payload";
-import { systemOverrideAccess } from "../../../server/system-gateway/overrides.ts";
+import { systemOverrideAccess } from "../system/overrides.ts";
 import type {
 	LeadDeliveryRecord,
 	LeadOutboxRepository,

@@ -28,7 +28,7 @@ import {
 	programmaticPayloadJobTasks,
 	staticPayloadJobTasks,
 } from "../../../../payload/jobs/registry.ts";
-import { redactRecord } from "../../../../server/security/redaction.ts";
+import { redactRecord } from "../../../../core/security/redaction.ts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

@@ -1,6 +1,6 @@
 import type { PayloadRequest } from "payload";
 import { projectConfig } from "../../project/project.config.ts";
-import { systemQueueJob } from "../../server/system-gateway/jobs.ts";
+import { systemQueueJob } from "../data-access/system/queue-job.ts";
 
 const requestAccess = { overrideAccess: false as const };
 

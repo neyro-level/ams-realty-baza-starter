@@ -8,7 +8,7 @@ Chosen mechanism: Preferred A, Route Handler.
 
 | Rule | Evidence |
 | --- | --- |
-| Public 410 body + status | `src/server/http/property-gone-response.ts` returns `410`, `X-Robots-Tag: noindex, follow`, `Cache-Control: public, max-age=300, must-revalidate` |
+| Public 410 body + status | `src/core/http/property-gone-response.ts` returns `410`, `X-Robots-Tag: noindex, follow`, `Cache-Control: public, max-age=300, must-revalidate` |
 | Route Handler ownership | `src/app/http/property-lifecycle/[slug]/route.ts` |
 | Public page for gone | `src/app/(site)/obekty/[slug]/page.tsx` renders gone HTML + noindex. Pinned Next 16.3.5 `AppPageConfig` rejects `Response` from `page.tsx`, so HTTP 410 is not returned from the RSC page. |
 | Redirect lookup | `redirects` collection via `findPublicRedirectByFromPath`; hardcoded `explicitRedirectPath: null` removed |

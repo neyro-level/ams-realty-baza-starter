@@ -4,7 +4,7 @@ import {
 	invalidateCacheTargets,
 	type CacheTarget,
 } from "../../../../core/cache/invalidator.ts";
-import { redactRecord } from "../../../../server/security/redaction.ts";
+import { redactRecord } from "../../../../core/security/redaction.ts";
 
 export const runtime = "nodejs";
 

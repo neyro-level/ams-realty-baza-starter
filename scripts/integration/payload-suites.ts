@@ -2,15 +2,15 @@ import assert from "node:assert/strict";
 import { getPayload } from "payload";
 import config from "../../payload.config.ts";
 import { requirePayloadRuntime } from "../../src/payload/env.ts";
-import { systemOverrideAccess } from "../../src/server/system-gateway/overrides.ts";
+import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { createControllableClock, installRuntimeClock, resetRuntimeClock } from "../../src/core/time/clock.ts";
 import { payloadJobTaskSlugs } from "../../src/payload/jobs/registry.ts";
 import { payloadJobTasks } from "../../src/payload/jobs/tasks.ts";
 import {
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
-} from "../../src/server/public-gateway/catalog.ts";
-import { findPublicPage } from "../../src/server/public-gateway/pages.ts";
+} from "../../src/core/data-access/public/catalog.ts";
+import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
 
 requirePayloadRuntime();
 

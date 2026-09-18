@@ -1,4 +1,4 @@
-import type { PublicPropertyLifecycle } from "@/server/public-gateway/dto";
+import type { PublicPropertyLifecycle } from "@/core/data-access/public/dto";
 import { sanitizeExplicitRedirectPath } from "./redirect-path.ts";
 
 export { sanitizeExplicitRedirectPath } from "./redirect-path.ts";

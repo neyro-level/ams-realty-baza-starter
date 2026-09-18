@@ -1,1 +1,1 @@
-export { toMetadata } from "../server/seo/page-metadata";
+export { toMetadata } from "../core/seo/page-metadata";

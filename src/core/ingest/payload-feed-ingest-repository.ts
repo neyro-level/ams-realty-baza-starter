@@ -1,5 +1,5 @@
 import type { Payload } from "payload";
-import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
+import { systemOverrideAccess } from "../data-access/system/overrides.ts";
 import {
 	countMissingActiveFeedProperties,
 	deactivateMissingFeedProperties,

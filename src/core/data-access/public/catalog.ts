@@ -9,7 +9,7 @@ import type {
 import type { Payload, Where } from "payload";
 import { z } from "zod";
 import type { PropertiesSelect, Property } from "@/payload/payload-types";
-import { sanitizeExplicitRedirectPath } from "@/server/seo/redirect-path";
+import { sanitizeExplicitRedirectPath } from "@/core/seo/redirect-path";
 import { publicGatewayPolicy } from "./policy";
 import {
 	aggregatePublicCatalogFacets,

@@ -1,6 +1,6 @@
 import type { CollectionConfig, PayloadRequest } from "payload";
 import { retryLeadDelivery } from "../../core/leads/owner-delivery-operations.ts";
-import { systemQueueJob } from "../../server/system-gateway/jobs.ts";
+import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 export const LeadDeliveries: CollectionConfig = {

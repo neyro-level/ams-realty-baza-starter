@@ -7,11 +7,11 @@ import {
 	listPublicSitemapPropertiesPage,
 } from "./payload-reads";
 import { projectConfig } from "@/project/project.config";
-import { resolvePropertyPageLifecycle } from "@/server/seo/property";
+import { resolvePropertyPageLifecycle } from "@/core/seo/property";
 import {
 	type PublicUrlEntry,
 	staticPublicUrlEntries,
-} from "@/server/seo/site";
+} from "@/core/seo/site";
 import {
 	type CatalogQueryInput,
 	findPublicCatalogFacets,

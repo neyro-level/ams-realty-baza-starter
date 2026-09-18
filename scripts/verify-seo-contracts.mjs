@@ -3,13 +3,13 @@ import { readFileSync } from "node:fs";
 import {
 	buildCatalogSeoDecision,
 	catalogSeoParamPolicy,
-} from "../src/server/seo/catalog.ts";
+} from "../src/core/seo/catalog.ts";
 import {
 	getPropertyRobots,
 	resolvePropertyPageLifecycle,
 	sanitizeExplicitRedirectPath,
-} from "../src/server/seo/property.ts";
-import { staticPublicUrlEntries } from "../src/server/seo/site.ts";
+} from "../src/core/seo/property.ts";
+import { staticPublicUrlEntries } from "../src/core/seo/site.ts";
 
 assert.deepEqual(catalogSeoParamPolicy.indexedFilterKeys, [
 	"category",
@@ -137,7 +137,7 @@ const sitemapSource = readFileSync("src/app/sitemap.ts", "utf8");
 assert.ok(sitemapSource.includes("generateSitemaps"));
 assert.match(sitemapSource, /export const revalidate = 3600;/);
 assert.equal(sitemapSource.includes("limit: 1000"), false);
-const catalogSource = readFileSync("src/server/public-gateway/catalog.ts", "utf8");
+const catalogSource = readFileSync("src/core/data-access/public/catalog.ts", "utf8");
 assert.equal(catalogSource.includes("limit: 1000"), false);
 assert.ok(catalogSource.includes("aggregatePublicCatalogFacets"));
 assert.ok(catalogSource.includes("payload-aggregate"));
@@ -147,7 +147,7 @@ assert.ok(
 		"status: 410",
 	) ||
 		readFileSync(
-			"src/server/http/property-gone-response.ts",
+			"src/core/http/property-gone-response.ts",
 			"utf8",
 		).includes("status: 410"),
 );

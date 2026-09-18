@@ -2,14 +2,14 @@ import type { MarketingPageDTO } from "@ams/realtbase-contracts";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { PropertyPageView } from "@ams/realtbase-ui";
-import { toMetadata } from "@/server/seo/page-metadata";
-import { getPublicProperty } from "@/server/public-gateway";
-import { getPropertyRobots } from "@/server/seo/property";
+import { toMetadata } from "@/core/seo/page-metadata";
+import { getPublicProperty } from "@/core/data-access/public";
+import { getPropertyRobots } from "@/core/seo/property";
 import {
 	buildBreadcrumbJsonLd,
 	buildPropertyJsonLd,
 	JsonLdScript,
-} from "@/server/seo/structured-data";
+} from "@/core/seo/structured-data";
 
 export const dynamic = "force-dynamic";
 

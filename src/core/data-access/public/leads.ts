@@ -1,17 +1,17 @@
 import "server-only";
 
 import type { Payload, PayloadRequest } from "payload";
-import { createPayloadLeadOutboxRepository } from "../../core/data-access/leads/payload-outbox-repository.ts";
-import { resolveEnabledLeadChannels } from "../../core/leads/channels.ts";
-import { hitInProcessLeadRateLimit } from "../../core/leads/in-process-rate-limit.ts";
+import { createPayloadLeadOutboxRepository } from "../leads/payload-outbox-repository.ts";
+import { resolveEnabledLeadChannels } from "../../leads/channels.ts";
+import { hitInProcessLeadRateLimit } from "../../leads/in-process-rate-limit.ts";
 import {
 	accelerateLeadDeliveryJobs,
 	commitLeadOutbox,
 	prepareLeadIntake,
 	type LeadIntakeRejected,
-} from "../../core/leads/index.ts";
-import { runtimeEnv } from "../../payload/env.ts";
-import { systemOverrideAccess } from "../system-gateway/overrides.ts";
+} from "../../leads/index.ts";
+import { runtimeEnv } from "../../../payload/env.ts";
+import { systemOverrideAccess } from "../system/overrides.ts";
 import { getPublicGatewayPayload } from "./payload.ts";
 
 export type PublicLeadSubmitResult =

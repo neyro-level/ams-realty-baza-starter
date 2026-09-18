@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { sanitizeExplicitRedirectPath } from "../../server/seo/redirect-path.ts";
+import { sanitizeExplicitRedirectPath } from "../../core/seo/redirect-path.ts";
 import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
 
 export const Redirects: CollectionConfig = {

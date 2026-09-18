@@ -1,10 +1,10 @@
 import type { Payload } from "payload";
 import { claimLeadDeliveryRow } from "../data-access/system/sql/index.ts";
-import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
+import { systemOverrideAccess } from "../data-access/system/overrides.ts";
 import {
 	parseOutboundHostList,
 	safeOutboundFetch,
-} from "../../server/security/safe-outbound-client.ts";
+} from "../security/safe-outbound-client.ts";
 import { sendCustomWebhookLead } from "./adapters/custom-webhook.ts";
 import { sendMaxLead } from "./adapters/max.ts";
 import {

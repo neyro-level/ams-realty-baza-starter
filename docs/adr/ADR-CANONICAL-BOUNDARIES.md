@@ -9,7 +9,7 @@
 Оставляем существующие Payload-owned пути и не делаем косметический rename:
 
 - collections/access/jobs/env остаются в `src/payload/**` (Payload CMS owns Admin, Local API, schema, migrations);
-- public/system/ingest logic живёт в `src/core/**` и `src/server/**`;
+- public/system/ingest/security/seo/http live in `src/core/**` (Public Gateway: `src/core/data-access/public`, System Gateway: `src/core/data-access/system`);
 - presentation DTO freeze: `packages/contracts` (`contractState=frozen` 1.0.0);
 - UI package: `packages/ui`.
 

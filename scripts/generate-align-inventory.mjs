@@ -84,7 +84,7 @@ nodes.push(epic("EPIC-02", "Proxy REST proof", "Prove Next 16 proxy.ts denies an
 nodes.push(task("TASK-02-01", "Anonymous REST deny proof without renaming proxy", "EPIC-02", "Keep src/proxy.ts; extend verify/integration deny tests; Leads.ts comment on public intake path.", ["02"], ["proxy export remains", "anonymous business REST deny covered by verify"], ["pnpm verify:security-boundaries"], [], "wave:security"));
 nodes.push(delivery("EPIC-02", ["TASK-02-01"], "wave:security", "SourceCraft RISKY gate"));
 
-nodes.push(epic("EPIC-03", "Gateway layout", "Public and System gateways live under src/core/data-access.", ["03"], ["no src/server/public-gateway", "overrideAccess only in system gateway"], ["EPIC-02"], "wave:layout"));
+nodes.push(epic("EPIC-03", "Gateway layout", "Public and System gateways live under src/core/data-access.", ["03"], ["no src/core/data-access/public", "overrideAccess only in system gateway"], ["EPIC-02"], "wave:layout"));
 nodes.push(task("TASK-03-01", "Move public/system/security/seo/http gateways", "EPIC-03", "Relocate existing modules; update guards and imports; do not create empty core folders.", ["03"], ["architecture-guard whitelist updated", "public-gateway and security-boundaries pass"], ["pnpm quality:architecture", "pnpm verify:public-gateway", "pnpm verify:security-boundaries", "pnpm typecheck"], [], "wave:layout"));
 nodes.push(delivery("EPIC-03", ["TASK-03-01"], "wave:layout", "SourceCraft RISKY gate"));
 

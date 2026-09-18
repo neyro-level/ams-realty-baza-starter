@@ -1,14 +1,14 @@
 import { CatalogPageView } from "@ams/realtbase-ui";
-import { getPublicCatalog } from "@/server/public-gateway";
+import { getPublicCatalog } from "@/core/data-access/public";
 import {
 	buildCatalogMetadata,
 	buildCatalogSeoDecision,
 	type CatalogSearchParams,
-} from "@/server/seo/catalog";
+} from "@/core/seo/catalog";
 import {
 	buildCatalogItemListJsonLd,
 	JsonLdScript,
-} from "@/server/seo/structured-data";
+} from "@/core/seo/structured-data";
 
 export const dynamic = "force-dynamic";
 

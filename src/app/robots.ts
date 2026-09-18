@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getSiteUrl } from "@/server/seo/site";
+import { getSiteUrl } from "@/core/seo/site";
 
 export default function robots(): MetadataRoute.Robots {
 	const host = getSiteUrl();

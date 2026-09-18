@@ -1,11 +1,11 @@
 import { HomePageView } from "@ams/realtbase-ui";
-import { toMetadata } from "@/server/seo/page-metadata";
-import { getPublicHomePage } from "@/server/public-gateway";
+import { toMetadata } from "@/core/seo/page-metadata";
+import { getPublicHomePage } from "@/core/data-access/public";
 import {
 	buildOrganizationJsonLd,
 	buildWebsiteJsonLd,
 	JsonLdScript,
-} from "@/server/seo/structured-data";
+} from "@/core/seo/structured-data";
 
 export const dynamic = "force-dynamic";
 
