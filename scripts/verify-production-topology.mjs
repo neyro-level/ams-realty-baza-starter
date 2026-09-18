@@ -110,4 +110,66 @@ for (const forbiddenEnv of [
 	);
 }
 
+const packageJson = JSON.parse(read("package.json"));
+const dependencies = {
+	...(packageJson.dependencies ?? {}),
+	...(packageJson.devDependencies ?? {}),
+};
+assert.equal(
+	Object.hasOwn(dependencies, "@payloadcms/storage-s3"),
+	false,
+	"starter must not declare @payloadcms/storage-s3 as a required dependency",
+);
+
+const adr = read("docs/adr/ADR-LOCAL-STARTER-STORAGE.md");
+assert.ok(adr.includes("Accepted"), "ADR-LOCAL-STARTER-STORAGE must remain Accepted");
+assert.ok(
+	adr.includes("не копирует эту topology автоматически"),
+	"ADR must state commercial clone does not copy starter topology automatically",
+);
+
+const agents = read("AGENTS.md");
+assert.ok(agents.includes("local PostgreSQL"), "AGENTS.md must pin local PostgreSQL starter runtime");
+assert.ok(agents.includes("MEDIA_DIR"), "AGENTS.md must pin MEDIA_DIR starter runtime");
+
+const composeForbidden = [
+	"storage-s3",
+	"S3_BUCKET",
+	"timeweb-cloud.com/dbaas",
+	"Managed PostgreSQL",
+];
+for (const needle of composeForbidden) {
+	assert.equal(
+		compose.includes(needle),
+		false,
+		`compose must not require ${needle} as starter runtime`,
+	);
+}
+
+for (const [name, body] of [
+	["docs/PROJECT.md", project],
+	["docs/03_ARCHITECTURE.md", architecture],
+	["docs/OPERATIONS.md", operations],
+]) {
+	assert.equal(
+		/S3 is required for starter/i.test(body) || body.includes("starter requires S3"),
+		false,
+		`${name} must not require S3 as this starter runtime`,
+	);
+	assert.equal(
+		body.includes("buy Timeweb Managed PostgreSQL"),
+		false,
+		`${name} must not require buying Managed PostgreSQL for this starter`,
+	);
+}
+
+assert.ok(
+	operations.includes("pg_dump -Fc"),
+	"Operations backup canon must remain local PostgreSQL dump",
+);
+assert.ok(
+	operations.includes("archive `MEDIA_DIR`") || operations.includes("archive MEDIA_DIR"),
+	"Operations backup canon must remain MEDIA_DIR snapshot",
+);
+
 console.log("verify-production-topology: ok");

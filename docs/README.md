@@ -13,6 +13,7 @@
 | Условия готовности к merge и release | `05_RELEASE_CHECKLIST.md` |
 | Решения конкретного экземпляра проекта | `PROJECT.md` |
 | Эксплуатационные процедуры | `OPERATIONS.md` |
+| Starter vs коммерческий clone | `CLONE_ONBOARDING.md` |
 | Source of truth для секретов и доступов | `PROJECT.md` + `03_ARCHITECTURE.md` |
 | Визуальная система и UI-правила | `DESIGN.md` |
 | Реализуемость presentation contracts | `CONTRACT_FEASIBILITY.md` |

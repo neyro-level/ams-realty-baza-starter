@@ -10,7 +10,7 @@
 - Master plan: `docs/AMS_MASTER_PLAN №3.md` (`Plan ID: AMS-REALTBASE-CORRECTIONS`, `Version: v3`, `Status: APPROVED`). Закрытый hardening: `docs/AMS_MASTER_PLAN №2.md`. Исторический v1.0: `AMS_PROJECT_ARCHITECTURE_v1.0.md`.
 - Operational graph: локальный stealth Beads; `.beads` не коммитится.
 
-- `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. S3 не используется starter-runtime; клиентский clone принимает собственное topology decision.
+- `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
 ## Reading order
 

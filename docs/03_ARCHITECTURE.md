@@ -12,7 +12,7 @@ Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Программа `AMS-REALTBASE-HARDENING` использует `MERGE_AFTER_GATE` в `hardening/realtbase-starter` и checkpoint-PR в `main`. Production только отдельной командой владельца.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Программа `AMS-REALTBASE-CORRECTIONS` использует `MERGE_AFTER_GATE` в `main` по эпикам. Production только как EPIC-21 по отдельной команде владельца.
 
 ## Stack и ownership
 

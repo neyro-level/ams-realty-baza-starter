@@ -50,6 +50,10 @@ Release sequence:
 
 Starter backup = согласованная пара в одном window: `pg_dump -Fc` + archive `MEDIA_DIR`.
 
+Это канон **этого** demo runtime. Не заменять его единственным правилом «managed PostgreSQL backup + S3 versioning».
+
+`DATABASE_URI` в `/etc/ams/realtbase/start-baza.env` указывает на local PostgreSQL того же AMS Server (`ams_realtbase_prod`), не на Timeweb Managed PostgreSQL.
+
 Обязательно: автоматическое расписание, ретенция минимум 7 daily, offsite/второй носитель вне диска AMS Server, проверка целостности последней копии, alert при backup failure. Restore rehearsal проверяет DB + media references. Disk-full — critical; backup только на том же диске недостаточен.
 
 ## Staging contour

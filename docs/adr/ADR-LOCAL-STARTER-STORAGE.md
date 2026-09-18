@@ -1,10 +1,12 @@
 # ADR-LOCAL-STARTER-STORAGE
 
-Статус: Accepted  
+Статус: Accepted (demo/template only)  
 Дата: 2026-09-18  
 Контекст: AMS RealtBase Starter / `AMS_PROFILE=REALTY_BASE`
 
 ## Решение
+
+Этот ADR описывает **демо-шаблон** на AMS Server. Коммерческий clone не копирует эту topology автоматически.
 
 Starter живёт на одном AMS Server:
 

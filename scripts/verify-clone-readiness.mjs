@@ -35,6 +35,12 @@ try {
 		project.replaceAll("AMS Realty Baza Starter", "Clone Agency"),
 	);
 
+	const cloneDocs = readFileSync(path.join(root, "docs", "CLONE_ONBOARDING.md"), "utf8");
+	assert.ok(cloneDocs.includes("local PostgreSQL"));
+	assert.ok(cloneDocs.includes("MEDIA_DIR"));
+	assert.ok(cloneDocs.includes("собственное") || cloneDocs.includes("own"));
+	assert.ok(!cloneDocs.includes("S3 credentials: required"));
+
 	assert.equal(git(["diff", "--", "src/core"]).trim(), "");
 	assert.equal(git(["diff", "--", "packages"]).trim(), "");
 	assert.notEqual(git(["diff", "--", "src/project"]).trim(), "");
