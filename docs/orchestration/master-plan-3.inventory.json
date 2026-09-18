@@ -1,0 +1,1707 @@
+{
+	"schema_version": 2,
+	"beads_prefix": "rbc",
+	"source": {
+		"plan_id": "AMS-REALTBASE-CORRECTIONS",
+		"path": "docs/AMS_MASTER_PLAN №3.md",
+		"version": "v3",
+		"status": "APPROVED",
+		"approved_by": "owner",
+		"approved_at": "2026-09-18T18:06:00+03:00",
+		"sha256": "b844463c5fce7f995fc2781272645871708f2f66296495258c266102f520ee42",
+		"epic_anchors": [
+			"EPIC-11",
+			"EPIC-12",
+			"EPIC-13",
+			"EPIC-14",
+			"EPIC-15",
+			"EPIC-16",
+			"EPIC-17",
+			"EPIC-18",
+			"EPIC-19",
+			"EPIC-20",
+			"EPIC-21"
+		]
+	},
+	"nodes": [
+		{
+			"key": "EPIC-11",
+			"title": "Public data boundary",
+			"type": "epic",
+			"source_anchor": "EPIC-11",
+			"goal": "Anonymous raw Payload business REST deny; public site only via Public Gateway.",
+			"scope": [
+				"11.1-11.7"
+			],
+			"acceptance_criteria": [
+				"anonymous GET properties/pages/leads/lead-deliveries denied",
+				"public gateway catalog/property/page works",
+				"mechanical allowlist guard"
+			],
+			"depends_on": [],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-11-01",
+			"title": "Collection access inventory and deny anonymous business REST",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-11",
+			"source_anchor": "EPIC-11",
+			"goal": "Access matrix recorded; properties/pages anonymous read deny; media REST not public CRUD; redirects stay application-resolved.",
+			"scope": [
+				"11.1",
+				"11.2",
+				"11.3",
+				"11.4",
+				"11.5"
+			],
+			"acceptance_criteria": [
+				"properties and pages anonymous collection read deny",
+				"public file delivery still possible for media assets"
+			],
+			"required_checks": [
+				"pnpm verify:security-boundaries",
+				"pnpm verify:public-gateway"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-11-02",
+			"title": "Anonymous REST guard and integration tests",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-11",
+			"source_anchor": "EPIC-11",
+			"goal": "Declarative allowlist guard fails on unexpected anonymous business read; integration tests cover deny + gateway happy path.",
+			"scope": [
+				"11.6",
+				"11.7"
+			],
+			"acceptance_criteria": [
+				"guard not properties-only",
+				"tests listed in EPIC-11 exist and pass"
+			],
+			"required_checks": [
+				"pnpm verify:security-boundaries",
+				"pnpm verify:public-gateway",
+				"pnpm quality:guards"
+			],
+			"depends_on": [
+				"TASK-11-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-11-DELIVERY",
+			"title": "Deliver EPIC-11 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-11",
+			"source_anchor": "EPIC-11",
+			"goal": "PR merged to main after RISKY exact-head gate; epic branch deleted.",
+			"scope": [
+				"PR",
+				"gate",
+				"merge",
+				"branch cleanup"
+			],
+			"acceptance_criteria": [
+				"merged into main",
+				"exact head gate green"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-11-01",
+				"TASK-11-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-12",
+			"title": "Remove unproven public raw SQL",
+			"type": "epic",
+			"source_anchor": "EPIC-12",
+			"goal": "Public reads Payload-first; public sql layer gone unless later owner Optimized Read.",
+			"scope": [
+				"12.1-12.7"
+			],
+			"acceptance_criteria": [
+				"public raw SQL = 0",
+				"facets/sitemap/lifecycle/redirect preserved",
+				"p95 evidence recorded without stopping"
+			],
+			"depends_on": [
+				"EPIC-11"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:data",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-12-01",
+			"title": "Move public catalog/sitemap/lifecycle/redirect to Payload reads",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-12",
+			"source_anchor": "EPIC-12",
+			"goal": "Replace drizzle.execute public path with Payload read/count; delete src/core/data-access/public/sql when unused.",
+			"scope": [
+				"12.1",
+				"12.2",
+				"12.3",
+				"12.4",
+				"12.5"
+			],
+			"acceptance_criteria": [
+				"no public/sql consumers",
+				"directory removed if unused"
+			],
+			"required_checks": [
+				"pnpm verify:public-gateway",
+				"pnpm verify:seo-contracts"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:data",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-12-02",
+			"title": "Low-level DB guard and catalog budget evidence",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-12",
+			"source_anchor": "EPIC-12",
+			"goal": "Guard blocks public raw SQL; representative p95 evidence stored; do not restore SQL if budget misses.",
+			"scope": [
+				"12.6",
+				"12.7"
+			],
+			"acceptance_criteria": [
+				"architecture/guards fail on public drizzle",
+				"docs/proofs/epic-12 exists"
+			],
+			"required_checks": [
+				"pnpm quality:architecture",
+				"pnpm quality:guards",
+				"pnpm verify:product-regression"
+			],
+			"depends_on": [
+				"TASK-12-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:data",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-12-DELIVERY",
+			"title": "Deliver EPIC-12 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-12",
+			"source_anchor": "EPIC-12",
+			"goal": "PR merged to main after RISKY gate.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-12-01",
+				"TASK-12-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:data",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-13",
+			"title": "Starter topology contract",
+			"type": "epic",
+			"source_anchor": "EPIC-13",
+			"goal": "Docs/guards keep AMS Server local PostgreSQL + MEDIA_DIR; no S3/managed purchase.",
+			"scope": [
+				"13.1-13.7"
+			],
+			"acceptance_criteria": [
+				"no required S3 adapter",
+				"verify:production-topology asserts local starter topology"
+			],
+			"depends_on": [
+				"EPIC-12"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 3,
+			"labels": [
+				"wave:runtime",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-13-01",
+			"title": "Align docs, ADR, deploy, clone-readiness with local topology",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-13",
+			"source_anchor": "EPIC-13",
+			"goal": "PROJECT/OPERATIONS/architecture/ADR/env/deploy describe local PG + MEDIA_DIR; clone docs split starter vs commercial clone.",
+			"scope": [
+				"13.1",
+				"13.2",
+				"13.4",
+				"13.5",
+				"13.6"
+			],
+			"acceptance_criteria": [
+				"ADR remains starter local storage",
+				"no S3 required runtime"
+			],
+			"required_checks": [
+				"pnpm verify:production-topology",
+				"pnpm verify:clone-readiness"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-13-02",
+			"title": "Topology guard must not require S3",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-13",
+			"source_anchor": "EPIC-13",
+			"goal": "verify:production-topology fails if starter contract requires S3 or Managed PostgreSQL as this runtime.",
+			"scope": [
+				"13.3",
+				"13.7"
+			],
+			"acceptance_criteria": [
+				"guard matches local topology"
+			],
+			"required_checks": [
+				"pnpm verify:production-topology",
+				"pnpm verify:security-boundaries"
+			],
+			"depends_on": [
+				"TASK-13-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-13-DELIVERY",
+			"title": "Deliver EPIC-13 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-13",
+			"source_anchor": "EPIC-13",
+			"goal": "PR merged to main after RISKY gate.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-13-01",
+				"TASK-13-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-14",
+			"title": "Retention contract",
+			"type": "epic",
+			"source_anchor": "EPIC-14",
+			"goal": "Lead/archive retention fail-closed without invented days.",
+			"scope": [
+				"14.1-14.6"
+			],
+			"acceptance_criteria": [
+				"missing policy fails production readiness",
+				"expired lead processed when policy set",
+				"PROJECT.md NEEDS_OWNER"
+			],
+			"depends_on": [
+				"EPIC-13"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 4,
+			"labels": [
+				"wave:runtime",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-14-01",
+			"title": "Fail-closed retention runtime and tests",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-14",
+			"source_anchor": "EPIC-14",
+			"goal": "Production readiness fails without leadRetentionDays when intake/channel active; maintenance processes expired rows only with policy.",
+			"scope": [
+				"14.1",
+				"14.2",
+				"14.3",
+				"14.4",
+				"14.6"
+			],
+			"acceptance_criteria": [
+				"tests for absent policy / expired / linked delivery / non-expired"
+			],
+			"required_checks": [
+				"pnpm verify:operational-recovery",
+				"pnpm verify:lead-outbox"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-14-02",
+			"title": "Document NEEDS_OWNER retention knobs",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-14",
+			"source_anchor": "EPIC-14",
+			"goal": "PROJECT.md records leadRetentionDays and archiveRetentionDays as NEEDS_OWNER.",
+			"scope": [
+				"14.5"
+			],
+			"acceptance_criteria": [
+				"PROJECT.md explicit NEEDS_OWNER"
+			],
+			"required_checks": [
+				"file check"
+			],
+			"depends_on": [
+				"TASK-14-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-14-DELIVERY",
+			"title": "Deliver EPIC-14 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-14",
+			"source_anchor": "EPIC-14",
+			"goal": "PR merged to main after RISKY gate.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-14-01",
+				"TASK-14-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-15",
+			"title": "Local API override access boundaries",
+			"type": "epic",
+			"source_anchor": "EPIC-15",
+			"goal": "systemOverrideAccess only from System Gateway whitelist; owner paths use request access.",
+			"scope": [
+				"15.1-15.7"
+			],
+			"acceptance_criteria": [
+				"return-to-feed without system override",
+				"guard on helper imports",
+				"owner/admin/anonymous/system tests"
+			],
+			"depends_on": [
+				"EPIC-14"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:security",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-15-01",
+			"title": "Inventory Local API calls and remove unnecessary overrides",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-15",
+			"source_anchor": "EPIC-15",
+			"goal": "Classify user/public/system/ingest; owner/admin endpoints use request access; FeedSources hooks explicit.",
+			"scope": [
+				"15.1",
+				"15.2",
+				"15.3",
+				"15.4",
+				"15.5"
+			],
+			"acceptance_criteria": [
+				"Properties return-to-feed no systemOverrideAccess"
+			],
+			"required_checks": [
+				"pnpm verify:owner-operations",
+				"pnpm verify:security-boundaries"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-15-02",
+			"title": "Override helper import guard and tests",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-15",
+			"source_anchor": "EPIC-15",
+			"goal": "Business code cannot import systemOverrideAccess; whitelist path only.",
+			"scope": [
+				"15.6",
+				"15.7"
+			],
+			"acceptance_criteria": [
+				"quality:architecture or guards fail on illegal import"
+			],
+			"required_checks": [
+				"pnpm quality:architecture",
+				"pnpm quality:guards"
+			],
+			"depends_on": [
+				"TASK-15-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-15-DELIVERY",
+			"title": "Deliver EPIC-15 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-15",
+			"source_anchor": "EPIC-15",
+			"goal": "PR merged to main after RISKY gate.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-15-01",
+				"TASK-15-02"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-16",
+			"title": "Feed source invariants",
+			"type": "epic",
+			"source_anchor": "EPIC-16",
+			"goal": "Enabled feed sources always have nextDueAt; dispatcher no catch-up.",
+			"scope": [
+				"16.1-16.6"
+			],
+			"acceptance_criteria": [
+				"enabled nextDueAt required",
+				"create/enable sets now",
+				"safety knobs not bypassed"
+			],
+			"depends_on": [
+				"EPIC-15"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:runtime",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-16-01",
+			"title": "Enforce nextDueAt and dispatcher tests",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-16",
+			"source_anchor": "EPIC-16",
+			"goal": "Schema/hooks/migration if needed; dispatcher tests; safety knobs on manual import.",
+			"scope": [
+				"16.1",
+				"16.2",
+				"16.3",
+				"16.4",
+				"16.5",
+				"16.6"
+			],
+			"acceptance_criteria": [
+				"enabled source never missing nextDueAt",
+				"one claim one run"
+			],
+			"required_checks": [
+				"pnpm verify:jobs-config",
+				"pnpm verify:feed-lifecycle",
+				"pnpm verify:schema"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-16-DELIVERY",
+			"title": "Deliver EPIC-16 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-16",
+			"source_anchor": "EPIC-16",
+			"goal": "PR merged to main after RISKY gate.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-16-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:runtime",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-17",
+			"title": "Derived property fields",
+			"type": "epic",
+			"source_anchor": "EPIC-17",
+			"goal": "pricePerMeterMinor owned by ingest/manual write boundary; null semantics correct.",
+			"scope": [
+				"17.1-17.6"
+			],
+			"acceptance_criteria": [
+				"no hidden global recalc owner",
+				"null when price/area invalid",
+				"banker rounding tests"
+			],
+			"depends_on": [
+				"EPIC-16"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 3,
+			"labels": [
+				"wave:data",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-17-01",
+			"title": "Move derived field calculation to ingest/manual boundary",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-17",
+			"source_anchor": "EPIC-17",
+			"goal": "Remove misleading collection hook ownership; shared calculator; stale null overwrite.",
+			"scope": [
+				"17.1",
+				"17.2",
+				"17.3",
+				"17.4",
+				"17.5",
+				"17.6"
+			],
+			"acceptance_criteria": [
+				"feed and manual tests",
+				"zero area null"
+			],
+			"required_checks": [
+				"pnpm verify:feed-ingest",
+				"pnpm verify:manual-ownership"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:data",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-17-DELIVERY",
+			"title": "Deliver EPIC-17 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-17",
+			"source_anchor": "EPIC-17",
+			"goal": "PR merged to main after RISKY gate.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-17-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:data",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-18",
+			"title": "Security config fail-closed",
+			"type": "epic",
+			"source_anchor": "EPIC-18",
+			"goal": "No production schema push; CSP exact image hosts; conditional env; outbound tests.",
+			"scope": [
+				"18.1-18.6"
+			],
+			"acceptance_criteria": [
+				"production+PAYLOAD_DB_PUSH fails",
+				"CSP no global https:",
+				"build fallback cannot start production"
+			],
+			"depends_on": [
+				"EPIC-17"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 3,
+			"labels": [
+				"wave:security",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-18-01",
+			"title": "Fail-closed push, CSP, env, outbound, secrets guard",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-18",
+			"source_anchor": "EPIC-18",
+			"goal": "Implement 18.1-18.6 without requiring S3 settings for this starter.",
+			"scope": [
+				"18.1",
+				"18.2",
+				"18.3",
+				"18.4",
+				"18.5",
+				"18.6"
+			],
+			"acceptance_criteria": [
+				"targeted outbound tests",
+				"no real tokens in docs/fixtures"
+			],
+			"required_checks": [
+				"pnpm verify:security-boundaries",
+				"pnpm quality:guards"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-18-DELIVERY",
+			"title": "Deliver EPIC-18 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-18",
+			"source_anchor": "EPIC-18",
+			"goal": "PR merged to main after RISKY gate.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-18-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:security",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-19",
+			"title": "UI Core 5.0 drift pass",
+			"type": "epic",
+			"source_anchor": "EPIC-19",
+			"goal": "No redesign; remove UI Core drift; a11y/SEO/responsive/performance on representative pages.",
+			"scope": [
+				"19.1-19.12"
+			],
+			"acceptance_criteria": [
+				"PR finding table",
+				"LeadForm states",
+				"token taxonomy without Atlas breakage"
+			],
+			"depends_on": [
+				"EPIC-18"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 3,
+			"labels": [
+				"wave:ui",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-19-01",
+			"title": "UI drift remediation and representative proof",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-19",
+			"source_anchor": "EPIC-19",
+			"goal": "Inventory, client boundaries, tokens, CSS, aliases, pages, LeadForm, a11y, responsive, LCP/CLS local, SEO contracts.",
+			"scope": [
+				"19.1",
+				"19.2",
+				"19.3",
+				"19.4",
+				"19.5",
+				"19.6",
+				"19.7",
+				"19.8",
+				"19.9",
+				"19.10",
+				"19.11",
+				"19.12"
+			],
+			"acceptance_criteria": [
+				"no second primitive foundation",
+				"quality:design-tokens pass"
+			],
+			"required_checks": [
+				"pnpm quality:design-tokens",
+				"pnpm verify:a11y-starter",
+				"pnpm verify:seo-contracts"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:ui",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-19-DELIVERY",
+			"title": "Deliver EPIC-19 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-19",
+			"source_anchor": "EPIC-19",
+			"goal": "PR merged to main after STANDARD gate.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft STANDARD gate"
+			],
+			"depends_on": [
+				"TASK-19-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:ui",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-20",
+			"title": "Final constitution proof",
+			"type": "epic",
+			"source_anchor": "EPIC-20",
+			"goal": "Hard Contract matrix with evidence on exact SHA; no new features.",
+			"scope": [
+				"20.1-20.8"
+			],
+			"acceptance_criteria": [
+				"FINAL_CORE_5_5_AUDIT.md",
+				"verify + verify:schema on exact SHA",
+				"no PASS without evidence"
+			],
+			"depends_on": [
+				"EPIC-19"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 4,
+			"labels": [
+				"wave:proof",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-20-01",
+			"title": "Run proofs and write final audit",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-20",
+			"source_anchor": "EPIC-20",
+			"goal": "18A proofs, integration suites as required, docs/FINAL_CORE_5_5_AUDIT.md.",
+			"scope": [
+				"20.1",
+				"20.2",
+				"20.3",
+				"20.4",
+				"20.5",
+				"20.6",
+				"20.7"
+			],
+			"acceptance_criteria": [
+				"audit file exists",
+				"NOT PROVEN honest"
+			],
+			"required_checks": [
+				"pnpm verify:daily",
+				"pnpm verify",
+				"pnpm verify:schema"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:proof",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-20-DELIVERY",
+			"title": "Deliver EPIC-20 to main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-20",
+			"source_anchor": "EPIC-20",
+			"goal": "PR merged to main after RISKY gate; do not deploy.",
+			"scope": [
+				"PR/merge"
+			],
+			"acceptance_criteria": [
+				"merged into main",
+				"production not deployed from this epic"
+			],
+			"required_checks": [
+				"PR SHA",
+				"SourceCraft RISKY gate"
+			],
+			"depends_on": [
+				"TASK-20-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:proof",
+				"work:delivery"
+			]
+		},
+		{
+			"key": "EPIC-21",
+			"title": "AMS Server demo release",
+			"type": "epic",
+			"source_anchor": "EPIC-21",
+			"goal": "One production rollout to start-baza.ams24.ru on AMS Server from exact main.",
+			"scope": [
+				"21.1-21.5"
+			],
+			"acceptance_criteria": [
+				"live smoke",
+				"noindex",
+				"one jobs owner",
+				"rollback image kept"
+			],
+			"depends_on": [
+				"EPIC-20"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"new secret",
+				"wrong server",
+				"managed purchase"
+			],
+			"priority": 4,
+			"labels": [
+				"wave:release",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-21-01",
+			"title": "Align OPERATIONS runbook with live AMS contour",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-21",
+			"source_anchor": "EPIC-21",
+			"goal": "OPERATIONS.md matches existing AMS Server demo contour without secrets.",
+			"scope": [
+				"21.1"
+			],
+			"acceptance_criteria": [
+				"runbook not skeleton-contradicting live contour"
+			],
+			"required_checks": [
+				"docs review"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"destructive migration",
+				"new secret",
+				"paid external action"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:release",
+				"work:implementation"
+			]
+		},
+		{
+			"key": "TASK-21-DELIVERY",
+			"title": "Roll out exact main to AMS Server",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-21",
+			"source_anchor": "EPIC-21",
+			"goal": "Immutable image built off-host; migrate; one runtime; live smoke start-baza.ams24.ru; cleanup branches.",
+			"scope": [
+				"21.2",
+				"21.3",
+				"21.4",
+				"21.5"
+			],
+			"acceptance_criteria": [
+				"live HTTPS responds",
+				"healthz ok",
+				"exact SHA"
+			],
+			"required_checks": [
+				"live smoke",
+				"ams-production-deploy"
+			],
+			"depends_on": [
+				"TASK-21-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №3.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"wrong server",
+				"new secret"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:release",
+				"work:delivery"
+			]
+		}
+	]
+}

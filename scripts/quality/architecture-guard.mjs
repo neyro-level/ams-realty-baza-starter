@@ -144,13 +144,20 @@ if (
 	);
 }
 const proxyPath = path.join(root, "src", "proxy.ts");
+const anonymousRestHelperPath = path.join(
+	root,
+	"src",
+	"server",
+	"security",
+	"anonymous-raw-rest.ts",
+);
 if (!existsSync(proxyPath)) {
 	violations.push("src/proxy.ts: raw REST edge boundary is missing");
 } else {
 	const proxy = readFileSync(proxyPath, "utf8");
-	if (!proxy.includes("anonymousDenyCollections")) {
+	if (!proxy.includes("isAnonymousDeniedRawRestPath")) {
 		violations.push(
-			"src/proxy.ts: raw REST edge boundary must read anonymousDenyCollections",
+			"src/proxy.ts: raw REST edge boundary must use isAnonymousDeniedRawRestPath",
 		);
 	}
 	if (!proxy.includes("notFound")) {
@@ -158,6 +165,13 @@ if (!existsSync(proxyPath)) {
 			"src/proxy.ts: anonymous raw REST denial must return notFound",
 		);
 	}
+}
+if (!existsSync(anonymousRestHelperPath)) {
+	violations.push("src/server/security/anonymous-raw-rest.ts: denylist helper is missing");
+} else if (!readFileSync(anonymousRestHelperPath, "utf8").includes("anonymousDenyCollections")) {
+	violations.push(
+		"src/server/security/anonymous-raw-rest.ts: helper must read anonymousDenyCollections",
+	);
 }
 
 const globals = readFileSync(
@@ -296,6 +310,33 @@ for (const slug of requiredCollections) {
 }
 if (boundary.classifiedCollections?.media !== "deny-anonymous") {
 	violations.push("media must be classified deny-anonymous in raw-rest-boundary.json");
+}
+
+const denyAnonymousFiles = {
+	users: "src/payload/collections/Users.ts",
+	pages: "src/payload/collections/Pages.ts",
+	properties: "src/payload/collections/Properties.ts",
+	"feed-sources": "src/payload/collections/FeedSources.ts",
+	"import-runs": "src/payload/collections/ImportRuns.ts",
+	"import-issues": "src/payload/collections/ImportIssues.ts",
+	leads: "src/payload/collections/Leads.ts",
+	"lead-deliveries": "src/payload/collections/LeadDeliveries.ts",
+	media: "src/payload/collections/Media.ts",
+	redirects: "src/payload/collections/Redirects.ts",
+};
+for (const slug of boundary.anonymousDenyCollections ?? []) {
+	const relativeFile = denyAnonymousFiles[slug];
+	if (!relativeFile) {
+		violations.push(`anonymousDenyCollections includes unclassified file mapping for ${slug}`);
+		continue;
+	}
+	const content = readFileSync(path.join(root, relativeFile), "utf8");
+	if (!/access:\s*\{[\s\S]*?read:\s*(?:adminsAndOwners|ownersOnly)/.test(content)) {
+		violations.push(`${relativeFile}: deny-anonymous collection must not expose generic anonymous read`);
+	}
+	if (/read:\s*\(\)\s*=>\s*true/.test(content)) {
+		violations.push(`${relativeFile}: open anonymous read is forbidden`);
+	}
 }
 
 for (const file of routeFiles) {

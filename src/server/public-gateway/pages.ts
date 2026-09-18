@@ -58,6 +58,7 @@ export async function findPublicPage(
 			},
 		},
 		overrideAccess: publicGatewayPolicy.overrideAccess,
+		context: publicGatewayPolicy.context,
 	});
 
 	const page = result.docs[0];
@@ -102,6 +103,7 @@ export async function findPublicPages(
 			},
 		},
 		overrideAccess: publicGatewayPolicy.overrideAccess,
+		context: publicGatewayPolicy.context,
 	});
 
 	return result.docs.map((page) => ({
@@ -140,6 +142,7 @@ export async function findPublicSitemapPages(
 			},
 		},
 		overrideAccess: publicGatewayPolicy.overrideAccess,
+		context: publicGatewayPolicy.context,
 	});
 
 	return result.docs

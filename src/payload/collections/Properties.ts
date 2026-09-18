@@ -1,4 +1,4 @@
-import type { CollectionConfig, FieldAccess, PayloadRequest, Where } from "payload";
+import type { CollectionConfig, FieldAccess, PayloadRequest } from "payload";
 import { calculatePropertyDerivedFields } from "../../core/ingest/derived-fields.ts";
 import {
 	applyPublishedSlugPolicy,
@@ -19,14 +19,6 @@ const privateFieldAccess = {
 	update: fieldAdminsAndOwners,
 };
 
-const publicPropertyReadWhere: Where = {
-	and: [
-		{ status: { equals: "active" } },
-		{ publishedAt: { exists: true } },
-		{ contentPurgedAt: { exists: false } },
-	],
-};
-
 export const Properties: CollectionConfig = {
 	slug: "properties",
 	versions: false,
@@ -36,13 +28,7 @@ export const Properties: CollectionConfig = {
 	},
 	access: {
 		create: adminsAndOwners,
-		read: ({ req }) => {
-			if (hasRole(req.user, ["owner", "admin"])) {
-				return true;
-			}
-
-			return publicPropertyReadWhere;
-		},
+		read: adminsAndOwners,
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},

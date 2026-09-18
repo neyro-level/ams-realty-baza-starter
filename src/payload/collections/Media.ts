@@ -5,7 +5,7 @@ import {
 	mediaOverwriteDisabled,
 	uniqueMediaFilename,
 } from "../../core/storage/local-fs.ts";
-import { ownersOnly } from "../access/roles.ts";
+import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
 
 const allowedMimeTypes = [
 	"image/jpeg",
@@ -27,7 +27,7 @@ export const Media: CollectionConfig = {
 	},
 	access: {
 		create: ownersOnly,
-		read: () => true,
+		read: adminsAndOwners,
 		update: ownersOnly,
 		delete: ownersOnly,
 	},

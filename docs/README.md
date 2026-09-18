@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Active / Hardening` — утверждён master plan `AMS-REALTBASE-HARDENING` v2.
+Статус: `Active / Execution` — `AMS-REALTBASE-CORRECTIONS` v3 APPROVED (EPIC 11–21).
 
 ## Канонические документы
 
@@ -20,7 +20,8 @@
 
 ## Нормативные источники
 
-- `docs/AMS_MASTER_PLAN №2.md` — действующий утверждённый мастер-план hardening (`AMS-REALTBASE-HARDENING` v2).
+- `docs/AMS_MASTER_PLAN №3.md` — действующий APPROVED мастер-план EPIC 11–21 (`AMS-REALTBASE-CORRECTIONS` v3).
+- `docs/AMS_MASTER_PLAN №2.md` — закрытый утверждённый hardening (`AMS-REALTBASE-HARDENING` v2, `main@f39826c`).
 - `../AMS_PROJECT_ARCHITECTURE_v1.0.md` — историческая спецификация demo/template контура v1.0.
 - `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` — платформенные инварианты Core 5.5.
 - `research/ATLAS_BASELINE.md` — evidence точного Atlas donor, UI inventory и обязательных visual scenarios.

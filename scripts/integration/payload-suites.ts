@@ -6,6 +6,11 @@ import { systemOverrideAccess } from "../../src/server/system-gateway/overrides.
 import { createControllableClock, installRuntimeClock, resetRuntimeClock } from "../../src/core/time/clock.ts";
 import { payloadJobTaskSlugs } from "../../src/payload/jobs/registry.ts";
 import { payloadJobTasks } from "../../src/payload/jobs/tasks.ts";
+import {
+	findPublicCatalogProperties,
+	findPublicPropertyBySlug,
+} from "../../src/server/public-gateway/catalog.ts";
+import { findPublicPage } from "../../src/server/public-gateway/pages.ts";
 
 requirePayloadRuntime();
 
@@ -15,7 +20,15 @@ installRuntimeClock(clock);
 const payload = await getPayload({ config });
 const access = systemOverrideAccess("system-job");
 
-async function assertPubliclyInaccessible(collection: "leads" | "lead-deliveries") {
+async function assertPubliclyInaccessible(
+	collection:
+		| "leads"
+		| "lead-deliveries"
+		| "properties"
+		| "pages"
+		| "media"
+		| "redirects",
+) {
 	try {
 		const result = await payload.find({
 			collection,
@@ -35,6 +48,18 @@ async function assertPubliclyInaccessible(collection: "leads" | "lead-deliveries
 
 await assertPubliclyInaccessible("leads");
 await assertPubliclyInaccessible("lead-deliveries");
+await assertPubliclyInaccessible("properties");
+await assertPubliclyInaccessible("pages");
+await assertPubliclyInaccessible("media");
+await assertPubliclyInaccessible("redirects");
+
+const catalog = await findPublicCatalogProperties(payload, { page: 1, limit: 1 });
+assert.ok(Array.isArray(catalog.items), "public catalog gateway must return DTO items");
+assert.ok(typeof catalog.total === "number", "public catalog gateway must return totals");
+const catalogProperty = await findPublicPropertyBySlug(payload, "__missing-public-property__");
+assert.equal(catalogProperty, null, "missing public property slug must resolve to null");
+const cmsPage = await findPublicPage(payload, "__missing-public-page__");
+assert.equal(cmsPage, null, "missing public CMS page slug must resolve to null");
 
 const suffix = `${Date.now()}`;
 const lead = await payload.create({

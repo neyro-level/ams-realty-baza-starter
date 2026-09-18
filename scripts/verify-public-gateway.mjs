@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 const catalogSource = readFileSync("src/server/public-gateway/catalog.ts", "utf8");
 const gatewaySource = readFileSync("src/server/public-gateway/index.ts", "utf8");
 const policySource = readFileSync("src/server/public-gateway/policy.ts", "utf8");
+const accessSource = readFileSync("src/server/system-gateway/public-read.ts", "utf8");
 const propertiesSource = readFileSync("src/payload/collections/Properties.ts", "utf8");
+const pagesSource = readFileSync("src/payload/collections/Pages.ts", "utf8");
+const mediaSource = readFileSync("src/payload/collections/Media.ts", "utf8");
 const rawRestBoundary = JSON.parse(readFileSync("config/raw-rest-boundary.json", "utf8"));
 
 const forbiddenPublicFields = [
@@ -34,7 +37,7 @@ for (const field of forbiddenPublicFields) {
 }
 
 const requiredPolicySnippets = [
-	"overrideAccess: false",
+	"publicGatewayReadAccess",
 	"depth: 0",
 	"maxLimit: 48",
 	"output: \"dto\"",
@@ -46,8 +49,28 @@ for (const snippet of requiredPolicySnippets) {
 	}
 }
 
+if (!accessSource.includes("publicGatewayOperation:") || !accessSource.includes("public-read")) {
+	throw new Error("Public Gateway must declare explicit public-read access mode");
+}
+
+if (!accessSource.includes("overrideAccess:") || !accessSource.includes("true")) {
+	throw new Error("Public Gateway Local API must use explicit overrideAccess, not anonymous collection read");
+}
+
+if (propertiesSource.includes("publicPropertyReadWhere") || pagesSource.includes("publicPageReadWhere")) {
+	throw new Error("Publication predicates must not live in collection access as a public API");
+}
+
+if (!propertiesSource.includes("read: adminsAndOwners") || !pagesSource.includes("read: adminsAndOwners")) {
+	throw new Error("properties and pages anonymous collection read must be deny");
+}
+
 if (!gatewaySource.includes("export { publicGatewayPolicy }")) {
 	throw new Error("Public Gateway policy is not exported from index");
+}
+
+if (!gatewaySource.includes("export { publicGatewayReadAccess }")) {
+	throw new Error("publicGatewayReadAccess must be exported from Public Gateway");
 }
 
 const requiredPredicateSnippets = [
@@ -57,8 +80,8 @@ const requiredPredicateSnippets = [
 ];
 
 for (const snippet of requiredPredicateSnippets) {
-	if (!catalogSource.includes(snippet) || !propertiesSource.includes(snippet)) {
-		throw new Error(`Publication predicate missing from gateway/access: ${snippet}`);
+	if (!catalogSource.includes(snippet)) {
+		throw new Error(`Publication predicate missing from Public Gateway: ${snippet}`);
 	}
 }
 

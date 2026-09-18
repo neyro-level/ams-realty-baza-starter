@@ -1,7 +1,9 @@
 import "server-only";
 
+import { publicGatewayReadAccess } from "../system-gateway/public-read.ts";
+
 export const publicGatewayPolicy = {
-	overrideAccess: false,
+	...publicGatewayReadAccess(),
 	depth: 0,
 	maxLimit: 48,
 	output: "dto",

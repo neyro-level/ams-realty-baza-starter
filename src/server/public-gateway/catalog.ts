@@ -296,6 +296,7 @@ export async function findPublicCatalogProperties(
 		sort: sortForCatalog(query.sort),
 		select: publicPropertySelect,
 		overrideAccess: publicGatewayPolicy.overrideAccess,
+		context: publicGatewayPolicy.context,
 	});
 
 	return {
@@ -334,6 +335,7 @@ export async function findPublicPropertyBySlug(payload: Payload, slug: string) {
 		page: 1,
 		select: publicPropertySelect,
 		overrideAccess: publicGatewayPolicy.overrideAccess,
+		context: publicGatewayPolicy.context,
 	});
 
 	const property = result.docs[0];

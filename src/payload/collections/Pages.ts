@@ -1,13 +1,6 @@
-import type { CollectionConfig, Where } from "payload";
+import type { CollectionConfig } from "payload";
 import { projectConfig } from "../../project/project.config.ts";
-import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
-
-const publicPageReadWhere: Where = {
-	and: [
-		{ status: { equals: "published" } },
-		{ publishedAt: { exists: true } },
-	],
-};
+import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
 
 export const Pages: CollectionConfig = {
 	slug: "pages",
@@ -17,13 +10,7 @@ export const Pages: CollectionConfig = {
 	},
 	access: {
 		create: adminsAndOwners,
-		read: ({ req }) => {
-			if (hasRole(req.user, ["owner", "admin"])) {
-				return true;
-			}
-
-			return publicPageReadWhere;
-		},
+		read: adminsAndOwners,
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},

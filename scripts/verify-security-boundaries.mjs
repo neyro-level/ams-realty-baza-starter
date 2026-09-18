@@ -67,10 +67,42 @@ for (const collection of [
 	);
 }
 
+const collectionFileBySlug = {
+	users: "src/payload/collections/Users.ts",
+	pages: "src/payload/collections/Pages.ts",
+	properties: "src/payload/collections/Properties.ts",
+	"feed-sources": "src/payload/collections/FeedSources.ts",
+	"import-runs": "src/payload/collections/ImportRuns.ts",
+	"import-issues": "src/payload/collections/ImportIssues.ts",
+	leads: "src/payload/collections/Leads.ts",
+	"lead-deliveries": "src/payload/collections/LeadDeliveries.ts",
+	media: "src/payload/collections/Media.ts",
+	redirects: "src/payload/collections/Redirects.ts",
+};
+
+for (const slug of rawRestBoundary.anonymousDenyCollections) {
+	const file = collectionFileBySlug[slug];
+	assert.ok(file, `deny-anonymous collection ${slug} must map to a collection file`);
+	const content = read(file);
+	assert.ok(
+		/access:\s*\{[\s\S]*?read:\s*(?:adminsAndOwners|ownersOnly)/.test(content),
+		`${file}: anonymous generic read must be role-denied, not a public predicate`,
+	);
+	assert.ok(
+		!/read:\s*\(\)\s*=>\s*true/.test(content),
+		`${file}: anonymous open read is forbidden`,
+	);
+}
+
 requireIncludes(
 	"src/proxy.ts",
+	"isAnonymousDeniedRawRestPath",
+	"raw REST edge boundary must use the configured denylist helper",
+);
+requireIncludes(
+	"src/server/security/anonymous-raw-rest.ts",
 	"anonymousDenyCollections",
-	"raw REST edge boundary must use the configured denylist",
+	"anonymous REST helper must read the configured denylist",
 );
 requireIncludes(
 	"src/proxy.ts",
@@ -204,6 +236,7 @@ for (const required of [
 
 const overrideAllowlist = new Set([
 	"src/server/system-gateway/overrides.ts",
+	"src/server/system-gateway/public-read.ts",
 	"scripts/quality/architecture-guard.mjs",
 	"scripts/verify-security-boundaries.mjs",
 ]);
@@ -246,5 +279,26 @@ if (violations.length) {
 	console.error(violations.join("\n"));
 	process.exit(1);
 }
+
+const { isAnonymousDeniedRawRestPath } = await import(
+	"../src/server/security/anonymous-raw-rest.ts"
+);
+for (const slug of ["properties", "pages", "leads", "lead-deliveries"]) {
+	assert.equal(
+		isAnonymousDeniedRawRestPath(`/api/${slug}`),
+		true,
+		`anonymous GET /api/${slug} must be denied`,
+	);
+	assert.equal(
+		isAnonymousDeniedRawRestPath(`/api/${slug}/example-id`),
+		true,
+		`anonymous GET /api/${slug}/:id must be denied`,
+	);
+}
+assert.equal(
+	isAnonymousDeniedRawRestPath("/api/users/login"),
+	false,
+	"Payload login remain on the auth allowlist",
+);
 
 console.log("verify-security-boundaries: ok");
