@@ -24,7 +24,9 @@ const runtimeEnvSchema = z.object({
 	CACHE_INVALIDATION_MODE: z.enum(["http"]).default("http"),
 	PAYLOAD_DB_PUSH: booleanString.default(false),
 
-	NEXT_PUBLIC_SERVER_URL: optionalUrl,
+	// Public origin stays optional at Zod parse so `next build` can import this module.
+	// Production runtime fail-fast for empty/invalid URL is evaluateRuntimeEnv.
+	NEXT_PUBLIC_SERVER_URL: optionalString,
 	INTERNAL_REVALIDATE_BASE_URL: optionalUrl,
 	INTERNAL_HEALTH_SECRET: optionalString,
 	REVALIDATE_SECRET: optionalString,

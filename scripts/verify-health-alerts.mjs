@@ -208,6 +208,7 @@ assert.equal(
 
 const {
 	evaluateRuntimeEnv,
+	assertRuntimeEnvOrThrow,
 	importStaleThresholdMs,
 	queuedImportOrphanThresholdMs,
 	pendingDeliveryOrphanThresholdMs,
@@ -257,6 +258,38 @@ assert.ok(
 		{ ...productionLike, LEAD_CHANNELS: "max" },
 		"runtime",
 	).missing.includes("MAX_BOT_TOKEN"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{ ...productionLike, NEXT_PUBLIC_SERVER_URL: "" },
+		"runtime",
+	).missing.includes("NEXT_PUBLIC_SERVER_URL"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{ ...productionLike, NEXT_PUBLIC_SERVER_URL: "not-a-url" },
+		"runtime",
+	).missing.includes("NEXT_PUBLIC_SERVER_URL"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{ ...productionLike, LEAD_CHANNELS: "telegram" },
+		"runtime",
+	).missing.includes("LEAD_CHANNELS"),
+);
+assert.throws(
+	() =>
+		assertRuntimeEnvOrThrow({
+			...productionLike,
+			LEAD_CHANNELS: "max",
+		}),
+	/MAX_BOT_TOKEN/,
+);
+assert.ok(
+	!evaluateRuntimeEnv(
+		{ NEXT_PHASE: "phase-production-build" },
+		"build",
+	).missing.includes("DATABASE_URI"),
 );
 assert.ok(
 	evaluateRuntimeEnv(

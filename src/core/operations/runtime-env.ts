@@ -61,17 +61,39 @@ function collectConditionalRuntimeKeys(env: NodeJS.ProcessEnv): string[] {
 		missing.push("PAYLOAD_DB_PUSH");
 	}
 
-	for (const channel of parseLeadChannelIds(env.LEAD_CHANNELS)) {
-		const refs = knownChannelCredentials[channel];
-		if (!refs) continue;
-		for (const key of refs) {
-			if (!env[key]?.trim() && !missing.includes(key)) {
-				missing.push(key);
+	const rawChannels = env.LEAD_CHANNELS?.trim();
+	if (rawChannels) {
+		const ids = parseLeadChannelIds(rawChannels);
+		if (ids.length === 0 && !missing.includes("LEAD_CHANNELS")) {
+			missing.push("LEAD_CHANNELS");
+		}
+
+		for (const channel of ids) {
+			const refs = knownChannelCredentials[channel];
+			if (!refs) {
+				if (!missing.includes("LEAD_CHANNELS")) {
+					missing.push("LEAD_CHANNELS");
+				}
+				continue;
+			}
+			for (const key of refs) {
+				if (!env[key]?.trim() && !missing.includes(key)) {
+					missing.push(key);
+				}
 			}
 		}
 	}
 
 	return missing;
+}
+
+function isHttpOrigin(value: string): boolean {
+	try {
+		const parsed = new URL(value);
+		return parsed.protocol === "http:" || parsed.protocol === "https:";
+	} catch {
+		return false;
+	}
 }
 
 export function evaluateRuntimeEnv(
@@ -92,6 +114,11 @@ export function evaluateRuntimeEnv(
 	}
 
 	if (mode === "runtime") {
+		const origin = env.NEXT_PUBLIC_SERVER_URL?.trim();
+		if (origin && !isHttpOrigin(origin) && !missing.includes("NEXT_PUBLIC_SERVER_URL")) {
+			missing.push("NEXT_PUBLIC_SERVER_URL");
+		}
+
 		for (const key of collectConditionalRuntimeKeys(env)) {
 			if (!missing.includes(key)) {
 				missing.push(key);

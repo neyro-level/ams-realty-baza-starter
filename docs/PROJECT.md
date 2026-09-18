@@ -17,6 +17,7 @@
 | S3 runtime | не используется и не закупается; см. `docs/adr/ADR-LOCAL-STARTER-STORAGE.md` |
 | Client clone topology | вне этого демо-репозитория; здесь не планируется |
 | Secrets | Secret Master `https://infisical.ams24.ru` |
+| Env mapping | Canonical knobs → starter env (no CRM / telegram keys): `DATABASE` → `DATABASE_URI`; public origin → `NEXT_PUBLIC_SERVER_URL`; media → `MEDIA_DIR`; Payload secret → `PAYLOAD_SECRET`; ISR secret → `REVALIDATE_SECRET`; lead channels → `LEAD_CHANNELS` (`max`, `custom-webhook` only) |
 | Demo domain | `start-baza.ams24.ru`, `noindex` |
 | Jobs owner | exactly one runtime with `JOBS_AUTORUN=true` |
 | Dispatcher interval | `project.config.ts` → `dispatcherIntervalMinutes = 5` |
