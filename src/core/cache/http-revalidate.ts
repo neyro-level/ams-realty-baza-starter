@@ -1,3 +1,5 @@
+import { recordCacheInvalidationOutcome } from "./invalidation-sla.ts";
+
 export type HttpCacheTarget =
 	| { type: "tag"; tag: string }
 	| { type: "path"; path: string; routeType?: "page" | "layout" };
@@ -27,11 +29,13 @@ export async function postBatchedHttpRevalidate(input: {
 	fetchImpl?: typeof fetch;
 }): Promise<HttpCacheInvalidationResult> {
 	if (input.targets.length === 0) {
+		recordCacheInvalidationOutcome(true);
 		return { ok: true, count: 0 };
 	}
 
 	const baseUrl = input.baseUrl?.replace(/\/$/, "");
 	if (!baseUrl || !input.secret) {
+		recordCacheInvalidationOutcome(false);
 		return { ok: false, warning: true, reason: "not_configured" };
 	}
 
@@ -52,13 +56,16 @@ export async function postBatchedHttpRevalidate(input: {
 				}),
 			});
 			if (!response.ok) {
+				recordCacheInvalidationOutcome(false);
 				return { ok: false, warning: true, reason: "rejected" };
 			}
 			posted += chunk.length;
 		} catch {
+			recordCacheInvalidationOutcome(false);
 			return { ok: false, warning: true, reason: "request_failed" };
 		}
 	}
 
+	recordCacheInvalidationOutcome(true);
 	return { ok: true, count: posted };
 }

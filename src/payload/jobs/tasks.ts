@@ -8,8 +8,18 @@ import {
 } from "../../core/data-access/ingest/sql/index.ts";
 import { runDeliverLeadTask } from "../../core/leads/deliver-lead.ts";
 import { isLiveFuturePayloadJob } from "../../core/leads/job-liveness.ts";
+import {
+	anonymizeLeadFields,
+	planLeadRetentionRun,
+} from "../../core/leads/retention.ts";
 import { inspectPayloadJob } from "../../core/data-access/system/jobs/index.ts";
 import { postBatchedHttpRevalidate } from "../../core/cache/http-revalidate.ts";
+import {
+	importStaleThresholdMs,
+	observedSuccessfulDurationMs,
+	pendingDeliveryOrphanThresholdMs,
+	queuedImportOrphanThresholdMs,
+} from "../../core/operations/recovery-thresholds.ts";
 import { dispatchDueFeeds } from "../../core/ingest/dispatch-due-feeds.ts";
 import { fetchConditionalFeed } from "../../core/ingest/feed-fetcher.ts";
 import { createPayloadFeedIngestRepository } from "../../core/ingest/payload-feed-ingest-repository.ts";
@@ -39,8 +49,6 @@ type GenericPayloadJobTask = TaskConfig<{
 }>;
 
 const minuteInMs = 60_000;
-const staleJobThresholdMs = projectConfig.maintenanceIntervalMinutes * minuteInMs;
-const defaultArchiveRetentionDays = 30;
 
 function nowIso() {
 	return new Date().toISOString();
@@ -255,7 +263,24 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		label: "Jobs janitor",
 		schedule: getStaticSchedule(payloadJobTaskSlugs.jobsJanitor),
 		handler: async ({ req }) => {
-			const threshold = new Date(Date.now() - staleJobThresholdMs).toISOString();
+			const recentSuccess = await req.payload.find({
+				collection: "import-runs",
+				where: { status: { equals: "success" } },
+				sort: "-finishedAt",
+				limit: 5,
+				depth: 0,
+				req,
+			});
+			const importStaleMs = importStaleThresholdMs(
+				observedSuccessfulDurationMs(recentSuccess.docs),
+			);
+			const queuedOrphanMs = queuedImportOrphanThresholdMs(
+				projectConfig.dispatcherIntervalMinutes,
+			);
+			const importStaleBefore = new Date(Date.now() - importStaleMs).toISOString();
+			const queuedOrphanBefore = new Date(
+				Date.now() - queuedOrphanMs,
+			).toISOString();
 			const staleRuns = await req.payload.find({
 				collection: "import-runs",
 				where: {
@@ -263,13 +288,13 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 						{
 							and: [
 								{ status: { equals: "running" } },
-								{ heartbeatAt: { less_than: threshold } },
+								{ heartbeatAt: { less_than: importStaleBefore } },
 							],
 						},
 						{
 							and: [
 								{ status: { equals: "queued" } },
-								{ queuedAt: { less_than: threshold } },
+								{ queuedAt: { less_than: queuedOrphanBefore } },
 								{ jobId: { exists: false } },
 							],
 						},
@@ -301,6 +326,17 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		label: "Lead retention cleanup",
 		schedule: getStaticSchedule(payloadJobTaskSlugs.leadRetentionCleanup),
 		handler: async ({ req }) => {
+			const decision = planLeadRetentionRun(projectConfig.leadRetentionDays);
+			if (!decision.destructive) {
+				return {
+					output: {
+						purgedLeads: 0,
+						skipped: decision.reason,
+						alert: decision.alert.code,
+					},
+				};
+			}
+
 			const expiredLeads = await req.payload.find({
 				collection: "leads",
 				where: {
@@ -314,22 +350,27 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				req,
 			});
 			const purgedAt = nowIso();
+			let deleted = 0;
+			let anonymized = 0;
 
 			for (const lead of expiredLeads.docs) {
+				if (lead.retentionMode === "delete") {
+					await req.payload.delete({
+						collection: "leads",
+						id: lead.id,
+						req,
+					});
+					deleted += 1;
+					continue;
+				}
+
 				await req.payload.update({
 					collection: "leads",
 					id: lead.id,
-					data: {
-						name: "Anonymized lead",
-						phoneRaw: null,
-						phoneE164: "+00000000000",
-						email: null,
-						message: null,
-						fraudFingerprint: null,
-						piiPurgedAt: purgedAt,
-					},
+					data: anonymizeLeadFields(purgedAt),
 					req,
 				});
+				anonymized += 1;
 				const deliveries = await req.payload.find({
 					collection: "lead-deliveries",
 					where: { lead: { equals: lead.id } },
@@ -352,7 +393,13 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				}
 			}
 
-			return { output: { purgedLeads: expiredLeads.docs.length } };
+			return {
+				output: {
+					purgedLeads: deleted + anonymized,
+					deleted,
+					anonymized,
+				},
+			};
 		},
 	},
 	{
@@ -361,7 +408,15 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		schedule: getStaticSchedule(payloadJobTaskSlugs.catalogLifecycle),
 		handler: async ({ req }) => {
 			const retentionDays =
-				runtimeEnv.ARCHIVE_RETENTION_DAYS ?? defaultArchiveRetentionDays;
+				projectConfig.archiveRetentionDays ?? runtimeEnv.ARCHIVE_RETENTION_DAYS;
+			if (!retentionDays) {
+				return {
+					output: {
+						purgedProperties: 0,
+						skipped: "missing_policy",
+					},
+				};
+			}
 			const threshold = new Date(
 				Date.now() - retentionDays * 24 * 60 * minuteInMs,
 			).toISOString();
@@ -403,7 +458,12 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		label: "Recover lead deliveries",
 		schedule: getStaticSchedule(payloadJobTaskSlugs.recoverLeadDeliveries),
 		handler: async ({ req }) => {
-			const staleThreshold = new Date(Date.now() - staleJobThresholdMs).toISOString();
+			const staleThreshold = new Date(
+				Date.now() -
+					pendingDeliveryOrphanThresholdMs(
+						projectConfig.maintenanceIntervalMinutes,
+					),
+			).toISOString();
 			const staleSending = await req.payload.find({
 				collection: "lead-deliveries",
 				where: {

@@ -8,6 +8,10 @@ export const Users: CollectionConfig = {
 		lockTime: 10 * 60 * 1000,
 		verify: false,
 		useAPIKey: false,
+		cookies: {
+			secure: process.env.NODE_ENV === "production",
+			sameSite: "Lax",
+		},
 	},
 	admin: {
 		useAsTitle: "email",

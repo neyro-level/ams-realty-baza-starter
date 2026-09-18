@@ -47,6 +47,7 @@ const runtimeEnvSchema = z.object({
 	ARCHIVE_RETENTION_DAYS: optionalInteger,
 	LEAD_RETENTION_DAYS: optionalInteger,
 	ALERT_WEBHOOK_URL: optionalUrl,
+	BACKUP_STATUS_PATH: optionalString,
 });
 
 export const runtimeEnv = runtimeEnvSchema.parse(process.env);

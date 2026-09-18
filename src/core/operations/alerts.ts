@@ -4,7 +4,12 @@ export type OperationalAlertComponent =
 	| "jobs"
 	| "delivery"
 	| "storage"
-	| "cache";
+	| "cache"
+	| "retention"
+	| "backup"
+	| "disk"
+	| "alerts"
+	| "outbound";
 
 export type OperationalAlert = {
 	code: string;
@@ -36,6 +41,22 @@ export type OperationalHealthSnapshot = {
 	};
 	cache?: {
 		invalidationStaleBeyondSla: boolean;
+	};
+	retention?: {
+		leadPolicyConfigured: boolean;
+	};
+	backup?: {
+		dbFailed: boolean;
+		mediaFailed: boolean;
+	};
+	disk?: {
+		freeRatio?: number | null;
+	};
+	alerts?: {
+		independentChannel: boolean;
+	};
+	outbound?: {
+		criticalFailures: number;
 	};
 };
 
@@ -130,6 +151,70 @@ export function buildOperationalAlerts(
 			severity: "critical",
 			component: "cache",
 			message: "Public cache is stale after a failed invalidation.",
+		});
+	}
+
+	if (snapshot.retention && snapshot.retention.leadPolicyConfigured === false) {
+		alerts.push({
+			code: "retention_policy_missing",
+			severity: "warning",
+			component: "retention",
+			message: "Lead retention days are unset; destructive cleanup is skipped.",
+		});
+	}
+
+	if (snapshot.backup?.dbFailed) {
+		alerts.push({
+			code: "backup_db_failure",
+			severity: "critical",
+			component: "backup",
+			message: "Database backup missed the offsite integrity window.",
+		});
+	}
+
+	if (snapshot.backup?.mediaFailed) {
+		alerts.push({
+			code: "backup_media_failure",
+			severity: "critical",
+			component: "backup",
+			message: "Media backup missed the offsite integrity window.",
+		});
+	}
+
+	if (typeof snapshot.disk?.freeRatio === "number") {
+		if (snapshot.disk.freeRatio < 0.1) {
+			alerts.push({
+				code: "disk_low",
+				severity: "critical",
+				component: "disk",
+				message: "Data volume free space is below 10 percent.",
+			});
+		} else if (snapshot.disk.freeRatio < 0.2) {
+			alerts.push({
+				code: "disk_low",
+				severity: "warning",
+				component: "disk",
+				message: "Data volume free space is below 20 percent.",
+			});
+		}
+	}
+
+	if (snapshot.alerts && snapshot.alerts.independentChannel === false) {
+		alerts.push({
+			code: "alert_channel_not_independent",
+			severity: "critical",
+			component: "alerts",
+			message: "Operational alerts share the only lead delivery channel.",
+		});
+	}
+
+	if ((snapshot.outbound?.criticalFailures ?? 0) > 0) {
+		alerts.push({
+			code: "outbound_integration_failure",
+			severity: "critical",
+			component: "outbound",
+			message: "A critical outbound integration is failing.",
+			count: snapshot.outbound?.criticalFailures,
 		});
 	}
 

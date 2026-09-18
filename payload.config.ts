@@ -39,6 +39,7 @@ export default buildConfig({
 	],
 	cors: runtimeEnv.NEXT_PUBLIC_SERVER_URL ? [runtimeEnv.NEXT_PUBLIC_SERVER_URL] : [],
 	csrf: runtimeEnv.NEXT_PUBLIC_SERVER_URL ? [runtimeEnv.NEXT_PUBLIC_SERVER_URL] : [],
+	cookiePrefix: "payload",
 	db: postgresAdapter({
 		migrationDir: "src/payload/migrations",
 		pool: {

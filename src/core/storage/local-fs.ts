@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, statfsSync } from "node:fs";
 import path from "node:path";
 
 const SAFE_NAME = /[^a-zA-Z0-9._-]+/g;
@@ -28,9 +28,28 @@ export function isLocalMediaReady(): boolean {
 	}
 }
 
+export const mediaOverwriteDisabled = true;
+
 export function uniqueMediaFilename(originalName: string): string {
 	const base = path.basename(originalName).replace(SAFE_NAME, "-");
 	const ext = path.extname(base);
 	const stem = path.basename(base, ext) || "file";
 	return `${stem}-${randomUUID()}${ext.toLowerCase()}`;
+}
+
+export function mediaFileExists(filename: string): boolean {
+	return existsSync(path.join(getMediaDirectory(), path.basename(filename)));
+}
+
+export function readDataVolumeFreeRatio(directory = getMediaDirectory()): number | null {
+	try {
+		const stats = statfsSync(directory);
+		const blocks = Number(stats.blocks);
+		if (!Number.isFinite(blocks) || blocks <= 0) {
+			return null;
+		}
+		return Number(stats.bavail) / blocks;
+	} catch {
+		return null;
+	}
 }

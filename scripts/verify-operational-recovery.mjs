@@ -66,6 +66,22 @@ assert.ok(
 	"pending jobs with future waitUntil must not be treated as orphans",
 );
 assert.ok(
+	jobs.includes("importStaleThresholdMs"),
+	"jobs janitor must use import stale threshold",
+);
+assert.ok(
+	jobs.includes("queuedImportOrphanThresholdMs"),
+	"jobs janitor must use queued import orphan threshold",
+);
+assert.ok(
+	jobs.includes("pendingDeliveryOrphanThresholdMs"),
+	"delivery recovery must use pending delivery orphan threshold",
+);
+assert.ok(
+	!jobs.includes("staleJobThresholdMs"),
+	"recovery must not share one universal stale constant",
+);
+assert.ok(
 	!/collection:\s*["']payload-jobs["']/.test(recoverSource),
 	"recoverLeadDeliveries must not use generic payload-jobs CRUD",
 );

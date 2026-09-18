@@ -48,6 +48,38 @@ assert.ok(
 	operations.includes("offsite"),
 	"Operations must require offsite backup copy",
 );
+assert.ok(
+	operations.includes("Independent alert channel"),
+	"Operations must pin an independent alert channel",
+);
+assert.ok(
+	operations.includes("ALERT_WEBHOOK_URL"),
+	"Operations must name the primary alert destination",
+);
+
+const compose = read("deploy/compose/start-baza.compose.yml");
+assert.ok(
+	compose.includes('JOBS_AUTORUN: "true"'),
+	"compose must start exactly one jobs owner with JOBS_AUTORUN=true",
+);
+assert.ok(
+	compose.includes("MEDIA_DIR: /var/lib/ams/realtbase/media"),
+	"compose must pin persistent MEDIA_DIR",
+);
+assert.ok(
+	compose.includes("/var/lib/ams/realtbase/media:/var/lib/ams/realtbase/media"),
+	"compose must persist MEDIA_DIR across recreate",
+);
+
+const nginx = read("deploy/nginx/start-baza.ams24.ru.conf");
+assert.ok(
+	nginx.includes("location /media/"),
+	"nginx must alias local media",
+);
+assert.ok(
+	nginx.includes("limit_req zone=ams_login"),
+	"nginx must rate-limit login",
+);
 
 for (const requiredEnv of [
 	"DATABASE_URI=",

@@ -103,9 +103,24 @@ requireIncludes(
 	"health endpoint must require the internal health secret header",
 );
 requireIncludes(
-	"src/app/api/internal/healthz/route.ts",
-	"no-store",
-	"health endpoint must not be cacheable",
+	"src/payload/collections/Users.ts",
+	"maxLoginAttempts: 5",
+	"admin login must lock after repeated attempts",
+);
+requireIncludes(
+	"src/payload/collections/Media.ts",
+	"mediaOverwriteDisabled",
+	"local media overwrite must stay disabled",
+);
+requireIncludes(
+	"deploy/nginx/start-baza.ams24.ru.conf",
+	"location /media/",
+	"nginx must alias persistent MEDIA_DIR",
+);
+requireIncludes(
+	"instrumentation.ts",
+	"assertRuntimeEnvOrThrow",
+	"production start must fail-fast on missing runtime env",
 );
 requireIncludes(
 	"src/app/api/public/leads/route.ts",
@@ -113,9 +128,14 @@ requireIncludes(
 	"public lead intake must use the classified public gateway, not generic Payload REST",
 );
 requireIncludes(
-	"src/payload/collections/Leads.ts",
-	"create: adminsAndOwners",
-	"generic Payload leads create must not be public",
+	"src/payload/jobs/tasks.ts",
+	"skipped: decision.reason",
+	"missing lead retention policy must skip destructive cleanup",
+);
+requireIncludes(
+	"src/payload/jobs/tasks.ts",
+	'input: { leadDeliveryId: String(delivery.id) }',
+	"lead delivery jobs must queue identifiers only",
 );
 
 const nextConfig = read("next.config.ts");

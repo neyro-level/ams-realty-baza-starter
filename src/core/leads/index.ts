@@ -41,6 +41,7 @@ export {
 } from "./channels.ts";
 export { hitInProcessLeadRateLimit } from "./in-process-rate-limit.ts";
 export { isLiveFuturePayloadJob } from "./job-liveness.ts";
+export { planLeadRetentionRun } from "./retention.ts";
 export {
 	buildFraudFingerprint,
 	buildLeadIdempotencyKey,

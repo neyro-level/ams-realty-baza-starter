@@ -1,7 +1,22 @@
+import { hostname } from "node:os";
 import { getPayload } from "payload";
 import configPromise from "../../../../../payload.config.ts";
+import { isCacheInvalidationStaleBeyondSla } from "../../../../core/cache/invalidation-sla.ts";
+import { isAlertChannelIndependent } from "../../../../core/operations/alert-channel.ts";
 import { buildOperationalAlerts } from "../../../../core/operations/alerts.ts";
-import { isLocalMediaReady } from "../../../../core/storage/local-fs.ts";
+import {
+	evaluateBackupFailures,
+	readBackupHealthSnapshot,
+} from "../../../../core/operations/backup-health.ts";
+import {
+	importStaleThresholdMs,
+	pendingDeliveryOrphanThresholdMs,
+} from "../../../../core/operations/recovery-thresholds.ts";
+import {
+	isLocalMediaReady,
+	readDataVolumeFreeRatio,
+} from "../../../../core/storage/local-fs.ts";
+import { projectConfig } from "../../../../project/project.config.ts";
 import { runtimeEnv } from "../../../../payload/env.ts";
 import {
 	programmaticPayloadJobTasks,
@@ -11,9 +26,6 @@ import { redactRecord } from "../../../../server/security/redaction.ts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const minuteInMs = 60_000;
-const staleThresholdMs = 15 * minuteInMs;
 
 function nowIso() {
 	return new Date().toISOString();
@@ -42,6 +54,12 @@ export async function GET(request: Request) {
 	}
 
 	const checkedAt = nowIso();
+	const jobsOwner = {
+		identity: hostname(),
+		pid: process.pid,
+		autorunEnabled: runtimeEnv.JOBS_AUTORUN,
+		exactlyOne: projectConfig.jobsAutorunExactlyOne,
+	};
 	const components = {
 		app: { status: "ok" as const },
 		database: { status: "unknown" as "ok" | "down" | "unknown" },
@@ -51,6 +69,9 @@ export async function GET(request: Request) {
 		jobs: {
 			status: "ok" as const,
 			autorunEnabled: runtimeEnv.JOBS_AUTORUN,
+			ownerIdentity: jobsOwner.identity,
+			ownerPid: jobsOwner.pid,
+			exactlyOne: jobsOwner.exactlyOne,
 			staticTaskCount: staticPayloadJobTasks.length,
 			programmaticTaskCount: programmaticPayloadJobTasks.length,
 		},
@@ -58,8 +79,14 @@ export async function GET(request: Request) {
 
 	try {
 		const payload = await getPayload({ config: configPromise });
-		const staleThreshold = new Date(
-			Date.now() - staleThresholdMs,
+		const importStaleBefore = new Date(
+			Date.now() - importStaleThresholdMs(),
+		).toISOString();
+		const deliveryOrphanBefore = new Date(
+			Date.now() -
+				pendingDeliveryOrphanThresholdMs(
+					projectConfig.maintenanceIntervalMinutes,
+				),
 		).toISOString();
 		const [
 			overdueFeeds,
@@ -92,7 +119,7 @@ export async function GET(request: Request) {
 				where: {
 					and: [
 						{ status: { equals: "running" } },
-						{ heartbeatAt: { less_than: staleThreshold } },
+						{ heartbeatAt: { less_than: importStaleBefore } },
 					],
 				},
 			}),
@@ -111,7 +138,7 @@ export async function GET(request: Request) {
 				where: {
 					and: [
 						{ status: { equals: "sending" } },
-						{ heartbeatAt: { less_than: staleThreshold } },
+						{ heartbeatAt: { less_than: deliveryOrphanBefore } },
 					],
 				},
 			}),
@@ -122,6 +149,14 @@ export async function GET(request: Request) {
 		]);
 
 		components.database.status = "ok";
+		const backupSnapshot = runtimeEnv.BACKUP_STATUS_PATH
+			? readBackupHealthSnapshot(runtimeEnv.BACKUP_STATUS_PATH)
+			: process.env.NODE_ENV === "production"
+				? { statusKnown: false as const }
+				: undefined;
+		const backup = backupSnapshot
+			? evaluateBackupFailures(backupSnapshot)
+			: undefined;
 		const alerts = buildOperationalAlerts({
 			feeds: {
 				overdueEnabled: overdueFeeds.totalDocs,
@@ -142,6 +177,35 @@ export async function GET(request: Request) {
 			storage: {
 				localMediaReady: isLocalMediaReady(),
 			},
+			cache: {
+				invalidationStaleBeyondSla: isCacheInvalidationStaleBeyondSla(
+					projectConfig.staleDataSlaMinutes,
+					checkedAt,
+				),
+			},
+			retention: {
+				leadPolicyConfigured: projectConfig.leadRetentionDays !== null,
+			},
+			backup: backup
+				? {
+						dbFailed: backup.dbBackupFailed,
+						mediaFailed: backup.mediaBackupFailed,
+					}
+				: undefined,
+			disk: {
+				freeRatio: readDataVolumeFreeRatio(),
+			},
+			alerts: runtimeEnv.ALERT_WEBHOOK_URL
+				? {
+						independentChannel: isAlertChannelIndependent({
+							alertWebhookUrl: runtimeEnv.ALERT_WEBHOOK_URL,
+							leadChannelUrls: [
+								runtimeEnv.CUSTOM_WEBHOOK_URL,
+								runtimeEnv.MAX_API_URL,
+							],
+						}),
+					}
+				: undefined,
 		});
 		const status = alerts.some((alert) => alert.severity === "critical")
 			? "degraded"

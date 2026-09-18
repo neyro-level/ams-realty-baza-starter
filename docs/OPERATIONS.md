@@ -101,9 +101,33 @@ Emergency unstuck of a stuck `processing=true` job is the documented operation `
 
 До release должны быть проверяемые health/alerts для site, DB, overdue feed, interrupted import, lead backlog/abandoned, backup failure и critical integration failure. Incident procedure: зафиксировать SHA и симптомы, остановить опасный mutating path, сохранить evidence, выполнить approved recovery/rollback и подтвердить live state.
 
+Backup failure alerts (`backup_db_failure`, `backup_media_failure`) читают `BACKUP_STATUS_PATH` JSON: `lastSuccessAt`, `integrityOk`, `offsiteCopyPresent` для db и media. Пропуск, порча, отсутствие offsite copy или неизвестный статус в production поднимают critical alert. Cache invalidation failure поднимается, если после неуспешной инвалидации публичные ответы остаются stale дольше `staleDataSlaMinutes`.
+
+## Independent alert channel
+
+Primary operational alerts: `ALERT_WEBHOOK_URL` (Secret Master).  
+Fallback: owner email / AMS operations inbox, not a messenger used for lead delivery.
+
+`ALERT_WEBHOOK_URL` must not share host with `CUSTOM_WEBHOOK_URL` or the live MAX lead adapter. Otherwise a messenger outage hides both leads and the alert that leads are not delivering.
+
+## Dynamic recovery thresholds
+
+Не использовать одну универсальную константу:
+
+- import stale (running heartbeat): `max(15m, 3 × observed successful duration)`;
+- queued import orphan: `max(15m, 3 × dispatcherIntervalMinutes)`;
+- pending/sending delivery orphan: `max(5m, 2 × maintenanceIntervalMinutes)`.
+
+## External uptime monitoring
+
+External monitor is independent of AMS Server and watches public homepage, `/api/internal/healthz` availability from outside, and TLS/HTTP. Feed overdue on the external contour uses `max(2 hours, 3 × refreshIntervalMinutes)`. Internal healthz remains the source for feed/jobs/lead condition alerts.
+
 ## Payload Jobs, media, CSP и raw REST
 
-- Jobs owner: ровно один runtime с `JOBS_AUTORUN=true`; при handover новый runtime сначала стартует с `false`.
-- Media: persistent `MEDIA_DIR`, Nginx alias, не S3.
+- Jobs owner: ровно один runtime с `JOBS_AUTORUN=true`; compose `deploy/compose/start-baza.compose.yml` pins `JOBS_AUTORUN: "true"` on that single service. Healthz reports `jobs.ownerIdentity` + `jobs.ownerPid`. При handover новый runtime сначала стартует с `false`.
+- Media: persistent `MEDIA_DIR`, Nginx `location /media/` alias на `/var/lib/ams/realtbase/media/`, unique filenames, overwrite disabled, не S3. Compose mounts the same host path.
+- Cookies: Payload session `payload-token` is httpOnly; production `secure` + `sameSite=Lax`.
+- Login lockout: 5 attempts / 10 minutes; Nginx `limit_req` on `/admin/login`, `/api/users/login`, `/api/public/leads`, `/api/internal/`.
+- Admin access: public+hardened until owner sets IP/VPN (`docs/PROJECT.md`).
 - Health endpoint: `GET /api/internal/healthz` требует `x-ams-health-secret`.
 - Raw REST boundary: `config/raw-rest-boundary.json`.

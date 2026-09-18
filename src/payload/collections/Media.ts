@@ -1,6 +1,8 @@
 import type { CollectionConfig } from "payload";
 import {
 	ensureMediaDirectory,
+	mediaFileExists,
+	mediaOverwriteDisabled,
 	uniqueMediaFilename,
 } from "../../core/storage/local-fs.ts";
 import { ownersOnly } from "../access/roles.ts";
@@ -34,6 +36,9 @@ export const Media: CollectionConfig = {
 			({ data, originalDoc }) => {
 				if (data?.filename && !originalDoc) {
 					data.filename = uniqueMediaFilename(String(data.filename));
+					if (mediaOverwriteDisabled && mediaFileExists(data.filename)) {
+						throw new Error("Media overwrite is disabled.");
+					}
 				}
 				return data;
 			},

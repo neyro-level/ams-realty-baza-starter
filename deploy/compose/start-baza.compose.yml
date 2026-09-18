@@ -18,6 +18,10 @@ services:
       INTERNAL_REVALIDATE_BASE_URL: http://127.0.0.1:3036
       CACHE_INVALIDATION_MODE: http
       PAYLOAD_DB_PUSH: "false"
+      JOBS_AUTORUN: "true"
+      MEDIA_DIR: /var/lib/ams/realtbase/media
+    volumes:
+      - /var/lib/ams/realtbase/media:/var/lib/ams/realtbase/media
     healthcheck:
       test:
         - CMD-SHELL
