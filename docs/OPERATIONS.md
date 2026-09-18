@@ -22,7 +22,7 @@ jobs: exactly one runtime JOBS_AUTORUN=true
 index: X-Robots-Tag noindex,nofollow
 ```
 
-Не покупать Timeweb Managed PostgreSQL, S3 или новый VPS для этого starter. `ams-server/prod` — доступ к хосту, не fallback application credentials.
+Этот контур — демо. Канон runtime: local PostgreSQL + `MEDIA_DIR`. Managed PostgreSQL, S3 и новый VPS здесь не закупаются и не планируются. `ams-server/prod` — доступ к хосту, не fallback application credentials.
 
 ## Deploy и rollback
 
@@ -40,7 +40,7 @@ indexing: noindex until owner explicitly promotes the instance
 
 Immutable artifact format: full Next.js Docker image built from `Dockerfile` outside the production host. Server runtime uses `deploy/compose/start-baza.compose.yml`; public proxy uses `deploy/nginx/start-baza.ams24.ru.conf`. Release identity is recorded by `pnpm release:manifest`; generated `.release/` files are local evidence and are not committed. Обязательные границы: отдельная команда владельца, clean SourceCraft `main`, exact SHA, отсутствие build на production host, один rollout и live smoke. Известный рабочий artifact сохраняется для rollback.
 
-Owner decision for the starter project: use the existing local PostgreSQL 18 on AMS Server instead of buying a separate Timeweb Managed PostgreSQL instance. Runtime database identity:
+Owner decision: local PostgreSQL 18 on AMS Server is the permanent demo canon, not a temporary substitute. Runtime database identity:
 
 ```text
 database: ams_realtbase_prod
@@ -70,7 +70,7 @@ Release sequence:
 
 Starter backup = согласованная пара в одном window: `pg_dump -Fc` + archive `MEDIA_DIR`.
 
-Это канон **этого** demo runtime. Не заменять его единственным правилом «managed PostgreSQL backup + S3 versioning».
+Это канон **этого** demo runtime: `pg_dump` + snapshot `MEDIA_DIR`. Backup-правило managed PostgreSQL / S3 versioning к этому репозиторию не применяется.
 
 `DATABASE_URI` в `/etc/ams/realtbase/start-baza.env` указывает на local PostgreSQL того же AMS Server (`ams_realtbase_prod`), не на Timeweb Managed PostgreSQL.
 
@@ -88,7 +88,7 @@ Warning при <20% free, critical при <10% на data volume.
 
 Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, является canonical source of truth для секретов и доступов AMS RealBaza. Все новые пароли, API tokens, SSH keys, database credentials и service credentials создаются и хранятся там. Doppler считается только legacy/import source, если старые секреты ещё не перенесены.
 
-Операционное правило: значения секретов не выводить в чат, markdown, логи или git. Для работы с секретами использовать trigger `подключись к секрет мастеру`. Для Git-доступов SourceCraft/GitHub использовать trigger `подключись к гид-сервису`. SourceCraft — основной Git-сервис; GitHub — зеркало, если проект явно не говорит обратное.
+Операционное правило: значения секретов не выводить в чат, markdown, логи или git. Для работы с секретами использовать trigger `подключись к секрет мастеру`. Канонический Git этого демо-репозитория — SourceCraft; GitHub в текущей программе не используется.
 
 Runtime secret scope for this application should be project-specific in Secret Master when the starter project is promoted beyond the current owner-operated AMS Server deployment. Current runtime values are materialized in `/etc/ams/realtbase/start-baza.env` with root-only permissions; values must not be printed to chat, markdown, logs or git. `ams-server/prod` may identify the shared AMS server access contour, but it is not a fallback for application `DATABASE_URI`, Payload secret, S3 credentials, revalidation secret, health secret or lead channel credentials.
 

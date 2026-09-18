@@ -16,8 +16,8 @@ S3 credentials: not required to treat the template as clone-ready
 
 Канон: `docs/adr/ADR-LOCAL-STARTER-STORAGE.md`, `docs/PROJECT.md`, `docs/OPERATIONS.md`.
 
-## Будущий коммерческий клиент
+## Вне этого демо-репозитория
 
-Клиентский clone принимает **собственное** topology decision. Часто это Managed PostgreSQL + S3, отдельный VPS, домен и секреты. Это решение clone-time, не скрытая миграция starter и не обязательный adapter в этом репозитории.
+Если когда-нибудь появится отдельный клиентский контур, он принимает **собственное** topology decision. Это не задача и не закупка внутри данного репозитория и не обязательный adapter здесь.
 
-Не копировать local PG + MEDIA_DIR автоматически только потому, что так устроен demo.
+Не копировать local PG + MEDIA_DIR автоматически только потому, что так устроен demo. Не трактовать demo-канон как «надо купить Managed PG/S3».

@@ -6,23 +6,23 @@
 
 ## Решение
 
-Этот ADR описывает **демо-шаблон** на AMS Server. Коммерческий clone не копирует эту topology автоматически.
+Этот ADR описывает **демо-проект** на AMS Server. Коммерческий clone не копирует эту topology автоматически.
 
-Starter живёт на одном AMS Server:
+Этот репозиторий живёт на одном AMS Server:
 
-- PostgreSQL local, не Timeweb Managed PostgreSQL;
+- PostgreSQL local — постоянный канон, не «пока не купим Managed PostgreSQL»;
 - Payload Media в persistent host directory (`MEDIA_DIR`), не `@payloadcms/storage-s3`;
 - один application runtime с `JOBS_AUTORUN=true`.
 
-Это осознанное deviation от типовой commercial topology Core 5.5. Клиентский clone принимает собственное topology decision.
+Закупка Timeweb Managed PostgreSQL и S3 для этого репозитория закрыта. Это не stopgap и не backlog-задача.
 
 ## Почему
 
-Owner-operated template/demo не должен требовать отдельную платную managed-инфраструктуру. Нужны проверяемые backup/restore и jobs ownership на уже существующем сервере.
+Owner-operated demo не требует отдельную платную managed-инфраструктуру. Нужны проверяемые backup/restore и jobs ownership на уже существующем сервере.
 
 ## Сохраняется
 
-Storage Boundary abstraction. S3-compatible adapter может вернуться в клиентском clone заменой adapter/config, не переписыванием UI.
+Storage Boundary abstraction в коде. Адаптер object storage в этот репозиторий не добавляется.
 
 ## Последствия
 

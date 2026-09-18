@@ -1,6 +1,6 @@
 # Project — AMS Realty Baza Starter
 
-Статус: `Hardening / REALTY_BASE`.
+Статус: `Demo / REALTY_BASE`. Этот репозиторий — демо-проект. Runtime навсегда: local PostgreSQL + `MEDIA_DIR` на AMS Server. Закупка базы, S3 и любой платной инфраструктурной замены **не входит в проект**.
 
 ## Зафиксировано
 
@@ -13,9 +13,9 @@
 | Time zone | `Europe/Moscow` / timestamps UTC in system logic |
 | Currency | `RUB`, integer minor units |
 | Starter topology | AMS Server + Nginx + Next/Payload + local PostgreSQL + local `MEDIA_DIR` |
-| Managed PostgreSQL | not used by starter |
-| S3 runtime | not used by starter; see `docs/adr/ADR-LOCAL-STARTER-STORAGE.md` |
-| Client clone topology | отдельное решение на уровне клиентского проекта |
+| Managed PostgreSQL | не используется и не закупается в этом репозитории |
+| S3 runtime | не используется и не закупается; см. `docs/adr/ADR-LOCAL-STARTER-STORAGE.md` |
+| Client clone topology | вне этого демо-репозитория; здесь не планируется |
 | Secrets | Secret Master `https://infisical.ams24.ru` |
 | Demo domain | `start-baza.ams24.ru`, `noindex` |
 | Jobs owner | exactly one runtime with `JOBS_AUTORUN=true` |

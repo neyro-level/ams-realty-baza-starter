@@ -8,11 +8,11 @@
 AMS_PROFILE=REALTY_BASE
 DELIVERY_PROFILE=COMMERCIAL
 Mode=BUILD
-Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
+Git platform=SOURCECRAFT_PRIMARY
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Программа `AMS-REALTBASE-CORRECTIONS` использует `MERGE_AFTER_GATE` в `main` по эпикам. Production только как EPIC-21 по отдельной команде владельца.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Программа `AMS-REALTBASE-CORE-ALIGN` использует `MERGE_AFTER_GATE` в `main` по эпикам. Production в этот план не входит. GitHub не является delivery surface.
 
 ## Stack и ownership
 
@@ -60,7 +60,7 @@ indexing: noindex
 
 ADR: `docs/adr/ADR-LOCAL-STARTER-STORAGE.md`.
 
-Реальный клиентский clone получает отдельные VPS/DB/S3/домен/секреты по своему решению. S3 и Managed PostgreSQL не возвращаются в starter без owner decision.
+Этот репозиторий остаётся демо на local PostgreSQL + MEDIA_DIR. Отдельный клиентский контур, если появится, принимает собственное topology decision вне этого репозитория. S3 и Managed PostgreSQL сюда не возвращаются.
 
 Production starter release использует immutable artifact из clean `main`. Процедуры — `OPERATIONS.md`.
 
