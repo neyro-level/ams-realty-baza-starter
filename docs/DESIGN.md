@@ -60,6 +60,8 @@ Local Atlas donor: SourceCraft `integrator-p/atlas-realty-starter`, exact `main@
 
 `embla-carousel-react`, `yet-another-react-lightbox`, Lucide, Radix/shadcn primitives already in `packages/ui`. New specialized UI deps need a project trigger.
 
+Icon ecosystem: `lucide-react` 1.x only. Do not add a second icon pack.
+
 ## Компоненты и композиция
 
 - порядок: `REUSE -> VARIANT -> CREATE`;

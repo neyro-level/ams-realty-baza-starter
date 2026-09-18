@@ -1,9 +1,9 @@
 import {
 	MarketingRoute,
 	generateMarketingMetadata,
-} from "../_lib/marketing-route";
+} from "../marketing-route";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export function generateMetadata() {
 	return generateMarketingMetadata("ipoteka");

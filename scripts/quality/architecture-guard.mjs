@@ -397,6 +397,9 @@ for (const leftover of [
 	"src/server/seo",
 	"src/server/http",
 	"src/server/ingest-gateway",
+	"src/components/fixture",
+	"src/demo-data",
+	"src/app/(site)/_lib",
 ]) {
 	if (existsSync(path.join(root, leftover))) {
 		violations.push(`${leftover}: moved under src/core; leftover path must be removed`);

@@ -149,6 +149,7 @@ External monitor is independent of AMS Server and watches public homepage, `/api
 ## Payload Jobs, media, CSP и raw REST
 
 - Jobs owner: ровно один runtime с `JOBS_AUTORUN=true`; compose `deploy/compose/start-baza.compose.yml` pins `JOBS_AUTORUN: "true"` on that single service. Healthz reports `jobs.ownerIdentity` + `jobs.ownerPid`. При handover новый runtime сначала стартует с `false`.
+- Imports queue `limit: 1` in `src/payload/jobs/queues.ts`: ровно один import owner/runtime обрабатывает feed import; параллельный второй import worker на этой очереди запрещён.
 - Media: persistent `MEDIA_DIR`, Nginx `location /media/` alias на `/var/lib/ams/realtbase/media/`, unique filenames, overwrite disabled, не S3. Compose mounts the same host path.
 - Cookies: Payload session `payload-token` is httpOnly; production `secure` + `sameSite=Lax`.
 - Login lockout: 5 attempts / 10 minutes; Nginx `limit_req` on `/admin/login`, `/api/users/login`, `/api/public/leads`, `/api/internal/`.

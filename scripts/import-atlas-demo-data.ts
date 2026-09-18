@@ -81,7 +81,7 @@ type ImportRecord = {
 	data: Record<string, unknown>;
 };
 
-const catalogPath = join(process.cwd(), "src", "demo-data", "atlas-yandex", "catalog.json");
+const catalogPath = join(process.cwd(), "scripts", "demo", "atlas-yandex", "catalog.json");
 const mediaRoot = join(process.cwd(), "public", "atlas-demo", "yandex");
 const mediaUrlPrefix = "/atlas-demo/yandex";
 const verifyOnly = process.argv.includes("--verify-only");
@@ -319,3 +319,4 @@ try {
 } finally {
 	await payload.destroy();
 }
+

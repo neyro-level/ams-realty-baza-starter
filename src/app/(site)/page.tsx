@@ -14,7 +14,7 @@ import {
 	JsonLdScript,
 } from "@/core/seo/structured-data";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export async function generateMetadata() {
 	const home = await getPublicHomePage();

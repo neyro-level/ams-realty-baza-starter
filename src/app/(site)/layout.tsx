@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { StarterSiteFooter, StarterSiteHeader } from "@ams/realtbase-ui";
 import { getPublicShell } from "@/core/data-access/public";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function PublicSiteLayout({
 	children,

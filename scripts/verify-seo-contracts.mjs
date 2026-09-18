@@ -157,4 +157,44 @@ assert.ok(
 	),
 );
 
+const marketingPages = [
+	"src/app/(site)/uslugi/page.tsx",
+	"src/app/(site)/o-kompanii/page.tsx",
+	"src/app/(site)/ipoteka/page.tsx",
+	"src/app/(site)/kontakty/page.tsx",
+	"src/app/(site)/politika-konfidencialnosti/page.tsx",
+	"src/app/(site)/soglasie-na-obrabotku-personalnyh-dannyh/page.tsx",
+	"src/app/(site)/sdat/page.tsx",
+	"src/app/(site)/prodat/page.tsx",
+];
+for (const file of marketingPages) {
+	const source = readFileSync(file, "utf8");
+	assert.equal(source.includes("force-dynamic"), false, `${file} must not be force-dynamic`);
+	assert.ok(
+		source.includes("export const revalidate = 3600;"),
+		`${file} must export literal ISR revalidate`,
+	);
+}
+assert.match(
+	readFileSync("src/core/lib/page-cache.ts", "utf8"),
+	/export const marketingRevalidateSeconds = 3600;/,
+);
+assert.ok(
+	readFileSync("src/app/(site)/page.tsx", "utf8").includes(
+		"export const revalidate = 3600;",
+	),
+	"home must export literal ISR revalidate",
+);
+assert.equal(
+	readFileSync("src/app/(site)/page.tsx", "utf8").includes("force-dynamic"),
+	false,
+	"home must not be force-dynamic",
+);
+assert.ok(
+	readFileSync("src/app/(site)/nedvizhimost/page.tsx", "utf8").includes(
+		"force-dynamic",
+	),
+	"catalog may stay dynamic",
+);
+
 console.log("verify-seo-contracts: ok");

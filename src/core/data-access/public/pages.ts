@@ -31,6 +31,24 @@ function pageSeo(
 	};
 }
 
+export function fallbackPublicPage(slug: string): PublicPageRecord {
+	const title =
+		slug === "home"
+			? "Главная"
+			: slug
+					.split("-")
+					.filter(Boolean)
+					.map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+					.join(" ") || slug;
+
+	return {
+		slug,
+		title,
+		updatedAt: "1970-01-01T00:00:00.000Z",
+		seo: pageSeo(slug, title),
+	};
+}
+
 export async function findPublicPage(
 	payload: Payload,
 	slug: string,

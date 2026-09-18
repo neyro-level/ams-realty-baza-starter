@@ -115,4 +115,12 @@ for (const collection of requiredRawRestDeniedCollections) {
 	}
 }
 
+const payloadAdapter = readFileSync("src/core/data-access/public/payload.ts", "utf8");
+if (!payloadAdapter.includes("isPayloadRuntimeConfigured")) {
+	throw new Error("Public gateway must skip Payload init when DATABASE_URI is absent");
+}
+if (!payloadAdapter.includes("getOptionalPublicGatewayPayload")) {
+	throw new Error("Public gateway needs optional Payload for ISR build without Postgres");
+}
+
 console.log("verify:public-gateway passed");

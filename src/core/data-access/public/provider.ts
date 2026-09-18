@@ -14,10 +14,12 @@ import {
 } from "@/core/seo/site";
 import {
 	type CatalogQueryInput,
+	catalogQuerySchema,
 	findPublicCatalogFacets,
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
 	findPublicPropertyLifecycleBySlug,
+	type PublicCatalogResult,
 } from "./catalog";
 import {
 	type PublicPropertyDetailsDTO,
@@ -29,10 +31,11 @@ import {
 	toShellDTO,
 } from "./dto";
 import {
+	fallbackPublicPage,
 	findPublicPage,
 	findPublicPages,
 } from "./pages";
-import { getPublicGatewayPayload } from "./payload";
+import { getOptionalPublicGatewayPayload } from "./payload";
 
 export type PublicPropertyPageState =
 	| {
@@ -50,6 +53,31 @@ export type PublicPropertyPageState =
 
 const urlsPerShard = projectConfig.sitemapUrlsPerShard;
 const queryPageSize = projectConfig.sitemapQueryPageSize;
+
+function emptyCatalog(query: CatalogQueryInput = { limit: 24, page: 1 }): PublicCatalogResult {
+	const parsed = catalogQuerySchema.parse(query);
+	return {
+		items: [],
+		total: 0,
+		page: parsed.page,
+		pageSize: parsed.limit,
+		totalPages: 0,
+		applied: {
+			query: parsed.query,
+			category: parsed.category,
+			dealType: parsed.dealType,
+			city: parsed.city,
+			district: parsed.district,
+			rooms: parsed.rooms,
+			priceFromMinor: parsed.priceFromMinor,
+			priceToMinor: parsed.priceToMinor,
+			areaFrom: parsed.areaFrom,
+			areaTo: parsed.areaTo,
+			sort: parsed.sort,
+			view: parsed.view,
+		},
+	};
+}
 
 function indexableStaticEntries(): PublicUrlEntry[] {
 	return staticPublicUrlEntries.filter((entry) => entry.indexable);
@@ -76,14 +104,24 @@ async function listRange<T>(
 }
 
 export async function getPublicShell() {
-	const payload = await getPublicGatewayPayload();
+	const payload = await getOptionalPublicGatewayPayload();
+	if (!payload) {
+		return toShellDTO([]);
+	}
 	return toShellDTO(await findPublicPages(payload));
 }
 
 export async function getPublicCatalog(
 	query: CatalogQueryInput = { limit: 24, page: 1 },
 ) {
-	const payload = await getPublicGatewayPayload();
+	const payload = await getOptionalPublicGatewayPayload();
+	if (!payload) {
+		const result = emptyCatalog(query);
+		return {
+			list: toPropertyListDTO(result),
+			filters: toPropertyFilterDTO(result),
+		} as const;
+	}
 	const [result, facets] = await Promise.all([
 		findPublicCatalogProperties(payload, query),
 		findPublicCatalogFacets(payload, query),
@@ -96,7 +134,16 @@ export async function getPublicCatalog(
 }
 
 export async function getPublicSitemapTotals() {
-	const payload = await getPublicGatewayPayload();
+	const payload = await getOptionalPublicGatewayPayload();
+	if (!payload) {
+		const staticCount = indexableStaticEntries().length;
+		return {
+			staticCount,
+			pages: 0,
+			properties: 0,
+			total: staticCount,
+		};
+	}
 	const staticCount = indexableStaticEntries().length;
 	const [pages, properties] = await Promise.all([
 		countPublicSitemapPages(payload),
@@ -117,8 +164,14 @@ export async function getPublicSitemapShardCount() {
 
 export async function getPublicSitemapShard(id: number): Promise<PublicUrlEntry[]> {
 	if (!Number.isInteger(id) || id < 0) return [];
-	const payload = await getPublicGatewayPayload();
+	const payload = await getOptionalPublicGatewayPayload();
 	const staticEntries = indexableStaticEntries();
+	if (!payload) {
+		const start = id * urlsPerShard;
+		return start >= staticEntries.length
+			? []
+			: staticEntries.slice(start, start + urlsPerShard);
+	}
 	const totals = await getPublicSitemapTotals();
 	const start = id * urlsPerShard;
 	if (start >= totals.total) return [];
@@ -189,7 +242,13 @@ export async function getPublicSitemapEntries() {
 }
 
 export async function getPublicHomePage() {
-	const payload = await getPublicGatewayPayload();
+	const payload = await getOptionalPublicGatewayPayload();
+	if (!payload) {
+		return {
+			page: toHomePageDTO(null),
+			featured: null,
+		} as const;
+	}
 	const [page, catalog] = await Promise.all([
 		findPublicPage(payload, "home"),
 		findPublicCatalogProperties(payload, { limit: 1, page: 1 }),
@@ -209,7 +268,10 @@ export async function getPublicHomePage() {
 export async function getPublicProperty(
 	slug: string,
 ): Promise<PublicPropertyPageState | null> {
-	const payload = await getPublicGatewayPayload();
+	const payload = await getOptionalPublicGatewayPayload();
+	if (!payload) {
+		return null;
+	}
 	const lifecycle = resolvePropertyPageLifecycle(
 		await findPublicPropertyLifecycleBySlug(payload, slug),
 	);
@@ -241,7 +303,10 @@ export async function getPublicProperty(
 }
 
 export async function getPublicMarketingPage(slug: string) {
-	const payload = await getPublicGatewayPayload();
+	const payload = await getOptionalPublicGatewayPayload();
+	if (!payload) {
+		return toMarketingPageDTO(fallbackPublicPage(slug));
+	}
 	const page = await findPublicPage(payload, slug);
 	return page ? toMarketingPageDTO(page) : null;
 }
