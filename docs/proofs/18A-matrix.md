@@ -9,6 +9,6 @@ Starter cache mode = `http`. In-process invalidation is not claimed.
 | B2 | HTTP self-call batched revalidate | EPIC 3 | `docs/proofs/epic-3/cache-http-self-call.md` | PASS |
 | C | Dispatcher no catch-up | EPIC 3 | `docs/proofs/epic-3/dispatcher.md` | PASS |
 | D | Stale import recovery | EPIC 3 | `docs/proofs/epic-3/stale-recovery.md` | PASS |
-| E | Retention execution | EPIC 7 | `docs/proofs/epic-7/` | NOT-CLAIMED |
-| F | Lead outbox crash window | EPIC 5 | `docs/proofs/epic-5/` | NOT-CLAIMED |
-| G | Retryable delivery + waitUntil | EPIC 6 | `docs/proofs/epic-6/` | NOT-CLAIMED |
+| E | Retention execution | EPIC 7 | `docs/proofs/epic-7/retention.md` | PASS |
+| F | Lead outbox crash window | EPIC 5 | `docs/proofs/epic-5/public-lead-intake.md` + `pnpm verify:lead-outbox` | PASS |
+| G | Retryable delivery + waitUntil | EPIC 6 | `docs/proofs/epic-6/waituntil-backoff.md` | PASS |

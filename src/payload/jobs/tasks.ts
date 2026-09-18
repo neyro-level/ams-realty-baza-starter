@@ -29,12 +29,14 @@ import {
 	runImportFeed,
 } from "../../core/ingest/import-feed-runtime.ts";
 import { projectConfig } from "../../project/project.config.ts";
+import { getRuntimeClock } from "../../core/time/clock.ts";
 import { systemQueueJob } from "../../server/system-gateway/jobs.ts";
 import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
 import {
 	createSafeFeedOutboundFetch,
 	parseOutboundHostList,
 } from "../../server/security/safe-outbound-client.ts";
+import { parseTestApprovedOrigins } from "../../server/security/test-destinations.ts";
 import { runtimeEnv } from "../env.ts";
 import {
 	payloadJobQueues,
@@ -50,8 +52,12 @@ type GenericPayloadJobTask = TaskConfig<{
 
 const minuteInMs = 60_000;
 
+function nowDate() {
+	return getRuntimeClock().now();
+}
+
 function nowIso() {
-	return new Date().toISOString();
+	return getRuntimeClock().nowIso();
 }
 
 function addMinutes(date: Date, minutes: number) {
@@ -113,7 +119,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		label: "Dispatch due feeds",
 		schedule: getStaticSchedule(payloadJobTaskSlugs.dispatchDueFeeds),
 		handler: async ({ req }) => {
-			const now = new Date();
+			const now = nowDate();
 			const result = await dispatchDueFeeds({
 				now,
 				batchSize: projectConfig.dispatchBatchSize,
@@ -174,9 +180,13 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		},
 		handler: async ({ req, input }) => {
 			const payload = req.payload;
+			const testOrigins = parseTestApprovedOrigins(process.env);
+			const testHosts = [
+				...new Set(testOrigins.map((origin) => new URL(origin).hostname)),
+			];
 			const result = await runImportFeed(
 				{
-					now: () => new Date(),
+					now: () => nowDate(),
 					claimQueuedImportRun: (claim) => claimQueuedImportRun(payload, claim),
 					touchHeartbeat: async (tick) => {
 						await touchImportRunHeartbeat(payload, tick);
@@ -220,7 +230,12 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 							etag,
 							lastModified,
 							outboundFetch: createSafeFeedOutboundFetch({
-								allowedHosts: parseOutboundHostList(runtimeEnv.OUTBOUND_ALLOWED_HOSTS),
+								allowedHosts: [
+									...parseOutboundHostList(runtimeEnv.OUTBOUND_ALLOWED_HOSTS),
+									...testHosts,
+								],
+								approvedHttpHosts: testHosts,
+								approvedExactOrigins: testOrigins,
 								maxBytes: 64 * 1024 * 1024,
 							}),
 						}),
@@ -277,9 +292,11 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 			const queuedOrphanMs = queuedImportOrphanThresholdMs(
 				projectConfig.dispatcherIntervalMinutes,
 			);
-			const importStaleBefore = new Date(Date.now() - importStaleMs).toISOString();
+			const importStaleBefore = new Date(
+				nowDate().getTime() - importStaleMs,
+			).toISOString();
 			const queuedOrphanBefore = new Date(
-				Date.now() - queuedOrphanMs,
+				nowDate().getTime() - queuedOrphanMs,
 			).toISOString();
 			const staleRuns = await req.payload.find({
 				collection: "import-runs",
@@ -315,6 +332,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 						lastErrorRedacted: "Recovered by jobsJanitor: stale or orphan import run.",
 					},
 					req,
+					...systemOverrideAccess("system-job"),
 				});
 			}
 
@@ -459,7 +477,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		schedule: getStaticSchedule(payloadJobTaskSlugs.recoverLeadDeliveries),
 		handler: async ({ req }) => {
 			const staleThreshold = new Date(
-				Date.now() -
+				nowDate().getTime() -
 					pendingDeliveryOrphanThresholdMs(
 						projectConfig.maintenanceIntervalMinutes,
 					),
@@ -492,6 +510,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 							"Recovered by recoverLeadDeliveries: stale sending delivery.",
 					},
 					req,
+					...systemOverrideAccess("system-job"),
 				});
 			}
 
@@ -527,7 +546,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 									(job as { processing?: boolean }).processing,
 								),
 							},
-							new Date(),
+							nowDate(),
 						);
 					} catch {
 						live = false;
@@ -551,6 +570,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 						jobId: String(queuedJob.id),
 					},
 					req,
+					...systemOverrideAccess("system-job"),
 				});
 				queuedPending += 1;
 			}

@@ -131,3 +131,13 @@ External monitor is independent of AMS Server and watches public homepage, `/api
 - Admin access: public+hardened until owner sets IP/VPN (`docs/PROJECT.md`).
 - Health endpoint: `GET /api/internal/healthz` требует `x-ams-health-secret`.
 - Raw REST boundary: `config/raw-rest-boundary.json`.
+
+## Canonical verification
+
+Единственная обязательная поверхность (не дробить на дополнительные gate):
+
+```bash
+pnpm verify:daily
+pnpm verify
+pnpm verify:schema
+```

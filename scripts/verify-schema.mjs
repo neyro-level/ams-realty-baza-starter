@@ -1,4 +1,7 @@
 import { execFileSync } from "node:child_process";
+import { loadLocalEnv } from "./integration/env.mjs";
+
+loadLocalEnv();
 
 const databaseUri = process.env.DATABASE_URI;
 

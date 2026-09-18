@@ -14,6 +14,7 @@ type AddressRecord = {
 type SafeOutboundOptions = {
 	allowedHosts: readonly string[];
 	approvedHttpHosts?: readonly string[];
+	approvedExactOrigins?: readonly string[];
 	timeoutMs?: number;
 	maxBytes?: number;
 	headers?: HeadersInit;
@@ -74,6 +75,13 @@ async function assertSafeDestination(url: URL, options: SafeOutboundOptions): Pr
 	if (!allowedHosts.has(host)) throw new Error(`Outbound host is not allowlisted: ${host}`);
 	if (url.protocol !== "https:" && !(url.protocol === "http:" && approvedHttpHosts.has(host))) {
 		throw new Error(`Outbound protocol is not approved for ${host}`);
+	}
+
+	const approvedExactOrigins = new Set(
+		(options.approvedExactOrigins ?? []).map((item) => item.toLowerCase()),
+	);
+	if (approvedExactOrigins.has(url.origin.toLowerCase())) {
+		return;
 	}
 
 	const resolver = options.resolveAddresses ?? ((name: string) => lookup(name, { all: true, verbatim: true }));

@@ -41,4 +41,14 @@
 
 Canonical URL map: `02_PRODUCT_STRUCTURE.md`. Knobs source: `src/project/project.config.ts`.
 
+## Verification
+
+Единственная обязательная поверхность:
+
+```bash
+pnpm verify:daily
+pnpm verify
+pnpm verify:schema
+```
+
 Секретные значения не записываются в этот документ.
