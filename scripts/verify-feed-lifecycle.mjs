@@ -25,7 +25,7 @@ const baseline = {
 };
 
 assert.deepEqual(
-	decideFeedRunCompletion({ ...baseline, fetchStatus: "not-modified" }),
+	decideFeedRunCompletion({ ...baseline, fetchStatus: "unchanged" }),
 	{
 		status: "unchanged",
 		canDeactivateMissing: false,

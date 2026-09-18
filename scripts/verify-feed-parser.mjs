@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { createSafeFeedOutboundFetch } from "../src/server/security/safe-outbound-client.ts";
 import {
 	buildConditionalFeedHeaders,
 	fetchConditionalFeed,
@@ -45,21 +47,59 @@ const notModified = await fetchConditionalFeed({
 	url: "https://feeds.example.test/base.xml",
 	etag: '"known-etag"',
 	lastModified: "Wed, 16 Sep 2026 09:00:00 GMT",
-	fetchImpl: async (_url, init) => {
-		assert.equal(init?.headers?.["If-None-Match"], '"known-etag"');
+	outboundFetch: async ({ url, headers: requestHeaders }) => {
+		assert.equal(url.hostname, "feeds.example.test");
+		assert.equal(requestHeaders["If-None-Match"], '"known-etag"');
 		assert.equal(
-			init?.headers?.["If-Modified-Since"],
+			requestHeaders["If-Modified-Since"],
 			"Wed, 16 Sep 2026 09:00:00 GMT",
 		);
-		return new Response(null, {
+		return {
 			status: 304,
-			headers: { etag: '"known-etag-next"' },
+			statusText: "Not Modified",
+			headers: new Headers({ etag: '"known-etag-next"' }),
+			body: null,
+			sha256: Promise.resolve(null),
+		};
+	},
+});
+
+assert.equal(notModified.status, "unchanged");
+assert.equal(notModified.etag, '"known-etag-next"');
+
+const bodyText = "streaming-feed-body";
+const expectedHash = createHash("sha256").update(bodyText).digest("hex");
+const outbound = createSafeFeedOutboundFetch({
+	allowedHosts: ["feeds.example.test"],
+	resolveAddresses: async () => [{ address: "203.0.113.10", family: 4 }],
+	fetchImpl: async (_url, init) => {
+		assert.equal(init?.redirect, "manual");
+		assert.equal(
+			new Headers(init?.headers).get("if-none-match"),
+			'"body-etag"',
+		);
+		return new Response(bodyText, {
+			status: 200,
+			headers: {
+				etag: '"body-etag-next"',
+				"last-modified": "Wed, 16 Sep 2026 10:00:00 GMT",
+			},
 		});
 	},
 });
 
-assert.equal(notModified.status, "not-modified");
-assert.equal(notModified.etag, '"known-etag-next"');
+const fetched = await fetchConditionalFeed({
+	url: "https://feeds.example.test/base.xml",
+	etag: '"body-etag"',
+	outboundFetch: outbound,
+});
+
+assert.equal(fetched.status, "fetched");
+if (fetched.status !== "fetched") throw new Error("expected fetched feed");
+const consumed = await new Response(fetched.body).text();
+assert.equal(consumed, bodyText);
+assert.equal(await fetched.sha256, expectedHash);
+assert.equal(fetched.etag, '"body-etag-next"');
 
 console.log("verify-feed-parser: ok");
 
