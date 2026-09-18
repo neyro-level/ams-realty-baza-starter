@@ -16,7 +16,7 @@ import {
 	CardHeader,
 	CardTitle,
 	Container,
-	LeadConsentField,
+	LeadFormView,
 	Section,
 	SectionHeader,
 } from "@ams/realtbase-ui";
@@ -46,44 +46,7 @@ function Breadcrumbs({ items }: MarketingPageDTO["breadcrumbs"]) {
 
 export function FixtureLeadForm({ page }: { page: MarketingPageDTO }) {
 	if (!page.leadContext) return null;
-	return (
-		<form aria-label="Форма заявки">
-			<Card id="lead-form" className="shadow-[var(--shadow-card)]">
-				<CardHeader>
-					<CardTitle>Обсудить задачу</CardTitle>
-					<CardDescription>
-						Форма показывает frozen-draft consent contract. Отправка будет
-						подключена в отдельном эпике.
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="grid gap-4">
-					<label className="grid gap-2 text-label font-semibold">
-						Имя
-						<input
-							className="min-h-control rounded-md border border-input bg-surface-raised px-4 font-normal"
-							name="name"
-							autoComplete="name"
-						/>
-					</label>
-					<label className="grid gap-2 text-label font-semibold">
-						Телефон
-						<input
-							className="min-h-control rounded-md border border-input bg-surface-raised px-4 font-normal"
-							name="phone"
-							inputMode="tel"
-							autoComplete="tel"
-						/>
-					</label>
-					<LeadConsentField context={page.leadContext} />
-				</CardContent>
-				<CardFooter>
-					<Button type="button" disabled>
-						Отправка подключается позже
-					</Button>
-				</CardFooter>
-			</Card>
-		</form>
-	);
+	return <LeadFormView context={page.leadContext} />;
 }
 
 export function MarketingPageView({ page }: { page: MarketingPageDTO }) {

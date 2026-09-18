@@ -13,7 +13,6 @@
 		"components": "@ams/realtbase-ui/components",
 		"utils": "@ams/realtbase-ui/lib/utils",
 		"ui": "@ams/realtbase-ui/components/ui",
-		"lib": "@ams/realtbase-ui/lib",
-		"hooks": "@ams/realtbase-ui/hooks"
+		"lib": "@ams/realtbase-ui/lib"
 	}
 }

@@ -20,8 +20,8 @@ Anti-goals: новый visual language без owner approval; вторая primi
 |---|---|
 | CORE | Required semantic tokens enforced by `scripts/quality/design-tokens.mjs` (`--background`, section rhythm, radii, motion, fonts). |
 | SHADCN | `@theme inline` mappings that expose CORE/PROJECT values to Tailwind utilities. |
-| PROJECT | Starter/Atlas page tokens with live `var(--*)` usage in `packages/ui` or `src`. |
-| MODULE-RESERVED | Unused prefixes kept for documented future modules: `journal`, `promo`, `compare`, `new-building`, `careers`, `employee`, `spasibo`, `agency`, `about-company`, `sale`, `catalog-buyer`, `session`, `reviews`, `contacts`, `deferred-yandex`, `route-status`, `request-cta`, `leadgen`, `corporate-landing`. Journal DTO remains contract-only in `packages/contracts`. |
+| PROJECT | Starter/Atlas page tokens with live `var(--*)` usage in `packages/ui` or `src`, including live corporate prefixes `about-company`, `sale`, `new-building`. |
+| MODULE-RESERVED | None in this starter. Unused future-module prefixes without a `docs/modules/` contract were removed in EPIC-19. Journal DTO remains contract-only in `packages/contracts` without unused CSS tokens. |
 | DEAD | No `var(--token)` and not a `@theme` key and not MODULE-RESERVED. Guard requires count = 0. |
 
 ACTIVE = CORE ∪ SHADCN ∪ PROJECT. Documented RESERVED is not dead.

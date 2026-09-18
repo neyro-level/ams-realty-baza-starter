@@ -1,4 +1,4 @@
-"use client";
+"use client"; // interactive form state, validation, fetch, focus management
 
 import type { LeadFormContext, LeadFormKind } from "@ams/realtbase-contracts";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";

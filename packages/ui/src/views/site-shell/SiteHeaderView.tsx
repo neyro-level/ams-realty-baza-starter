@@ -1,4 +1,4 @@
-"use client";
+"use client"; // header refs, mobile menu, city switcher, phone reveal, dropdowns
 
 import { Building2, Menu, SlidersHorizontal, X } from "lucide-react";
 import type { ReactNode, RefObject } from "react";

@@ -138,27 +138,7 @@ const pageStyleFailures = componentCssFiles.flatMap((path) => {
 	return failures;
 });
 
-const reservedPrefixes = [
-	"--journal-",
-	"--promo-",
-	"--compare-",
-	"--new-building-",
-	"--careers-",
-	"--employee-",
-	"--spasibo-",
-	"--agency-",
-	"--about-company-",
-	"--sale-",
-	"--catalog-buyer-",
-	"--session-",
-	"--reviews-",
-	"--contacts-",
-	"--deferred-yandex-",
-	"--route-status-",
-	"--request-cta-",
-	"--leadgen-",
-	"--corporate-landing-",
-];
+const reservedPrefixes = [];
 
 function isReservedToken(token) {
 	return reservedPrefixes.some((prefix) => token.startsWith(prefix));
