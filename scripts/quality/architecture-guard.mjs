@@ -297,6 +297,20 @@ for (const file of [
 	}
 }
 
+for (const file of filesUnder("src/core/cache")) {
+	const name = relative(file);
+	const content = readFileSync(file, "utf8");
+	if (
+		/import\(["']next\/cache["']\)/.test(content) &&
+		name !== "src/core/cache/in-process.ts"
+	) {
+		report(file, "lazy next/cache is only allowed in the in-process adapter");
+	}
+	if (name === "src/core/cache/http-revalidate.ts" && /next\/cache/.test(content)) {
+		report(file, "HTTP cache adapter must not import next/cache");
+	}
+}
+
 const payloadConfig = readFileSync(path.join(root, "payload.config.ts"), "utf8");
 if (/cors:\s*["']\*["']/.test(payloadConfig) || /origin:\s*["']\*["']/.test(payloadConfig)) {
 	violations.push("payload.config.ts: wildcard CORS is forbidden");

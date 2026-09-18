@@ -215,6 +215,33 @@ await new Promise((resolve) => setTimeout(resolve, 60));
 heartbeat.stop();
 assert.ok(ticks >= 1, "heartbeat ticks must run outside ingest work");
 
+const ingestSource = readFileSync("src/core/ingest/feed-ingest.ts", "utf8");
+assert.equal(
+	ingestSource.includes("startImportHeartbeat"),
+	false,
+	"ingest transaction/work must not own the heartbeat timer",
+);
+assert.equal(
+	/transaction|db\.begin|payload\.db/.test(ingestSource),
+	false,
+	"normalized ingest must not wrap heartbeat in a DB transaction",
+);
+const runtimeSource = readFileSync("src/core/ingest/import-feed-runtime.ts", "utf8");
+assert.ok(
+	runtimeSource.includes("const heartbeat = startImportHeartbeat"),
+	"heartbeat must start in import runtime, outside ingestNormalizedFeed",
+);
+assert.ok(
+	runtimeSource.indexOf("const heartbeat = startImportHeartbeat") <
+		runtimeSource.indexOf("const ingest = deps.ingest"),
+	"heartbeat must be scheduled before ingest work",
+);
+const heartbeatSource = readFileSync("src/core/ingest/dispatch-due-feeds.ts", "utf8");
+assert.ok(
+	heartbeatSource.includes("setInterval"),
+	"heartbeat must tick on an interval outside ingest work",
+);
+
 let ingestCalls = 0;
 const unchanged = await runImportFeed(
 	{

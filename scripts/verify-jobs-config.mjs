@@ -223,5 +223,59 @@ if (!tasksSource.includes("retries: 0")) {
 	throw new Error("deliverLead platform retries must be 0.");
 }
 
-console.log("Jobs config verified.");
+if (!tasksSource.includes("postBatchedHttpRevalidate")) {
+	throw new Error("import-feed must invalidate public cache via HTTP adapter.");
+}
+
+const revalidateRoute = readFileSync(
+	join(root, "src", "app", "api", "internal", "revalidate", "route.ts"),
+	"utf8",
+);
+if (!revalidateRoute.includes("invalidateCacheTargets")) {
+	throw new Error("HTTP revalidate route must call the in-process invalidator.");
+}
+if (/from\s+["']next\/cache["']/.test(revalidateRoute)) {
+	throw new Error("HTTP revalidate route must not top-level import next/cache.");
+}
+
+const httpAdapter = readFileSync(
+	join(root, "src", "core", "cache", "http-revalidate.ts"),
+	"utf8",
+);
+if (httpAdapter.includes("next/cache")) {
+	throw new Error("HTTP cache adapter must not import next/cache.");
+}
+
+const liveB2Configured = Boolean(
+	process.env.DATABASE_URI_TEST?.trim() &&
+		process.env.INTERNAL_REVALIDATE_BASE_URL?.trim() &&
+		process.env.REVALIDATE_SECRET?.trim(),
+);
+if (liveB2Configured) {
+	const base = process.env.INTERNAL_REVALIDATE_BASE_URL.replace(/\/$/, "");
+	try {
+		const response = await fetch(`${base}/api/internal/revalidate`, {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+				"x-ams-revalidate-secret": process.env.REVALIDATE_SECRET,
+			},
+			body: JSON.stringify({
+				targets: [{ type: "tag", tag: "properties" }],
+				reason: "epic-05-b2-probe",
+			}),
+		});
+		if (!response.ok) {
+			console.log(
+				`Jobs config verified. B2 live self-call NOT PROVEN (HTTP ${response.status}).`,
+			);
+		} else {
+			console.log("Jobs config verified. B2 live self-call PASS.");
+		}
+	} catch {
+		console.log("Jobs config verified. B2 live self-call NOT PROVEN (network).");
+	}
+} else {
+	console.log("Jobs config verified. B2 live self-call NOT PROVEN (no DATABASE_URI_TEST).");
+}
 

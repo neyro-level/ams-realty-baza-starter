@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { invalidateInProcessCacheTargets } from "./in-process.ts";
 
 const pathTargetSchema = z.object({
 	type: z.literal("path"),
@@ -28,13 +29,5 @@ export type CacheInvalidationRequest = z.output<
 >;
 
 export async function invalidateCacheTargets(targets: CacheTarget[]): Promise<void> {
-	const { revalidatePath, revalidateTag } = await import("next/cache");
-
-	for (const target of targets) {
-		if (target.type === "path") {
-			revalidatePath(target.path, target.routeType);
-			continue;
-		}
-		revalidateTag(target.tag, "max");
-	}
+	await invalidateInProcessCacheTargets(targets);
 }

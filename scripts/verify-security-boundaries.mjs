@@ -382,4 +382,19 @@ requireIncludes(
 	"proxy.ts must apply the anonymous REST edge decision",
 );
 
+assert.equal(
+	read("src/core/cache/http-revalidate.ts").includes("next/cache"),
+	false,
+	"HTTP cache adapter must not import next/cache",
+);
+assert.ok(
+	/import\(["']next\/cache["']\)/.test(read("src/core/cache/in-process.ts")),
+	"in-process adapter must lazy-import next/cache",
+);
+assert.equal(
+	/from\s+["']next\/cache["']/.test(read("src/core/cache/in-process.ts")),
+	false,
+	"in-process adapter must not top-level import next/cache",
+);
+
 console.log("verify-security-boundaries: ok");
