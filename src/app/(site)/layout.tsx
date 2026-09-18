@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SiteShell } from "@/components/fixture/SiteShell";
+import { SiteShellView } from "@ams/realtbase-ui";
 import { getPublicShell } from "@/server/public-gateway";
 
 export const dynamic = "force-dynamic";
@@ -11,8 +11,8 @@ export default async function PublicSiteLayout({
 }) {
 	const shell = await getPublicShell();
 	return (
-		<SiteShell header={shell.header} footer={shell.footer}>
+		<SiteShellView header={shell.header} footer={shell.footer}>
 			{children}
-		</SiteShell>
+		</SiteShellView>
 	);
 }

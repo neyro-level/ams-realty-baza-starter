@@ -107,8 +107,8 @@ export function RequestModalView({
 						</h2>
 						<p className="request-modal__subtitle">{successMessage}</p>
 						<Button
-							variant="plain"
-							className="home-btn-primary request-modal__submit"
+							variant="hero"
+							className="request-modal__submit"
 							type="button"
 							onClick={onClose}
 						>
@@ -272,8 +272,8 @@ export function RequestModalView({
 							) : null}
 
 							<Button
-								variant="plain"
-								className="home-btn-primary request-modal__submit"
+								variant="hero"
+								className="request-modal__submit"
 								type="submit"
 								disabled={isPending}
 							>

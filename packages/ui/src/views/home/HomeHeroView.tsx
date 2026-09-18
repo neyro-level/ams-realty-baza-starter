@@ -1,4 +1,6 @@
 import { RequestModalButton } from "../../components/shared/site-overlay-context";
+import { buttonVariants } from "../../components/ui/button";
+import { cn } from "../../lib/utils";
 import type { HomeFeaturedPropertyDTO } from "../../view-models/content";
 import type { SiteImageRenderer, SiteLinkRenderer } from "../../lib/adapters";
 
@@ -55,7 +57,7 @@ export function HomeHeroView({
 						<div className="home-hero__actions">
 							<RequestModalButton
 								type="button"
-								className="home-btn-primary"
+								className={cn(buttonVariants({ variant: "hero" }))}
 								request={{
 									title: content.cta,
 									subtitle: content.ctaSubtitle,

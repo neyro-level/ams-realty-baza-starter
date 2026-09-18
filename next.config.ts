@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 import { withPayload } from "@payloadcms/next/withPayload";
+import {
+	parseAllowedImageHosts,
+	toNextImageRemotePatterns,
+} from "./src/core/ingest/image-hosts.ts";
 
 const baseSecurityHeaders = [
 	{ key: "X-Content-Type-Options", value: "nosniff" },
@@ -40,6 +44,11 @@ const adminCsp = [
 
 const nextConfig: NextConfig = {
 	transpilePackages: ["@ams/realtbase-ui", "@ams/realtbase-contracts"],
+	images: {
+		remotePatterns: toNextImageRemotePatterns(
+			parseAllowedImageHosts(process.env.EXTERNAL_IMAGE_HOSTS),
+		),
+	},
 	async headers() {
 		return [
 			{

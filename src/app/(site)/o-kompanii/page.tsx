@@ -1,13 +1,13 @@
 import {
-	FixtureMarketingRoute,
-	generateFixtureMetadata,
-} from "@/components/fixture/FixtureMarketingRoute";
+	MarketingRoute,
+	generateMarketingMetadata,
+} from "../_lib/marketing-route";
 
 export const dynamic = "force-dynamic";
 
 export function generateMetadata() {
-	return generateFixtureMetadata("o-kompanii");
+	return generateMarketingMetadata("o-kompanii");
 }
 export default function Page() {
-	return <FixtureMarketingRoute slug="o-kompanii" />;
+	return <MarketingRoute slug="o-kompanii" />;
 }

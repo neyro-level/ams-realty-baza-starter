@@ -52,6 +52,9 @@ export {
 export {
 	type ImageHostValidationResult,
 	parseAllowedImageHosts,
+	toNextImageRemotePatterns,
+	isLocalCmsMediaSrc,
+	getApprovedImageOutboundHosts,
 	validateExternalImageUrl,
 } from "./image-hosts.ts";
 export {

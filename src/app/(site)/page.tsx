@@ -1,5 +1,5 @@
-import { HomePageView } from "@/components/fixture/FixturePages";
-import { toMetadata } from "@/fixture/metadata";
+import { HomePageView } from "@ams/realtbase-ui";
+import { toMetadata } from "@/server/seo/page-metadata";
 import { getPublicHomePage } from "@/server/public-gateway";
 import {
 	buildOrganizationJsonLd,

@@ -56,4 +56,7 @@ export * from "./views/site-shell/MobileMenuView";
 export * from "./views/site-shell/PhoneRevealView";
 export * from "./views/site-shell/RequestModalView";
 export * from "./views/site-shell/SiteFooterView";
+export * from "./views/starter/LeadFormView";
+export * from "./views/starter/SiteShellView";
+export * from "./views/starter/StarterPages";
 export * from "./views/site-shell/SiteHeaderView";

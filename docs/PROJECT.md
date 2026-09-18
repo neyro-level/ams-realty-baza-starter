@@ -29,7 +29,7 @@
 | Lead/archive retention | `null` in `project.config.ts`; destructive cleanup forbidden until owner/legal sets days |
 | Stale-data SLA | `staleDataSlaMinutes = 30` |
 | Cache | mode `http`, proof status `http`, in-process not claimed |
-| Feed images | external HTTPS, exact hosts only |
+| Feed images | external HTTPS, exact hosts from `EXTERNAL_IMAGE_HOSTS` via `src/core/ingest/image-hosts.ts`; Variant B: feed `unoptimized` + `sizes` + aspect ratio; local CMS media may use Next optimizer |
 | Lead routing | public intake `POST /api/public/leads` only; generic Payload `leads` create is not public; live channels require credentialRef + `LEAD_OUTBOUND_HOSTS` |
 | Indexed catalog filters | `category`, `dealType`, `city`, `district`, `rooms` in `project.config.ts`; other query params are `noindex` |
 | Sitemap | shards of 50_000 URLs, `generateSitemaps`, generation `revalidate` 3600s |
@@ -37,6 +37,7 @@
 | Backup | automatic `pg_dump` + `MEDIA_DIR` snapshot, rotation, offsite copy, integrity check |
 | Admin access | public+hardened until owner sets IP/VPN |
 | Field ownership | `manual → field override → owning feed`; foreign-feed identity is degenerate for REALTY_BASE |
+| Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
 
 Canonical URL map: `02_PRODUCT_STRUCTURE.md`. Knobs source: `src/project/project.config.ts`.
 

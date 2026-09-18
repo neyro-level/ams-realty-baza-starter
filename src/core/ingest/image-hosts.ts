@@ -61,3 +61,26 @@ export function validateExternalImageUrl(
 
 	return { ok: true, url: url.toString(), host };
 }
+
+export type NextImageRemotePattern = {
+	protocol: "https";
+	hostname: string;
+};
+
+export function toNextImageRemotePatterns(
+	hosts: ReadonlySet<string>,
+): NextImageRemotePattern[] {
+	return [...hosts]
+		.filter((hostname) => hostname && !hostname.includes("*"))
+		.map((hostname) => ({ protocol: "https" as const, hostname }));
+}
+
+export function isLocalCmsMediaSrc(src: string): boolean {
+	return src.startsWith("/") && !src.startsWith("//");
+}
+
+export function getApprovedImageOutboundHosts(
+	env: NodeJS.ProcessEnv = process.env,
+): string[] {
+	return [...parseAllowedImageHosts(env.EXTERNAL_IMAGE_HOSTS)];
+}

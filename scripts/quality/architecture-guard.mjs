@@ -61,6 +61,19 @@ for (const file of filesUnder("src")) {
 	}
 }
 
+const nextConfigPath = path.join(root, "next.config.ts");
+if (existsSync(nextConfigPath)) {
+	const nextConfig = readFileSync(nextConfigPath, "utf8");
+	if (/hostname\s*:\s*["']\*+["']/.test(nextConfig)) {
+		violations.push("next.config.ts: wildcard image hostname");
+	}
+	if (!nextConfig.includes("parseAllowedImageHosts") || !nextConfig.includes("toNextImageRemotePatterns")) {
+		violations.push(
+			"next.config.ts: image remotePatterns must come from src/core/ingest/image-hosts.ts",
+		);
+	}
+}
+
 const fixtureRuntimeFiles = [
 	...filesUnder("src/fixture"),
 	...filesUnder("src/components/fixture"),
@@ -88,6 +101,19 @@ const requiredFixtureRoutes = [
 for (const route of requiredFixtureRoutes) {
 	if (!existsSync(path.join(root, route)))
 		violations.push(`${route}: required fixture route is missing`);
+}
+
+for (const file of filesUnder("src/app")) {
+	const name = relative(file);
+	if (
+		name.includes("/(payload)/") ||
+		name.includes("src\\app\\(payload)")
+	) {
+		continue;
+	}
+	if (/@\/components\/fixture|components\/fixture\//.test(readFileSync(file, "utf8"))) {
+		violations.push(`${name}: production app routes must not import fixture presentation`);
+	}
 }
 
 const boundary = JSON.parse(

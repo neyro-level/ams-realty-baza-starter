@@ -1,8 +1,8 @@
 import type { MarketingPageDTO } from "@ams/realtbase-contracts";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { PropertyPageView } from "@/components/fixture/FixturePages";
-import { toMetadata } from "@/fixture/metadata";
+import { PropertyPageView } from "@ams/realtbase-ui";
+import { toMetadata } from "@/server/seo/page-metadata";
 import { getPublicProperty } from "@/server/public-gateway";
 import { getPropertyRobots } from "@/server/seo/property";
 import {
@@ -83,7 +83,7 @@ export default async function PropertyPage({
 			formKind: "property",
 			sourcePage: property.href,
 			property: { id: property.id, slug: property.slug, title: property.title },
-			consentVersion: "fixture-consent-v1",
+			consentVersion: "pd-2026-01",
 			consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
 			consentRequired: true,
 		},
@@ -104,7 +104,7 @@ export default async function PropertyPage({
 					{ name: property.title, path: property.href },
 				])}
 			/>
-			<PropertyPageView property={property} leadPage={leadPage} />
+			<PropertyPageView property={property} leadContext={leadPage.leadContext} />
 		</>
 	);
 }

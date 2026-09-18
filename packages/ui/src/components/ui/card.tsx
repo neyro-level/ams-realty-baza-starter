@@ -1,14 +1,29 @@
 import type { HTMLAttributes } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/utils";
 
-export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+const cardVariants = cva(
+	"rounded-[var(--radius-lg)] border border-[var(--card-border,var(--border))] bg-[var(--card-bg,var(--surface))] text-[var(--text-primary)]",
+	{
+		variants: {
+			elevation: {
+				flat: "",
+				raised: "shadow-[var(--shadow-card)]",
+			},
+		},
+		defaultVariants: { elevation: "flat" },
+	},
+);
+
+export function Card({
+	className,
+	elevation,
+	...props
+}: HTMLAttributes<HTMLDivElement> & VariantProps<typeof cardVariants>) {
 	return (
 		<div
 			data-slot="card"
-			className={cn(
-				"rounded-[var(--radius-lg)] border border-[var(--card-border,var(--border))] bg-[var(--card-bg,var(--surface))] text-[var(--text-primary)]",
-				className,
-			)}
+			className={cn(cardVariants({ elevation }), className)}
 			{...props}
 		/>
 	);
@@ -94,3 +109,5 @@ export function CardFooter({
 		/>
 	);
 }
+
+export { cardVariants };

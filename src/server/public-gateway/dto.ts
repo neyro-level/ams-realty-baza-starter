@@ -226,12 +226,18 @@ export function toPropertyFilterDTO(
 }
 
 export function toShellDTO(pages: readonly PublicPageRecord[]) {
-	const navigation = pages
+	const starterNavigation = [
+		{ label: "Недвижимость", href: "/nedvizhimost" },
+		{ label: "Услуги", href: "/uslugi" },
+		{ label: "Ипотека", href: "/ipoteka" },
+		{ label: "О компании", href: "/o-kompanii" },
+		{ label: "Контакты", href: "/kontakty" },
+	];
+	const cmsNavigation = pages
 		.filter((page) => page.slug !== "home")
 		.slice(0, 6)
 		.map((page) => ({ label: page.title, href: `/${page.slug}` }));
-	const fallbackNavigation = [{ label: "Недвижимость", href: "/nedvizhimost" }];
-	const links = navigation.length ? navigation : fallbackNavigation;
+	const links = cmsNavigation.length ? cmsNavigation : starterNavigation;
 
 	const header: SiteHeaderDTO = {
 		brandName,
@@ -247,7 +253,13 @@ export function toShellDTO(pages: readonly PublicPageRecord[]) {
 		logo,
 		groups: [{ title: "Разделы", links }],
 		contacts: [{ label: "+7 (000) 000-00-00", href: "tel:+70000000000" }],
-		legalLinks: [],
+		legalLinks: [
+			{ label: "Политика конфиденциальности", href: "/politika-konfidencialnosti" },
+			{
+				label: "Согласие на обработку данных",
+				href: "/soglasie-na-obrabotku-personalnyh-dannyh",
+			},
+		],
 		copyright: `© ${brandName}`,
 	};
 
@@ -284,7 +296,12 @@ export function toHomePageDTO(page: PublicPageRecord | null): HomePageDTO {
 			consentRequired: true,
 		},
 		featuredPropertyId: "",
-		serviceLinks: [{ label: "Купить", href: "/nedvizhimost", description: "Объекты из каталога" }],
+		serviceLinks: [
+			{ label: "Купить", href: "/nedvizhimost", description: "Квартиры и дома в каталоге" },
+			{ label: "Продать", href: "/prodat", description: "Оценка и сопровождение продажи" },
+			{ label: "Сдать", href: "/sdat", description: "Аренда без лишней неопределённости" },
+			{ label: "Ипотека", href: "/ipoteka", description: "Подбор программы и одобрение" },
+		],
 	};
 }
 

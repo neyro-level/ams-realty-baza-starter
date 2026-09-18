@@ -1,4 +1,4 @@
-import { CatalogPageView } from "@/components/fixture/FixturePages";
+import { CatalogPageView } from "@ams/realtbase-ui";
 import { getPublicCatalog } from "@/server/public-gateway";
 import {
 	buildCatalogMetadata,

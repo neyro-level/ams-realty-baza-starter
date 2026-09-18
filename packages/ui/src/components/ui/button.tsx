@@ -20,6 +20,8 @@ const buttonVariants = cva(
 					"text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
 				link: "text-[var(--primary)] underline-offset-4 hover:underline",
 				plain: "bg-transparent text-inherit",
+				hero:
+					"min-h-12 border-0 bg-[var(--accent)] px-6 py-3.5 text-[var(--surface)] shadow-[var(--home-shadow-action)] hover:-translate-y-px hover:bg-[var(--accent-hover)] hover:shadow-[var(--home-shadow-action-hover)]",
 			},
 			size: {
 				sm: "h-[var(--control-height-sm)] px-[var(--control-padding-sm)]",
