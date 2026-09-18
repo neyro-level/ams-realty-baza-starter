@@ -169,9 +169,9 @@ if (!existsSync(proxyPath)) {
 	violations.push("src/proxy.ts: raw REST edge boundary is missing");
 } else {
 	const proxy = readFileSync(proxyPath, "utf8");
-	if (!proxy.includes("isAnonymousDeniedRawRestPath")) {
+	if (!proxy.includes("anonymousRawRestEdgeDecision")) {
 		violations.push(
-			"src/proxy.ts: raw REST edge boundary must use isAnonymousDeniedRawRestPath",
+			"src/proxy.ts: raw REST edge boundary must use anonymousRawRestEdgeDecision",
 		);
 	}
 	if (!proxy.includes("notFound")) {

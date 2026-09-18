@@ -19,6 +19,10 @@ View-only модели карточек/каталога/shell, которых �
 
 Массовый перенос `src/payload` → `src/project/collections` сломает Payload generate/importMap и не меняет dependency boundaries. Расширение frozen `packages/contracts` требует отдельного owner `CONTRACT_CHANGE_APPROVED` + version bump; presentation view models не являются public Gateway DTO.
 
+## Next.js 16 edge file
+
+Anonymous Payload REST is cut in `src/proxy.ts` (`export function proxy`). Official Next 16 convention: `middleware.ts` is deprecated; do not rename this file back. Proof lives in `pnpm verify:security-boundaries` (source + helper + proxy invocation).
+
 ## Guards
 
 - `packages/ui` не импортирует Payload/DB/`src/payload`/`src/project`.

@@ -13,6 +13,8 @@ const piiFieldAccess: {
 
 export const Leads: CollectionConfig = {
 	slug: "leads",
+	// Public intake is POST /api/public/leads via Public Gateway + System Gateway.
+	// Collection `create` stays adminsAndOwners; it is not a public REST endpoint.
 	versions: false,
 	admin: {
 		group: "Operations",

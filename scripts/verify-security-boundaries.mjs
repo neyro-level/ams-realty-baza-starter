@@ -96,7 +96,7 @@ for (const slug of rawRestBoundary.anonymousDenyCollections) {
 
 requireIncludes(
 	"src/proxy.ts",
-	"isAnonymousDeniedRawRestPath",
+	"anonymousRawRestEdgeDecision",
 	"raw REST edge boundary must use the configured denylist helper",
 );
 requireIncludes(
@@ -300,10 +300,32 @@ if (violations.length) {
 	process.exit(1);
 }
 
-const { isAnonymousDeniedRawRestPath } = await import(
+requireIncludes(
+	"src/payload/collections/Leads.ts",
+	"POST /api/public/leads",
+	"Leads collection must document that public create is not generic REST",
+);
+requireIncludes(
+	"src/payload/collections/Leads.ts",
+	"Collection `create` stays adminsAndOwners",
+	"Leads collection create must remain non-public",
+);
+
+assert.equal(
+	existsSync(path.join(root, "src/middleware.ts")),
+	false,
+	"Next 16 must keep src/proxy.ts; src/middleware.ts must not return",
+);
+assert.match(
+	read("src/proxy.ts"),
+	/export function proxy\s*\(/,
+	"src/proxy.ts must export function proxy",
+);
+
+const { isAnonymousDeniedRawRestPath, anonymousRawRestEdgeDecision } = await import(
 	"../src/server/security/anonymous-raw-rest.ts"
 );
-for (const slug of ["properties", "pages", "leads", "lead-deliveries"]) {
+for (const slug of ["properties", "pages", "leads", "lead-deliveries", "users"]) {
 	assert.equal(
 		isAnonymousDeniedRawRestPath(`/api/${slug}`),
 		true,
@@ -316,9 +338,48 @@ for (const slug of ["properties", "pages", "leads", "lead-deliveries"]) {
 	);
 }
 assert.equal(
+	isAnonymousDeniedRawRestPath("/api/payload-jobs"),
+	true,
+	"anonymous payload-jobs REST must be denied",
+);
+assert.equal(
+	isAnonymousDeniedRawRestPath("/api/payload-jobs/example-id"),
+	true,
+	"anonymous payload-jobs item REST must be denied",
+);
+assert.equal(
 	isAnonymousDeniedRawRestPath("/api/users/login"),
 	false,
 	"Payload login remain on the auth allowlist",
+);
+assert.equal(
+	isAnonymousDeniedRawRestPath("/api/public/leads"),
+	false,
+	"classified public lead intake must stay reachable",
+);
+
+const fakeSession = "aaaaaaaaaa.bbbbbbbbbb.cccccccccc";
+for (const pathname of ["/api/leads", "/api/properties", "/api/users", "/api/payload-jobs"]) {
+	assert.deepEqual(
+		anonymousRawRestEdgeDecision(pathname, undefined),
+		{ status: 404, body: { error: "notFound" } },
+		`edge decision must 404 anonymous ${pathname}`,
+	);
+	assert.equal(
+		anonymousRawRestEdgeDecision(pathname, fakeSession),
+		null,
+		`edge decision must pass ${pathname} with a session token`,
+	);
+}
+assert.equal(
+	anonymousRawRestEdgeDecision("/api/users/login", undefined),
+	null,
+	"edge decision must not block Payload login",
+);
+requireIncludes(
+	"src/proxy.ts",
+	"anonymousRawRestEdgeDecision",
+	"proxy.ts must apply the anonymous REST edge decision",
 );
 
 console.log("verify-security-boundaries: ok");
