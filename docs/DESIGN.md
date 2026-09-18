@@ -2,6 +2,12 @@
 
 Статус: `Hardening / REALTY_BASE / EPIC 9`.
 
+## Theme
+
+Dark theme: DISABLED.
+
+`--surface-dark` and `--surface-dark-strong` are lightbox, overlay and inverse-footer tokens inside the light theme. Root `html` has no `dark` class. Tailwind `@custom-variant dark` remains unused by starter public routes.
+
 ## Характер
 
 Цель — visual parity with Atlas при архитектурной очистке. Это не редизайн. Изменение визуального решения требует явного owner approval.
@@ -37,7 +43,7 @@ Numeric colors, type sizes, weights, radii, shadows and durations live in `globa
 ## Approved exceptions
 
 - Feed images Variant B (unoptimized + allowlist), see Media.
-- Atlas home page CSS remains for the richer clone path; starter public routes compose shadcn primitives.
+- Atlas `home-page.css` is a donor dump, not a live design-system export; starter public home composes Tailwind/shadcn sections.
 - Visual deviations vs Atlas donor: simpler starter shell/cards (REPORT ONLY after EPIC 8.3). Not a silent redesign.
 
 ## Representative pages and viewports

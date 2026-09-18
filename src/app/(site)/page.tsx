@@ -1,4 +1,11 @@
-import { HomePageView } from "@ams/realtbase-ui";
+import {
+	HomeFeaturedSection,
+	HomeHeroSection,
+	HomeLeadSection,
+	HomeProcessSection,
+	HomeServicesSection,
+	HomeTrustSection,
+} from "@ams/realtbase-ui";
 import { toMetadata } from "@/core/seo/page-metadata";
 import { getPublicHomePage } from "@/core/data-access/public";
 import {
@@ -20,7 +27,12 @@ export default async function HomePage() {
 		<>
 			<JsonLdScript data={buildOrganizationJsonLd()} />
 			<JsonLdScript data={buildWebsiteJsonLd(home.page)} />
-			<HomePageView page={home.page} featured={home.featured} />
+			<HomeHeroSection page={home.page} featured={home.featured} />
+			<HomeServicesSection page={home.page} />
+			<HomeFeaturedSection featured={home.featured} />
+			<HomeProcessSection page={home.page} />
+			<HomeTrustSection />
+			<HomeLeadSection page={home.page} />
 		</>
 	);
 }

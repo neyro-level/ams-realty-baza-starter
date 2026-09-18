@@ -42,7 +42,6 @@ const cssPaths = [
 	"packages/ui/src/styles/shell.css",
 	"packages/ui/src/styles/request-modal.css",
 	"packages/ui/src/styles/site-footer.css",
-	"packages/ui/src/styles/home-page.css",
 	"packages/ui/src/styles/home-articles.css",
 ];
 const cssParts = await Promise.all(

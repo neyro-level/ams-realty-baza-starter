@@ -13,14 +13,29 @@ assert.ok(leadForm.includes("successRef.current?.focus()"));
 
 const starterPages = read("packages/ui/src/views/starter/StarterPages.tsx");
 assert.equal([...starterPages.matchAll(/<h1\b/g)].length >= 4, true);
+assert.ok(starterPages.includes("export function HomeHeroSection"));
+assert.ok(starterPages.includes("export function HomeServicesSection"));
 
-const homeCss = read("packages/ui/src/styles/home-page.css");
-assert.ok(homeCss.includes("prefers-reduced-motion"));
+const homePage = read("src/app/(site)/page.tsx");
+assert.equal(
+	homePage.includes("<HomePageView"),
+	false,
+	"home page must compose sections, not a single HomePageView tree",
+);
+assert.ok(homePage.includes("<HomeHeroSection"));
+assert.ok(homePage.includes("<HomeServicesSection"));
+
+const layout = read("src/app/(site)/layout.tsx");
+assert.ok(layout.includes("<StarterSiteHeader"));
+assert.ok(layout.includes("<main>"));
+assert.ok(layout.includes("<StarterSiteFooter"));
 
 const globals = read("src/app/globals.css");
-assert.ok(
-	globals.includes("prefers-reduced-motion") ||
-		homeCss.includes("prefers-reduced-motion"),
+assert.ok(globals.includes("prefers-reduced-motion"));
+assert.equal(
+	/html[^>]*className=["'][^"']*dark/.test(read("src/app/layout.tsx")),
+	false,
+	"root html must not enable a dark theme class",
 );
 
 const fallback = read("packages/ui/src/views/starter/MediaFallback.tsx");

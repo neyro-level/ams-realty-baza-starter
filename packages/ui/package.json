@@ -8,7 +8,6 @@
 		"./primitives": "./src/primitives.ts",
 		"./views": "./src/views.ts",
 		"./styles.css": "./src/styles.css",
-		"./styles/home-page.css": "./src/styles/home-page.css",
 		"./styles/home-articles.css": "./src/styles/home-articles.css",
 		"./components/*": "./src/components/*.tsx",
 		"./lib/*": "./src/lib/*.ts"
