@@ -18,11 +18,24 @@ export const normalizedFeedOfferSchema = z.object({
 	propertyType: z.string().optional(),
 	priceMinor: z.number().int().nonnegative().optional(),
 	currency: z.string().min(3).max(3).default("RUB"),
+	rooms: z.number().finite().optional(),
+	totalArea: z.number().finite().optional(),
+	livingArea: z.number().finite().optional(),
+	kitchenArea: z.number().finite().optional(),
+	floor: z.number().finite().optional(),
+	floors: z.number().finite().optional(),
+	region: z.string().optional(),
 	publicAddress: z.string().optional(),
 	locality: z.string().optional(),
 	district: z.string().optional(),
+	street: z.string().optional(),
+	house: z.string().optional(),
 	latitude: z.number().finite().optional(),
 	longitude: z.number().finite().optional(),
+	externalComplexId: z.string().optional(),
+	externalComplexName: z.string().optional(),
+	externalBuildingId: z.string().optional(),
+	externalLayoutId: z.string().optional(),
 	images: z.array(normalizedFeedImageSchema),
 });
 
@@ -46,10 +59,27 @@ export type RawYrlOffer = {
 	price?: string;
 	currency?: string;
 	address?: string;
+	region?: string;
 	locality?: string;
 	district?: string;
+	street?: string;
+	house?: string;
 	latitude?: string;
 	longitude?: string;
+	rooms?: string;
+	floor?: string;
+	floors?: string;
+	totalArea?: string;
+	totalAreaUnit?: string;
+	livingArea?: string;
+	livingAreaUnit?: string;
+	kitchenArea?: string;
+	kitchenAreaUnit?: string;
+	externalComplexId?: string;
+	externalComplexName?: string;
+	externalBuildingId?: string;
+	externalLayoutId?: string;
+	marketFromXml?: string;
 	pictures: string[];
 };
 
@@ -101,11 +131,24 @@ export function normalizeYrlOffer(
 		propertyType: rawOffer.propertyType,
 		priceMinor: parseMoneyToMinor(rawOffer.price),
 		currency: normalizeCurrency(rawOffer.currency),
+		rooms: parseOptionalNumber(rawOffer.rooms),
+		totalArea: parseAreaToSquareMeters(rawOffer.totalArea, rawOffer.totalAreaUnit),
+		livingArea: parseAreaToSquareMeters(rawOffer.livingArea, rawOffer.livingAreaUnit),
+		kitchenArea: parseAreaToSquareMeters(rawOffer.kitchenArea, rawOffer.kitchenAreaUnit),
+		floor: parseOptionalNumber(rawOffer.floor),
+		floors: parseOptionalNumber(rawOffer.floors),
+		region: rawOffer.region,
 		publicAddress: rawOffer.address,
 		locality: rawOffer.locality,
 		district: rawOffer.district,
+		street: rawOffer.street,
+		house: rawOffer.house,
 		latitude: parseCoordinate(rawOffer.latitude),
 		longitude: parseCoordinate(rawOffer.longitude),
+		externalComplexId: rawOffer.externalComplexId,
+		externalComplexName: rawOffer.externalComplexName,
+		externalBuildingId: rawOffer.externalBuildingId,
+		externalLayoutId: rawOffer.externalLayoutId,
 		images,
 	});
 
@@ -144,7 +187,46 @@ function parseMoneyToMinor(value: string | undefined): number | undefined {
 	if (!Number.isFinite(amount) || amount < 0) {
 		return undefined;
 	}
-	return Math.round(amount * 100);
+	const minor = Math.round(amount * 100);
+	if (!Number.isSafeInteger(minor)) {
+		return undefined;
+	}
+	return minor;
+}
+
+function parseOptionalNumber(value: string | undefined): number | undefined {
+	if (!value) {
+		return undefined;
+	}
+	const parsed = Number(value.trim().replace(",", "."));
+	return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function parseAreaToSquareMeters(
+	value: string | undefined,
+	unit: string | undefined,
+): number | undefined {
+	const amount = parseOptionalNumber(value);
+	if (amount == null || amount < 0) {
+		return undefined;
+	}
+	const normalizedUnit = (unit ?? "sqm").trim().toLowerCase();
+	if (
+		normalizedUnit === "sqm" ||
+		normalizedUnit === "кв.м" ||
+		normalizedUnit === "sq.m" ||
+		normalizedUnit === "m2" ||
+		normalizedUnit === "м2"
+	) {
+		return amount;
+	}
+	if (normalizedUnit === "sqft" || normalizedUnit === "sq.ft" || normalizedUnit === "ft2") {
+		return amount * 0.09290304;
+	}
+	if (normalizedUnit === "ha" || normalizedUnit === "hectare" || normalizedUnit === "га") {
+		return amount * 10_000;
+	}
+	return amount;
 }
 
 function parseCoordinate(value: string | undefined): number | undefined {

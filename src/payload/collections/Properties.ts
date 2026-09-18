@@ -1,4 +1,5 @@
 import type { CollectionConfig, FieldAccess, Where } from "payload";
+import { calculatePropertyDerivedFields } from "../../core/ingest/derived-fields.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) => hasRole(req.user, ["owner", "admin"]);
@@ -36,6 +37,22 @@ export const Properties: CollectionConfig = {
 		},
 		update: adminsAndOwners,
 		delete: ownersOnly,
+	},
+	hooks: {
+		beforeChange: [
+			({ data, originalDoc }) => {
+				const priceMinor =
+					data.priceMinor === undefined ? originalDoc?.priceMinor : data.priceMinor;
+				const totalArea =
+					data.totalArea === undefined ? originalDoc?.totalArea : data.totalArea;
+				const derived = calculatePropertyDerivedFields({ priceMinor, totalArea });
+				if (derived.pricePerMeterMinor == null) {
+					return data;
+				}
+				data.pricePerMeterMinor = derived.pricePerMeterMinor;
+				return data;
+			},
+		],
 	},
 	fields: [
 		{

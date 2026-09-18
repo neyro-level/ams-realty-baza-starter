@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { calculatePropertyDerivedFields } from "./derived-fields.ts";
 import type {
 	FeedNormalizationIssue,
 	NormalizedFeedOffer,
@@ -44,8 +45,22 @@ export type FeedPropertyWriteData = {
 	publicAddress?: string;
 	locality?: string;
 	district?: string;
+	region?: string;
+	street?: string;
+	house?: string;
 	lat?: number;
 	lng?: number;
+	rooms?: number;
+	totalArea?: number;
+	livingArea?: number;
+	kitchenArea?: number;
+	floor?: number;
+	floors?: number;
+	pricePerMeterMinor?: number;
+	externalComplexId?: string;
+	externalComplexName?: string;
+	externalBuildingId?: string;
+	externalLayoutId?: string;
 	title: string;
 	description?: string;
 	images: FeedPropertyImageDraft[];
@@ -191,8 +206,25 @@ export function buildFeedPropertyWriteData({
 		publicAddress: offer.publicAddress,
 		locality: offer.locality,
 		district: offer.district,
+		region: offer.region,
+		street: offer.street,
+		house: offer.house,
 		lat: offer.latitude,
 		lng: offer.longitude,
+		rooms: offer.rooms,
+		totalArea: offer.totalArea,
+		livingArea: offer.livingArea,
+		kitchenArea: offer.kitchenArea,
+		floor: offer.floor,
+		floors: offer.floors,
+		externalComplexId: offer.externalComplexId,
+		externalComplexName: offer.externalComplexName,
+		externalBuildingId: offer.externalBuildingId,
+		externalLayoutId: offer.externalLayoutId,
+		...calculatePropertyDerivedFields({
+			priceMinor: offer.priceMinor,
+			totalArea: offer.totalArea,
+		}),
 		title: offer.title,
 		description: offer.description,
 		images: offer.images.map((image, index) => ({

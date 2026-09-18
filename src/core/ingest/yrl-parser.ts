@@ -1,3 +1,4 @@
+import { SaxesParser } from "saxes";
 import {
 	type FeedNormalizationIssue,
 	type NormalizedFeedOffer,
@@ -11,12 +12,20 @@ export type YrlFeedInput = {
 		| AsyncIterable<Uint8Array>
 		| Iterable<Uint8Array>;
 	allowedImageHosts: ReadonlySet<string>;
-	maxRetainedChars?: number;
+	signal?: AbortSignal;
+	onOffer?: (offer: NormalizedFeedOffer) => void | Promise<void>;
+	collectOffers?: boolean;
+	maxNestingDepth?: number;
+	maxAttributes?: number;
+	maxTextNodeChars?: number;
+	maxOfferBytes?: number;
 };
 
 export type YrlFeedParseStats = {
 	offersSeen: number;
 	maxRetainedCharsObserved: number;
+	parserCompleted: boolean;
+	criticalStructuralAnomaly: boolean;
 };
 
 export type YrlFeedParseResult = {
@@ -25,13 +34,27 @@ export type YrlFeedParseResult = {
 	stats: YrlFeedParseStats;
 };
 
-const DEFAULT_MAX_RETAINED_CHARS = 512 * 1024;
-const OFFER_CLOSE_TAG = "</offer>";
+const DEFAULT_MAX_NESTING = 32;
+const DEFAULT_MAX_ATTRIBUTES = 32;
+const DEFAULT_MAX_TEXT_NODE = 64 * 1024;
+const DEFAULT_MAX_OFFER_BYTES = 1024 * 1024;
+
+type ActiveOffer = {
+	raw: RawYrlOffer;
+	stack: string[];
+	bytes: number;
+};
 
 export async function parseYrlFeed({
 	stream,
 	allowedImageHosts,
-	maxRetainedChars = DEFAULT_MAX_RETAINED_CHARS,
+	signal,
+	onOffer,
+	collectOffers = Boolean(onOffer) === false,
+	maxNestingDepth = DEFAULT_MAX_NESTING,
+	maxAttributes = DEFAULT_MAX_ATTRIBUTES,
+	maxTextNodeChars = DEFAULT_MAX_TEXT_NODE,
+	maxOfferBytes = DEFAULT_MAX_OFFER_BYTES,
 }: YrlFeedInput): Promise<YrlFeedParseResult> {
 	const decoder = new TextDecoder();
 	const offers: NormalizedFeedOffer[] = [];
@@ -39,177 +62,298 @@ export async function parseYrlFeed({
 	const stats: YrlFeedParseStats = {
 		offersSeen: 0,
 		maxRetainedCharsObserved: 0,
+		parserCompleted: false,
+		criticalStructuralAnomaly: false,
 	};
-	let buffer = "";
 
-	for await (const chunk of toAsyncIterable(stream)) {
-		buffer += decoder.decode(chunk, { stream: true });
-		stats.maxRetainedCharsObserved = Math.max(
-			stats.maxRetainedCharsObserved,
-			buffer.length,
-		);
-		buffer = drainCompleteOffers(
-			buffer,
-			allowedImageHosts,
-			offers,
-			issues,
-			stats,
-		);
-		assertRetainedBufferLimit(buffer, maxRetainedChars);
+	const parser = new SaxesParser({ xmlns: false, fragment: false });
+	const documentStack: string[] = [];
+	let currentText = "";
+	let active: ActiveOffer | undefined;
+	let stopError: Error | undefined;
+
+	const failCritical = (message: string) => {
+		stats.criticalStructuralAnomaly = true;
+		stopError = new Error(message);
+	};
+
+	parser.on("doctype", () => {
+		failCritical("DTD and DOCTYPE are not allowed in feed XML.");
+	});
+
+	parser.on("error", (error) => {
+		if (active) {
+			issues.push({
+				severity: "error",
+				code: "feed.offer_invalid",
+				externalId: active.raw.externalId || undefined,
+				messageRedacted: "Malformed offer XML was isolated and skipped.",
+			});
+			active = undefined;
+			currentText = "";
+			return;
+		}
+		failCritical(error.message || "Malformed feed XML.");
+	});
+
+	parser.on("opentag", (tag) => {
+		if (stopError) return;
+		const name = tag.name.toLowerCase();
+		const attributeCount = Object.keys(tag.attributes).length;
+		if (attributeCount > maxAttributes) {
+			failCritical("Feed XML exceeded max attributes per element.");
+			return;
+		}
+
+		documentStack.push(name);
+		if (documentStack.length > maxNestingDepth) {
+			failCritical("Feed XML exceeded max nesting depth.");
+			return;
+		}
+
+		currentText = "";
+
+		if (name === "offer") {
+			active = {
+				raw: emptyRawOffer(tag.attributes),
+				stack: ["offer"],
+				bytes: 0,
+			};
+			return;
+		}
+
+		if (active) {
+			active.stack.push(name);
+			active.bytes += name.length + attributeCount * 8;
+			if (active.bytes > maxOfferBytes) {
+				issues.push({
+					severity: "error",
+					code: "feed.offer_invalid",
+					externalId: active.raw.externalId || undefined,
+					messageRedacted: "Offer exceeded max size and was skipped.",
+				});
+				active = undefined;
+			}
+		}
+	});
+
+	const appendText = (value: string) => {
+		if (stopError || !value) return;
+		if (value.length > maxTextNodeChars) {
+			if (active) {
+				issues.push({
+					severity: "error",
+					code: "feed.offer_invalid",
+					externalId: active.raw.externalId || undefined,
+					messageRedacted: "Offer text node exceeded max size.",
+				});
+				active = undefined;
+				currentText = "";
+				return;
+			}
+			failCritical("Feed XML text node exceeded max size.");
+			return;
+		}
+		currentText += value;
+		if (currentText.length > maxTextNodeChars) {
+			appendText("");
+			return;
+		}
+		if (active) {
+			active.bytes += value.length;
+			stats.maxRetainedCharsObserved = Math.max(
+				stats.maxRetainedCharsObserved,
+				active.bytes,
+			);
+			if (active.bytes > maxOfferBytes) {
+				issues.push({
+					severity: "error",
+					code: "feed.offer_invalid",
+					externalId: active.raw.externalId || undefined,
+					messageRedacted: "Offer exceeded max size and was skipped.",
+				});
+				active = undefined;
+			}
+		}
+	};
+
+	parser.on("text", appendText);
+	parser.on("cdata", appendText);
+
+	parser.on("closetag", (tag) => {
+		if (stopError) return;
+		const name = tag.name.toLowerCase();
+		documentStack.pop();
+		const text = currentText.trim();
+		currentText = "";
+
+		if (active) {
+			assignOfferField(active.raw, active.stack, text);
+			active.stack.pop();
+			if (name === "offer") {
+				stats.offersSeen += 1;
+				const normalized = normalizeYrlOffer(active.raw, allowedImageHosts);
+				issues.push(...normalized.issues);
+				if (normalized.ok) {
+					if (collectOffers) offers.push(normalized.offer);
+					void onOffer?.(normalized.offer);
+				}
+				active = undefined;
+			}
+		}
+	});
+
+	try {
+		for await (const chunk of toAsyncIterable(stream)) {
+			if (signal?.aborted) {
+				failCritical("Feed parser was cancelled.");
+				break;
+			}
+			parser.write(decoder.decode(chunk, { stream: true }));
+			if (stopError) break;
+		}
+		if (!stopError && !signal?.aborted) {
+			parser.write(decoder.decode());
+			parser.close();
+			stats.parserCompleted = !stats.criticalStructuralAnomaly;
+		}
+	} catch (error) {
+		stats.criticalStructuralAnomaly = true;
+		stats.parserCompleted = false;
+		if (!stopError) {
+			stopError = error instanceof Error ? error : new Error("Feed parser failed.");
+		}
 	}
 
-	buffer += decoder.decode();
-	stats.maxRetainedCharsObserved = Math.max(
-		stats.maxRetainedCharsObserved,
-		buffer.length,
-	);
-	buffer = drainCompleteOffers(
-		buffer,
-		allowedImageHosts,
-		offers,
-		issues,
-		stats,
-	);
-	assertRetainedBufferLimit(buffer, maxRetainedChars);
+	if (stats.criticalStructuralAnomaly) {
+		issues.push({
+			severity: "error",
+			code: "feed.offer_invalid",
+			messageRedacted: "Feed XML had a critical structural anomaly.",
+		});
+	}
 
 	return { offers, issues, stats };
 }
 
-function drainCompleteOffers(
-	input: string,
-	allowedImageHosts: ReadonlySet<string>,
-	offers: NormalizedFeedOffer[],
-	issues: FeedNormalizationIssue[],
-	stats: YrlFeedParseStats,
-): string {
-	let buffer = input;
-
-	while (true) {
-		const start = findOfferStart(buffer);
-		if (start === -1) {
-			return retainXmlTail(buffer);
-		}
-
-		if (start > 0) {
-			buffer = buffer.slice(start);
-		}
-
-		const end = buffer.toLowerCase().indexOf(OFFER_CLOSE_TAG);
-		if (end === -1) {
-			return buffer;
-		}
-
-		const offerXml = buffer.slice(0, end + OFFER_CLOSE_TAG.length);
-		stats.offersSeen += 1;
-
-		const normalized = normalizeYrlOffer(
-			parseRawOffer(offerXml),
-			allowedImageHosts,
-		);
-		issues.push(...normalized.issues);
-		if (normalized.ok) {
-			offers.push(normalized.offer);
-		}
-
-		buffer = buffer.slice(end + OFFER_CLOSE_TAG.length);
-	}
-}
-
-function findOfferStart(value: string): number {
-	const match = /<offer\b/i.exec(value);
-	return match?.index ?? -1;
-}
-
-function retainXmlTail(value: string): string {
-	const tailStart = Math.max(0, value.length - 32);
-	return value.slice(tailStart);
-}
-
-function assertRetainedBufferLimit(
-	value: string,
-	maxRetainedChars: number,
-): void {
-	if (value.length > maxRetainedChars) {
-		throw new Error(
-			"Feed parser retained too much data while waiting for an offer boundary.",
-		);
-	}
-}
-
-function parseRawOffer(offerXml: string): RawYrlOffer {
-	const openingTag = offerXml.match(/<offer\b[^>]*>/i)?.[0] ?? "";
-
+function emptyRawOffer(attributes: Record<string, string>): RawYrlOffer {
 	return {
-		externalId:
-			readAttribute(openingTag, "id") ??
-			readTagText(offerXml, "external-id") ??
-			"",
-		title:
-			readTagText(offerXml, "title") ??
-			readTagText(offerXml, "name") ??
-			readTagText(offerXml, "address"),
-		description: readTagText(offerXml, "description"),
-		category: readTagText(offerXml, "category"),
-		type: readTagText(offerXml, "type"),
-		propertyType: readTagText(offerXml, "property-type"),
-		price:
-			readNestedPriceTag(offerXml, "value") ?? readTagText(offerXml, "price"),
-		currency:
-			readNestedPriceTag(offerXml, "currency") ??
-			readTagText(offerXml, "currency"),
-		address: readTagText(offerXml, "address"),
-		locality: readTagText(offerXml, "locality-name"),
-		district: readTagText(offerXml, "district"),
-		latitude: readTagText(offerXml, "latitude"),
-		longitude: readTagText(offerXml, "longitude"),
-		pictures: readRepeatedTagText(offerXml, "picture"),
+		externalId: attributes.id ?? attributes["internal-id"] ?? "",
+		pictures: [],
+		marketFromXml: undefined,
 	};
 }
 
-function readAttribute(value: string, attribute: string): string | undefined {
-	const pattern = new RegExp(`${attribute}\\s*=\\s*["']([^"']+)["']`, "i");
-	const match = pattern.exec(value);
-	return cleanXmlText(match?.[1]);
-}
-
-function readNestedPriceTag(value: string, tag: string): string | undefined {
-	const priceBlock = /<price\b[^>]*>([\s\S]*?)<\/price>/i.exec(value)?.[1];
-	return priceBlock ? readTagText(priceBlock, tag) : undefined;
-}
-
-function readTagText(value: string, tag: string): string | undefined {
-	const pattern = new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i");
-	const match = pattern.exec(value);
-	return cleanXmlText(match?.[1]);
-}
-
-function readRepeatedTagText(value: string, tag: string): string[] {
-	const pattern = new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, "gi");
-	return [...value.matchAll(pattern)]
-		.map((match) => cleanXmlText(match[1]))
-		.filter((item): item is string => Boolean(item));
-}
-
-function cleanXmlText(value: string | undefined): string | undefined {
-	const text = value
-		?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
-		.replace(/<[^>]+>/g, "")
-		.trim();
-
-	if (!text) {
-		return undefined;
+function assignOfferField(raw: RawYrlOffer, stack: string[], text: string): void {
+	if (!text || stack.length < 2) return;
+	const path = stack.slice(1).join("/");
+	switch (path) {
+		case "external-id":
+			raw.externalId ||= text;
+			break;
+		case "title":
+		case "name":
+			raw.title = raw.title ?? text;
+			break;
+		case "description":
+			raw.description = text;
+			break;
+		case "category":
+			raw.category = text;
+			break;
+		case "type":
+			raw.type = text;
+			break;
+		case "property-type":
+			raw.propertyType = text;
+			break;
+		case "price/value":
+			raw.price = text;
+			break;
+		case "price":
+			raw.price = raw.price ?? text;
+			break;
+		case "price/currency":
+			raw.currency = text;
+			break;
+		case "currency":
+			raw.currency = raw.currency ?? text;
+			break;
+		case "address":
+			raw.address = text;
+			break;
+		case "locality-name":
+			raw.locality = text;
+			break;
+		case "region":
+			raw.region = text;
+			break;
+		case "district":
+			raw.district = text;
+			break;
+		case "street":
+			raw.street = text;
+			break;
+		case "house":
+			raw.house = text;
+			break;
+		case "latitude":
+			raw.latitude = text;
+			break;
+		case "longitude":
+			raw.longitude = text;
+			break;
+		case "rooms":
+			raw.rooms = text;
+			break;
+		case "floor":
+			raw.floor = text;
+			break;
+		case "floors-total":
+			raw.floors = text;
+			break;
+		case "area/value":
+			raw.totalArea = text;
+			break;
+		case "area/unit":
+			raw.totalAreaUnit = text;
+			break;
+		case "living-space/value":
+			raw.livingArea = text;
+			break;
+		case "living-space/unit":
+			raw.livingAreaUnit = text;
+			break;
+		case "kitchen-space/value":
+			raw.kitchenArea = text;
+			break;
+		case "kitchen-space/unit":
+			raw.kitchenAreaUnit = text;
+			break;
+		case "picture":
+			raw.pictures.push(text);
+			break;
+		case "yandex-building-id":
+		case "building-id":
+			raw.externalBuildingId = raw.externalBuildingId ?? text;
+			break;
+		case "yandex-house-id":
+			raw.externalLayoutId = text;
+			break;
+		case "building-name":
+		case "yandex-building-name":
+			raw.externalComplexName = raw.externalComplexName ?? text;
+			break;
+		case "complex-id":
+		case "village-id":
+			raw.externalComplexId = text;
+			break;
+		case "market":
+			raw.marketFromXml = text;
+			break;
+		default:
+			break;
 	}
-
-	return decodeXmlEntities(text);
-}
-
-function decodeXmlEntities(value: string): string {
-	return value
-		.replace(/&quot;/g, '"')
-		.replace(/&apos;/g, "'")
-		.replace(/&lt;/g, "<")
-		.replace(/&gt;/g, ">")
-		.replace(/&amp;/g, "&");
 }
 
 async function* toAsyncIterable(

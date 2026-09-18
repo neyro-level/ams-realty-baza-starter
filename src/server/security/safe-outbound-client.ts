@@ -1,10 +1,15 @@
-import "server-only";
+import { createHash } from "node:crypto";
 import { isIP } from "node:net";
-import { setTimeout as delay } from "node:timers/promises";
 import { lookup } from "node:dns/promises";
 
 const defaultTimeoutMs = 10_000;
 const defaultMaxBytes = 5 * 1024 * 1024;
+const defaultMaxRedirects = 5;
+
+type AddressRecord = {
+	address: string;
+	family: number;
+};
 
 type SafeOutboundOptions = {
 	allowedHosts: readonly string[];
@@ -12,6 +17,18 @@ type SafeOutboundOptions = {
 	timeoutMs?: number;
 	maxBytes?: number;
 	headers?: HeadersInit;
+	signal?: AbortSignal;
+	maxRedirects?: number;
+	fetchImpl?: typeof fetch;
+	resolveAddresses?: (host: string) => Promise<AddressRecord[]>;
+};
+
+export type SafeOutboundStreamResult = {
+	status: number;
+	statusText: string;
+	headers: Headers;
+	body: ReadableStream<Uint8Array> | null;
+	sha256: Promise<string | null>;
 };
 
 function isPrivateIPv4(address: string): boolean {
@@ -57,9 +74,119 @@ async function assertSafeDestination(url: URL, options: SafeOutboundOptions): Pr
 		throw new Error(`Outbound protocol is not approved for ${host}`);
 	}
 
-	const addresses = await lookup(host, { all: true, verbatim: true });
+	const resolver = options.resolveAddresses ?? ((name: string) => lookup(name, { all: true, verbatim: true }));
+	const addresses = await resolver(host);
 	if (addresses.some((item) => isUnsafeAddress(item.address))) {
 		throw new Error(`Outbound host resolves to a private or link-local address: ${host}`);
+	}
+}
+
+function tapHashAndLimit(
+	body: ReadableStream<Uint8Array>,
+	maxBytes: number,
+	onSettled: () => void,
+): { stream: ReadableStream<Uint8Array>; sha256: Promise<string> } {
+	const hash = createHash("sha256");
+	let received = 0;
+	let settle: (value: string) => void;
+	let rejectHash: (error: unknown) => void;
+	const sha256 = new Promise<string>((resolve, reject) => {
+		settle = resolve;
+		rejectHash = reject;
+	});
+	sha256.catch(() => undefined);
+
+	const finish = (error?: unknown) => {
+		onSettled();
+		if (error) rejectHash(error);
+	};
+
+	const reader = body.getReader();
+	const stream = new ReadableStream<Uint8Array>({
+		async pull(controller) {
+			try {
+				const { done, value } = await reader.read();
+				if (done) {
+					finish();
+					settle(hash.digest("hex"));
+					controller.close();
+					return;
+				}
+				received += value.byteLength;
+				if (received > maxBytes) {
+					await reader.cancel();
+					const error = new Error("Outbound response exceeded max size.");
+					finish(error);
+					controller.error(error);
+					return;
+				}
+				hash.update(value);
+				controller.enqueue(value);
+			} catch (error) {
+				finish(error);
+				controller.error(error);
+			}
+		},
+		cancel(reason) {
+			finish(reason ?? new Error("Outbound stream cancelled."));
+			return reader.cancel(reason);
+		},
+	});
+
+	return { stream, sha256 };
+}
+
+type OpenedOutboundRequest = {
+	response: Response;
+	release: () => void;
+};
+
+async function openSafeRequest(
+	input: string | URL,
+	options: SafeOutboundOptions,
+	hops = 0,
+): Promise<OpenedOutboundRequest> {
+	const url = new URL(input);
+	await assertSafeDestination(url, options);
+
+	const controller = new AbortController();
+	const onExternalAbort = () => controller.abort();
+	options.signal?.addEventListener("abort", onExternalAbort);
+	const timeoutId = setTimeout(
+		() => controller.abort(),
+		options.timeoutMs ?? defaultTimeoutMs,
+	);
+	const release = () => {
+		clearTimeout(timeoutId);
+		options.signal?.removeEventListener("abort", onExternalAbort);
+	};
+
+	try {
+		const fetchImpl = options.fetchImpl ?? fetch;
+		const response = await fetchImpl(url, {
+			headers: options.headers,
+			redirect: "manual",
+			signal: controller.signal,
+		});
+
+		if (
+			response.status >= 300 &&
+			response.status < 400 &&
+			response.headers.has("location")
+		) {
+			release();
+			await response.body?.cancel().catch(() => undefined);
+			if (hops >= (options.maxRedirects ?? defaultMaxRedirects)) {
+				throw new Error("Outbound redirect limit exceeded.");
+			}
+			const nextUrl = new URL(response.headers.get("location") ?? "", url);
+			return openSafeRequest(nextUrl, options, hops + 1);
+		}
+
+		return { response, release };
+	} catch (error) {
+		release();
+		throw error;
 	}
 }
 
@@ -95,39 +222,65 @@ export async function safeOutboundFetch(
 	input: string | URL,
 	options: SafeOutboundOptions,
 ): Promise<Response> {
-	const url = new URL(input);
-	await assertSafeDestination(url, options);
-
-	const controller = new AbortController();
-	const timeout = delay(options.timeoutMs ?? defaultTimeoutMs, undefined, {
-		signal: controller.signal,
-	}).then(() => controller.abort());
-
+	const opened = await openSafeRequest(input, options);
 	try {
-		const response = await fetch(url, {
-			headers: options.headers,
-			redirect: "manual",
-			signal: controller.signal,
-		});
-
-		if (
-			response.status >= 300 &&
-			response.status < 400 &&
-			response.headers.has("location")
-		) {
-			const nextUrl = new URL(response.headers.get("location") ?? "", url);
-			await assertSafeDestination(nextUrl, options);
-			return safeOutboundFetch(nextUrl, options);
-		}
-
-		const body = await readBounded(response, options.maxBytes ?? defaultMaxBytes);
+		const body = await readBounded(opened.response, options.maxBytes ?? defaultMaxBytes);
 		return new Response(body, {
-			status: response.status,
-			statusText: response.statusText,
-			headers: response.headers,
+			status: opened.response.status,
+			statusText: opened.response.statusText,
+			headers: opened.response.headers,
 		});
 	} finally {
-		controller.abort();
-		await timeout.catch(() => undefined);
+		opened.release();
 	}
+}
+
+export async function safeOutboundFetchStream(
+	input: string | URL,
+	options: SafeOutboundOptions,
+): Promise<SafeOutboundStreamResult> {
+	const opened = await openSafeRequest(input, options);
+	if (opened.response.status === 304 || !opened.response.body) {
+		opened.release();
+		return {
+			status: opened.response.status,
+			statusText: opened.response.statusText,
+			headers: opened.response.headers,
+			body: null,
+			sha256: Promise.resolve(null),
+		};
+	}
+
+	const tapped = tapHashAndLimit(
+		opened.response.body,
+		options.maxBytes ?? defaultMaxBytes,
+		opened.release,
+	);
+	return {
+		status: opened.response.status,
+		statusText: opened.response.statusText,
+		headers: opened.response.headers,
+		body: tapped.stream,
+		sha256: tapped.sha256,
+	};
+}
+
+export function parseOutboundHostList(value?: string | null): string[] {
+	return (value ?? "")
+		.split(",")
+		.map((item) => item.trim().toLowerCase())
+		.filter(Boolean);
+}
+
+export function createSafeFeedOutboundFetch(options: Omit<SafeOutboundOptions, "headers" | "signal">) {
+	return async (input: {
+		url: URL;
+		headers?: HeadersInit;
+		signal?: AbortSignal;
+	}): Promise<SafeOutboundStreamResult> =>
+		safeOutboundFetchStream(input.url, {
+			...options,
+			headers: input.headers,
+			signal: input.signal,
+		});
 }

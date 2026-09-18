@@ -1,3 +1,5 @@
+import type { SafeOutboundStreamResult } from "../../server/security/safe-outbound-client.ts";
+
 export type ConditionalFeedState = {
 	etag?: string | null;
 	lastModified?: string | null;
@@ -8,25 +10,33 @@ export type ConditionalFeedHeaders = {
 	"If-Modified-Since"?: string;
 };
 
+export type FeedOutboundFetch = (input: {
+	url: URL;
+	headers: ConditionalFeedHeaders;
+	signal?: AbortSignal;
+}) => Promise<SafeOutboundStreamResult>;
+
 export type FetchFeedInput = ConditionalFeedState & {
 	url: string;
-	fetchImpl?: typeof fetch;
+	outboundFetch: FeedOutboundFetch;
+	signal?: AbortSignal;
 };
 
 export type FetchedFeed = {
 	status: "fetched";
 	body: ReadableStream<Uint8Array>;
+	sha256: Promise<string | null>;
 	etag?: string;
 	lastModified?: string;
 };
 
-export type NotModifiedFeed = {
-	status: "not-modified";
+export type UnchangedFeed = {
+	status: "unchanged";
 	etag?: string;
 	lastModified?: string;
 };
 
-export type FetchFeedResult = FetchedFeed | NotModifiedFeed;
+export type FetchFeedResult = FetchedFeed | UnchangedFeed;
 
 export function buildConditionalFeedHeaders({
 	etag,
@@ -46,31 +56,32 @@ export async function fetchConditionalFeed({
 	url,
 	etag,
 	lastModified,
-	fetchImpl = fetch,
+	outboundFetch,
+	signal,
 }: FetchFeedInput): Promise<FetchFeedResult> {
 	const parsedUrl = new URL(url);
 	if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
 		throw new Error("Feed URL must use http or https.");
 	}
 
-	const response = await fetchImpl(parsedUrl, {
+	const response = await outboundFetch({
+		url: parsedUrl,
 		headers: buildConditionalFeedHeaders({ etag, lastModified }),
-		redirect: "follow",
+		signal,
 	});
 
 	const responseEtag = response.headers.get("etag") ?? undefined;
-	const responseLastModified =
-		response.headers.get("last-modified") ?? undefined;
+	const responseLastModified = response.headers.get("last-modified") ?? undefined;
 
 	if (response.status === 304) {
 		return {
-			status: "not-modified",
+			status: "unchanged",
 			etag: responseEtag ?? etag ?? undefined,
 			lastModified: responseLastModified ?? lastModified ?? undefined,
 		};
 	}
 
-	if (!response.ok) {
+	if (response.status < 200 || response.status >= 300) {
 		throw new Error(`Feed request failed with status ${response.status}.`);
 	}
 
@@ -81,6 +92,7 @@ export async function fetchConditionalFeed({
 	return {
 		status: "fetched",
 		body: response.body,
+		sha256: response.sha256,
 		etag: responseEtag,
 		lastModified: responseLastModified,
 	};

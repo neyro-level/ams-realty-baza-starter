@@ -11,7 +11,7 @@ export type FeedRunCompletionInput = {
 	safetyThresholdPercent: number;
 	plannedDeactivations: number;
 	maxDeactivationsPerRun: number;
-	fetchStatus: "fetched" | "not-modified";
+	fetchStatus: "fetched" | "unchanged";
 	feedHash?: string;
 	lastFeedHash?: string;
 };
@@ -65,7 +65,7 @@ const defaultStaleThresholdMs = 15 * 60 * 1000;
 export function decideFeedRunCompletion(
 	input: FeedRunCompletionInput,
 ): FeedRunCompletionDecision {
-	if (input.fetchStatus === "not-modified") {
+	if (input.fetchStatus === "unchanged") {
 		return unchanged("not_modified");
 	}
 

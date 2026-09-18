@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { createSafeFeedOutboundFetch } from "../src/server/security/safe-outbound-client.ts";
 import {
 	buildConditionalFeedHeaders,
+	calculatePropertyDerivedFields,
 	fetchConditionalFeed,
 	parseAllowedImageHosts,
 	parseYrlFeed,
@@ -12,7 +15,7 @@ const feed = buildLargeFeed(180);
 const parsed = await parseYrlFeed({
 	stream: chunkUtf8(feed, 127),
 	allowedImageHosts,
-	maxRetainedChars: 64 * 1024,
+	collectOffers: true,
 });
 
 assert.equal(parsed.offers.length, 180);
@@ -45,21 +48,87 @@ const notModified = await fetchConditionalFeed({
 	url: "https://feeds.example.test/base.xml",
 	etag: '"known-etag"',
 	lastModified: "Wed, 16 Sep 2026 09:00:00 GMT",
-	fetchImpl: async (_url, init) => {
-		assert.equal(init?.headers?.["If-None-Match"], '"known-etag"');
+	outboundFetch: async ({ url, headers: requestHeaders }) => {
+		assert.equal(url.hostname, "feeds.example.test");
+		assert.equal(requestHeaders["If-None-Match"], '"known-etag"');
 		assert.equal(
-			init?.headers?.["If-Modified-Since"],
+			requestHeaders["If-Modified-Since"],
 			"Wed, 16 Sep 2026 09:00:00 GMT",
 		);
-		return new Response(null, {
+		return {
 			status: 304,
-			headers: { etag: '"known-etag-next"' },
+			statusText: "Not Modified",
+			headers: new Headers({ etag: '"known-etag-next"' }),
+			body: null,
+			sha256: Promise.resolve(null),
+		};
+	},
+});
+
+assert.equal(notModified.status, "unchanged");
+assert.equal(notModified.etag, '"known-etag-next"');
+
+const bodyText = "streaming-feed-body";
+const expectedHash = createHash("sha256").update(bodyText).digest("hex");
+const outbound = createSafeFeedOutboundFetch({
+	allowedHosts: ["feeds.example.test"],
+	resolveAddresses: async () => [{ address: "203.0.113.10", family: 4 }],
+	fetchImpl: async (_url, init) => {
+		assert.equal(init?.redirect, "manual");
+		assert.equal(
+			new Headers(init?.headers).get("if-none-match"),
+			'"body-etag"',
+		);
+		return new Response(bodyText, {
+			status: 200,
+			headers: {
+				etag: '"body-etag-next"',
+				"last-modified": "Wed, 16 Sep 2026 10:00:00 GMT",
+			},
 		});
 	},
 });
 
-assert.equal(notModified.status, "not-modified");
-assert.equal(notModified.etag, '"known-etag-next"');
+const fetched = await fetchConditionalFeed({
+	url: "https://feeds.example.test/base.xml",
+	etag: '"body-etag"',
+	outboundFetch: outbound,
+});
+
+assert.equal(fetched.status, "fetched");
+if (fetched.status !== "fetched") throw new Error("expected fetched feed");
+const consumed = await new Response(fetched.body).text();
+assert.equal(consumed, bodyText);
+assert.equal(await fetched.sha256, expectedHash);
+assert.equal(fetched.etag, '"body-etag-next"');
+
+const dtd = await parseYrlFeed({
+	stream: chunkUtf8(
+		`<?xml version="1.0"?><!DOCTYPE realty-feed [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><realty-feed><offer id="x"><type>продажа</type></offer></realty-feed>`,
+		32,
+	),
+	allowedImageHosts,
+	collectOffers: true,
+});
+assert.equal(dtd.stats.criticalStructuralAnomaly, true);
+assert.equal(dtd.stats.parserCompleted, false);
+
+const marketProbe = await parseYrlFeed({
+	stream: chunkUtf8(
+		`<?xml version="1.0"?><realty-feed><offer id="m1"><title>Market probe</title><market>newbuild</market><type>продажа</type><category>квартира</category><price><value>1000000</value><currency>RUR</currency></price><area><value>50</value><unit>sqm</unit></area></offer></realty-feed>`,
+		64,
+	),
+	allowedImageHosts,
+	collectOffers: true,
+});
+assert.equal(marketProbe.stats.parserCompleted, true);
+assert.equal(marketProbe.offers[0].externalId, "m1");
+assert.equal(marketProbe.offers[0].totalArea, 50);
+assert.equal("market" in marketProbe.offers[0], false);
+assert.deepEqual(
+	calculatePropertyDerivedFields({ priceMinor: 10_000_000_00, totalArea: 50 }),
+	{ pricePerMeterMinor: 20_000_000 },
+);
 
 console.log("verify-feed-parser: ok");
 
