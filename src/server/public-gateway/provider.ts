@@ -1,13 +1,23 @@
 import "server-only";
 
+import {
+	countPublicSitemapPages,
+	countPublicSitemapProperties,
+	listPublicSitemapPagesPage,
+	listPublicSitemapPropertiesPage,
+} from "@/core/data-access/public/sql";
+import { projectConfig } from "@/project/project.config";
 import { resolvePropertyPageLifecycle } from "@/server/seo/property";
+import {
+	type PublicUrlEntry,
+	staticPublicUrlEntries,
+} from "@/server/seo/site";
 import {
 	type CatalogQueryInput,
 	findPublicCatalogFacets,
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
 	findPublicPropertyLifecycleBySlug,
-	findPublicSitemapProperties,
 } from "./catalog";
 import {
 	type PublicPropertyDetailsDTO,
@@ -21,7 +31,6 @@ import {
 import {
 	findPublicPage,
 	findPublicPages,
-	findPublicSitemapPages,
 } from "./pages";
 import { getPublicGatewayPayload } from "./payload";
 
@@ -38,6 +47,33 @@ export type PublicPropertyPageState =
 				| { kind: "archived"; statusCode: 200; robots: "noindex" };
 			property: PublicPropertyDetailsDTO;
 	  };
+
+const urlsPerShard = projectConfig.sitemapUrlsPerShard;
+const queryPageSize = projectConfig.sitemapQueryPageSize;
+
+function indexableStaticEntries(): PublicUrlEntry[] {
+	return staticPublicUrlEntries.filter((entry) => entry.indexable);
+}
+
+async function listRange<T>(
+	readPage: (input: {
+		limit: number;
+		offset: number;
+	}) => Promise<readonly T[]>,
+	offset: number,
+	limit: number,
+): Promise<T[]> {
+	const items: T[] = [];
+	while (items.length < limit) {
+		const batch = await readPage({
+			offset: offset + items.length,
+			limit: Math.min(queryPageSize, limit - items.length),
+		});
+		if (!batch.length) break;
+		items.push(...batch);
+	}
+	return items;
+}
 
 export async function getPublicShell() {
 	const payload = await getPublicGatewayPayload();
@@ -59,29 +95,97 @@ export async function getPublicCatalog(
 	} as const;
 }
 
-export async function getPublicSitemapEntries() {
+export async function getPublicSitemapTotals() {
 	const payload = await getPublicGatewayPayload();
+	const staticCount = indexableStaticEntries().length;
 	const [pages, properties] = await Promise.all([
-		findPublicSitemapPages(payload),
-		findPublicSitemapProperties(payload),
+		countPublicSitemapPages(payload),
+		countPublicSitemapProperties(payload),
 	]);
+	return {
+		staticCount,
+		pages,
+		properties,
+		total: staticCount + pages + properties,
+	};
+}
 
-	return [
-		...pages.map((page) => ({
-			path: page.slug === "home" ? "/" : `/${page.slug}`,
-			lastModified: page.updatedAt,
-			changeFrequency: "weekly" as const,
-			priority: page.slug === "home" ? 1 : 0.6,
-			indexable: true,
-		})),
-		...properties.map((property) => ({
-			path: `/obekty/${property.slug}`,
-			lastModified: property.updatedAt,
-			changeFrequency: "daily" as const,
-			priority: 0.8,
-			indexable: true,
-		})),
-	];
+export async function getPublicSitemapShardCount() {
+	const totals = await getPublicSitemapTotals();
+	return Math.max(1, Math.ceil(totals.total / urlsPerShard));
+}
+
+export async function getPublicSitemapShard(id: number): Promise<PublicUrlEntry[]> {
+	if (!Number.isInteger(id) || id < 0) return [];
+	const payload = await getPublicGatewayPayload();
+	const staticEntries = indexableStaticEntries();
+	const totals = await getPublicSitemapTotals();
+	const start = id * urlsPerShard;
+	if (start >= totals.total) return [];
+	let remaining = urlsPerShard;
+	let cursor = start;
+	const entries: PublicUrlEntry[] = [];
+
+	if (cursor < staticEntries.length && remaining > 0) {
+		const slice = staticEntries.slice(cursor, cursor + remaining);
+		entries.push(...slice);
+		remaining -= slice.length;
+		cursor += slice.length;
+	}
+
+	const pagesStart = staticEntries.length;
+	if (cursor >= pagesStart && remaining > 0) {
+		const pageOffset = cursor - pagesStart;
+		if (pageOffset < totals.pages) {
+			const pages = await listRange(
+				(input) => listPublicSitemapPagesPage(payload, input),
+				pageOffset,
+				remaining,
+			);
+			entries.push(
+				...pages.map((page) => ({
+					path: `/${page.slug}`,
+					lastModified: page.updatedAt,
+					changeFrequency: "weekly" as const,
+					priority: 0.6,
+					indexable: true,
+				})),
+			);
+			remaining -= pages.length;
+			cursor += pages.length;
+		} else {
+			cursor = pagesStart + totals.pages;
+		}
+	}
+
+	const propertiesStart = staticEntries.length + totals.pages;
+	if (cursor >= propertiesStart && remaining > 0) {
+		const propertyOffset = cursor - propertiesStart;
+		const properties = await listRange(
+			(input) => listPublicSitemapPropertiesPage(payload, input),
+			propertyOffset,
+			remaining,
+		);
+		entries.push(
+			...properties.map((property) => ({
+				path: `/obekty/${property.slug}`,
+				lastModified: property.updatedAt,
+				changeFrequency: "daily" as const,
+				priority: 0.8,
+				indexable: true,
+			})),
+		);
+	}
+
+	return entries;
+}
+
+export async function getPublicSitemapEntries() {
+	const count = await getPublicSitemapShardCount();
+	const shards = await Promise.all(
+		Array.from({ length: count }, (_, id) => getPublicSitemapShard(id)),
+	);
+	return shards.flat();
 }
 
 export async function getPublicHomePage() {

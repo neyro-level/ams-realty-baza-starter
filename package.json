@@ -35,6 +35,7 @@
 		"verify:feed-parser": "node --experimental-strip-types scripts/verify-feed-parser.mjs",
 		"verify:feed-ingest": "node --experimental-strip-types scripts/verify-feed-ingest.mjs",
 		"verify:feed-lifecycle": "node --experimental-strip-types scripts/verify-feed-lifecycle.mjs",
+		"verify:manual-ownership": "node --experimental-strip-types scripts/verify-manual-ownership.mjs",
 		"verify:lead-intake": "node --experimental-strip-types scripts/verify-lead-intake.mjs",
 		"verify:lead-outbox": "node --experimental-strip-types scripts/verify-lead-outbox.mjs",
 		"verify:lead-delivery-state": "node --experimental-strip-types scripts/verify-lead-delivery-state.mjs",
@@ -52,7 +53,7 @@
 		"quality:architecture": "dependency-cruiser src packages scripts --config .dependency-cruiser.mjs --output-type err",
 		"quality:design-tokens": "node scripts/quality/design-tokens.mjs",
 		"quality:guards": "node scripts/quality/architecture-guard.mjs && node scripts/quality/design-tokens.mjs && node scripts/quality/sourcecraft-policy.mjs",
-		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm verify:jobs-config && pnpm verify:public-gateway && pnpm verify:feed-parser && pnpm verify:feed-ingest && pnpm verify:feed-lifecycle && pnpm verify:lead-intake && pnpm verify:lead-outbox && pnpm verify:lead-delivery-state && pnpm verify:max-adapter && pnpm verify:custom-webhook-adapter && pnpm verify:seo-contracts && pnpm verify:owner-operations && pnpm verify:health-alerts && pnpm verify:operational-recovery && pnpm verify:security-boundaries && pnpm verify:product-regression && pnpm verify:production-topology && pnpm verify:release-artifact && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
+		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm verify:jobs-config && pnpm verify:public-gateway && pnpm verify:feed-parser && pnpm verify:feed-ingest && pnpm verify:feed-lifecycle && pnpm verify:manual-ownership && pnpm verify:lead-intake && pnpm verify:lead-outbox && pnpm verify:lead-delivery-state && pnpm verify:max-adapter && pnpm verify:custom-webhook-adapter && pnpm verify:seo-contracts && pnpm verify:owner-operations && pnpm verify:health-alerts && pnpm verify:operational-recovery && pnpm verify:security-boundaries && pnpm verify:product-regression && pnpm verify:production-topology && pnpm verify:release-artifact && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
 		"verify:foundation": "pnpm verify"
 	},
 	"dependencies": {

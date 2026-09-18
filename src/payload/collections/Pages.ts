@@ -1,4 +1,5 @@
 import type { CollectionConfig, Where } from "payload";
+import { projectConfig } from "../../project/project.config.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 const publicPageReadWhere: Where = {
@@ -25,6 +26,26 @@ export const Pages: CollectionConfig = {
 		},
 		update: adminsAndOwners,
 		delete: ownersOnly,
+	},
+	hooks: {
+		beforeValidate: [
+			({ data }) => {
+				if (!data || typeof data.slug !== "string") return data;
+				const slug = data.slug.trim().replace(/^\/+/, "");
+				const path = `/${slug}`;
+				const reserved = projectConfig.reservedNamespaces.some(
+					(namespace) =>
+						path === namespace || path.startsWith(`${namespace}/`),
+				);
+				if (reserved) {
+					throw new Error(
+						`CMS page slug cannot occupy reserved namespace ${path}.`,
+					);
+				}
+				data.slug = slug;
+				return data;
+			},
+		],
 	},
 	fields: [
 		{

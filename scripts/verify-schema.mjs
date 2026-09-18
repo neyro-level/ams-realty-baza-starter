@@ -28,7 +28,9 @@ DECLARE
 		'lead_deliveries_lead_channel_unique_idx',
 		'lead_deliveries_recovery_due_idx',
 		'lead_deliveries_stale_sending_idx',
-		'feed_sources_enabled_due_idx'
+		'feed_sources_enabled_due_idx',
+		'properties_public_catalog_idx',
+		'properties_public_sitemap_idx'
 	];
 	required_index text;
 BEGIN

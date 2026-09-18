@@ -8,7 +8,15 @@ import type {
 } from "@ams/realtbase-contracts";
 import type { Payload, Where } from "payload";
 import { z } from "zod";
+import {
+	aggregatePublicCatalogFacets,
+	findPublicPropertyLifecycleRow,
+	findPublicRedirectByFromPath,
+	listPublicSitemapPropertiesPage,
+	publicRedirectDestinationIsChain,
+} from "@/core/data-access/public/sql";
 import type { PropertiesSelect, Property } from "@/payload/payload-types";
+import { sanitizeExplicitRedirectPath } from "@/server/seo/redirect-path";
 import { publicGatewayPolicy } from "./policy";
 
 const publicPropertySelect = {
@@ -42,18 +50,6 @@ const publicPropertySelect = {
 		order: true,
 	},
 	updatedAt: true,
-} satisfies PropertiesSelect<true>;
-
-const publicPropertyFacetSelect = {
-	category: true,
-	dealType: true,
-	rooms: true,
-	priceMinor: true,
-	locality: true,
-	district: true,
-	totalArea: true,
-	kitchenArea: true,
-	floor: true,
 } satisfies PropertiesSelect<true>;
 
 const propertyCategorySchema = z.enum([
@@ -163,21 +159,17 @@ export type PublicCatalogResult = {
 };
 
 export type PublicCatalogFacetsResult = {
-	items: readonly Pick<
-		PublicCatalogProperty,
-		| "category"
-		| "dealType"
-		| "rooms"
-		| "priceMinor"
-		| "locality"
-		| "district"
-		| "totalArea"
-		| "kitchenArea"
-		| "floor"
-	>[];
-	limit: number;
+	source: "sql-aggregate";
 	total: number;
-	bounded: true;
+	categories: readonly { value: PropertyCategory; count: number }[];
+	dealTypes: readonly { value: PropertyDealType; count: number }[];
+	cities: readonly { value: string; count: number }[];
+	districts: readonly { value: string; count: number }[];
+	rooms: readonly { value: number; count: number }[];
+	priceMinor: {
+		min: number | null;
+		max: number | null;
+	};
 };
 
 export const publicPropertyPublicationWhere: Where = {
@@ -243,23 +235,6 @@ function sortForCatalog(sort: PropertySort): string {
 	}
 }
 
-function withoutPaginationOnlyFilters(query: CatalogQuery): Where {
-	const {
-		page: _page,
-		limit: _limit,
-		sort: _sort,
-		view: _view,
-		...filterInput
-	} = query;
-	return buildCatalogWhere({
-		...filterInput,
-		page: 1,
-		limit: publicGatewayPolicy.maxLimit,
-		sort: "recommended",
-		view: "grid",
-	});
-}
-
 function toPublicCatalogProperty(
 	property: PublicCatalogSelectedProperty,
 ): PublicCatalogProperty {
@@ -300,25 +275,9 @@ function toPublicCatalogProperty(
 
 export async function findPublicSitemapProperties(
 	payload: Payload,
+	input: { limit: number; offset: number } = { limit: 500, offset: 0 },
 ): Promise<readonly Pick<PublicCatalogProperty, "slug" | "updatedAt">[]> {
-	const result = await payload.find({
-		collection: "properties",
-		where: publicPropertyPublicationWhere,
-		depth: 0,
-		limit: 1000,
-		page: 1,
-		sort: "-updatedAt",
-		select: {
-			slug: true,
-			updatedAt: true,
-		},
-		overrideAccess: publicGatewayPolicy.overrideAccess,
-	});
-
-	return result.docs.map((property) => ({
-		slug: property.slug,
-		updatedAt: property.updatedAt,
-	}));
+	return listPublicSitemapPropertiesPage(payload, input);
 }
 
 export async function findPublicCatalogProperties(
@@ -387,31 +346,22 @@ export async function findPublicPropertyLifecycleBySlug(
 	payload: Payload,
 	slug: string,
 ): Promise<PublicPropertyLifecycleLookup> {
-	const result = await payload.find({
-		collection: "properties",
-		where: { slug: { equals: slug } },
-		depth: 0,
-		limit: 1,
-		page: 1,
-		select: {
-			status: true,
-			publishedAt: true,
-			contentPurgedAt: true,
-		},
-		overrideAccess: publicGatewayPolicy.overrideAccess,
-	});
-
-	const property = result.docs[0] as
-		| Pick<Property, "status" | "publishedAt" | "contentPurgedAt">
-		| undefined;
+	const property = await findPublicPropertyLifecycleRow(payload, slug);
 	if (!property) return { found: false };
+
+	const fromPath = `/obekty/${slug}`;
+	const redirect = await findPublicRedirectByFromPath(payload, fromPath);
+	const destination = sanitizeExplicitRedirectPath(redirect?.to);
+	const chained =
+		destination != null &&
+		(await publicRedirectDestinationIsChain(payload, destination, fromPath));
 
 	return {
 		found: true,
 		status: property.status,
 		publishedAt: property.publishedAt,
 		contentPurgedAt: property.contentPurgedAt,
-		explicitRedirectPath: null,
+		explicitRedirectPath: chained ? null : destination,
 	};
 }
 
@@ -420,32 +370,38 @@ export async function findPublicCatalogFacets(
 	input: CatalogQueryInput,
 ): Promise<PublicCatalogFacetsResult> {
 	const query = catalogQuerySchema.parse(input);
-	const limit = 500;
-	const result = await payload.find({
-		collection: "properties",
-		where: withoutPaginationOnlyFilters(query),
-		depth: publicGatewayPolicy.depth,
-		limit,
-		page: 1,
-		sort: "locality",
-		select: publicPropertyFacetSelect,
-		overrideAccess: publicGatewayPolicy.overrideAccess,
+	const aggregate = await aggregatePublicCatalogFacets(payload, {
+		query: query.query,
+		category: query.category,
+		dealType: query.dealType,
+		city: query.city,
+		district: query.district,
+		rooms: query.rooms,
+		priceFromMinor: query.priceFromMinor,
+		priceToMinor: query.priceToMinor,
+		areaFrom: query.areaFrom,
+		areaTo: query.areaTo,
+	});
+	const categories = aggregate.categories.flatMap((bucket) => {
+		const parsed = propertyCategorySchema.safeParse(bucket.value);
+		return parsed.success ? [{ value: parsed.data, count: bucket.count }] : [];
+	});
+	const dealTypes = aggregate.dealTypes.flatMap((bucket) => {
+		const parsed = propertyDealTypeSchema.safeParse(bucket.value);
+		return parsed.success ? [{ value: parsed.data, count: bucket.count }] : [];
 	});
 
 	return {
-		items: result.docs.map((property) => ({
-			category: property.category,
-			dealType: property.dealType,
-			rooms: property.rooms,
-			priceMinor: property.priceMinor,
-			locality: property.locality,
-			district: property.district,
-			totalArea: property.totalArea,
-			kitchenArea: property.kitchenArea,
-			floor: property.floor,
-		})),
-		limit,
-		total: result.totalDocs,
-		bounded: true,
+		source: "sql-aggregate",
+		total: aggregate.total,
+		categories,
+		dealTypes,
+		cities: aggregate.cities,
+		districts: aggregate.districts,
+		rooms: aggregate.rooms,
+		priceMinor: {
+			min: aggregate.priceMin,
+			max: aggregate.priceMax,
+		},
 	};
 }

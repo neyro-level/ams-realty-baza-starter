@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import type { CatalogQueryInput } from "@/server/public-gateway";
+import { projectConfig } from "../../project/project.config.ts";
 import { absoluteUrl, siteBrandName } from "./site.ts";
 
-const indexedFilterKeys = [
-	"category",
-	"dealType",
-	"city",
-	"district",
-	"rooms",
-] as const;
+const indexedFilterKeys = projectConfig.indexedCatalogFilterKeys;
 const allowedControlKeys = ["page", "sort", "view"] as const;
 const nonIndexableFilterKeys = [
 	"query",

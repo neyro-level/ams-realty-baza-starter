@@ -31,11 +31,12 @@
 | Cache | mode `http`, proof status `http`, in-process not claimed |
 | Feed images | external HTTPS, exact hosts only |
 | Lead routing | no live channels until credentialRef + host allowlist set |
-| Reserved namespaces | `/novostroyki`, `/komplex`, `/journal` |
+| Indexed catalog filters | `category`, `dealType`, `city`, `district`, `rooms` in `project.config.ts`; other query params are `noindex` |
+| Sitemap | shards of 50_000 URLs, `generateSitemaps`, generation `revalidate` 3600s |
 | Staging | separate DB + MEDIA_DIR + secrets; no production PII dump |
 | Backup | automatic `pg_dump` + `MEDIA_DIR` snapshot, rotation, offsite copy, integrity check |
 | Admin access | public+hardened until owner sets IP/VPN |
-| Extended modules | off |
+| Field ownership | `manual → field override → owning feed`; foreign-feed identity is degenerate for REALTY_BASE |
 
 Canonical URL map: `02_PRODUCT_STRUCTURE.md`. Knobs source: `src/project/project.config.ts`.
 

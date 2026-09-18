@@ -160,34 +160,59 @@ export function toPropertyFilterDTO(
 	result: PublicCatalogResult,
 	facets?: PublicCatalogFacetsResult,
 ): PropertyFilterDTO {
-	const cards = facets?.items ?? result.items;
-	const rooms = [...new Set(cards.map((item) => item.rooms).filter((room): room is number => Boolean(room)))].sort(
-		(a, b) => a - b,
-	);
-	const prices = cards.map((item) => item.priceMinor).filter((price): price is number => Boolean(price));
-	const cities = [...new Set(cards.map((item) => item.locality).filter((city): city is string => Boolean(city)))];
-	const districts = [
-		...new Set(cards.map((item) => item.district).filter((district): district is string => Boolean(district))),
-	];
-	const categories = [...new Set(cards.map((item) => item.category))];
-	const dealTypes = [...new Set(cards.map((item) => item.dealType))];
+	const rooms = facets
+		? [...facets.rooms.map((bucket) => bucket.value)].sort((a, b) => a - b)
+		: [...new Set(result.items.map((item) => item.rooms).filter((room): room is number => Boolean(room)))].sort(
+				(a, b) => a - b,
+			);
+	const categories = facets
+		? facets.categories.map((bucket) => bucket.value)
+		: [...new Set(result.items.map((item) => item.category))];
+	const dealTypes = facets
+		? facets.dealTypes.map((bucket) => bucket.value)
+		: [...new Set(result.items.map((item) => item.dealType))];
+	const cities = facets
+		? facets.cities.map((bucket) => bucket.value)
+		: [...new Set(result.items.map((item) => item.locality).filter((city): city is string => Boolean(city)))];
+	const districts = facets
+		? facets.districts.map((bucket) => bucket.value)
+		: [
+				...new Set(
+					result.items
+						.map((item) => item.district)
+						.filter((district): district is string => Boolean(district)),
+				),
+			];
+	const priceMinor = facets
+		? facets.priceMinor
+		: {
+				min: (() => {
+					const prices = result.items
+						.map((item) => item.priceMinor)
+						.filter((price): price is number => Boolean(price));
+					return prices.length ? Math.min(...prices) : null;
+				})(),
+				max: (() => {
+					const prices = result.items
+						.map((item) => item.priceMinor)
+						.filter((price): price is number => Boolean(price));
+					return prices.length ? Math.max(...prices) : null;
+				})(),
+			};
 
 	return {
-		categories: categories.map((category) => ({
-			value: category,
-			label: categoryLabels[category],
-		})),
-		dealTypes: dealTypes.map((dealType) => ({
-			value: dealType,
-			label: dealTypeLabels[dealType],
-		})),
+		categories: categories.flatMap((category) => {
+			const label = categoryLabels[category as keyof typeof categoryLabels];
+			return label ? [{ value: category as keyof typeof categoryLabels, label }] : [];
+		}),
+		dealTypes: dealTypes.flatMap((dealType) => {
+			const label = dealTypeLabels[dealType as keyof typeof dealTypeLabels];
+			return label ? [{ value: dealType as keyof typeof dealTypeLabels, label }] : [];
+		}),
 		cities: cities.map((city) => ({ value: city, label: city })),
 		districts: districts.map((district) => ({ value: district, label: district })),
 		rooms,
-		priceMinor: {
-			min: prices.length ? Math.min(...prices) : null,
-			max: prices.length ? Math.max(...prices) : null,
-		},
+		priceMinor,
 		buildingTypes: [],
 		renovations: [],
 		landUseTypes: [],

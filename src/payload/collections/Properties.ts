@@ -1,5 +1,13 @@
-import type { CollectionConfig, FieldAccess, Where } from "payload";
+import type { CollectionConfig, FieldAccess, PayloadRequest, Where } from "payload";
 import { calculatePropertyDerivedFields } from "../../core/ingest/derived-fields.ts";
+import {
+	applyPublishedSlugPolicy,
+	collectChangedImportOwnedFields,
+	mergeManualOverrides,
+	returnFieldToFeed,
+	shouldRecordManualOwnership,
+} from "../../core/ingest/manual-ownership.ts";
+import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) => hasRole(req.user, ["owner", "admin"]);
@@ -38,18 +46,108 @@ export const Properties: CollectionConfig = {
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},
+	endpoints: [
+		{
+			path: "/:id/return-to-feed",
+			method: "post",
+			handler: async (req: PayloadRequest) => {
+				if (!hasRole(req.user, ["owner", "admin"])) {
+					return Response.json({ error: "forbidden" }, { status: 403 });
+				}
+				const id = String(req.routeParams?.id ?? "");
+				const body = (await req.json?.()) as { field?: string } | null;
+				if (!id || !body?.field) {
+					return Response.json({ error: "invalid_payload" }, { status: 400 });
+				}
+				const doc = await req.payload.findByID({
+					collection: "properties",
+					id,
+					depth: 0,
+					...systemOverrideAccess("system-job"),
+				});
+				const next = returnFieldToFeed(
+					doc.manualOverrides as
+						| { field: string; setAt: string; setBy?: string | number | null }[]
+						| undefined,
+					body.field,
+				);
+				await req.payload.update({
+					collection: "properties",
+					id,
+					data: {
+						manualOverrides: next.map((marker) => ({
+							field: marker.field,
+							setAt: marker.setAt,
+							setBy:
+								typeof marker.setBy === "number"
+									? marker.setBy
+									: marker.setBy == null || marker.setBy === ""
+										? null
+										: Number(marker.setBy),
+						})),
+					},
+					...systemOverrideAccess("system-job"),
+					context: {
+						...systemOverrideAccess("system-job").context,
+						source: "system",
+					},
+				});
+				return Response.json({ field: body.field, returned: true });
+			},
+		},
+	],
 	hooks: {
 		beforeChange: [
-			({ data, originalDoc }) => {
+			({ data, originalDoc, req }) => {
 				const priceMinor =
 					data.priceMinor === undefined ? originalDoc?.priceMinor : data.priceMinor;
 				const totalArea =
 					data.totalArea === undefined ? originalDoc?.totalArea : data.totalArea;
 				const derived = calculatePropertyDerivedFields({ priceMinor, totalArea });
-				if (derived.pricePerMeterMinor == null) {
-					return data;
+				if (derived.pricePerMeterMinor != null) {
+					data.pricePerMeterMinor = derived.pricePerMeterMinor;
 				}
-				data.pricePerMeterMinor = derived.pricePerMeterMinor;
+
+				const contextSource =
+					(req?.context as { source?: string } | undefined)?.source ??
+					(req?.context as { systemGatewayOperation?: string } | undefined)
+						?.systemGatewayOperation;
+				const actorSource =
+					contextSource === "system-job" || contextSource === "import"
+						? contextSource === "system-job"
+							? "system"
+							: "import"
+						: contextSource;
+				if (
+					shouldRecordManualOwnership({
+						userId: req?.user?.id,
+						source: actorSource,
+					})
+				) {
+					const changed = collectChangedImportOwnedFields(
+						data as Record<string, unknown>,
+						originalDoc as Record<string, unknown> | undefined,
+					);
+					if (changed.length > 0) {
+						data.manualOverrides = mergeManualOverrides(
+							originalDoc?.manualOverrides as
+								| { field: string; setAt: string; setBy?: string | number | null }[]
+								| undefined,
+							changed,
+							{
+								nowIso: new Date().toISOString(),
+								userId: req?.user?.id,
+							},
+						);
+					}
+				}
+
+				const lockedSlug = applyPublishedSlugPolicy({
+					nextSlug: data.slug,
+					originalSlug: originalDoc?.slug,
+					publishedAt: originalDoc?.publishedAt ?? data.publishedAt,
+				});
+				if (lockedSlug) data.slug = lockedSlug;
 				return data;
 			},
 		],

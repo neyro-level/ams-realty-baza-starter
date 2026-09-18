@@ -1,0 +1,103 @@
+import assert from "node:assert/strict";
+import {
+	applyPublishedSlugPolicy,
+	collectChangedImportOwnedFields,
+	mergeManualOverrides,
+	returnFieldToFeed,
+	shouldRecordManualOwnership,
+} from "../src/core/ingest/manual-ownership.ts";
+import { calculatePropertyDerivedFields } from "../src/core/ingest/derived-fields.ts";
+import { ingestNormalizedFeed } from "../src/core/ingest/index.ts";
+
+assert.equal(
+	shouldRecordManualOwnership({ userId: 1, source: "import" }),
+	false,
+);
+assert.equal(
+	shouldRecordManualOwnership({ userId: 1, source: "system" }),
+	false,
+);
+assert.equal(shouldRecordManualOwnership({ userId: 1, source: "admin" }), true);
+assert.equal(shouldRecordManualOwnership({ source: "admin" }), false);
+
+const first = mergeManualOverrides([], ["title"], {
+	nowIso: "2026-09-18T12:00:00.000Z",
+	userId: 7,
+});
+assert.deepEqual(first, [
+	{ field: "title", setAt: "2026-09-18T12:00:00.000Z", setBy: 7 },
+]);
+assert.equal(returnFieldToFeed(first, "title").length, 0);
+assert.deepEqual(collectChangedImportOwnedFields({ title: "A" }, { title: "A" }), []);
+assert.deepEqual(collectChangedImportOwnedFields({ title: "B" }, { title: "A" }), [
+	"title",
+]);
+
+assert.equal(
+	applyPublishedSlugPolicy({
+		nextSlug: "new-slug",
+		originalSlug: "old-slug",
+		publishedAt: "2026-09-01T00:00:00.000Z",
+	}),
+	"old-slug",
+);
+
+const derived = calculatePropertyDerivedFields({
+	priceMinor: 10_000_000_00,
+	totalArea: 50,
+});
+assert.equal(derived.pricePerMeterMinor, 20_000_000);
+
+const repository = {
+	byId: new Map(),
+	async findFeedProperty({ feedSourceId, externalId }) {
+		return [...this.byId.values()].find(
+			(row) => row.feedSource === feedSourceId && row.externalId === externalId,
+		);
+	},
+	async createFeedProperty(data) {
+		const record = { ...data, id: "p1", slug: data.slug, manualOverrides: [] };
+		this.byId.set(record.id, record);
+		return record;
+	},
+	async updateFeedProperty(id, data) {
+		const next = { ...this.byId.get(id), ...data };
+		this.byId.set(id, next);
+		return next;
+	},
+	async createImportIssue() {},
+	async touchLastSeenAt() {},
+	async countMissingActive() {
+		return 0;
+	},
+	async deactivateMissing() {
+		return 0;
+	},
+};
+
+const offer = {
+	externalId: "ext-1",
+	title: "Квартира",
+	category: "квартира",
+	dealType: "продажа",
+	priceMinor: 12_000_000_00,
+	currency: "RUB",
+	images: [],
+};
+const context = {
+	feedSourceId: "11",
+	feedSourceCode: "a",
+	importRunId: "1",
+	market: "secondary",
+	nowIso: "2026-09-18T12:00:00.000Z",
+};
+
+await ingestNormalizedFeed({ context, offers: [offer], repository });
+await ingestNormalizedFeed({
+	context: { ...context, importRunId: "2" },
+	offers: [offer],
+	repository,
+});
+assert.deepEqual(repository.byId.get("p1").manualOverrides, []);
+
+console.log("verify-manual-ownership: ok");

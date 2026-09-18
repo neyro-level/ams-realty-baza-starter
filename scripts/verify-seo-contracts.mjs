@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
 	buildCatalogSeoDecision,
 	catalogSeoParamPolicy,
@@ -6,6 +7,7 @@ import {
 import {
 	getPropertyRobots,
 	resolvePropertyPageLifecycle,
+	sanitizeExplicitRedirectPath,
 } from "../src/server/seo/property.ts";
 import { staticPublicUrlEntries } from "../src/server/seo/site.ts";
 
@@ -117,6 +119,40 @@ assert.deepEqual(
 		statusCode: 308,
 		destination: "/obekty/explicit-target",
 	},
+);
+assert.deepEqual(
+	resolvePropertyPageLifecycle({
+		found: true,
+		status: "archived",
+		publishedAt: "2026-01-01T00:00:00.000Z",
+		contentPurgedAt: "2026-02-01T00:00:00.000Z",
+		explicitRedirectPath: "/",
+	}),
+	{ kind: "gone", statusCode: 410, robots: "noindex" },
+);
+assert.equal(sanitizeExplicitRedirectPath("/"), null);
+assert.equal(sanitizeExplicitRedirectPath("/obekty/next"), "/obekty/next");
+
+const sitemapSource = readFileSync("src/app/sitemap.ts", "utf8");
+assert.ok(sitemapSource.includes("generateSitemaps"));
+assert.match(sitemapSource, /export const revalidate = 3600;/);
+assert.equal(sitemapSource.includes("limit: 1000"), false);
+const catalogSource = readFileSync("src/server/public-gateway/catalog.ts", "utf8");
+assert.equal(catalogSource.includes("limit: 1000"), false);
+assert.ok(catalogSource.includes("aggregatePublicCatalogFacets"));
+assert.ok(
+	readFileSync("src/app/http/property-lifecycle/[slug]/route.ts", "utf8").includes(
+		"status: 410",
+	) ||
+		readFileSync(
+			"src/server/http/property-gone-response.ts",
+			"utf8",
+		).includes("status: 410"),
+);
+assert.ok(
+	readFileSync("src/payload/collections/Pages.ts", "utf8").includes(
+		"reservedNamespaces",
+	),
 );
 
 console.log("verify-seo-contracts: ok");

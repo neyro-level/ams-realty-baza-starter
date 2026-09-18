@@ -15,6 +15,16 @@ export const projectConfig = {
 		"/komplex",
 		"/journal",
 	],
+	indexedCatalogFilterKeys: [
+		"category",
+		"dealType",
+		"city",
+		"district",
+		"rooms",
+	],
+	sitemapUrlsPerShard: 50_000,
+	sitemapQueryPageSize: 500,
+	sitemapGenerationRevalidateSeconds: 3_600,
 	jobsAutorunExactlyOne: true,
 } as const;
 

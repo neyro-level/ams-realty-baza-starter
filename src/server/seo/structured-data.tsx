@@ -50,20 +50,40 @@ export function buildCatalogItemListJsonLd(list: PropertyListDTO): JsonLd {
 }
 
 export function buildPropertyJsonLd(property: PropertyDetailsDTO): JsonLd {
-	return {
+	const offer: JsonLd = {
 		"@context": "https://schema.org",
 		"@type": "Offer",
 		url: absoluteUrl(property.href),
 		name: property.title,
 		description: property.description,
-		price: property.price ? property.price.priceMinor / 100 : undefined,
-		priceCurrency: property.price?.currency ?? "RUB",
-		availability: "https://schema.org/InStock",
 		itemOffered: {
 			"@type": "Residence",
 			name: property.title,
 			address: property.address,
-			floorSize: property.summary.find((item) => item.key === "area")?.value,
 		},
+	};
+	if (property.price) {
+		offer.price = property.price.priceMinor / 100;
+		offer.priceCurrency = property.price.currency;
+	}
+	const area = property.summary.find((item) => item.key === "area")?.value;
+	if (area) {
+		(offer.itemOffered as JsonLd).floorSize = area;
+	}
+	return offer;
+}
+
+export function buildBreadcrumbJsonLd(
+	items: readonly { name: string; path: string }[],
+): JsonLd {
+	return {
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: items.map((item, index) => ({
+			"@type": "ListItem",
+			position: index + 1,
+			name: item.name,
+			item: absoluteUrl(item.path),
+		})),
 	};
 }

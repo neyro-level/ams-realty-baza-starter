@@ -63,10 +63,9 @@ for (const snippet of requiredPredicateSnippets) {
 }
 
 const facetSnippets = [
-	"const publicPropertyFacetSelect",
+	"aggregatePublicCatalogFacets",
+	"source: \"sql-aggregate\"",
 	"export async function findPublicCatalogFacets",
-	"const limit = 500",
-	"bounded: true",
 ];
 
 for (const snippet of facetSnippets) {

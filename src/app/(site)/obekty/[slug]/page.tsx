@@ -6,6 +6,7 @@ import { toMetadata } from "@/fixture/metadata";
 import { getPublicProperty } from "@/server/public-gateway";
 import { getPropertyRobots } from "@/server/seo/property";
 import {
+	buildBreadcrumbJsonLd,
 	buildPropertyJsonLd,
 	JsonLdScript,
 } from "@/server/seo/structured-data";
@@ -96,6 +97,13 @@ export default async function PropertyPage({
 				</div>
 			) : null}
 			<JsonLdScript data={buildPropertyJsonLd(property)} />
+			<JsonLdScript
+				data={buildBreadcrumbJsonLd([
+					{ name: "Главная", path: "/" },
+					{ name: "Недвижимость", path: "/nedvizhimost" },
+					{ name: property.title, path: property.href },
+				])}
+			/>
 			<PropertyPageView property={property} leadPage={leadPage} />
 		</>
 	);
@@ -112,7 +120,8 @@ function GonePropertyPage({ slug }: { slug: string }) {
 			</h1>
 			<p className="mt-4 text-balance text-body-lg text-content-muted">
 				Страница объекта {slug} больше не содержит публичные данные после
-				окончания retention-периода. Автоматический редирект не выполняется.
+				окончания retention-периода. Автоматический редирект на главную не
+				выполняется.
 			</p>
 			<a
 				className="mt-8 rounded-full bg-content-default px-6 py-3 font-medium text-surface text-sm"

@@ -388,6 +388,8 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					},
 					req,
 				});
+				// Purge never writes a homepage redirect; public path becomes 410
+				// unless an explicit redirects.from row already exists.
 			}
 
 			return { output: { purgedProperties: archivedProperties.docs.length } };

@@ -16,7 +16,6 @@ export async function generateMetadata() {
 
 export default async function HomePage() {
 	const home = await getPublicHomePage();
-	if (!home.featured) return null;
 	return (
 		<>
 			<JsonLdScript data={buildOrganizationJsonLd()} />

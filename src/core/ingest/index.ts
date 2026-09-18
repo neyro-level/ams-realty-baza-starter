@@ -30,6 +30,12 @@ export {
 	ingestNormalizedFeed,
 } from "./feed-ingest.ts";
 export {
+	applyPublishedSlugPolicy,
+	importOwnedFields,
+	returnFieldToFeed,
+	shouldRecordManualOwnership,
+} from "./manual-ownership.ts";
+export {
 	computeTransientRetryAt,
 	decideFeedRunCompletion,
 	decideStaleRunRecovery,

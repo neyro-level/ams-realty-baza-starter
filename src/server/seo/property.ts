@@ -1,4 +1,7 @@
 import type { PublicPropertyLifecycle } from "@/server/public-gateway/dto";
+import { sanitizeExplicitRedirectPath } from "./redirect-path.ts";
+
+export { sanitizeExplicitRedirectPath } from "./redirect-path.ts";
 
 export type PropertyPageLifecycleState =
 	| { kind: "missing"; statusCode: 404 }
@@ -33,11 +36,12 @@ export function resolvePropertyPageLifecycle(
 	}
 
 	if (input.contentPurgedAt) {
-		if (input.explicitRedirectPath) {
+		const destination = sanitizeExplicitRedirectPath(input.explicitRedirectPath);
+		if (destination) {
 			return {
 				kind: "redirect",
 				statusCode: 308,
-				destination: input.explicitRedirectPath,
+				destination,
 			};
 		}
 

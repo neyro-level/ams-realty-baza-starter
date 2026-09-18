@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { sanitizeExplicitRedirectPath } from "../../server/seo/redirect-path.ts";
 import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
 
 export const Redirects: CollectionConfig = {
@@ -12,6 +13,29 @@ export const Redirects: CollectionConfig = {
 		read: adminsAndOwners,
 		update: ownersOnly,
 		delete: ownersOnly,
+	},
+	hooks: {
+		beforeValidate: [
+			({ data }) => {
+				if (!data) return data;
+				const to = sanitizeExplicitRedirectPath(
+					typeof data.to === "string" ? data.to : null,
+				);
+				if (!to) {
+					throw new Error(
+						"Redirect destination must be an explicit public path and must not target the homepage.",
+					);
+				}
+				data.to = to;
+				if (typeof data.from === "string") {
+					const from = data.from.trim();
+					if (from === to) {
+						throw new Error("Redirect must not form a self-chain.");
+					}
+				}
+				return data;
+			},
+		],
 	},
 	fields: [
 		{

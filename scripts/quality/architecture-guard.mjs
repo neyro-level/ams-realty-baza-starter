@@ -206,7 +206,7 @@ if (!Array.isArray(baseline.knownExceptions) || baseline.knownExceptions.length 
 }
 
 const approvedSql =
-	/^src\/core\/data-access\/(?:system|ingest)\/sql\//;
+	/^src\/core\/data-access\/(?:system|ingest|public)\/sql\//;
 const migrationSql = /^src\/payload\/migrations\//;
 for (const file of filesUnder("src")) {
 	const name = relative(file);

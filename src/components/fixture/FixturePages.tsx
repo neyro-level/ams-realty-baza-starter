@@ -201,7 +201,7 @@ export function HomePageView({
 	featured,
 }: {
 	page: HomePageDTO;
-	featured: PropertyCardDTO;
+	featured: PropertyCardDTO | null;
 }) {
 	return (
 		<main>
@@ -226,7 +226,23 @@ export function HomePageView({
 							</Button>
 						</div>
 					</div>
-					<PropertyCard property={featured} headingLevel="h2" />
+					{featured ? (
+						<PropertyCard property={featured} headingLevel="h2" />
+					) : (
+						<Card>
+							<CardHeader>
+								<CardTitle>Избранный объект появится позже</CardTitle>
+								<CardDescription>
+									Каталог пока пуст, главная страница остаётся доступной.
+								</CardDescription>
+							</CardHeader>
+							<CardFooter>
+								<Button asChild variant="outline">
+									<Link href="/nedvizhimost">Открыть каталог</Link>
+								</Button>
+							</CardFooter>
+						</Card>
+					)}
 				</Container>
 			</Section>
 			<Section>
@@ -330,9 +346,16 @@ export function CatalogPageView({
 						description="Неизвестные поля не вычисляются и не показываются."
 					/>
 					<div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-						{list.items.map((property) => (
-							<PropertyCard key={property.id} property={property} />
-						))}
+						{list.items.length ? (
+							list.items.map((property) => (
+								<PropertyCard key={property.id} property={property} />
+							))
+						) : (
+							<p className="col-span-full text-body-large text-content-default">
+								Подходящих объектов пока нет. Измените фильтры или загляните
+								позже.
+							</p>
+						)}
 					</div>
 				</Container>
 			</Section>
@@ -358,7 +381,9 @@ export function PropertyPageView({
 					<div className="grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">
 						<div>
 							<div className="flex aspect-[16/9] items-center justify-center rounded-[var(--radius-lg)] bg-surface-subtle text-content-default">
-								Галерея заполняется тегами picture из XML-фида
+								{property.gallery.length
+									? "Галерея объекта"
+									: "Фотографии появятся позже"}
 							</div>
 							<h1 className="mt-8 text-display-small font-extrabold leading-heading">
 								{property.title}
@@ -399,9 +424,15 @@ export function PropertyPageView({
 				<Container>
 					<SectionHeader title="Похожие объекты" />
 					<div className="mt-8 grid gap-6 md:grid-cols-2">
-						{property.related.map((item) => (
-							<PropertyCard key={item.id} property={item} />
-						))}
+						{property.related.length ? (
+							property.related.map((item) => (
+								<PropertyCard key={item.id} property={item} />
+							))
+						) : (
+							<p className="col-span-full text-body-large text-content-default">
+								Похожие объекты пока не подобраны.
+							</p>
+						)}
 					</div>
 				</Container>
 			</Section>

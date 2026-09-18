@@ -40,4 +40,6 @@ export {
 	getPublicProperty,
 	getPublicShell,
 	getPublicSitemapEntries,
+	getPublicSitemapShard,
+	getPublicSitemapShardCount,
 } from "./provider";
