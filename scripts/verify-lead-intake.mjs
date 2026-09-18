@@ -1,8 +1,12 @@
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import {
+	buildFraudFingerprint,
 	evaluateLeadRateLimit,
+	hitInProcessLeadRateLimit,
 	normalizePhoneToE164,
 	prepareLeadIntake,
+	resolveEnabledLeadChannels,
 } from "../src/core/leads/index.ts";
 
 const validPayload = {
@@ -33,6 +37,69 @@ assert.equal(accepted.lead.idempotencyKey.startsWith("lead:"), true);
 assert.equal(accepted.lead.fraudFingerprint.startsWith("lead-fraud:"), true);
 assert.equal(accepted.safeDiagnostics.rawPiiIncluded, false);
 assertNoRawPii(accepted.safeDiagnostics);
+
+const sameIdentityLaterConsent = prepareLeadIntake({
+	...validPayload,
+	consentedAt: "2026-09-16T12:30:00.000Z",
+	renderedAt: "2026-09-16T12:29:50.000Z",
+	submittedAt: "2026-09-16T12:30:00.000Z",
+});
+assert.equal(sameIdentityLaterConsent.accepted, true);
+assert.equal(
+	sameIdentityLaterConsent.lead.idempotencyKey,
+	accepted.lead.idempotencyKey,
+	"Idempotency must not depend on timestamp alone.",
+);
+
+const hmacFingerprint = buildFraudFingerprint(
+	{
+		phoneE164: "+79161234567",
+		sourcePage: "/kontakty",
+		submittedAt: "2026-09-16T12:00:00.000Z",
+	},
+	"test-hmac-key",
+);
+assert.equal(hmacFingerprint.startsWith("lead-fraud:"), true);
+assert.notEqual(hmacFingerprint, accepted.lead.fraudFingerprint);
+
+assert.deepEqual(resolveEnabledLeadChannels({}), []);
+assert.deepEqual(
+	resolveEnabledLeadChannels({ LEAD_CHANNELS: "max" }),
+	[],
+	"Enabled channel without credential refs and host allowlist must stay off.",
+);
+assert.equal(
+	resolveEnabledLeadChannels({
+		LEAD_CHANNELS: "max",
+		LEAD_OUTBOUND_HOSTS: "botapi.max.ru",
+		MAX_BOT_TOKEN: "x",
+		MAX_CHAT_ID: "1",
+	}).length,
+	1,
+);
+
+const firstHit = hitInProcessLeadRateLimit({
+	key: "verify-lead-intake",
+	limit: 2,
+	now: 1,
+});
+assert.equal(firstHit, undefined);
+hitInProcessLeadRateLimit({ key: "verify-lead-intake", limit: 2, now: 1 });
+const limitedInProcess = hitInProcessLeadRateLimit({
+	key: "verify-lead-intake",
+	limit: 2,
+	now: 1,
+});
+assert.equal(limitedInProcess?.code, "lead.rate_limited");
+
+const routeSource = readFileSync("src/app/api/public/leads/route.ts", "utf8");
+assert.equal(routeSource.includes("submitPublicLead"), true);
+const boundary = JSON.parse(readFileSync("config/raw-rest-boundary.json", "utf8"));
+assert.equal(
+	boundary.allowedRouteFiles.includes("src/app/api/public/leads/route.ts"),
+	true,
+);
+assert.equal(boundary.anonymousDenyCollections.includes("leads"), true);
 
 const invalidPhone = prepareLeadIntake({ ...validPayload, phone: "abc123" });
 assert.equal(invalidPhone.accepted, false);

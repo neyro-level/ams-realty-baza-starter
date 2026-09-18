@@ -3,6 +3,7 @@
 	"allowedRouteFiles": [
 		"src/app/api/internal/healthz/route.ts",
 		"src/app/api/internal/revalidate/route.ts",
+		"src/app/api/public/leads/route.ts",
 		"src/app/(payload)/api/[[...slug]]/route.ts",
 		"src/app/(payload)/api/graphql/route.ts",
 		"src/app/(payload)/api/graphql-playground/route.ts"
@@ -40,5 +41,5 @@
 		"/api/users/reset-password",
 		"/api/users/verify"
 	],
-	"note": "Every app API route must be explicitly approved here. Raw anonymous business REST remains denied by default."
+	"note": "Every app API route must be explicitly approved here. Public lead intake is POST /api/public/leads only; generic Payload leads create remains deny-anonymous. Raw anonymous business REST remains denied by default."
 }

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+	accelerateLeadDeliveryJobs,
 	commitLeadOutbox,
 	planRecoverableLeadDeliveryJobs,
 	prepareLeadIntake,
@@ -76,6 +77,18 @@ const afterEnqueueRecoveryPlan = await planRecoverableLeadDeliveryJobs(
 );
 assert.equal(afterEnqueueRecoveryPlan.length, 1);
 assert.equal(afterEnqueueRecoveryPlan[0].deliveryId, "delivery-2");
+
+let enqueueCalls = 0;
+await accelerateLeadDeliveryJobs({
+	repository,
+	nowIso: "2026-09-16T12:10:00.000Z",
+	enqueue: async () => {
+		enqueueCalls += 1;
+		throw new Error("enqueue unavailable");
+	},
+});
+assert.equal(enqueueCalls, 1);
+assert.equal(repository.leads.length, 1, "Enqueue failure must not roll back the lead.");
 
 console.log("verify-lead-outbox: ok");
 

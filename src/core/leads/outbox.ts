@@ -34,6 +34,7 @@ export type LeadOutboxRepository = {
 	findPendingDeliveriesWithoutJob(
 		nowIso: string,
 	): Promise<LeadDeliveryRecord[]>;
+	attachDeliveryJobId?(deliveryId: string, jobId: string): Promise<void>;
 };
 
 export type LeadOutboxTransaction = {
@@ -82,29 +83,65 @@ export async function commitLeadOutbox({
 		};
 	}
 
-	return repository.transaction(async (tx) => {
-		const lead = await tx.createLead({
-			...intake.lead,
-			status: "new",
+	try {
+		return await repository.transaction(async (tx) => {
+			const lead = await tx.createLead({
+				...intake.lead,
+				status: "new",
+			});
+			const deliveries: LeadDeliveryRecord[] = [];
+
+			for (const channel of channels.filter((item) => item.enabled)) {
+				deliveries.push(
+					await tx.createLeadDelivery({
+						lead: lead.id,
+						channelId: channel.id,
+						channelKind: channel.kind,
+						status: "pending",
+						attempts: 0,
+						nextAttemptAt: nowIso,
+						idempotencyKey: buildLeadDeliveryIdempotencyKey(lead.id, channel.id),
+					}),
+				);
+			}
+
+			return { lead, deliveries, reusedExistingLead: false };
 		});
-		const deliveries: LeadDeliveryRecord[] = [];
-
-		for (const channel of channels.filter((item) => item.enabled)) {
-			deliveries.push(
-				await tx.createLeadDelivery({
-					lead: lead.id,
-					channelId: channel.id,
-					channelKind: channel.kind,
-					status: "pending",
-					attempts: 0,
-					nextAttemptAt: nowIso,
-					idempotencyKey: buildLeadDeliveryIdempotencyKey(lead.id, channel.id),
-				}),
-			);
+	} catch (error) {
+		const raced = await repository.findLeadByIdempotencyKey(
+			intake.lead.idempotencyKey,
+		);
+		if (raced) {
+			return {
+				lead: raced,
+				deliveries: await repository.findLeadDeliveries(raced.id),
+				reusedExistingLead: true,
+			};
 		}
+		throw error;
+	}
+}
 
-		return { lead, deliveries, reusedExistingLead: false };
-	});
+export async function accelerateLeadDeliveryJobs({
+	repository,
+	nowIso,
+	enqueue,
+}: {
+	repository: LeadOutboxRepository;
+	nowIso: string;
+	enqueue: (leadDeliveryId: string) => Promise<string | undefined>;
+}): Promise<void> {
+	const plans = await planRecoverableLeadDeliveryJobs(repository, nowIso);
+	for (const plan of plans) {
+		try {
+			const jobId = await enqueue(plan.input.leadDeliveryId);
+			if (jobId && repository.attachDeliveryJobId) {
+				await repository.attachDeliveryJobId(plan.deliveryId, jobId);
+			}
+		} catch {
+			// Immediate enqueue is optional. Sweeper remains the correctness path.
+		}
+	}
 }
 
 export async function planRecoverableLeadDeliveryJobs(

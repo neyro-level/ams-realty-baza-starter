@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { z } from "zod";
 
 export type LeadFormKind =
@@ -101,7 +101,10 @@ const leadIntakeSchema = z.object({
 		.or(z.literal("")),
 });
 
-export function prepareLeadIntake(input: unknown): LeadIntakeResult {
+export function prepareLeadIntake(
+	input: unknown,
+	options?: { fraudHmacKey?: string },
+): LeadIntakeResult {
 	const parsed = leadIntakeSchema.safeParse(input);
 	if (!parsed.success) {
 		return reject("lead.invalid_payload", "Payload failed validation.");
@@ -157,13 +160,16 @@ export function prepareLeadIntake(input: unknown): LeadIntakeResult {
 					phoneE164,
 					formKind: payload.formKind,
 					sourcePage: payload.sourcePage,
-					consentedAt: payload.consentedAt,
+					consentVersion: payload.consentVersion,
 				}),
-			fraudFingerprint: buildFraudFingerprint({
-				phoneE164,
-				sourcePage: payload.sourcePage,
-				submittedAt: payload.submittedAt,
-			}),
+			fraudFingerprint: buildFraudFingerprint(
+				{
+					phoneE164,
+					sourcePage: payload.sourcePage,
+					submittedAt: payload.submittedAt,
+				},
+				options?.fraudHmacKey,
+			),
 		},
 		safeDiagnostics: diagnostics(
 			"lead.accepted",
@@ -217,18 +223,25 @@ export function buildLeadIdempotencyKey(input: {
 	phoneE164: string;
 	formKind: LeadFormKind;
 	sourcePage: string;
-	consentedAt: string;
+	consentVersion: string;
 }): string {
-	return `lead:${hashSafe([input.phoneE164, input.formKind, input.sourcePage, input.consentedAt])}`;
+	return `lead:${hashSafe([input.phoneE164, input.formKind, input.sourcePage, input.consentVersion])}`;
 }
 
-export function buildFraudFingerprint(input: {
-	phoneE164: string;
-	sourcePage: string;
-	submittedAt: string;
-}): string {
+export function buildFraudFingerprint(
+	input: {
+		phoneE164: string;
+		sourcePage: string;
+		submittedAt: string;
+	},
+	hmacKey?: string,
+): string {
 	const submittedDate = input.submittedAt.slice(0, 10);
-	return `lead-fraud:${hashSafe([input.phoneE164, input.sourcePage, submittedDate])}`;
+	const material = [input.phoneE164, input.sourcePage, submittedDate];
+	const digest = hmacKey?.trim()
+		? createHmac("sha256", hmacKey).update(material.join("\0")).digest("hex")
+		: hashSafe(material);
+	return `lead-fraud:${digest}`;
 }
 
 function isFillTimeAcceptable(

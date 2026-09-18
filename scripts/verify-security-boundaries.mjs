@@ -107,6 +107,16 @@ requireIncludes(
 	"no-store",
 	"health endpoint must not be cacheable",
 );
+requireIncludes(
+	"src/app/api/public/leads/route.ts",
+	"submitPublicLead",
+	"public lead intake must use the classified public gateway, not generic Payload REST",
+);
+requireIncludes(
+	"src/payload/collections/Leads.ts",
+	"create: adminsAndOwners",
+	"generic Payload leads create must not be public",
+);
 
 const nextConfig = read("next.config.ts");
 for (const required of [

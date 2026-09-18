@@ -30,7 +30,7 @@
 | Stale-data SLA | `staleDataSlaMinutes = 30` |
 | Cache | mode `http`, proof status `http`, in-process not claimed |
 | Feed images | external HTTPS, exact hosts only |
-| Lead routing | no live channels until credentialRef + host allowlist set |
+| Lead routing | public intake `POST /api/public/leads` only; generic Payload `leads` create is not public; live channels require credentialRef + `LEAD_OUTBOUND_HOSTS` |
 | Indexed catalog filters | `category`, `dealType`, `city`, `district`, `rooms` in `project.config.ts`; other query params are `noindex` |
 | Sitemap | shards of 50_000 URLs, `generateSitemaps`, generation `revalidate` 3600s |
 | Staging | separate DB + MEDIA_DIR + secrets; no production PII dump |

@@ -33,14 +33,22 @@ export {
 	recoverStaleSendingDelivery,
 } from "./delivery-state.ts";
 export {
+	parseLeadChannelIds,
+	resolveEnabledLeadChannels,
+	type LeadChannelEnv,
+} from "./channels.ts";
+export { hitInProcessLeadRateLimit } from "./in-process-rate-limit.ts";
+export {
 	buildFraudFingerprint,
 	buildLeadIdempotencyKey,
 	evaluateLeadRateLimit,
+	type LeadIntakeRejected,
 	type LeadIntakeResult,
 	normalizePhoneToE164,
 	prepareLeadIntake,
 } from "./intake.ts";
 export {
+	accelerateLeadDeliveryJobs,
 	buildLeadDeliveryIdempotencyKey,
 	commitLeadOutbox,
 	type LeadChannelConfig,
