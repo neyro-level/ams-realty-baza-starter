@@ -140,6 +140,8 @@ assert.equal(sitemapSource.includes("limit: 1000"), false);
 const catalogSource = readFileSync("src/server/public-gateway/catalog.ts", "utf8");
 assert.equal(catalogSource.includes("limit: 1000"), false);
 assert.ok(catalogSource.includes("aggregatePublicCatalogFacets"));
+assert.ok(catalogSource.includes("payload-aggregate"));
+assert.equal(catalogSource.includes("sql-aggregate"), false);
 assert.ok(
 	readFileSync("src/app/http/property-lifecycle/[slug]/route.ts", "utf8").includes(
 		"status: 410",

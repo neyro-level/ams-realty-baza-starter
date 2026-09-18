@@ -359,6 +359,25 @@ if (!existsSync(path.join(root, "src", "core", "data-access", "system", "jobs", 
 	violations.push("src/core/data-access/system/jobs module is missing");
 }
 
+if (existsSync(path.join(root, "src", "core", "data-access", "public", "sql"))) {
+	violations.push("src/core/data-access/public/sql: public raw SQL layer must be removed");
+}
+
+const publicReadRoots = [
+	"src/server/public-gateway",
+	"src/app/(site)",
+	"src/core/data-access/public",
+];
+const publicSqlForbidden =
+	/drizzle\.execute|from\s+["']@payloadcms\/db-postgres\/drizzle["']|payload\.db|db\.drizzle/;
+for (const directory of publicReadRoots) {
+	for (const file of filesUnder(directory)) {
+		if (publicSqlForbidden.test(readFileSync(file, "utf8"))) {
+			report(file, "public/read path must not use drizzle.execute or payload.db");
+		}
+	}
+}
+
 if (violations.length) {
 	console.error(violations.join("\n"));
 	process.exit(1);

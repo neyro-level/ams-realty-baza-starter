@@ -87,7 +87,7 @@ for (const snippet of requiredPredicateSnippets) {
 
 const facetSnippets = [
 	"aggregatePublicCatalogFacets",
-	"source: \"sql-aggregate\"",
+	"source: \"payload-aggregate\"",
 	"export async function findPublicCatalogFacets",
 ];
 

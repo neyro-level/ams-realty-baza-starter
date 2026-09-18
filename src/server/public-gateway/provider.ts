@@ -5,7 +5,7 @@ import {
 	countPublicSitemapProperties,
 	listPublicSitemapPagesPage,
 	listPublicSitemapPropertiesPage,
-} from "@/core/data-access/public/sql";
+} from "./payload-reads";
 import { projectConfig } from "@/project/project.config";
 import { resolvePropertyPageLifecycle } from "@/server/seo/property";
 import {

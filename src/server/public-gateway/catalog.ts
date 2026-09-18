@@ -8,16 +8,16 @@ import type {
 } from "@ams/realtbase-contracts";
 import type { Payload, Where } from "payload";
 import { z } from "zod";
+import type { PropertiesSelect, Property } from "@/payload/payload-types";
+import { sanitizeExplicitRedirectPath } from "@/server/seo/redirect-path";
+import { publicGatewayPolicy } from "./policy";
 import {
 	aggregatePublicCatalogFacets,
 	findPublicPropertyLifecycleRow,
 	findPublicRedirectByFromPath,
 	listPublicSitemapPropertiesPage,
 	publicRedirectDestinationIsChain,
-} from "@/core/data-access/public/sql";
-import type { PropertiesSelect, Property } from "@/payload/payload-types";
-import { sanitizeExplicitRedirectPath } from "@/server/seo/redirect-path";
-import { publicGatewayPolicy } from "./policy";
+} from "./payload-reads";
 
 const publicPropertySelect = {
 	slug: true,
@@ -159,7 +159,7 @@ export type PublicCatalogResult = {
 };
 
 export type PublicCatalogFacetsResult = {
-	source: "sql-aggregate";
+	source: "payload-aggregate";
 	total: number;
 	categories: readonly { value: PropertyCategory; count: number }[];
 	dealTypes: readonly { value: PropertyDealType; count: number }[];
@@ -372,18 +372,8 @@ export async function findPublicCatalogFacets(
 	input: CatalogQueryInput,
 ): Promise<PublicCatalogFacetsResult> {
 	const query = catalogQuerySchema.parse(input);
-	const aggregate = await aggregatePublicCatalogFacets(payload, {
-		query: query.query,
-		category: query.category,
-		dealType: query.dealType,
-		city: query.city,
-		district: query.district,
-		rooms: query.rooms,
-		priceFromMinor: query.priceFromMinor,
-		priceToMinor: query.priceToMinor,
-		areaFrom: query.areaFrom,
-		areaTo: query.areaTo,
-	});
+	const where = buildCatalogWhere(query);
+	const aggregate = await aggregatePublicCatalogFacets(payload, where);
 	const categories = aggregate.categories.flatMap((bucket) => {
 		const parsed = propertyCategorySchema.safeParse(bucket.value);
 		return parsed.success ? [{ value: parsed.data, count: bucket.count }] : [];
@@ -394,7 +384,7 @@ export async function findPublicCatalogFacets(
 	});
 
 	return {
-		source: "sql-aggregate",
+		source: "payload-aggregate",
 		total: aggregate.total,
 		categories,
 		dealTypes,
