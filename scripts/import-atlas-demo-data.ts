@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { getPayload } from "payload";
 import config from "../payload.config.ts";
 import { requirePayloadRuntime } from "../src/payload/env.ts";
+import { calculatePropertyDerivedFields } from "../src/core/ingest/derived-fields.ts";
 import { systemOverrideAccess } from "../src/server/system-gateway/overrides.ts";
 
 type AtlasPhoto = {
@@ -105,9 +106,11 @@ function moneyMinor(value?: number | null): number | undefined {
 	return Math.round(value * 100);
 }
 
-function pricePerMeterMinor(price?: number | null, area?: number | null): number | undefined {
-	if (typeof price !== "number" || typeof area !== "number" || area <= 0) return undefined;
-	return Math.round((price / area) * 100);
+function pricePerMeterMinor(priceMinor?: number | null, area?: number | null) {
+	return calculatePropertyDerivedFields({
+		priceMinor,
+		totalArea: area,
+	}).pricePerMeterMinor;
 }
 
 function defined<T>(value: T | null | undefined): T | undefined {
@@ -159,7 +162,7 @@ function propertyRecord(item: AtlasProperty): ImportRecord {
 			dealType: "sale",
 			priceMinor,
 			currency: "RUB",
-			pricePerMeterMinor: pricePerMeterMinor(item.price, item.area),
+			pricePerMeterMinor: pricePerMeterMinor(priceMinor, item.area),
 			rooms: defined(item.rooms),
 			totalArea: defined(item.area),
 			livingArea: defined(item.livingArea),

@@ -56,7 +56,7 @@ export type FeedPropertyWriteData = {
 	kitchenArea?: number;
 	floor?: number;
 	floors?: number;
-	pricePerMeterMinor?: number;
+	pricePerMeterMinor?: number | null;
 	externalComplexId?: string;
 	externalComplexName?: string;
 	externalBuildingId?: string;

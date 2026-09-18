@@ -1,5 +1,5 @@
 import type { CollectionConfig, FieldAccess, PayloadRequest } from "payload";
-import { calculatePropertyDerivedFields } from "../../core/ingest/derived-fields.ts";
+import { applyDerivedFieldsOnWrite } from "../../core/ingest/derived-fields.ts";
 import {
 	applyPublishedSlugPolicy,
 	collectChangedImportOwnedFields,
@@ -89,15 +89,23 @@ export const Properties: CollectionConfig = {
 					data.priceMinor === undefined ? originalDoc?.priceMinor : data.priceMinor;
 				const totalArea =
 					data.totalArea === undefined ? originalDoc?.totalArea : data.totalArea;
-				const derived = calculatePropertyDerivedFields({ priceMinor, totalArea });
-				if (derived.pricePerMeterMinor != null) {
-					data.pricePerMeterMinor = derived.pricePerMeterMinor;
-				}
-
 				const contextSource =
 					(req?.context as { source?: string } | undefined)?.source ??
 					(req?.context as { systemGatewayOperation?: string } | undefined)
 						?.systemGatewayOperation;
+				const ingestOwned =
+					contextSource === "system-job" ||
+					contextSource === "import" ||
+					contextSource === "system";
+				const derived = applyDerivedFieldsOnWrite({
+					origin: (data.origin ?? originalDoc?.origin) as string | undefined,
+					ingestOwned,
+					priceMinor,
+					totalArea,
+				});
+				if (derived) {
+					data.pricePerMeterMinor = derived.pricePerMeterMinor;
+				}
 				const actorSource =
 					contextSource === "system-job" || contextSource === "import"
 						? contextSource === "system-job"

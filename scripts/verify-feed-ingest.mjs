@@ -54,6 +54,45 @@ assert.deepEqual(firstRun.invalidatedTargets, [
 	{ type: "tag", tag: "properties" },
 	{ type: "path", path: "/nedvizhimost", routeType: "page" },
 ]);
+assert.equal(repository.byId.get("property-1").pricePerMeterMinor, null);
+
+const derivedRun = await ingestNormalizedFeed({
+	context: { ...baseContext, importRunId: "run-derived" },
+	offers: [{ ...offer, priceMinor: 10_000_000_00, totalArea: 50 }],
+	repository,
+});
+assert.equal(derivedRun.updatedCount, 1);
+assert.equal(repository.byId.get("property-1").pricePerMeterMinor, 20_000_000);
+
+const priceRemovedRun = await ingestNormalizedFeed({
+	context: { ...baseContext, importRunId: "run-price-removed" },
+	offers: [{ ...offer, priceMinor: undefined, totalArea: 50 }],
+	repository,
+});
+assert.equal(priceRemovedRun.updatedCount, 1);
+assert.equal(repository.byId.get("property-1").pricePerMeterMinor, null);
+
+const areaRestoredRun = await ingestNormalizedFeed({
+	context: { ...baseContext, importRunId: "run-area-restored" },
+	offers: [{ ...offer, priceMinor: 10_000_000_00, totalArea: 50 }],
+	repository,
+});
+assert.equal(areaRestoredRun.updatedCount, 1);
+assert.equal(repository.byId.get("property-1").pricePerMeterMinor, 20_000_000);
+
+const areaRemovedRun = await ingestNormalizedFeed({
+	context: { ...baseContext, importRunId: "run-area-removed" },
+	offers: [{ ...offer, priceMinor: 10_000_000_00, totalArea: undefined }],
+	repository,
+});
+assert.equal(areaRemovedRun.updatedCount, 1);
+assert.equal(repository.byId.get("property-1").pricePerMeterMinor, null);
+
+await ingestNormalizedFeed({
+	context: { ...baseContext, importRunId: "run-restore-original" },
+	offers: [offer],
+	repository,
+});
 
 const sameRun = await ingestNormalizedFeed({
 	context: { ...baseContext, importRunId: "run-2" },

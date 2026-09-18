@@ -6,7 +6,11 @@ import {
 	returnFieldToFeed,
 	shouldRecordManualOwnership,
 } from "../src/core/ingest/manual-ownership.ts";
-import { calculatePropertyDerivedFields } from "../src/core/ingest/derived-fields.ts";
+import {
+	applyDerivedFieldsOnWrite,
+	bankersRoundToInteger,
+	calculatePropertyDerivedFields,
+} from "../src/core/ingest/derived-fields.ts";
 import { ingestNormalizedFeed } from "../src/core/ingest/index.ts";
 
 assert.equal(
@@ -47,6 +51,59 @@ const derived = calculatePropertyDerivedFields({
 	totalArea: 50,
 });
 assert.equal(derived.pricePerMeterMinor, 20_000_000);
+assert.equal(
+	calculatePropertyDerivedFields({ priceMinor: null, totalArea: 50 }).pricePerMeterMinor,
+	null,
+);
+assert.equal(
+	calculatePropertyDerivedFields({ priceMinor: 10_000_000_00, totalArea: 0 }).pricePerMeterMinor,
+	null,
+);
+assert.equal(
+	calculatePropertyDerivedFields({ priceMinor: 10_000_000_00, totalArea: -1 }).pricePerMeterMinor,
+	null,
+);
+assert.equal(bankersRoundToInteger(2.5), 2);
+assert.equal(bankersRoundToInteger(3.5), 4);
+assert.equal(
+	calculatePropertyDerivedFields({ priceMinor: 5, totalArea: 2 }).pricePerMeterMinor,
+	2,
+);
+assert.deepEqual(
+	applyDerivedFieldsOnWrite({
+		ingestOwned: true,
+		priceMinor: 100,
+		totalArea: 0,
+	}),
+	null,
+);
+assert.equal(
+	applyDerivedFieldsOnWrite({
+		origin: "manual",
+		ingestOwned: false,
+		priceMinor: 10_000_000_00,
+		totalArea: 50,
+	})?.pricePerMeterMinor,
+	20_000_000,
+);
+assert.equal(
+	applyDerivedFieldsOnWrite({
+		origin: "manual",
+		ingestOwned: false,
+		priceMinor: null,
+		totalArea: 50,
+	})?.pricePerMeterMinor,
+	null,
+);
+assert.equal(
+	applyDerivedFieldsOnWrite({
+		origin: "manual",
+		ingestOwned: false,
+		priceMinor: 10_000_000_00,
+		totalArea: null,
+	})?.pricePerMeterMinor,
+	null,
+);
 
 const repository = {
 	byId: new Map(),
