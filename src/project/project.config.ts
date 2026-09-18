@@ -3,6 +3,7 @@ export const projectConfig = {
 	dispatcherIntervalMinutes: 5,
 	maintenanceIntervalMinutes: 15,
 	dispatchBatchSize: 3,
+	importHeartbeatIntervalMs: 15_000,
 	approvalTtlMinutes: 240,
 	leadRetentionDays: null as number | null,
 	archiveRetentionDays: null as number | null,

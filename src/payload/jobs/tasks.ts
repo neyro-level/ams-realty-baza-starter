@@ -1,5 +1,27 @@
 import type { PayloadRequest, TaskConfig } from "payload";
+import {
+	claimDueFeedSources,
+	claimQueuedImportRun,
+	consumeDeactivationApproval,
+	finishImportRun,
+	touchImportRunHeartbeat,
+} from "../../core/data-access/ingest/sql/index.ts";
+import { postBatchedHttpRevalidate } from "../../core/cache/http-revalidate.ts";
+import { dispatchDueFeeds } from "../../core/ingest/dispatch-due-feeds.ts";
+import { fetchConditionalFeed } from "../../core/ingest/feed-fetcher.ts";
+import { createPayloadFeedIngestRepository } from "../../core/ingest/payload-feed-ingest-repository.ts";
+import {
+	parseFeedUrlRef,
+	parseImageHostEnv,
+	runImportFeed,
+} from "../../core/ingest/import-feed-runtime.ts";
+import { projectConfig } from "../../project/project.config.ts";
 import { systemQueueJob } from "../../server/system-gateway/jobs.ts";
+import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
+import {
+	createSafeFeedOutboundFetch,
+	parseOutboundHostList,
+} from "../../server/security/safe-outbound-client.ts";
 import { runtimeEnv } from "../env.ts";
 import {
 	payloadJobQueues,
@@ -14,7 +36,7 @@ type GenericPayloadJobTask = TaskConfig<{
 }>;
 
 const minuteInMs = 60_000;
-const staleJobThresholdMs = 15 * minuteInMs;
+const staleJobThresholdMs = projectConfig.maintenanceIntervalMinutes * minuteInMs;
 const defaultArchiveRetentionDays = 30;
 
 function nowIso() {
@@ -81,78 +103,47 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		schedule: getStaticSchedule(payloadJobTaskSlugs.dispatchDueFeeds),
 		handler: async ({ req }) => {
 			const now = new Date();
-			const nowValue = now.toISOString();
-			const dueFeeds = await req.payload.find({
-				collection: "feed-sources",
-				where: {
-					and: [
-						{ enabled: { equals: true } },
-						{ nextDueAt: { less_than_equal: nowValue } },
-					],
-				},
-				sort: "nextDueAt",
-				limit: 1,
-				depth: 0,
-				req,
-			});
-			const feed = dueFeeds.docs[0];
-
-			if (!feed) {
-				return { output: { dispatched: false } };
-			}
-
-			const nextDueAt = computeNextDueAt({
+			const result = await dispatchDueFeeds({
 				now,
-				previousNextDueAt: feed.nextDueAt,
-				refreshIntervalMinutes: feed.refreshIntervalMinutes,
-			});
-
-			await req.payload.update({
-				collection: "feed-sources",
-				id: feed.id,
-				data: {
-					lastAttemptAt: nowValue,
-					nextDueAt,
+				batchSize: projectConfig.dispatchBatchSize,
+				claimDueFeedSources: (input) => claimDueFeedSources(req.payload, input),
+				createQueuedImportRun: async ({ feedSourceId, now: queuedAt }) => {
+					const created = await req.payload.create({
+						collection: "import-runs",
+						data: {
+							feedSource: Number(feedSourceId),
+							status: "queued",
+							queuedAt: queuedAt.toISOString(),
+							heartbeatAt: queuedAt.toISOString(),
+						},
+						...systemOverrideAccess("system-job"),
+					});
+					return { id: String(created.id) };
 				},
-				req,
-			});
-
-			const importRun = await req.payload.create({
-				collection: "import-runs",
-				data: {
-					feedSource: feed.id,
-					status: "queued",
-					queuedAt: nowValue,
-					heartbeatAt: nowValue,
+				enqueueImportFeed: async (input) => {
+					const queuedJob = (await queueTask({
+						req,
+						task: payloadJobTaskSlugs.importFeed,
+						queue: payloadJobQueues.imports,
+						input,
+					})) as { id: number | string };
+					return { id: String(queuedJob.id) };
 				},
-				req,
-			});
-
-			const queuedJob = (await queueTask({
-				req,
-				task: payloadJobTaskSlugs.importFeed,
-				queue: payloadJobQueues.imports,
-				input: {
-					feedSourceId: String(feed.id),
-					importRunId: String(importRun.id),
+				attachJobId: async ({ importRunId, jobId }) => {
+					await req.payload.update({
+						collection: "import-runs",
+						id: importRunId,
+						data: { jobId },
+						...systemOverrideAccess("system-job"),
+					});
 				},
-			})) as { id: number | string };
-
-			await req.payload.update({
-				collection: "import-runs",
-				id: importRun.id,
-				data: {
-					jobId: String(queuedJob.id),
-				},
-				req,
 			});
 
 			return {
 				output: {
-					dispatched: true,
-					feedSourceId: String(feed.id),
-					importRunId: String(importRun.id),
-					nextDueAt,
+					dispatched: result.dispatched.length > 0,
+					count: result.dispatched.length,
+					items: result.dispatched,
 				},
 			};
 		},
@@ -170,9 +161,91 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 			exclusive: true,
 			supersedes: false,
 		},
-		handler: async () => ({
-			output: { registered: true, implementedBy: "feed-import-engine" },
-		}),
+		handler: async ({ req, input }) => {
+			const payload = req.payload;
+			const result = await runImportFeed(
+				{
+					now: () => new Date(),
+					claimQueuedImportRun: (claim) => claimQueuedImportRun(payload, claim),
+					touchHeartbeat: async (tick) => {
+						await touchImportRunHeartbeat(payload, tick);
+					},
+					loadFeedSource: async (feedSourceId) => {
+						const source = await payload.findByID({
+							collection: "feed-sources",
+							id: feedSourceId,
+							depth: 0,
+							...systemOverrideAccess("system-job"),
+						});
+						return {
+							id: String(source.id),
+							code: source.code,
+							enabled: Boolean(source.enabled),
+							market: source.market,
+							feedUrlRef: source.feedUrlRef,
+							lastEtag: source.lastEtag,
+							lastModified: source.lastModified,
+							lastFeedHash: source.lastFeedHash,
+							lastOfferCount: source.lastOfferCount,
+							safetyThresholdPercent: source.safetyThresholdPercent,
+							maxDeactivationsPerRun: source.maxDeactivationsPerRun,
+							deactivationApproval: {
+								runId:
+									typeof source.deactivationApproval?.runId === "object" &&
+									source.deactivationApproval.runId
+										? String(source.deactivationApproval.runId.id)
+										: source.deactivationApproval?.runId == null
+											? undefined
+											: String(source.deactivationApproval.runId),
+								expiresAt: source.deactivationApproval?.expiresAt,
+								consumedAt: source.deactivationApproval?.consumedAt,
+							},
+						};
+					},
+					resolveFeedUrl: parseFeedUrlRef,
+					fetchFeed: ({ url, etag, lastModified }) =>
+						fetchConditionalFeed({
+							url,
+							etag,
+							lastModified,
+							outboundFetch: createSafeFeedOutboundFetch({
+								allowedHosts: parseOutboundHostList(runtimeEnv.OUTBOUND_ALLOWED_HOSTS),
+								maxBytes: 64 * 1024 * 1024,
+							}),
+						}),
+					createRepository: (feedSourceId) =>
+						createPayloadFeedIngestRepository(payload, feedSourceId),
+					finishRun: (finish) => finishImportRun(payload, finish),
+					recordSourceContact: async ({ feedSourceId, patch }) => {
+						if (Object.keys(patch).length === 0) return;
+						await payload.update({
+							collection: "feed-sources",
+							id: feedSourceId,
+							data: patch,
+							...systemOverrideAccess("system-job"),
+						});
+					},
+					consumeDeactivationApproval: (input) =>
+						consumeDeactivationApproval(payload, input),
+					invalidatePublicCache: async (targets) => {
+						const result = await postBatchedHttpRevalidate({
+							baseUrl: runtimeEnv.INTERNAL_REVALIDATE_BASE_URL,
+							secret: runtimeEnv.REVALIDATE_SECRET,
+							targets,
+							reason: "import-feed",
+						});
+						return { ok: result.ok };
+					},
+					allowedImageHosts: parseImageHostEnv(runtimeEnv.EXTERNAL_IMAGE_HOSTS),
+				},
+				{
+					feedSourceId: String(input.feedSourceId),
+					importRunId: String(input.importRunId),
+				},
+			);
+
+			return { output: result };
+		},
 	},
 	{
 		slug: payloadJobTaskSlugs.jobsJanitor,

@@ -27,6 +27,7 @@ const runtimeEnvSchema = z.object({
 	NEXT_PUBLIC_SERVER_URL: optionalUrl,
 	INTERNAL_REVALIDATE_BASE_URL: optionalUrl,
 	INTERNAL_HEALTH_SECRET: optionalString,
+	REVALIDATE_SECRET: optionalString,
 
 	DATABASE_URI: optionalString,
 	DATABASE_POOL_MAX: optionalInteger.default(10),

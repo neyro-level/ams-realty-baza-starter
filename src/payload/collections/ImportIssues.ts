@@ -11,9 +11,9 @@ export const ImportIssues: CollectionConfig = {
 			"Owner operations: import warnings/errors with redacted messages and source links.",
 	},
 	access: {
-		create: adminsAndOwners,
+		create: () => false,
 		read: adminsAndOwners,
-		update: adminsAndOwners,
+		update: () => false,
 		delete: ownersOnly,
 	},
 	fields: [

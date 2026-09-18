@@ -1,5 +1,6 @@
-import type { CollectionConfig } from "payload";
-import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
+import type { CollectionConfig, PayloadRequest } from "payload";
+import { queueManualFeedImport, approveSuspiciousDeactivation } from "../../core/ingest/owner-feed-operations.ts";
+import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 export const FeedSources: CollectionConfig = {
 	slug: "feed-sources",
@@ -48,6 +49,40 @@ export const FeedSources: CollectionConfig = {
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},
+	endpoints: [
+		{
+			path: "/:id/manual-import",
+			method: "post",
+			handler: async (req: PayloadRequest) => {
+				if (!hasRole(req.user, ["owner", "admin"])) {
+					return Response.json({ error: "forbidden" }, { status: 403 });
+				}
+				const id = String(req.routeParams?.id ?? "");
+				const result = await queueManualFeedImport(req.payload, { feedSourceId: id });
+				return Response.json(result);
+			},
+		},
+		{
+			path: "/:id/approve-deactivation",
+			method: "post",
+			handler: async (req: PayloadRequest) => {
+				if (!hasRole(req.user, ["owner", "admin"])) {
+					return Response.json({ error: "forbidden" }, { status: 403 });
+				}
+				const id = String(req.routeParams?.id ?? "");
+				const body = (await req.json?.()) as { importRunId?: string } | null;
+				if (!body?.importRunId || !req.user?.id) {
+					return Response.json({ error: "invalid_payload" }, { status: 400 });
+				}
+				const result = await approveSuspiciousDeactivation(req.payload, {
+					feedSourceId: id,
+					importRunId: String(body.importRunId),
+					approvedByUserId: String(req.user.id),
+				});
+				return Response.json(result);
+			},
+		},
+	],
 	fields: [
 		{
 			name: "code",

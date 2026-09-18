@@ -70,12 +70,18 @@ Runtime secret scope for this application should be project-specific in Secret M
 
 ## Import operations
 
-- Manual import: owner/admin включает `feed-sources.enabled`, проверяет `nextDueAt`, `feedUrlRef`, `safetyThresholdPercent`, `maxDeactivationsPerRun` и запускает dispatch через jobs owner. `feedUrlRef` хранит только ссылку на secret/config, не credential URL.
-- Suspicious approval: если import run получил `status=suspicious`, каталог не деактивируется автоматически. Оператор проверяет `import-runs` и `import-issues`, затем заполняет `feed-sources.deactivationApproval` только metadata: `runId`, `approvedBy`, `approvedAt`, `expiresAt`. Raw XML, PII, feed credentials и токены в approval не записываются.
+- Manual import: owner/admin вызывает controlled endpoint `POST /api/feed-sources/:id/manual-import`. Он создаёт queued `import-run` и ставит `importFeed` в queue `imports`. `feedUrlRef` хранит только ссылку на secret/config, не credential URL.
+- Suspicious approval: если import run получил `status=suspicious`, каталог не деактивируется автоматически. Оператор проверяет `import-runs` и `import-issues`, затем вызывает `POST /api/feed-sources/:id/approve-deactivation` с `{ "importRunId": "<id>" }`. Approval run-specific, TTL `approvalTtlMinutes`, single-use (`consumedAt`). Raw XML, PII, feed credentials и токены в approval не записываются.
 - Stale/orphan recovery: `jobsJanitor` переводит stale `running` или orphan `queued` import runs в `interrupted` с redacted diagnostic. После устранения причины owner/admin создаёт новый run; старый run не переписывается задним числом.
 - Retry: повторный import выполняется новым run/job для того же `feedSource`. Bad/truncated feed и suspicious run не деактивируют каталог.
 - Изменение source identity или parser mapping проходит staging.
 - Новый image host требует config review, rebuild и release.
+
+## Payload Jobs inspection and emergency unstuck
+
+Read-only inspection of `payload-jobs` goes through `src/core/data-access/system/jobs` (`inspectPayloadJob`, `listStalePayloadJobs`). Generic Admin CRUD for `payload-jobs` is not enabled.
+
+Emergency unstuck of a stuck `processing=true` job is the documented operation `emergencyUnstuckPayloadJob`. It only clears the processing flag and writes a redacted error. Do not edit queue/system fields from generic Admin or application CRUD.
 
 ## Lead operations
 

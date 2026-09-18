@@ -25,7 +25,33 @@ const alerts = buildOperationalAlerts({
 
 assert.ok(alerts.some((alert) => alert.code === "feeds_suspicious_runs"));
 assert.ok(alerts.some((alert) => alert.code === "delivery_stale_sending"));
-assert.ok(alerts.some((alert) => alert.component === "storage"));
+assert.ok(alerts.some((alert) => alert.code === "storage_media_dir_unavailable"));
+
+const cacheAlerts = buildOperationalAlerts({
+	feeds: {
+		overdueEnabled: 0,
+		suspiciousRuns: 0,
+		failedRuns: 0,
+		staleRunningRuns: 0,
+	},
+	jobs: {
+		autorunEnabled: true,
+		staticTaskCount: 4,
+		programmaticTaskCount: 2,
+	},
+	delivery: {
+		duePending: 0,
+		staleSending: 0,
+		abandoned: 0,
+	},
+	storage: {
+		localMediaReady: true,
+	},
+	cache: {
+		invalidationStaleBeyondSla: true,
+	},
+});
+assert.ok(cacheAlerts.some((alert) => alert.code === "cache_invalidation_failure"));
 
 const serialized = JSON.stringify(alerts).toLowerCase();
 for (const forbidden of [

@@ -158,6 +158,28 @@ if (cliScheduleScripts.length > 0) {
 	);
 }
 
+const { projectConfig } = await import(
+	pathToFileURL(join(root, "src/project/project.config.ts")).href
+);
+const expectedMaintenanceCron = `*/${projectConfig.maintenanceIntervalMinutes} * * * *`;
+for (const slug of [
+	"jobsJanitor",
+	"leadRetentionCleanup",
+	"catalogLifecycle",
+	"recoverLeadDeliveries",
+]) {
+	const entry = registry.find((item) => item.slug === slug);
+	if (entry?.cron !== expectedMaintenanceCron) {
+		throw new Error(
+			`Maintenance task "${slug}" cron must be ${expectedMaintenanceCron}.`,
+		);
+	}
+}
+
+if (registry.some((item) => item.queue === "default")) {
+	throw new Error("Implicit default queue must not be used.");
+}
+
 const payloadConfig = readFileSync(join(root, "payload.config.ts"), "utf8");
 
 if (!payloadConfig.includes("enableConcurrencyControl: true")) {
@@ -166,6 +188,26 @@ if (!payloadConfig.includes("enableConcurrencyControl: true")) {
 
 if (!payloadConfig.includes("shouldAutoRun: async () => runtimeEnv.JOBS_AUTORUN")) {
 	throw new Error("Payload jobs autoRun must be gated by JOBS_AUTORUN.");
+}
+
+if (tasksSource.includes("nextDueAt: { less_than_equal")) {
+	throw new Error("dispatchDueFeeds must not find-then-update feed-sources.");
+}
+
+if (!tasksSource.includes("claimDueFeedSources")) {
+	throw new Error("dispatchDueFeeds must use atomic claimDueFeedSources.");
+}
+
+if (!tasksSource.includes("claimQueuedImportRun")) {
+	throw new Error("importFeed must claim queued runs atomically.");
+}
+
+if (!tasksSource.includes("touchImportRunHeartbeat")) {
+	throw new Error("importFeed must heartbeat outside the ingest transaction.");
+}
+
+if (tasksSource.includes('implementedBy: "feed-import-engine"')) {
+	throw new Error("importFeed stub must be replaced by the runtime pipeline.");
 }
 
 console.log("Jobs config verified.");

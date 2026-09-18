@@ -4,7 +4,7 @@ export type OperationalAlertComponent =
 	| "jobs"
 	| "delivery"
 	| "storage"
-	| "database";
+	| "cache";
 
 export type OperationalAlert = {
 	code: string;
@@ -33,6 +33,9 @@ export type OperationalHealthSnapshot = {
 	};
 	storage: {
 		localMediaReady: boolean;
+	};
+	cache?: {
+		invalidationStaleBeyondSla: boolean;
 	};
 };
 
@@ -118,6 +121,15 @@ export function buildOperationalAlerts(
 			severity: "critical",
 			component: "storage",
 			message: "Local media directory is not available.",
+		});
+	}
+
+	if (snapshot.cache?.invalidationStaleBeyondSla) {
+		alerts.push({
+			code: "cache_invalidation_failure",
+			severity: "critical",
+			component: "cache",
+			message: "Public cache is stale after a failed invalidation.",
 		});
 	}
 

@@ -22,6 +22,7 @@
 | Dispatcher interval | `project.config.ts` → `dispatcherIntervalMinutes = 5` |
 | Maintenance interval | `maintenanceIntervalMinutes = 15` |
 | Dispatch batch | `dispatchBatchSize = 3` (не env) |
+| Import heartbeat | `importHeartbeatIntervalMs = 15000`, вне ingest transaction |
 | Approval TTL | `approvalTtlMinutes = 240` |
 | Safety threshold | `safetyThresholdPercent = 30` until first real feed onboarding |
 | Max deactivations | `maxDeactivationsPerRun = 50` until first real feed onboarding |

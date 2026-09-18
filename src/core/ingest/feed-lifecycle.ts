@@ -11,6 +11,7 @@ export type FeedRunCompletionInput = {
 	safetyThresholdPercent: number;
 	plannedDeactivations: number;
 	maxDeactivationsPerRun: number;
+	hasValidDeactivationApproval?: boolean;
 	fetchStatus: "fetched" | "unchanged";
 	feedHash?: string;
 	lastFeedHash?: string;
@@ -32,7 +33,8 @@ export type FeedRunCompletionDecision = {
 		| "identity_invalid"
 		| "run_interrupted"
 		| "below_safety_threshold"
-		| "too_many_deactivations";
+		| "too_many_deactivations"
+		| "approved_deactivation";
 };
 
 export type StaleRunInput = {
@@ -115,11 +117,11 @@ export function decideFeedRunCompletion(
 		minimumExpectedCount !== undefined &&
 		input.offeredCount < minimumExpectedCount
 	) {
-		return suspicious("below_safety_threshold");
+		return suspiciousOrApproved(input, "below_safety_threshold");
 	}
 
 	if (input.plannedDeactivations > input.maxDeactivationsPerRun) {
-		return suspicious("too_many_deactivations");
+		return suspiciousOrApproved(input, "too_many_deactivations");
 	}
 
 	return {
@@ -184,15 +186,88 @@ function unchanged(
 	};
 }
 
-function suspicious(
+function suspiciousOrApproved(
+	input: FeedRunCompletionInput,
 	reason: "below_safety_threshold" | "too_many_deactivations",
 ): FeedRunCompletionDecision {
+	if (input.hasValidDeactivationApproval) {
+		return {
+			status: "success",
+			canDeactivateMissing: true,
+			createBaseline: false,
+			reason: "approved_deactivation",
+		};
+	}
+
 	return {
 		status: "suspicious",
 		canDeactivateMissing: false,
 		createBaseline: false,
 		reason,
 	};
+}
+
+export type DeactivationApprovalSnapshot = {
+	runId?: string | number | null;
+	expiresAt?: string | null;
+	consumedAt?: string | null;
+};
+
+export function isDeactivationApprovalValid(input: {
+	importRunId: string;
+	nowIso: string;
+	approval?: DeactivationApprovalSnapshot;
+}): boolean {
+	const approval = input.approval;
+	if (!approval) return false;
+	if (approval.consumedAt) return false;
+	if (String(approval.runId ?? "") !== input.importRunId) return false;
+	if (!approval.expiresAt) return false;
+	return new Date(approval.expiresAt).getTime() >= new Date(input.nowIso).getTime();
+}
+
+export type FeedSourceBaselineInput = {
+	status: "success" | "unchanged" | "suspicious" | "interrupted" | "failed";
+	parserCompleted: boolean;
+	criticalStructuralError: boolean;
+	nowIso: string;
+	etag?: string;
+	lastModified?: string;
+	feedHash?: string;
+	offeredCount?: number;
+};
+
+export type FeedSourceBaselinePatch = {
+	lastSuccessfulRunAt?: string;
+	lastFullRunAt?: string;
+	lastOfferCount?: number;
+	lastEtag?: string;
+	lastModified?: string;
+	lastFeedHash?: string;
+};
+
+export function buildFeedSourceBaselinePatch(
+	input: FeedSourceBaselineInput,
+): FeedSourceBaselinePatch {
+	const patch: FeedSourceBaselinePatch = {};
+	const structurallyValid =
+		input.parserCompleted && !input.criticalStructuralError;
+
+	if (input.status === "success" || input.status === "unchanged") {
+		patch.lastSuccessfulRunAt = input.nowIso;
+		if (input.etag) patch.lastEtag = input.etag;
+		if (input.lastModified) patch.lastModified = input.lastModified;
+	}
+
+	if (input.status === "success" && structurallyValid) {
+		patch.lastFullRunAt = input.nowIso;
+		if (input.offeredCount !== undefined) {
+			patch.lastOfferCount = input.offeredCount;
+		}
+		if (input.feedHash) patch.lastFeedHash = input.feedHash;
+	}
+
+	return patch;
 }
 
 function retryableStop(

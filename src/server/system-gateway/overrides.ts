@@ -4,7 +4,8 @@ type SystemOperation =
 	| "system-job"
 	| "migration-helper"
 	| "trusted-inspection"
-	| "payload-jobs-inspect";
+	| "payload-jobs-inspect"
+	| "payload-jobs-unstuck";
 
 export function systemOverrideAccess(operation: SystemOperation) {
 	return {

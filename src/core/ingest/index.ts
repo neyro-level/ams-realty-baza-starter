@@ -4,6 +4,19 @@ export {
 	type PropertyDerivedInput,
 } from "./derived-fields.ts";
 export {
+	dispatchDueFeeds,
+	startImportHeartbeat,
+} from "./dispatch-due-feeds.ts";
+export {
+	parseFeedUrlRef,
+	parseImageHostEnv,
+	runImportFeed,
+} from "./import-feed-runtime.ts";
+export {
+	approveSuspiciousDeactivation,
+	queueManualFeedImport,
+} from "./owner-feed-operations.ts";
+export {
 	buildConditionalFeedHeaders,
 	type FetchFeedResult,
 	fetchConditionalFeed,
@@ -20,6 +33,8 @@ export {
 	computeTransientRetryAt,
 	decideFeedRunCompletion,
 	decideStaleRunRecovery,
+	isDeactivationApprovalValid,
+	buildFeedSourceBaselinePatch,
 } from "./feed-lifecycle.ts";
 export {
 	type FeedNormalizationIssue,

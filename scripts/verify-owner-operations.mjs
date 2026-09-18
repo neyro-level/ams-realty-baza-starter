@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { FeedSources } from "../src/payload/collections/FeedSources.ts";
 import { ImportIssues } from "../src/payload/collections/ImportIssues.ts";
@@ -113,5 +113,38 @@ assert.equal(
 	false,
 	"owner operations must not create a second Admin framework",
 );
+
+assert.ok(
+	Array.isArray(FeedSources.endpoints) && FeedSources.endpoints.length >= 2,
+	"feed-sources must expose controlled owner endpoints",
+);
+assert.ok(
+	FeedSources.endpoints?.some((endpoint) => endpoint.path.includes("manual-import")),
+	"feed-sources must expose manual import",
+);
+assert.ok(
+	FeedSources.endpoints?.some((endpoint) =>
+		endpoint.path.includes("approve-deactivation"),
+	),
+	"feed-sources must expose suspicious-run approval",
+);
+
+assert.equal(typeof ImportRuns.access?.create, "function");
+assert.equal(typeof ImportRuns.access?.update, "function");
+assert.equal(await ImportRuns.access.create({ req: {} }), false);
+assert.equal(await ImportRuns.access.update({ req: {} }), false);
+
+assert.ok(
+	existsSync(join(root, "src", "core", "data-access", "system", "jobs", "unstuck.ts")),
+	"payload-jobs unstuck must live in system/jobs",
+);
+assert.ok(
+	existsSync(join(root, "src", "core", "data-access", "system", "jobs", "inspect.ts")),
+	"payload-jobs inspect must live in system/jobs",
+);
+
+const payloadConfig = readFileSync(join(root, "payload.config.ts"), "utf8");
+assert.equal(payloadConfig.includes("slug: \"payload-jobs\""), false);
+assert.equal(payloadConfig.includes("jobsCollectionOverrides"), false);
 
 console.log("verify-owner-operations: ok");

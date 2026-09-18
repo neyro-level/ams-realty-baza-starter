@@ -36,7 +36,7 @@ export type FeedPropertyWriteData = {
 	firstSeenAt?: string;
 	lastSeenAt: string;
 	lastImportRun: string;
-	status: "active";
+	status: "active" | "archived";
 	market: FeedIngestMarket;
 	category: FeedPropertyCategory;
 	dealType: FeedPropertyDealType;
@@ -89,6 +89,22 @@ export type FeedIngestRepository = {
 		data: Partial<FeedPropertyWriteData>,
 	): Promise<FeedPropertyRecord>;
 	createImportIssue(issue: FeedImportIssueDraft): Promise<void>;
+	touchLastSeenAt(input: {
+		feedSourceId: string;
+		importRunId: string;
+		externalIds: string[];
+		nowIso: string;
+	}): Promise<void>;
+	countMissingActive(input: {
+		feedSourceId: string;
+		seenBeforeIso: string;
+	}): Promise<number>;
+	deactivateMissing(input: {
+		feedSourceId: string;
+		importRunId: string;
+		seenBeforeIso: string;
+		nowIso: string;
+	}): Promise<number>;
 };
 
 export type CacheInvalidationTarget =
@@ -131,6 +147,7 @@ export async function ingestNormalizedFeed({
 		errorCount: 0,
 		invalidatedTargets: [],
 	};
+	const seenExternalIds: string[] = [];
 
 	for (const issue of issues) {
 		await repository.createImportIssue({
@@ -151,10 +168,45 @@ export async function ingestNormalizedFeed({
 			externalId: offer.externalId,
 		});
 		const nextData = buildFeedPropertyWriteData({ context, offer, existing });
+		if (nextData.market !== context.market) {
+			throw new Error("Feed ingest cannot write a property outside source market.");
+		}
 
 		if (!existing) {
+			seenExternalIds.push(offer.externalId);
 			await repository.createFeedProperty(nextData);
 			result.createdCount += 1;
+			continue;
+		}
+
+		if (existing.feedSource !== context.feedSourceId) {
+			throw new Error("Feed ingest cannot write a property outside source scope.");
+		}
+
+		if (existing.market !== context.market) {
+			await repository.createImportIssue({
+				severity: "error",
+				code: "feed.offer_invalid",
+				externalId: offer.externalId,
+				field: "market",
+				messageRedacted: "Existing feed property market does not match the source.",
+				feedSource: context.feedSourceId,
+				importRun: context.importRunId,
+			});
+			result.errorCount += 1;
+			result.skippedCount += 1;
+			continue;
+		}
+
+		seenExternalIds.push(offer.externalId);
+
+		if (existing.importHash === nextData.importHash) {
+			if (existing.status !== "active") {
+				await repository.updateFeedProperty(existing.id, { status: "active" });
+				result.updatedCount += 1;
+				continue;
+			}
+			result.skippedCount += 1;
 			continue;
 		}
 
@@ -168,9 +220,15 @@ export async function ingestNormalizedFeed({
 		result.updatedCount += 1;
 	}
 
+	await repository.touchLastSeenAt({
+		feedSourceId: context.feedSourceId,
+		importRunId: context.importRunId,
+		externalIds: seenExternalIds,
+		nowIso: context.nowIso,
+	});
+
 	if (result.createdCount > 0 || result.updatedCount > 0) {
 		result.invalidatedTargets = [
-			{ type: "tag", tag: "catalog" },
 			{ type: "tag", tag: "properties" },
 			{ type: "path", path: "/nedvizhimost", routeType: "page" },
 		];
@@ -249,12 +307,20 @@ export function diffFeedProperty(
 		),
 	);
 	const patch: Partial<FeedPropertyWriteData> = {};
+	const technicalFields = new Set<keyof FeedPropertyWriteData>([
+		"lastSeenAt",
+		"lastImportRun",
+	]);
 
 	for (const [key, value] of Object.entries(nextData) as [
 		keyof FeedPropertyWriteData,
 		FeedPropertyWriteData[keyof FeedPropertyWriteData],
 	][]) {
-		if (manuallyOwnedFields.has(key) || manualFields.has(key)) {
+		if (
+			manuallyOwnedFields.has(key) ||
+			manualFields.has(key) ||
+			technicalFields.has(key)
+		) {
 			continue;
 		}
 

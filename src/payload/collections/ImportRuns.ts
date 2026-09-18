@@ -18,9 +18,9 @@ export const ImportRuns: CollectionConfig = {
 			"Owner operations: import history, suspicious/interrupted status, heartbeat, safe counters and redacted diagnostics.",
 	},
 	access: {
-		create: adminsAndOwners,
+		create: () => false,
 		read: adminsAndOwners,
-		update: adminsAndOwners,
+		update: () => false,
 		delete: ownersOnly,
 	},
 	fields: [
