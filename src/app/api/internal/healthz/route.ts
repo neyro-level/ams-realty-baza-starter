@@ -2,8 +2,14 @@ import { hostname } from "node:os";
 import { getPayload } from "payload";
 import configPromise from "../../../../../payload.config.ts";
 import { isCacheInvalidationStaleBeyondSla } from "../../../../core/cache/invalidation-sla.ts";
+import { resolveEnabledLeadChannels } from "../../../../core/leads/channels.ts";
+import {
+	evaluateProductionRetentionReadiness,
+	isConfiguredRetentionDays,
+} from "../../../../core/leads/retention.ts";
 import { isAlertChannelIndependent } from "../../../../core/operations/alert-channel.ts";
 import { buildOperationalAlerts } from "../../../../core/operations/alerts.ts";
+import { detectRuntimeEnvMode } from "../../../../core/operations/runtime-env.ts";
 import {
 	evaluateBackupFailures,
 	readBackupHealthSnapshot,
@@ -184,7 +190,16 @@ export async function GET(request: Request) {
 				),
 			},
 			retention: {
-				leadPolicyConfigured: projectConfig.leadRetentionDays !== null,
+				leadPolicyConfigured:
+					isConfiguredRetentionDays(projectConfig.leadRetentionDays) &&
+					isConfiguredRetentionDays(projectConfig.archiveRetentionDays),
+				productionReadinessFailed: !evaluateProductionRetentionReadiness({
+					runtimeMode: detectRuntimeEnvMode(),
+					publicLeadIntakeEnabled: true,
+					enabledLeadChannelCount: resolveEnabledLeadChannels(runtimeEnv).length,
+					leadRetentionDays: projectConfig.leadRetentionDays,
+					archiveRetentionDays: projectConfig.archiveRetentionDays,
+				}).ok,
 			},
 			backup: backup
 				? {

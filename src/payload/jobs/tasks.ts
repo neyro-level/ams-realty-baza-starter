@@ -10,7 +10,9 @@ import { runDeliverLeadTask } from "../../core/leads/deliver-lead.ts";
 import { isLiveFuturePayloadJob } from "../../core/leads/job-liveness.ts";
 import {
 	anonymizeLeadFields,
+	isConfiguredRetentionDays,
 	planLeadRetentionRun,
+	purgeDeliveryDiagnostics,
 } from "../../core/leads/retention.ts";
 import { inspectPayloadJob } from "../../core/data-access/system/jobs/index.ts";
 import { postBatchedHttpRevalidate } from "../../core/cache/http-revalidate.ts";
@@ -372,6 +374,23 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 			let anonymized = 0;
 
 			for (const lead of expiredLeads.docs) {
+				const deliveries = await req.payload.find({
+					collection: "lead-deliveries",
+					where: { lead: { equals: lead.id } },
+					limit: 50,
+					depth: 0,
+					req,
+				});
+
+				for (const delivery of deliveries.docs) {
+					await req.payload.update({
+						collection: "lead-deliveries",
+						id: delivery.id,
+						data: purgeDeliveryDiagnostics(purgedAt),
+						req,
+					});
+				}
+
 				if (lead.retentionMode === "delete") {
 					await req.payload.delete({
 						collection: "leads",
@@ -389,26 +408,6 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					req,
 				});
 				anonymized += 1;
-				const deliveries = await req.payload.find({
-					collection: "lead-deliveries",
-					where: { lead: { equals: lead.id } },
-					limit: 50,
-					depth: 0,
-					req,
-				});
-
-				for (const delivery of deliveries.docs) {
-					await req.payload.update({
-						collection: "lead-deliveries",
-						id: delivery.id,
-						data: {
-							attemptLog: [],
-							lastErrorRedacted: null,
-							diagnosticsPurgedAt: purgedAt,
-						},
-						req,
-					});
-				}
 			}
 
 			return {
@@ -425,9 +424,8 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		label: "Catalog lifecycle",
 		schedule: getStaticSchedule(payloadJobTaskSlugs.catalogLifecycle),
 		handler: async ({ req }) => {
-			const retentionDays =
-				projectConfig.archiveRetentionDays ?? runtimeEnv.ARCHIVE_RETENTION_DAYS;
-			if (!retentionDays) {
+			const retentionDays = projectConfig.archiveRetentionDays;
+			if (!isConfiguredRetentionDays(retentionDays)) {
 				return {
 					output: {
 						purgedProperties: 0,

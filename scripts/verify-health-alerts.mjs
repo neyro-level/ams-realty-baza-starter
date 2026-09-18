@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { buildOperationalAlerts } from "../src/core/operations/alerts.ts";
-import { planLeadRetentionRun } from "../src/core/leads/index.ts";
+import {
+	assertNoPiiInDiagnostics,
+	evaluateProductionRetentionReadiness,
+	planLeadRetentionRun,
+	planRetentionActions,
+} from "../src/core/leads/index.ts";
 
 const alerts = buildOperationalAlerts({
 	feeds: {
@@ -240,6 +245,112 @@ assert.equal(
 		leadChannelUrls: ["https://hooks.example.test/leads"],
 	}),
 	false,
+);
+
+assert.equal(
+	evaluateProductionRetentionReadiness({
+		runtimeMode: "runtime",
+		publicLeadIntakeEnabled: true,
+		enabledLeadChannelCount: 0,
+		leadRetentionDays: null,
+		archiveRetentionDays: null,
+	}).ok,
+	false,
+	"policy absent must fail production readiness",
+);
+assert.equal(
+	evaluateProductionRetentionReadiness({
+		runtimeMode: "build",
+		publicLeadIntakeEnabled: true,
+		enabledLeadChannelCount: 1,
+		leadRetentionDays: null,
+		archiveRetentionDays: null,
+	}).ok,
+	true,
+	"build remains permissive without retention days",
+);
+assert.equal(
+	evaluateProductionRetentionReadiness({
+		runtimeMode: "runtime",
+		publicLeadIntakeEnabled: true,
+		enabledLeadChannelCount: 1,
+		leadRetentionDays: 90,
+		archiveRetentionDays: 365,
+	}).ok,
+	true,
+);
+
+const expiredLead = {
+	id: "lead-expired",
+	retentionUntil: "2026-01-01T00:00:00.000Z",
+	retentionMode: "anonymize",
+	piiPurgedAt: null,
+	phoneE164: "+79990001122",
+	email: "owner@example.test",
+	message: "secret-message",
+	name: "Ivan",
+};
+const freshLead = {
+	id: "lead-fresh",
+	retentionUntil: "2027-01-01T00:00:00.000Z",
+	retentionMode: "anonymize",
+	piiPurgedAt: null,
+	phoneE164: "+79990003344",
+};
+const retentionPlan = planRetentionActions({
+	nowIso: "2026-09-18T12:00:00.000Z",
+	decision: planLeadRetentionRun(90),
+	leads: [expiredLead, freshLead],
+	deliveries: [
+		{
+			id: "delivery-expired",
+			leadId: expiredLead.id,
+			attemptLog: [{ phone: expiredLead.phoneE164 }],
+			lastErrorRedacted: expiredLead.message,
+		},
+		{
+			id: "delivery-fresh",
+			leadId: freshLead.id,
+			attemptLog: [{ keep: true }],
+			lastErrorRedacted: null,
+		},
+	],
+});
+assert.deepEqual(retentionPlan.processedLeadIds, [expiredLead.id]);
+assert.deepEqual(retentionPlan.untouchedLeadIds, [freshLead.id]);
+assert.deepEqual(retentionPlan.processedDeliveryIds, ["delivery-expired"]);
+assert.ok(retentionPlan.purgedDiagnostics);
+assertNoPiiInDiagnostics({
+	...retentionPlan.purgedDiagnostics,
+	sourceLead: expiredLead,
+});
+assert.deepEqual(
+	planRetentionActions({
+		nowIso: "2026-09-18T12:00:00.000Z",
+		decision: planLeadRetentionRun(null),
+		leads: [expiredLead],
+		deliveries: [
+			{
+				id: "delivery-expired",
+				leadId: expiredLead.id,
+				attemptLog: [],
+				lastErrorRedacted: null,
+			},
+		],
+	}).processedLeadIds,
+	[],
+);
+assert.ok(
+	buildOperationalAlerts({
+		...healthyBase,
+		retention: {
+			leadPolicyConfigured: false,
+			productionReadinessFailed: true,
+		},
+	}).some(
+		(alert) =>
+			alert.code === "production_retention_unready" && alert.severity === "critical",
+	),
 );
 
 console.log("verify-health-alerts: ok");

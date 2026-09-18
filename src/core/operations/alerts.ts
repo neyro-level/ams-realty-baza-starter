@@ -44,6 +44,7 @@ export type OperationalHealthSnapshot = {
 	};
 	retention?: {
 		leadPolicyConfigured: boolean;
+		productionReadinessFailed?: boolean;
 	};
 	backup?: {
 		dbFailed: boolean;
@@ -160,6 +161,16 @@ export function buildOperationalAlerts(
 			severity: "warning",
 			component: "retention",
 			message: "Lead retention days are unset; destructive cleanup is skipped.",
+		});
+	}
+
+	if (snapshot.retention?.productionReadinessFailed) {
+		alerts.push({
+			code: "production_retention_unready",
+			severity: "critical",
+			component: "retention",
+			message:
+				"Production PII intake or catalog archive is active without an owner retention policy.",
 		});
 	}
 

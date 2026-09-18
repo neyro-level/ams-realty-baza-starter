@@ -172,4 +172,13 @@ assert.ok(
 	"Operations backup canon must remain MEDIA_DIR snapshot",
 );
 
+assert.ok(
+	project.includes("leadRetentionDays = NEEDS_OWNER"),
+	"PROJECT.md must keep leadRetentionDays as NEEDS_OWNER until clone configuration",
+);
+assert.ok(
+	project.includes("archiveRetentionDays = NEEDS_OWNER"),
+	"PROJECT.md must keep archiveRetentionDays as NEEDS_OWNER until production",
+);
+
 console.log("verify-production-topology: ok");

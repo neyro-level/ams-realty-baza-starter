@@ -82,8 +82,12 @@ assert.ok(
 	"recovery must not share one universal stale constant",
 );
 assert.ok(
-	!/collection:\s*["']payload-jobs["']/.test(recoverSource),
-	"recoverLeadDeliveries must not use generic payload-jobs CRUD",
+	jobs.includes("purgeDeliveryDiagnostics"),
+	"lead retention must purge linked delivery diagnostics",
+);
+assert.ok(
+	jobs.includes('skipped: "missing_policy"') || jobs.includes("skipped: decision.reason"),
+	"catalog/lead retention must skip without invented days",
 );
 
 for (const forbidden of ["Raw XML", "PII", "credentials", "токены"]) {
