@@ -17,6 +17,8 @@ type SafeOutboundOptions = {
 	timeoutMs?: number;
 	maxBytes?: number;
 	headers?: HeadersInit;
+	method?: string;
+	body?: BodyInit | null;
 	signal?: AbortSignal;
 	maxRedirects?: number;
 	fetchImpl?: typeof fetch;
@@ -164,7 +166,9 @@ async function openSafeRequest(
 	try {
 		const fetchImpl = options.fetchImpl ?? fetch;
 		const response = await fetchImpl(url, {
+			method: options.method ?? "GET",
 			headers: options.headers,
+			body: options.body,
 			redirect: "manual",
 			signal: controller.signal,
 		});

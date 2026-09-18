@@ -40,6 +40,7 @@ const runtimeEnvSchema = z.object({
 	LEAD_OUTBOUND_HOSTS: optionalString,
 	MAX_BOT_TOKEN: optionalString,
 	MAX_CHAT_ID: optionalString,
+	MAX_API_URL: optionalUrl,
 	CUSTOM_WEBHOOK_URL: optionalString,
 	CUSTOM_WEBHOOK_HMAC_SECRET: optionalString,
 

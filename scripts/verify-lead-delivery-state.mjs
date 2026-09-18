@@ -35,7 +35,7 @@ const retryable = completeLeadDeliveryAttempt({
 });
 assert.equal(retryable.status, "pending");
 assert.equal(retryable.lastErrorKind, "retryable");
-assert.equal(retryable.nextAttemptAt, "2026-09-16T12:16:00.000Z");
+assert.equal(retryable.nextAttemptAt, "2026-09-16T12:02:00.000Z");
 assert.equal(retryable.jobId, undefined);
 
 const permanent = completeLeadDeliveryAttempt({
@@ -47,18 +47,17 @@ const permanent = completeLeadDeliveryAttempt({
 		redactedNote: "Destination config is invalid.",
 	},
 });
-assert.equal(permanent.status, "abandoned");
+assert.equal(permanent.status, "failed");
 assert.equal(permanent.lastErrorKind, "permanent");
-assert.equal(permanent.abandonedReason, "permanent");
+assert.equal(permanent.abandonedReason, undefined);
 
 const missingAdapter = completeLeadDeliveryAttempt({
 	delivery: { ...claimed, id: "delivery-3", channelId: "unknown" },
 	nowIso: "2026-09-16T12:03:00.000Z",
 	result: { kind: "missing_adapter", channelId: "unknown" },
 });
-assert.equal(missingAdapter.status, "abandoned");
+assert.equal(missingAdapter.status, "failed");
 assert.equal(missingAdapter.lastErrorKind, "permanent");
-assert.equal(missingAdapter.nextAttemptAt, "2026-09-16T12:00:00.000Z");
 
 const delivered = completeLeadDeliveryAttempt({
 	delivery: claimed,
@@ -92,5 +91,29 @@ const boundedLog = appendAttemptLog(
 );
 assert.equal(boundedLog.length, 20);
 assert.equal(boundedLog[19].safeCode, "ok");
+
+const exhausted = completeLeadDeliveryAttempt({
+	delivery: { ...claimed, attempts: 6 },
+	nowIso: "2026-09-16T12:05:00.000Z",
+	result: {
+		kind: "retryable",
+		safeCode: "provider_timeout",
+		redactedNote: "Provider timeout.",
+	},
+});
+assert.equal(exhausted.status, "abandoned");
+assert.equal(exhausted.abandonedReason, "exhausted");
+
+const unknown = completeLeadDeliveryAttempt({
+	delivery: claimed,
+	nowIso: "2026-09-16T12:06:00.000Z",
+	result: {
+		kind: "unknown",
+		safeCode: "timeout_after_send",
+		redactedNote: "Provider timed out after the request was sent.",
+	},
+});
+assert.equal(unknown.status, "pending");
+assert.equal(unknown.nextAttemptAt, "2026-09-16T13:06:00.000Z");
 
 console.log("verify-lead-delivery-state: ok");

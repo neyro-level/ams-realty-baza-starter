@@ -1,5 +1,7 @@
-import type { CollectionConfig } from "payload";
-import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
+import type { CollectionConfig, PayloadRequest } from "payload";
+import { retryLeadDelivery } from "../../core/leads/owner-delivery-operations.ts";
+import { systemOverrideAccess } from "../../server/system-gateway/overrides.ts";
+import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 export const LeadDeliveries: CollectionConfig = {
 	slug: "lead-deliveries",
@@ -24,6 +26,49 @@ export const LeadDeliveries: CollectionConfig = {
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},
+	endpoints: [
+		{
+			path: "/:id/retry",
+			method: "post",
+			handler: async (req: PayloadRequest) => {
+				if (!hasRole(req.user, ["owner", "admin"])) {
+					return Response.json({ error: "forbidden" }, { status: 403 });
+				}
+				const id = String(req.routeParams?.id ?? "");
+				if (!id) {
+					return Response.json({ error: "invalid_payload" }, { status: 400 });
+				}
+				try {
+					const result = await retryLeadDelivery({
+						payload: req.payload,
+						deliveryId: id,
+						actorUserId: String(req.user?.id ?? "unknown"),
+						nowIso: new Date().toISOString(),
+						enqueue: async (leadDeliveryId) => {
+							const queued = (await req.payload.jobs.queue({
+								task: "deliverLead",
+								queue: "lead-deliveries",
+								input: { leadDeliveryId },
+								req,
+								...systemOverrideAccess("system-job"),
+							})) as { id: number | string };
+							return String(queued.id);
+						},
+					});
+					return Response.json({ ok: true, jobId: result.jobId });
+				} catch (error) {
+					return Response.json(
+						{
+							error: "retry_rejected",
+							code:
+								error instanceof Error ? error.message : "retry_rejected",
+						},
+						{ status: 409 },
+					);
+				}
+			},
+		},
+	],
 	fields: [
 		{
 			name: "lead",

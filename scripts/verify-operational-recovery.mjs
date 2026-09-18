@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { isLiveFuturePayloadJob } from "../src/core/leads/index.ts";
 import { payloadJobTaskSlugs } from "../src/payload/jobs/registry.ts";
 
 const operations = readFileSync("docs/OPERATIONS.md", "utf8");
@@ -50,6 +51,24 @@ assert.ok(
 	leadDeliveries.includes("Manual retry"),
 	"lead deliveries admin guidance is required for manual retry",
 );
+assert.ok(
+	leadDeliveries.includes("/:id/retry"),
+	"controlled manual retry endpoint is required",
+);
+
+const recoverSource = readFileSync("src/payload/jobs/tasks.ts", "utf8");
+assert.ok(
+	recoverSource.includes("inspectPayloadJob"),
+	"orphan recovery must inspect jobs through the system gateway",
+);
+assert.ok(
+	recoverSource.includes("isLiveFuturePayloadJob"),
+	"pending jobs with future waitUntil must not be treated as orphans",
+);
+assert.ok(
+	!/collection:\s*["']payload-jobs["']/.test(recoverSource),
+	"recoverLeadDeliveries must not use generic payload-jobs CRUD",
+);
 
 for (const forbidden of ["Raw XML", "PII", "credentials", "токены"]) {
 	assert.ok(
@@ -57,5 +76,20 @@ for (const forbidden of ["Raw XML", "PII", "credentials", "токены"]) {
 		`runbook must explicitly forbid ${forbidden}`,
 	);
 }
+
+assert.equal(
+	isLiveFuturePayloadJob(
+		{ waitUntil: "2026-09-16T13:00:00.000Z", completedAt: null },
+		new Date("2026-09-16T12:00:00.000Z"),
+	),
+	true,
+);
+assert.equal(
+	isLiveFuturePayloadJob(
+		{ waitUntil: null, completedAt: "2026-09-16T11:00:00.000Z" },
+		new Date("2026-09-16T12:00:00.000Z"),
+	),
+	false,
+);
 
 console.log("verify-operational-recovery: ok");

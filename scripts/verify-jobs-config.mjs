@@ -206,8 +206,16 @@ if (!tasksSource.includes("touchImportRunHeartbeat")) {
 	throw new Error("importFeed must heartbeat outside the ingest transaction.");
 }
 
-if (tasksSource.includes('implementedBy: "feed-import-engine"')) {
-	throw new Error("importFeed stub must be replaced by the runtime pipeline.");
+if (tasksSource.includes('implementedBy: "lead-delivery-adapter"')) {
+	throw new Error("deliverLead stub must be replaced by the runtime pipeline.");
+}
+
+if (!tasksSource.includes("runDeliverLeadTask")) {
+	throw new Error("deliverLead must call runDeliverLeadTask.");
+}
+
+if (!tasksSource.includes("retries: 0")) {
+	throw new Error("deliverLead platform retries must be 0.");
 }
 
 console.log("Jobs config verified.");

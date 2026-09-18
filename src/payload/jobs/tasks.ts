@@ -6,6 +6,9 @@ import {
 	finishImportRun,
 	touchImportRunHeartbeat,
 } from "../../core/data-access/ingest/sql/index.ts";
+import { runDeliverLeadTask } from "../../core/leads/deliver-lead.ts";
+import { isLiveFuturePayloadJob } from "../../core/leads/job-liveness.ts";
+import { inspectPayloadJob } from "../../core/data-access/system/jobs/index.ts";
 import { postBatchedHttpRevalidate } from "../../core/cache/http-revalidate.ts";
 import { dispatchDueFeeds } from "../../core/ingest/dispatch-due-feeds.ts";
 import { fetchConditionalFeed } from "../../core/ingest/feed-fetcher.ts";
@@ -421,6 +424,8 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					data: {
 						status: "pending",
 						nextAttemptAt: nowIso(),
+						jobId: null,
+						claimedAt: null,
 						heartbeatAt: null,
 						lastErrorKind: "retryable",
 						lastErrorRedacted:
@@ -436,7 +441,6 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					and: [
 						{ status: { equals: "pending" } },
 						{ nextAttemptAt: { less_than_equal: nowIso() } },
-						{ jobId: { exists: false } },
 					],
 				},
 				limit: 20,
@@ -444,7 +448,35 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				req,
 			});
 
+			let queuedPending = 0;
 			for (const delivery of duePending.docs) {
+				if (delivery.jobId) {
+					let live = false;
+					try {
+						const job = await inspectPayloadJob(
+							req.payload,
+							String(delivery.jobId),
+						);
+						live = isLiveFuturePayloadJob(
+							{
+								waitUntil:
+									typeof job.waitUntil === "string" ? job.waitUntil : null,
+								completedAt:
+									typeof job.completedAt === "string" ? job.completedAt : null,
+								processing: Boolean(
+									(job as { processing?: boolean }).processing,
+								),
+							},
+							new Date(),
+						);
+					} catch {
+						live = false;
+					}
+					if (live) {
+						continue;
+					}
+				}
+
 				const queuedJob = (await queueTask({
 					req,
 					task: payloadJobTaskSlugs.deliverLead,
@@ -460,12 +492,13 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					},
 					req,
 				});
+				queuedPending += 1;
 			}
 
 			return {
 				output: {
 					recoveredSending: staleSending.docs.length,
-					queuedPending: duePending.docs.length,
+					queuedPending,
 				},
 			};
 		},
@@ -474,13 +507,27 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		slug: payloadJobTaskSlugs.deliverLead,
 		label: "Deliver lead",
 		inputSchema: [{ name: "leadDeliveryId", type: "text", required: true }],
+		retries: 0,
 		concurrency: {
 			key: ({ input }) => `lead-delivery:${input.leadDeliveryId}`,
 			exclusive: true,
 			supersedes: false,
 		},
-		handler: async () => ({
-			output: { registered: true, implementedBy: "lead-delivery-adapter" },
-		}),
+		handler: async ({ input, req }) => {
+			const result = await runDeliverLeadTask({
+				payload: req.payload,
+				leadDeliveryId: String(input.leadDeliveryId),
+				nowIso: nowIso(),
+				env: {
+					LEAD_OUTBOUND_HOSTS: runtimeEnv.LEAD_OUTBOUND_HOSTS,
+					MAX_API_URL: runtimeEnv.MAX_API_URL,
+					MAX_BOT_TOKEN: runtimeEnv.MAX_BOT_TOKEN,
+					MAX_CHAT_ID: runtimeEnv.MAX_CHAT_ID,
+					CUSTOM_WEBHOOK_URL: runtimeEnv.CUSTOM_WEBHOOK_URL,
+					CUSTOM_WEBHOOK_HMAC_SECRET: runtimeEnv.CUSTOM_WEBHOOK_HMAC_SECRET,
+				},
+			});
+			return result;
+		},
 	},
 ];

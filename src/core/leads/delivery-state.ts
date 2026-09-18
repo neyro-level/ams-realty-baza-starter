@@ -43,10 +43,18 @@ export type LeadDeliveryResult =
 			redactedNote: string;
 			backoffMs?: number;
 	  }
+	| {
+			kind: "unknown";
+			safeCode: string;
+			redactedNote: string;
+			backoffMs?: number;
+	  }
 	| { kind: "permanent"; safeCode: string; redactedNote: string }
 	| { kind: "missing_adapter"; channelId: string };
 
-const defaultRetryBackoffMs = 15 * 60 * 1000;
+export const leadDeliveryRetryLadderMinutes = [0, 1, 5, 15, 60, 240] as const;
+export const leadDeliveryMaxAttempts = leadDeliveryRetryLadderMinutes.length;
+const unknownRetryBackoffMs = 60 * 60 * 1000;
 const staleSendingThresholdMs = 15 * 60 * 1000;
 const maxAttemptLogEntries = 20;
 
@@ -98,13 +106,33 @@ export function completeLeadDeliveryAttempt({
 		};
 	}
 
-	if (result.kind === "retryable") {
+	if (result.kind === "retryable" || result.kind === "unknown") {
+		if (delivery.attempts >= leadDeliveryMaxAttempts) {
+			return {
+				...clearActiveClaim(delivery),
+				status: "abandoned",
+				abandonedReason: "exhausted",
+				lastErrorKind: "retryable",
+				lastErrorRedacted: result.redactedNote,
+				attemptLog: appendAttemptLog(delivery.attemptLog, {
+					attemptedAt: nowIso,
+					safeCode: result.safeCode,
+					outcome: "retryable",
+					redactedNote: result.redactedNote,
+				}),
+			};
+		}
+
+		const backoffMs =
+			result.backoffMs ??
+			(result.kind === "unknown"
+				? unknownRetryBackoffMs
+				: retryBackoffMs(delivery.attempts));
 		return {
 			...clearActiveClaim(delivery),
 			status: "pending",
 			nextAttemptAt: new Date(
-				new Date(nowIso).getTime() +
-					(result.backoffMs ?? defaultRetryBackoffMs),
+				new Date(nowIso).getTime() + backoffMs,
 			).toISOString(),
 			lastErrorKind: "retryable",
 			lastErrorRedacted: result.redactedNote,
@@ -126,10 +154,9 @@ export function completeLeadDeliveryAttempt({
 
 	return {
 		...clearActiveClaim(delivery),
-		status: "abandoned",
+		status: "failed",
 		lastErrorKind: "permanent",
 		lastErrorRedacted: redactedNote,
-		abandonedReason: "permanent",
 		attemptLog: appendAttemptLog(delivery.attemptLog, {
 			attemptedAt: nowIso,
 			safeCode,
@@ -137,6 +164,14 @@ export function completeLeadDeliveryAttempt({
 			redactedNote,
 		}),
 	};
+}
+
+export function retryBackoffMs(attempts: number): number {
+	const index = Math.min(
+		Math.max(attempts, 1),
+		leadDeliveryRetryLadderMinutes.length - 1,
+	);
+	return leadDeliveryRetryLadderMinutes[index] * 60_000;
 }
 
 export function recoverStaleSendingDelivery(
