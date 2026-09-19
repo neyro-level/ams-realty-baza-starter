@@ -159,10 +159,19 @@ External monitor is independent of AMS Server and watches public homepage, `/api
 
 ## Canonical verification
 
-Единственная обязательная поверхность (не дробить на дополнительные gate):
+Developer и release используют существующие package scripts без создания
+дублирующих gates:
 
 ```bash
 pnpm verify:daily
-pnpm verify
 pnpm verify:schema
+pnpm verify:integration:required
+pnpm verify:ui-core
+pnpm verify:merge-standard
+pnpm verify:merge-risky
 ```
+
+`merge-standard` не требует DB. `merge-risky` требует safe isolated
+`DATABASE_URI_TEST`, выполняет required integration без skipped suites и build.
+Команда `pnpm verify` остаётся полной локальной suite, но не является вторым
+SourceCraft gate. Production proof выполняется только отдельной release-командой.

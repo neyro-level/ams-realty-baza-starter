@@ -40,6 +40,7 @@
 | Admin access | public+hardened until owner sets IP/VPN |
 | Field ownership | `manual → field override → owning feed`; foreign-feed identity is degenerate for REALTY_BASE |
 | Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
+| Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
 
 Next.js 16 edge: `src/proxy.ts` + `export function proxy` (not `middleware.ts`). Anonymous `/api/{collection}` for deny-list and system-only slugs returns JSON `{ error: "notFound" }` 404 unless a Payload session cookie is present. Public lead create remains `POST /api/public/leads`.
 
@@ -53,13 +54,19 @@ Canonical URL map: `02_PRODUCT_STRUCTURE.md`. Knobs source: `src/project/project
 pnpm verify:daily
 pnpm verify
 pnpm verify:schema
+pnpm verify:integration:required
 pnpm verify:merge-standard
 pnpm verify:merge-risky
+pnpm verify:ui-core
 ```
 
 `verify:merge-standard` не запускает PostgreSQL suite. `verify:merge-risky`
 требует явный `DATABASE_URI_TEST` на loopback (`127.0.0.1`/`localhost`) с именем
 базы `*_test`, выполняет миграции и Payload integration suites, затем build.
+`verify:integration:required` использует тот же fail-closed DB prerequisite и не
+допускает `SKIPPED`. `verify:ui-core` агрегирует UI ownership, design-token,
+accessibility и SEO contracts; visual matrix остаётся отдельным evidence при UI
+изменениях.
 Production-looking имена (`prod`, `production`, `live`) и fallback к
 `DATABASE_URI` запрещены до любой мутации. Локальный контур использует native
 PostgreSQL; Docker/WSL не запускаются автоматически.

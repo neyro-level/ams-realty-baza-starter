@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Plan №5 / APPROVED` — `AMS-REALTBASE-CORE-ALIGN` v1 закрыт на `main@f8344de`; новый `AMS-REALTBASE-RESIDUAL-ALIGN` v1 прошёл финальный аудит и утверждён владельцем (`docs/AMS_MASTER_PLAN №5.md`). Разрешены Beads import и Developer handoff; production остаётся вне графа.
+Статус: `Plan №5 / EXECUTION` — `AMS-REALTBASE-RESIDUAL-ALIGN` v1 утверждён владельцем. EPIC-01…11 доставлены в SourceCraft `main`; этот документ фиксирует EPIC-12 source-of-truth sync, после которого EPIC-13 выполняет финальный exact-SHA proof. Exact execution state хранится в локальном stealth Beads. Production и GitHub остаются вне графа.
 
 ## Канонические документы
 
@@ -19,9 +19,21 @@
 | Реализуемость presentation contracts | `CONTRACT_FEASIBILITY.md` |
 | Fixture acceptance перед freeze contracts | `research/FIXTURE_ACCEPTANCE.md` |
 
+## Рабочий порядок чтения
+
+1. `../AGENTS.md` — project router и invariants.
+2. Этот файл — карта Source of Truth.
+3. Один профильный документ из таблицы выше.
+4. Релевантный раздел `AMS_MASTER_PLAN №5.md` и текущая задача Beads.
+5. ADR/module/research только когда на них ссылается текущий scope.
+
+Исторические планы и proofs не являются инструкцией к повторному исполнению.
+Команды проверки берутся из `package.json`; их смысл и risk split описаны в
+`03_ARCHITECTURE.md` и `PROJECT.md`.
+
 ## Нормативные источники
 
-- `docs/AMS_MASTER_PLAN №5.md` — текущий APPROVED план остаточного выравнивания (`AMS-REALTBASE-RESIDUAL-ALIGN` v1). Демо: local PostgreSQL + MEDIA_DIR; production и GitHub вне графа.
+- `docs/AMS_MASTER_PLAN №5.md` — текущий APPROVED и исполняемый план остаточного выравнивания (`AMS-REALTBASE-RESIDUAL-ALIGN` v1). Демо: local PostgreSQL + MEDIA_DIR; production и GitHub вне графа.
 - `docs/AMS_MASTER_PLAN №4.md` — закрытый APPROVED Core Align (`AMS-REALTBASE-CORE-ALIGN` v1, `main@f8344de`).
 - `docs/AMS_MASTER_PLAN №3.md` — закрытый APPROVED corrections EPIC 11–21 (`AMS-REALTBASE-CORRECTIONS` v3, `main@14e9bf53`).
 - `docs/AMS_MASTER_PLAN №2.md` — закрытый утверждённый hardening (`AMS-REALTBASE-HARDENING` v2, `main@f39826c`).

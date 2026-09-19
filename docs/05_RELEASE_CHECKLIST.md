@@ -1,6 +1,6 @@
 # Release Checklist
 
-Статус: `Owner-operated demo contour exists; EPIC-21 rollout uses exact main`. PII retention days remain `NEEDS_OWNER`.
+Статус: `Owner-operated demo contour exists; Plan №5 pre-production alignment in progress`. PII retention days remain `NEEDS_OWNER`; существующий live contour не доказывает готовность нового SHA к release.
 
 ## Перед Pull Request
 
@@ -16,6 +16,8 @@
 - независимый review exact head SHA выполнен только если владелец явно запросил review/audit или scope заранее помечен как high-risk/high-complexity;
 - PR основан на актуальном `main` и не содержит чужого scope;
 - риск классифицирован как `STANDARD` или `RISKY`;
+- `STANDARD` запускает `pnpm verify:merge-standard`; `RISKY` запускает один
+  `pnpm verify:merge-risky` с safe isolated test DB и zero skipped required suites;
 - один ручной SourceCraft Merge Gate зелёный на exact head SHA;
 - все блокеры исправлены, evidence сохранён.
 
