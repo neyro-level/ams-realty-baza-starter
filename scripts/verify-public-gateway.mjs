@@ -1,13 +1,33 @@
 import { readFileSync } from "node:fs";
 
-const catalogSource = readFileSync("src/core/data-access/public/catalog.ts", "utf8");
-const gatewaySource = readFileSync("src/core/data-access/public/index.ts", "utf8");
-const policySource = readFileSync("src/core/data-access/public/policy.ts", "utf8");
-const accessSource = readFileSync("src/core/data-access/system/public-read.ts", "utf8");
-const propertiesSource = readFileSync("src/payload/collections/Properties.ts", "utf8");
+const catalogSource = readFileSync(
+	"src/core/data-access/public/catalog.ts",
+	"utf8",
+);
+const gatewaySource = readFileSync(
+	"src/core/data-access/public/index.ts",
+	"utf8",
+);
+const policySource = readFileSync(
+	"src/core/data-access/public/policy.ts",
+	"utf8",
+);
+const accessSource = readFileSync(
+	"src/core/data-access/public/access-mode.ts",
+	"utf8",
+);
+const propertiesSource = readFileSync(
+	"src/payload/collections/Properties.ts",
+	"utf8",
+);
 const pagesSource = readFileSync("src/payload/collections/Pages.ts", "utf8");
-const mediaSource = readFileSync("src/payload/collections/Media.ts", "utf8");
-const rawRestBoundary = JSON.parse(readFileSync("config/raw-rest-boundary.json", "utf8"));
+const redirectsSource = readFileSync(
+	"src/payload/collections/Redirects.ts",
+	"utf8",
+);
+const rawRestBoundary = JSON.parse(
+	readFileSync("config/raw-rest-boundary.json", "utf8"),
+);
 
 const forbiddenPublicFields = [
 	"feedSource",
@@ -32,7 +52,9 @@ if (!selectMatch?.groups?.select) {
 
 for (const field of forbiddenPublicFields) {
 	if (selectMatch.groups.select.includes(`${field}:`)) {
-		throw new Error(`Forbidden private/internal field in public select: ${field}`);
+		throw new Error(
+			`Forbidden private/internal field in public select: ${field}`,
+		);
 	}
 }
 
@@ -40,7 +62,7 @@ const requiredPolicySnippets = [
 	"publicGatewayReadAccess",
 	"depth: 0",
 	"maxLimit: 48",
-	"output: \"dto\"",
+	'output: "dto"',
 ];
 
 for (const snippet of requiredPolicySnippets) {
@@ -49,20 +71,43 @@ for (const snippet of requiredPolicySnippets) {
 	}
 }
 
-if (!accessSource.includes("publicGatewayOperation:") || !accessSource.includes("public-read")) {
-	throw new Error("Public Gateway must declare explicit public-read access mode");
+if (
+	!accessSource.includes('publicGatewayOperation = "public-read"') ||
+	!accessSource.includes("publicGatewayOperation }")
+) {
+	throw new Error(
+		"Public Gateway must declare explicit public-read access mode",
+	);
 }
 
-if (!accessSource.includes("overrideAccess:") || !accessSource.includes("true")) {
-	throw new Error("Public Gateway Local API must use explicit overrideAccess, not anonymous collection read");
+if (
+	!accessSource.includes("overrideAccess:") ||
+	!accessSource.includes("false")
+) {
+	throw new Error(
+		"Public Gateway Local API must enforce collection access with overrideAccess:false",
+	);
 }
 
-if (propertiesSource.includes("publicPropertyReadWhere") || pagesSource.includes("publicPageReadWhere")) {
-	throw new Error("Publication predicates must not live in collection access as a public API");
+if (
+	!accessSource.includes("user: null") ||
+	!accessSource.includes("context: { publicGatewayOperation }")
+) {
+	throw new Error(
+		"Public Gateway reads must be anonymous and carry the classified public-read context",
+	);
 }
 
-if (!propertiesSource.includes("read: adminsAndOwners") || !pagesSource.includes("read: adminsAndOwners")) {
-	throw new Error("properties and pages anonymous collection read must be deny");
+for (const [file, source, accessName] of [
+	["Properties", propertiesSource, "publicPropertyReadAccess"],
+	["Pages", pagesSource, "publicPageReadAccess"],
+	["Redirects", redirectsSource, "publicRedirectReadAccess"],
+]) {
+	if (!source.includes(`read: ${accessName}`)) {
+		throw new Error(
+			`${file} must authorize only its context-aware Public Gateway read access`,
+		);
+	}
 }
 
 if (!gatewaySource.includes("export { publicGatewayPolicy }")) {
@@ -70,24 +115,28 @@ if (!gatewaySource.includes("export { publicGatewayPolicy }")) {
 }
 
 if (!gatewaySource.includes("export { publicGatewayReadAccess }")) {
-	throw new Error("publicGatewayReadAccess must be exported from Public Gateway");
+	throw new Error(
+		"publicGatewayReadAccess must be exported from Public Gateway",
+	);
 }
 
 const requiredPredicateSnippets = [
-	"status: { equals: \"active\" }",
+	'status: { equals: "active" }',
 	"publishedAt: { exists: true }",
 	"contentPurgedAt: { exists: false }",
 ];
 
 for (const snippet of requiredPredicateSnippets) {
 	if (!catalogSource.includes(snippet)) {
-		throw new Error(`Publication predicate missing from Public Gateway: ${snippet}`);
+		throw new Error(
+			`Publication predicate missing from Public Gateway: ${snippet}`,
+		);
 	}
 }
 
 const facetSnippets = [
 	"aggregatePublicCatalogFacets",
-	"source: \"payload-aggregate\"",
+	'source: "payload-aggregate"',
 	"export async function findPublicCatalogFacets",
 ];
 
@@ -115,12 +164,19 @@ for (const collection of requiredRawRestDeniedCollections) {
 	}
 }
 
-const payloadAdapter = readFileSync("src/core/data-access/public/payload.ts", "utf8");
+const payloadAdapter = readFileSync(
+	"src/core/data-access/public/payload.ts",
+	"utf8",
+);
 if (!payloadAdapter.includes("isPayloadRuntimeConfigured")) {
-	throw new Error("Public gateway must skip Payload init when DATABASE_URI is absent");
+	throw new Error(
+		"Public gateway must skip Payload init when DATABASE_URI is absent",
+	);
 }
 if (!payloadAdapter.includes("getOptionalPublicGatewayPayload")) {
-	throw new Error("Public gateway needs optional Payload for ISR build without Postgres");
+	throw new Error(
+		"Public gateway needs optional Payload for ISR build without Postgres",
+	);
 }
 
 console.log("verify:public-gateway passed");

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { publicGatewayReadAccess } from "../system/public-read.ts";
+import { publicGatewayReadAccess } from "./access-mode.ts";
 
 export const publicGatewayPolicy = {
 	...publicGatewayReadAccess(),

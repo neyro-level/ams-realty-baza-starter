@@ -65,7 +65,10 @@ for (const file of filesUnder("src")) {
 			name === "src/core/leads/deliver-lead.ts"
 		)
 	) {
-		report(file, "systemOverrideAccess import outside System Gateway whitelist");
+		report(
+			file,
+			"systemOverrideAccess import outside System Gateway whitelist",
+		);
 	}
 	if (/hostname\s*:\s*["']\*+["']/.test(content))
 		report(file, "wildcard image hostname");
@@ -80,7 +83,10 @@ if (existsSync(nextConfigPath)) {
 	if (/hostname\s*:\s*["']\*+["']/.test(nextConfig)) {
 		violations.push("next.config.ts: wildcard image hostname");
 	}
-	if (!nextConfig.includes("parseAllowedImageHosts") || !nextConfig.includes("toNextImageRemotePatterns")) {
+	if (
+		!nextConfig.includes("parseAllowedImageHosts") ||
+		!nextConfig.includes("toNextImageRemotePatterns")
+	) {
 		violations.push(
 			"next.config.ts: image remotePatterns must come from src/core/ingest/image-hosts.ts",
 		);
@@ -118,14 +124,17 @@ for (const route of requiredFixtureRoutes) {
 
 for (const file of filesUnder("src/app")) {
 	const name = relative(file);
-	if (
-		name.includes("/(payload)/") ||
-		name.includes("src\\app\\(payload)")
-	) {
+	if (name.includes("/(payload)/") || name.includes("src\\app\\(payload)")) {
 		continue;
 	}
-	if (/@\/components\/fixture|components\/fixture\//.test(readFileSync(file, "utf8"))) {
-		violations.push(`${name}: production app routes must not import fixture presentation`);
+	if (
+		/@\/components\/fixture|components\/fixture\//.test(
+			readFileSync(file, "utf8"),
+		)
+	) {
+		violations.push(
+			`${name}: production app routes must not import fixture presentation`,
+		);
 	}
 }
 
@@ -180,8 +189,14 @@ if (!existsSync(proxyPath)) {
 	}
 }
 if (!existsSync(anonymousRestHelperPath)) {
-	violations.push("src/core/security/anonymous-raw-rest.ts: denylist helper is missing");
-} else if (!readFileSync(anonymousRestHelperPath, "utf8").includes("anonymousDenyCollections")) {
+	violations.push(
+		"src/core/security/anonymous-raw-rest.ts: denylist helper is missing",
+	);
+} else if (
+	!readFileSync(anonymousRestHelperPath, "utf8").includes(
+		"anonymousDenyCollections",
+	)
+) {
 	violations.push(
 		"src/core/security/anonymous-raw-rest.ts: helper must read anonymousDenyCollections",
 	);
@@ -254,12 +269,14 @@ const baseline = JSON.parse(
 if (baseline.frozen !== true) {
 	violations.push("docs/guard-baseline.json must be frozen");
 }
-if (!Array.isArray(baseline.knownExceptions) || baseline.knownExceptions.length !== 0) {
+if (
+	!Array.isArray(baseline.knownExceptions) ||
+	baseline.knownExceptions.length !== 0
+) {
 	violations.push("docs/guard-baseline.json knownExceptions must stay empty");
 }
 
-const approvedSql =
-	/^src\/core\/data-access\/(?:system|ingest|public)\/sql\//;
+const approvedSql = /^src\/core\/data-access\/(?:system|ingest|public)\/sql\//;
 const migrationSql = /^src\/payload\/migrations\//;
 for (const file of filesUnder("src")) {
 	const name = relative(file);
@@ -270,7 +287,10 @@ for (const file of filesUnder("src")) {
 		!approvedSql.test(name) &&
 		!migrationSql.test(name)
 	) {
-		report(file, "low-level SQL is only allowed in approved sql layers or migrations");
+		report(
+			file,
+			"low-level SQL is only allowed in approved sql layers or migrations",
+		);
 	}
 	if (
 		/collection:\s*["']payload-jobs["']/.test(content) &&
@@ -306,13 +326,22 @@ for (const file of filesUnder("src/core/cache")) {
 	) {
 		report(file, "lazy next/cache is only allowed in the in-process adapter");
 	}
-	if (name === "src/core/cache/http-revalidate.ts" && /next\/cache/.test(content)) {
+	if (
+		name === "src/core/cache/http-revalidate.ts" &&
+		/next\/cache/.test(content)
+	) {
 		report(file, "HTTP cache adapter must not import next/cache");
 	}
 }
 
-const payloadConfig = readFileSync(path.join(root, "payload.config.ts"), "utf8");
-if (/cors:\s*["']\*["']/.test(payloadConfig) || /origin:\s*["']\*["']/.test(payloadConfig)) {
+const payloadConfig = readFileSync(
+	path.join(root, "payload.config.ts"),
+	"utf8",
+);
+if (
+	/cors:\s*["']\*["']/.test(payloadConfig) ||
+	/origin:\s*["']\*["']/.test(payloadConfig)
+) {
 	violations.push("payload.config.ts: wildcard CORS is forbidden");
 }
 
@@ -332,11 +361,15 @@ const requiredCollections = [
 ];
 for (const slug of requiredCollections) {
 	if (!classified.has(slug)) {
-		violations.push(`config/raw-rest-boundary.json: collection ${slug} is unclassified`);
+		violations.push(
+			`config/raw-rest-boundary.json: collection ${slug} is unclassified`,
+		);
 	}
 }
 if (boundary.classifiedCollections?.media !== "deny-anonymous") {
-	violations.push("media must be classified deny-anonymous in raw-rest-boundary.json");
+	violations.push(
+		"media must be classified deny-anonymous in raw-rest-boundary.json",
+	);
 }
 
 const denyAnonymousFiles = {
@@ -351,15 +384,31 @@ const denyAnonymousFiles = {
 	media: "src/payload/collections/Media.ts",
 	redirects: "src/payload/collections/Redirects.ts",
 };
+const classifiedPublicReadAccess = {
+	pages: "publicPageReadAccess",
+	properties: "publicPropertyReadAccess",
+	redirects: "publicRedirectReadAccess",
+};
 for (const slug of boundary.anonymousDenyCollections ?? []) {
 	const relativeFile = denyAnonymousFiles[slug];
 	if (!relativeFile) {
-		violations.push(`anonymousDenyCollections includes unclassified file mapping for ${slug}`);
+		violations.push(
+			`anonymousDenyCollections includes unclassified file mapping for ${slug}`,
+		);
 		continue;
 	}
 	const content = readFileSync(path.join(root, relativeFile), "utf8");
-	if (!/access:\s*\{[\s\S]*?read:\s*(?:adminsAndOwners|ownersOnly)/.test(content)) {
-		violations.push(`${relativeFile}: deny-anonymous collection must not expose generic anonymous read`);
+	const publicAccess = classifiedPublicReadAccess[slug];
+	if (
+		!(publicAccess
+			? content.includes(`read: ${publicAccess}`)
+			: /access:\s*\{[\s\S]*?read:\s*(?:adminsAndOwners|ownersOnly)/.test(
+					content,
+				))
+	) {
+		violations.push(
+			`${relativeFile}: deny-anonymous collection must not expose generic anonymous read`,
+		);
 	}
 	if (/read:\s*\(\)\s*=>\s*true/.test(content)) {
 		violations.push(`${relativeFile}: open anonymous read is forbidden`);
@@ -378,16 +427,34 @@ for (const prefix of reserved) {
 		relative(file).includes(prefix.slice(1)),
 	);
 	if (appHit) {
-		violations.push(`reserved namespace ${prefix} must not be occupied by a static app route`);
+		violations.push(
+			`reserved namespace ${prefix} must not be occupied by a static app route`,
+		);
 	}
 }
 
-if (!existsSync(path.join(root, "src", "core", "data-access", "system", "jobs", "inspect.ts"))) {
+if (
+	!existsSync(
+		path.join(
+			root,
+			"src",
+			"core",
+			"data-access",
+			"system",
+			"jobs",
+			"inspect.ts",
+		),
+	)
+) {
 	violations.push("src/core/data-access/system/jobs module is missing");
 }
 
-if (existsSync(path.join(root, "src", "core", "data-access", "public", "sql"))) {
-	violations.push("src/core/data-access/public/sql: public raw SQL layer must be removed");
+if (
+	existsSync(path.join(root, "src", "core", "data-access", "public", "sql"))
+) {
+	violations.push(
+		"src/core/data-access/public/sql: public raw SQL layer must be removed",
+	);
 }
 
 for (const leftover of [
@@ -402,20 +469,22 @@ for (const leftover of [
 	"src/app/(site)/_lib",
 ]) {
 	if (existsSync(path.join(root, leftover))) {
-		violations.push(`${leftover}: moved under src/core; leftover path must be removed`);
+		violations.push(
+			`${leftover}: moved under src/core; leftover path must be removed`,
+		);
 	}
 }
 
-const publicReadRoots = [
-	"src/core/data-access/public",
-	"src/app/(site)",
-];
+const publicReadRoots = ["src/core/data-access/public", "src/app/(site)"];
 const publicSqlForbidden =
 	/drizzle\.execute|from\s+["']@payloadcms\/db-postgres\/drizzle["']|payload\.db|db\.drizzle/;
 for (const directory of publicReadRoots) {
 	for (const file of filesUnder(directory)) {
 		if (publicSqlForbidden.test(readFileSync(file, "utf8"))) {
-			report(file, "public/read path must not use drizzle.execute or payload.db");
+			report(
+				file,
+				"public/read path must not use drizzle.execute or payload.db",
+			);
 		}
 	}
 }

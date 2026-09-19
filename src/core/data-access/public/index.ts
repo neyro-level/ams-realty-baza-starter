@@ -15,6 +15,7 @@ export function parsePublicGatewayQuery(
 	return publicGatewayRequestSchema.parse(input);
 }
 
+export { publicGatewayReadAccess } from "./access-mode";
 export type {
 	CatalogQuery,
 	CatalogQueryInput,
@@ -32,7 +33,6 @@ export {
 	publicPropertyPublicationWhere,
 	publicPropertyRetainedArchivedWhere,
 } from "./catalog";
-export { publicGatewayReadAccess } from "../system/public-read";
 export { publicGatewayPolicy } from "./policy";
 export {
 	getPublicCatalog,

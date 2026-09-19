@@ -1,5 +1,6 @@
 import { hostname } from "node:os";
 import { getPayload } from "payload";
+import { trustedInspectionAccess } from "@/core/data-access/system/overrides";
 import configPromise from "../../../../../payload.config.ts";
 import { isCacheInvalidationStaleBeyondSla } from "../../../../core/cache/invalidation-sla.ts";
 import { resolveEnabledLeadChannels } from "../../../../core/leads/channels.ts";
@@ -9,7 +10,6 @@ import {
 } from "../../../../core/leads/retention.ts";
 import { isAlertChannelIndependent } from "../../../../core/operations/alert-channel.ts";
 import { buildOperationalAlerts } from "../../../../core/operations/alerts.ts";
-import { detectRuntimeEnvMode } from "../../../../core/operations/runtime-env.ts";
 import {
 	evaluateBackupFailures,
 	readBackupHealthSnapshot,
@@ -18,17 +18,18 @@ import {
 	importStaleThresholdMs,
 	pendingDeliveryOrphanThresholdMs,
 } from "../../../../core/operations/recovery-thresholds.ts";
+import { detectRuntimeEnvMode } from "../../../../core/operations/runtime-env.ts";
+import { redactRecord } from "../../../../core/security/redaction.ts";
 import {
 	isLocalMediaReady,
 	readDataVolumeFreeRatio,
 } from "../../../../core/storage/local-fs.ts";
-import { projectConfig } from "../../../../project/project.config.ts";
 import { runtimeEnv } from "../../../../payload/env.ts";
 import {
 	programmaticPayloadJobTasks,
 	staticPayloadJobTasks,
 } from "../../../../payload/jobs/registry.ts";
-import { redactRecord } from "../../../../core/security/redaction.ts";
+import { projectConfig } from "../../../../project/project.config.ts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -85,6 +86,7 @@ export async function GET(request: Request) {
 
 	try {
 		const payload = await getPayload({ config: configPromise });
+		const inspectionAccess = trustedInspectionAccess;
 		const importStaleBefore = new Date(
 			Date.now() - importStaleThresholdMs(),
 		).toISOString();
@@ -111,14 +113,17 @@ export async function GET(request: Request) {
 						{ nextDueAt: { less_than_equal: checkedAt } },
 					],
 				},
+				...inspectionAccess,
 			}),
 			payload.count({
 				collection: "import-runs",
 				where: { status: { equals: "suspicious" } },
+				...inspectionAccess,
 			}),
 			payload.count({
 				collection: "import-runs",
 				where: { status: { equals: "failed" } },
+				...inspectionAccess,
 			}),
 			payload.count({
 				collection: "import-runs",
@@ -128,6 +133,7 @@ export async function GET(request: Request) {
 						{ heartbeatAt: { less_than: importStaleBefore } },
 					],
 				},
+				...inspectionAccess,
 			}),
 			payload.count({
 				collection: "lead-deliveries",
@@ -138,6 +144,7 @@ export async function GET(request: Request) {
 						{ jobId: { exists: false } },
 					],
 				},
+				...inspectionAccess,
 			}),
 			payload.count({
 				collection: "lead-deliveries",
@@ -147,10 +154,12 @@ export async function GET(request: Request) {
 						{ heartbeatAt: { less_than: deliveryOrphanBefore } },
 					],
 				},
+				...inspectionAccess,
 			}),
 			payload.count({
 				collection: "lead-deliveries",
 				where: { status: { equals: "abandoned" } },
+				...inspectionAccess,
 			}),
 		]);
 
@@ -196,7 +205,8 @@ export async function GET(request: Request) {
 				productionReadinessFailed: !evaluateProductionRetentionReadiness({
 					runtimeMode: detectRuntimeEnvMode(),
 					publicLeadIntakeEnabled: true,
-					enabledLeadChannelCount: resolveEnabledLeadChannels(runtimeEnv).length,
+					enabledLeadChannelCount:
+						resolveEnabledLeadChannels(runtimeEnv).length,
 					leadRetentionDays: projectConfig.leadRetentionDays,
 					archiveRetentionDays: projectConfig.archiveRetentionDays,
 				}).ok,

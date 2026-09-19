@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { publicPageReadAccess } from "../../core/data-access/public/access-mode.ts";
 import { projectConfig } from "../../project/project.config.ts";
 import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
 
@@ -10,7 +11,7 @@ export const Pages: CollectionConfig = {
 	},
 	access: {
 		create: adminsAndOwners,
-		read: adminsAndOwners,
+		read: publicPageReadAccess,
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},
@@ -21,8 +22,7 @@ export const Pages: CollectionConfig = {
 				const slug = data.slug.trim().replace(/^\/+/, "");
 				const path = `/${slug}`;
 				const reserved = projectConfig.reservedNamespaces.some(
-					(namespace) =>
-						path === namespace || path.startsWith(`${namespace}/`),
+					(namespace) => path === namespace || path.startsWith(`${namespace}/`),
 				);
 				if (reserved) {
 					throw new Error(

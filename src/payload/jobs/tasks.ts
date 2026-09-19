@@ -1,4 +1,5 @@
 import type { PayloadRequest, TaskConfig } from "payload";
+import { postBatchedHttpRevalidate } from "../../core/cache/http-revalidate.ts";
 import {
 	claimDueFeedSources,
 	claimQueuedImportRun,
@@ -6,6 +7,17 @@ import {
 	finishImportRun,
 	touchImportRunHeartbeat,
 } from "../../core/data-access/ingest/sql/index.ts";
+import { inspectPayloadJob } from "../../core/data-access/system/jobs/index.ts";
+import { systemOverrideAccess } from "../../core/data-access/system/overrides.ts";
+import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
+import { dispatchDueFeeds } from "../../core/ingest/dispatch-due-feeds.ts";
+import { fetchConditionalFeed } from "../../core/ingest/feed-fetcher.ts";
+import {
+	parseFeedUrlRef,
+	parseImageHostEnv,
+	runImportFeed,
+} from "../../core/ingest/import-feed-runtime.ts";
+import { createPayloadFeedIngestRepository } from "../../core/ingest/payload-feed-ingest-repository.ts";
 import { runDeliverLeadTask } from "../../core/leads/deliver-lead.ts";
 import { isLiveFuturePayloadJob } from "../../core/leads/job-liveness.ts";
 import {
@@ -14,37 +26,25 @@ import {
 	planLeadRetentionRun,
 	purgeDeliveryDiagnostics,
 } from "../../core/leads/retention.ts";
-import { inspectPayloadJob } from "../../core/data-access/system/jobs/index.ts";
-import { postBatchedHttpRevalidate } from "../../core/cache/http-revalidate.ts";
 import {
 	importStaleThresholdMs,
 	observedSuccessfulDurationMs,
 	pendingDeliveryOrphanThresholdMs,
 	queuedImportOrphanThresholdMs,
 } from "../../core/operations/recovery-thresholds.ts";
-import { dispatchDueFeeds } from "../../core/ingest/dispatch-due-feeds.ts";
-import { fetchConditionalFeed } from "../../core/ingest/feed-fetcher.ts";
-import { createPayloadFeedIngestRepository } from "../../core/ingest/payload-feed-ingest-repository.ts";
-import {
-	parseFeedUrlRef,
-	parseImageHostEnv,
-	runImportFeed,
-} from "../../core/ingest/import-feed-runtime.ts";
-import { projectConfig } from "../../project/project.config.ts";
-import { getRuntimeClock } from "../../core/time/clock.ts";
-import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
-import { systemOverrideAccess } from "../../core/data-access/system/overrides.ts";
 import {
 	createSafeFeedOutboundFetch,
 	parseOutboundHostList,
 } from "../../core/security/safe-outbound-client.ts";
 import { parseTestApprovedOrigins } from "../../core/security/test-destinations.ts";
+import { getRuntimeClock } from "../../core/time/clock.ts";
+import { projectConfig } from "../../project/project.config.ts";
 import { runtimeEnv } from "../env.ts";
 import {
+	type PayloadJobTaskSlug,
 	payloadJobQueues,
 	payloadJobRegistry,
 	payloadJobTaskSlugs,
-	type PayloadJobTaskSlug,
 } from "./registry.ts";
 
 type GenericPayloadJobTask = TaskConfig<{
@@ -53,6 +53,7 @@ type GenericPayloadJobTask = TaskConfig<{
 }>;
 
 const minuteInMs = 60_000;
+const jobAccess = systemOverrideAccess("system-job");
 
 function nowDate() {
 	return getRuntimeClock().now();
@@ -77,7 +78,9 @@ export function computeNextDueAt({
 }) {
 	const nextFromNow = addMinutes(now, refreshIntervalMinutes);
 	const previous = previousNextDueAt ? new Date(previousNextDueAt) : undefined;
-	const nextFromPrevious = previous ? addMinutes(previous, refreshIntervalMinutes) : undefined;
+	const nextFromPrevious = previous
+		? addMinutes(previous, refreshIntervalMinutes)
+		: undefined;
 
 	if (nextFromPrevious && nextFromPrevious > nextFromNow) {
 		return nextFromPrevious.toISOString();
@@ -287,6 +290,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				limit: 5,
 				depth: 0,
 				req,
+				...jobAccess,
 			});
 			const importStaleMs = importStaleThresholdMs(
 				observedSuccessfulDurationMs(recentSuccess.docs),
@@ -322,6 +326,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				limit: 20,
 				depth: 0,
 				req,
+				...jobAccess,
 			});
 
 			for (const run of staleRuns.docs) {
@@ -331,7 +336,8 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					data: {
 						status: "interrupted",
 						finishedAt: nowIso(),
-						lastErrorRedacted: "Recovered by jobsJanitor: stale or orphan import run.",
+						lastErrorRedacted:
+							"Recovered by jobsJanitor: stale or orphan import run.",
 					},
 					req,
 					...systemOverrideAccess("system-job"),
@@ -368,6 +374,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				limit: 20,
 				depth: 0,
 				req,
+				...jobAccess,
 			});
 			const purgedAt = nowIso();
 			let deleted = 0;
@@ -380,6 +387,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					limit: 50,
 					depth: 0,
 					req,
+					...jobAccess,
 				});
 
 				for (const delivery of deliveries.docs) {
@@ -388,6 +396,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 						id: delivery.id,
 						data: purgeDeliveryDiagnostics(purgedAt),
 						req,
+						...jobAccess,
 					});
 				}
 
@@ -396,6 +405,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 						collection: "leads",
 						id: lead.id,
 						req,
+						...jobAccess,
 					});
 					deleted += 1;
 					continue;
@@ -406,6 +416,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					id: lead.id,
 					data: anonymizeLeadFields(purgedAt),
 					req,
+					...jobAccess,
 				});
 				anonymized += 1;
 			}
@@ -448,6 +459,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				limit: 20,
 				depth: 0,
 				req,
+				...jobAccess,
 			});
 			const purgedAt = nowIso();
 
@@ -461,6 +473,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 						contentPurgedAt: purgedAt,
 					},
 					req,
+					...jobAccess,
 				});
 				// Purge never writes a homepage redirect; public path becomes 410
 				// unless an explicit redirects.from row already exists.
@@ -491,6 +504,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				limit: 20,
 				depth: 0,
 				req,
+				...jobAccess,
 			});
 
 			for (const delivery of staleSending.docs) {
@@ -523,6 +537,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				limit: 20,
 				depth: 0,
 				req,
+				...jobAccess,
 			});
 
 			let queuedPending = 0;

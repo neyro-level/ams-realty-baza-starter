@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
+import { publicRedirectReadAccess } from "../../core/data-access/public/access-mode.ts";
 import { sanitizeExplicitRedirectPath } from "../../core/seo/redirect-path.ts";
-import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
+import { ownersOnly } from "../access/roles.ts";
 
 export const Redirects: CollectionConfig = {
 	slug: "redirects",
@@ -10,7 +11,7 @@ export const Redirects: CollectionConfig = {
 	},
 	access: {
 		create: ownersOnly,
-		read: adminsAndOwners,
+		read: publicRedirectReadAccess,
 		update: ownersOnly,
 		delete: ownersOnly,
 	},
@@ -45,7 +46,8 @@ export const Redirects: CollectionConfig = {
 			unique: true,
 			index: true,
 			admin: {
-				description: "Old public path. Must be created explicitly by owner action or approved migration.",
+				description:
+					"Old public path. Must be created explicitly by owner action or approved migration.",
 			},
 		},
 		{

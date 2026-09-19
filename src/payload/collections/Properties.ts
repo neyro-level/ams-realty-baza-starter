@@ -1,4 +1,5 @@
 import type { CollectionConfig, FieldAccess, PayloadRequest } from "payload";
+import { publicPropertyReadAccess } from "../../core/data-access/public/access-mode.ts";
 import { applyDerivedFieldsOnWrite } from "../../core/ingest/derived-fields.ts";
 import {
 	applyPublishedSlugPolicy,
@@ -9,7 +10,8 @@ import {
 } from "../../core/ingest/manual-ownership.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
-const fieldAdminsAndOwners: FieldAccess = ({ req }) => hasRole(req.user, ["owner", "admin"]);
+const fieldAdminsAndOwners: FieldAccess = ({ req }) =>
+	hasRole(req.user, ["owner", "admin"]);
 const fieldOwnersOnly: FieldAccess = ({ req }) => hasRole(req.user, ["owner"]);
 
 const privateFieldAccess = {
@@ -27,7 +29,7 @@ export const Properties: CollectionConfig = {
 	},
 	access: {
 		create: adminsAndOwners,
-		read: adminsAndOwners,
+		read: publicPropertyReadAccess,
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},
@@ -86,9 +88,13 @@ export const Properties: CollectionConfig = {
 		beforeChange: [
 			({ data, originalDoc, req }) => {
 				const priceMinor =
-					data.priceMinor === undefined ? originalDoc?.priceMinor : data.priceMinor;
+					data.priceMinor === undefined
+						? originalDoc?.priceMinor
+						: data.priceMinor;
 				const totalArea =
-					data.totalArea === undefined ? originalDoc?.totalArea : data.totalArea;
+					data.totalArea === undefined
+						? originalDoc?.totalArea
+						: data.totalArea;
 				const contextSource =
 					(req?.context as { source?: string } | undefined)?.source ??
 					(req?.context as { systemGatewayOperation?: string } | undefined)
@@ -125,7 +131,11 @@ export const Properties: CollectionConfig = {
 					if (changed.length > 0) {
 						data.manualOverrides = mergeManualOverrides(
 							originalDoc?.manualOverrides as
-								| { field: string; setAt: string; setBy?: string | number | null }[]
+								| {
+										field: string;
+										setAt: string;
+										setBy?: string | number | null;
+								  }[]
 								| undefined,
 							changed,
 							{
@@ -161,7 +171,8 @@ export const Properties: CollectionConfig = {
 			type: "text",
 			index: true,
 			admin: {
-				description: "Required for origin=feed; paired with feedSource by SQL guard.",
+				description:
+					"Required for origin=feed; paired with feedSource by SQL guard.",
 			},
 		},
 		{

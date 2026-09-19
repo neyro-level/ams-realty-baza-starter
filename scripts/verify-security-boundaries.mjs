@@ -80,13 +80,27 @@ const collectionFileBySlug = {
 	redirects: "src/payload/collections/Redirects.ts",
 };
 
+const classifiedPublicReadAccess = {
+	pages: "publicPageReadAccess",
+	properties: "publicPropertyReadAccess",
+	redirects: "publicRedirectReadAccess",
+};
+
 for (const slug of rawRestBoundary.anonymousDenyCollections) {
 	const file = collectionFileBySlug[slug];
-	assert.ok(file, `deny-anonymous collection ${slug} must map to a collection file`);
-	const content = read(file);
 	assert.ok(
-		/access:\s*\{[\s\S]*?read:\s*(?:adminsAndOwners|ownersOnly)/.test(content),
-		`${file}: anonymous generic read must be role-denied, not a public predicate`,
+		file,
+		`deny-anonymous collection ${slug} must map to a collection file`,
+	);
+	const content = read(file);
+	const classifiedAccess = classifiedPublicReadAccess[slug];
+	assert.ok(
+		classifiedAccess
+			? content.includes(`read: ${classifiedAccess}`)
+			: /access:\s*\{[\s\S]*?read:\s*(?:adminsAndOwners|ownersOnly)/.test(
+					content,
+				),
+		`${file}: anonymous generic read must be role-denied or classified by Public Gateway context`,
 	);
 	assert.ok(
 		!/read:\s*\(\)\s*=>\s*true/.test(content),
@@ -166,7 +180,7 @@ requireIncludes(
 );
 requireIncludes(
 	"src/payload/jobs/tasks.ts",
-	'input: { leadDeliveryId: String(delivery.id) }',
+	"input: { leadDeliveryId: String(delivery.id) }",
 	"lead delivery jobs must queue identifiers only",
 );
 
@@ -244,7 +258,6 @@ for (const required of [
 
 const overrideAllowlist = new Set([
 	"src/core/data-access/system/overrides.ts",
-	"src/core/data-access/system/public-read.ts",
 	"scripts/quality/architecture-guard.mjs",
 	"scripts/verify-security-boundaries.mjs",
 ]);
@@ -276,7 +289,9 @@ for (const file of [
 }
 
 assert.equal(
-	read("src/payload/collections/Properties.ts").includes("systemOverrideAccess"),
+	read("src/payload/collections/Properties.ts").includes(
+		"systemOverrideAccess",
+	),
 	false,
 	"Properties return-to-feed must not import systemOverrideAccess",
 );
@@ -322,10 +337,15 @@ assert.match(
 	"src/proxy.ts must export function proxy",
 );
 
-const { isAnonymousDeniedRawRestPath, anonymousRawRestEdgeDecision } = await import(
-	"../src/core/security/anonymous-raw-rest.ts"
-);
-for (const slug of ["properties", "pages", "leads", "lead-deliveries", "users"]) {
+const { isAnonymousDeniedRawRestPath, anonymousRawRestEdgeDecision } =
+	await import("../src/core/security/anonymous-raw-rest.ts");
+for (const slug of [
+	"properties",
+	"pages",
+	"leads",
+	"lead-deliveries",
+	"users",
+]) {
 	assert.equal(
 		isAnonymousDeniedRawRestPath(`/api/${slug}`),
 		true,
@@ -359,7 +379,12 @@ assert.equal(
 );
 
 const fakeSession = "aaaaaaaaaa.bbbbbbbbbb.cccccccccc";
-for (const pathname of ["/api/leads", "/api/properties", "/api/users", "/api/payload-jobs"]) {
+for (const pathname of [
+	"/api/leads",
+	"/api/properties",
+	"/api/users",
+	"/api/payload-jobs",
+]) {
 	assert.deepEqual(
 		anonymousRawRestEdgeDecision(pathname, undefined),
 		{ status: 404, body: { error: "notFound" } },

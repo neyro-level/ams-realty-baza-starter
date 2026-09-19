@@ -16,3 +16,5 @@ export function systemOverrideAccess(operation: SystemOperation) {
 	} as const;
 }
 
+export const trustedInspectionAccess =
+	systemOverrideAccess("trusted-inspection");
