@@ -7,6 +7,56 @@ import type { Payload } from "payload";
  */
 export const ingestSqlLayer = "src/core/data-access/ingest/sql" as const;
 
+export const approvedIngestSqlOperations = {
+	claimDueFeedSources: {
+		invariant:
+			"Each due feed source is claimed by at most one dispatcher tick.",
+		reason: "Requires one UPDATE with FOR UPDATE SKIP LOCKED and RETURNING.",
+	},
+	claimQueuedImportRun: {
+		invariant:
+			"Exactly one queued-to-running transition can win for an import run.",
+		reason:
+			"Payload 3.89.0 bulk update reads before per-document updates and cannot prove an atomic conditional claim.",
+	},
+	touchImportRunHeartbeat: {
+		invariant: "Only a running import run receives a heartbeat.",
+		reason:
+			"The status predicate and timestamp update must be one conditional statement.",
+	},
+	touchFeedPropertiesLastSeenAt: {
+		invariant:
+			"Only properties owned by the selected feed source and external IDs are touched.",
+		reason:
+			"A bounded set update avoids one Local API round trip per unchanged property.",
+	},
+	countMissingActiveFeedProperties: {
+		invariant:
+			"The safety count uses the same source, status, and last-seen predicate as deactivation.",
+		reason:
+			"The aggregate must be evaluated by PostgreSQL without loading candidate rows.",
+	},
+	deactivateMissingFeedProperties: {
+		invariant:
+			"Only active, unseen properties from the selected feed source are archived.",
+		reason:
+			"The guarded bulk transition must use the exact safety-count predicate.",
+	},
+	consumeDeactivationApproval: {
+		invariant: "A matching, unexpired approval can be consumed only once.",
+		reason:
+			"Approval validation and consumption require one conditional update.",
+	},
+	finishImportRun: {
+		invariant:
+			"Only the worker owning a running import can make one terminal transition.",
+		reason:
+			"The running predicate and terminal write must be one conditional statement with an affected result.",
+	},
+} as const;
+
+type ApprovedIngestSqlOperation = keyof typeof approvedIngestSqlOperations;
+
 export type ClaimedFeedSource = {
 	id: string;
 	code: string;
@@ -28,11 +78,21 @@ type DrizzleExecutor = {
 };
 
 function getDrizzle(payload: Payload): DrizzleExecutor {
-	const drizzle = (payload.db as { drizzle?: DrizzleExecutor } | undefined)?.drizzle;
+	const drizzle = (payload.db as { drizzle?: DrizzleExecutor } | undefined)
+		?.drizzle;
 	if (!drizzle?.execute) {
 		throw new Error("Ingest SQL requires Payload Postgres drizzle.execute.");
 	}
 	return drizzle;
+}
+
+function executeApprovedIngestSql(
+	payload: Payload,
+	operation: ApprovedIngestSqlOperation,
+	query: unknown,
+): Promise<unknown> {
+	void approvedIngestSqlOperations[operation];
+	return getDrizzle(payload).execute(query);
 }
 
 function rowsFrom(result: unknown): Array<Record<string, unknown>> {
@@ -92,7 +152,10 @@ export async function claimDueFeedSources(
 		throw new Error("dispatchBatchSize must be a positive integer.");
 	}
 	const now = input.now.toISOString();
-	const result = await getDrizzle(payload).execute(sql`
+	const result = await executeApprovedIngestSql(
+		payload,
+		"claimDueFeedSources",
+		sql`
 		UPDATE feed_sources AS claimed
 		SET
 			last_attempt_at = ${now}::timestamptz,
@@ -126,7 +189,8 @@ export async function claimDueFeedSources(
 			claimed.max_deactivations_per_run,
 			claimed.last_offer_count,
 			claimed.enabled
-	`);
+	`,
+	);
 	return rowsFrom(result).map(mapClaimedFeed);
 }
 
@@ -135,7 +199,10 @@ export async function claimQueuedImportRun(
 	input: { importRunId: string; now: Date },
 ): Promise<string | undefined> {
 	const now = input.now.toISOString();
-	const result = await getDrizzle(payload).execute(sql`
+	const result = await executeApprovedIngestSql(
+		payload,
+		"claimQueuedImportRun",
+		sql`
 		UPDATE import_runs
 		SET
 			status = 'running',
@@ -144,7 +211,8 @@ export async function claimQueuedImportRun(
 		WHERE id = ${input.importRunId}::integer
 			AND status = 'queued'
 		RETURNING id
-	`);
+	`,
+	);
 	const id = rowsFrom(result)[0]?.id;
 	return id == null ? undefined : asString(id);
 }
@@ -154,13 +222,17 @@ export async function touchImportRunHeartbeat(
 	input: { importRunId: string; now: Date },
 ): Promise<boolean> {
 	const now = input.now.toISOString();
-	const result = await getDrizzle(payload).execute(sql`
+	const result = await executeApprovedIngestSql(
+		payload,
+		"touchImportRunHeartbeat",
+		sql`
 		UPDATE import_runs
 		SET heartbeat_at = ${now}::timestamptz
 		WHERE id = ${input.importRunId}::integer
 			AND status = 'running'
 		RETURNING id
-	`);
+	`,
+	);
 	return rowsFrom(result).length > 0;
 }
 
@@ -194,7 +266,10 @@ export async function touchFeedPropertiesLastSeenAt(
 	const now = input.now.toISOString();
 	let touched = 0;
 	for (const chunk of chunkValues(input.externalIds)) {
-		const result = await getDrizzle(payload).execute(sql`
+		const result = await executeApprovedIngestSql(
+			payload,
+			"touchFeedPropertiesLastSeenAt",
+			sql`
 			UPDATE properties
 			SET
 				last_seen_at = ${now}::timestamptz,
@@ -204,7 +279,8 @@ export async function touchFeedPropertiesLastSeenAt(
 				AND feed_source_id = ${input.feedSourceId}::integer
 				AND external_id IN (${sqlStringList(chunk)})
 			RETURNING id
-		`);
+		`,
+		);
 		touched += rowsFrom(result).length;
 	}
 	return touched;
@@ -215,14 +291,18 @@ export async function countMissingActiveFeedProperties(
 	input: { feedSourceId: string; seenBefore: Date },
 ): Promise<number> {
 	const seenBefore = input.seenBefore.toISOString();
-	const result = await getDrizzle(payload).execute(sql`
+	const result = await executeApprovedIngestSql(
+		payload,
+		"countMissingActiveFeedProperties",
+		sql`
 		SELECT count(*)::int AS count
 		FROM properties
 		WHERE origin = 'feed'
 			AND feed_source_id = ${input.feedSourceId}::integer
 			AND status = 'active'
 			AND (last_seen_at IS NULL OR last_seen_at < ${seenBefore}::timestamptz)
-	`);
+	`,
+	);
 	return asNumber(rowsFrom(result)[0]?.count, 0);
 }
 
@@ -237,7 +317,10 @@ export async function deactivateMissingFeedProperties(
 ): Promise<number> {
 	const now = input.now.toISOString();
 	const seenBefore = input.seenBefore.toISOString();
-	const result = await getDrizzle(payload).execute(sql`
+	const result = await executeApprovedIngestSql(
+		payload,
+		"deactivateMissingFeedProperties",
+		sql`
 		UPDATE properties
 		SET
 			status = 'archived',
@@ -249,7 +332,8 @@ export async function deactivateMissingFeedProperties(
 			AND status = 'active'
 			AND (last_seen_at IS NULL OR last_seen_at < ${seenBefore}::timestamptz)
 		RETURNING id
-	`);
+	`,
+	);
 	return rowsFrom(result).length;
 }
 
@@ -258,7 +342,10 @@ export async function consumeDeactivationApproval(
 	input: { feedSourceId: string; importRunId: string; now: Date },
 ): Promise<boolean> {
 	const now = input.now.toISOString();
-	const result = await getDrizzle(payload).execute(sql`
+	const result = await executeApprovedIngestSql(
+		payload,
+		"consumeDeactivationApproval",
+		sql`
 		UPDATE feed_sources
 		SET deactivation_approval_consumed_at = ${now}::timestamptz
 		WHERE id = ${input.feedSourceId}::integer
@@ -267,7 +354,8 @@ export async function consumeDeactivationApproval(
 			AND deactivation_approval_expires_at IS NOT NULL
 			AND deactivation_approval_expires_at >= ${now}::timestamptz
 		RETURNING id
-	`);
+	`,
+	);
 	return rowsFrom(result).length > 0;
 }
 
@@ -286,9 +374,12 @@ export async function finishImportRun(
 		feedHash?: string;
 		lastErrorRedacted?: string;
 	},
-): Promise<void> {
+): Promise<boolean> {
 	const now = input.now.toISOString();
-	await getDrizzle(payload).execute(sql`
+	const result = await executeApprovedIngestSql(
+		payload,
+		"finishImportRun",
+		sql`
 		UPDATE import_runs
 		SET
 			status = ${input.status},
@@ -304,5 +395,8 @@ export async function finishImportRun(
 			last_error_redacted = ${input.lastErrorRedacted ?? null}
 		WHERE id = ${input.importRunId}::integer
 			AND status = 'running'
-	`);
+		RETURNING id
+	`,
+	);
+	return rowsFrom(result).length > 0;
 }

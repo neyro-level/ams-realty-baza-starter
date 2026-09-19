@@ -1,5 +1,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import {
+	assertSqlOperationManifest,
+	findSqlGovernanceViolations,
+	runSqlGovernanceSelfTest,
+} from "./sql-governance.mjs";
 
 const root = process.cwd();
 const violations = [];
@@ -276,22 +281,28 @@ if (
 	violations.push("docs/guard-baseline.json knownExceptions must stay empty");
 }
 
-const approvedSql = /^src\/core\/data-access\/(?:system|ingest|public)\/sql\//;
-const migrationSql = /^src\/payload\/migrations\//;
-for (const file of filesUnder("src")) {
+const sourceFiles = filesUnder("src");
+runSqlGovernanceSelfTest();
+for (const violation of findSqlGovernanceViolations(
+	sourceFiles.map((file) => ({
+		name: relative(file),
+		content: readFileSync(file, "utf8"),
+	})),
+)) {
+	violations.push(violation);
+}
+for (const sqlFile of [
+	"src/core/data-access/ingest/sql/index.ts",
+	"src/core/data-access/system/sql/index.ts",
+]) {
+	assertSqlOperationManifest(
+		sqlFile,
+		readFileSync(path.join(root, sqlFile), "utf8"),
+	);
+}
+for (const file of sourceFiles) {
 	const name = relative(file);
 	const content = readFileSync(file, "utf8");
-	if (
-		(/db\.execute\s*\(|\bsql`/.test(content) ||
-			/from\s+["']pg["']/.test(content)) &&
-		!approvedSql.test(name) &&
-		!migrationSql.test(name)
-	) {
-		report(
-			file,
-			"low-level SQL is only allowed in approved sql layers or migrations",
-		);
-	}
 	if (
 		/collection:\s*["']payload-jobs["']/.test(content) &&
 		!name.startsWith("src/core/data-access/system/jobs/") &&

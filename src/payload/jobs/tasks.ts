@@ -246,7 +246,14 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 						}),
 					createRepository: (feedSourceId) =>
 						createPayloadFeedIngestRepository(payload, feedSourceId),
-					finishRun: (finish) => finishImportRun(payload, finish),
+					finishRun: async (finish) => {
+						const transitioned = await finishImportRun(payload, finish);
+						if (!transitioned) {
+							throw new Error(
+								"Import run terminal transition rejected because it is no longer running.",
+							);
+						}
+					},
 					recordSourceContact: async ({ feedSourceId, patch }) => {
 						if (Object.keys(patch).length === 0) return;
 						await payload.update({

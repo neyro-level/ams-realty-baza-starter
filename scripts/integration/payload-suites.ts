@@ -15,6 +15,11 @@ import {
 import { requirePayloadRuntime } from "../../src/payload/env.ts";
 import { payloadJobTaskSlugs } from "../../src/payload/jobs/registry.ts";
 import { payloadJobTasks } from "../../src/payload/jobs/tasks.ts";
+import {
+	claimQueuedImportRun,
+	finishImportRun,
+	touchImportRunHeartbeat,
+} from "../../src/core/data-access/ingest/sql/index.ts";
 
 requirePayloadRuntime();
 
@@ -378,6 +383,78 @@ const feedSource = await payload.create({
 	},
 	...access,
 });
+
+const lifecycleRun = await payload.create({
+	collection: "import-runs",
+	data: {
+		feedSource: feedSource.id,
+		status: "queued",
+		queuedAt: "2026-09-18T11:55:00.000Z",
+	},
+	...access,
+});
+const claimAt = new Date("2026-09-18T12:00:00.000Z");
+const contenders = await Promise.all([
+	claimQueuedImportRun(payload, {
+		importRunId: String(lifecycleRun.id),
+		now: claimAt,
+	}),
+	claimQueuedImportRun(payload, {
+		importRunId: String(lifecycleRun.id),
+		now: claimAt,
+	}),
+]);
+assert.equal(
+	contenders.filter(Boolean).length,
+	1,
+	"two concurrent import contenders must produce exactly one claim winner",
+);
+const heartbeatAt = new Date("2026-09-18T12:01:00.000Z");
+assert.equal(
+	await touchImportRunHeartbeat(payload, {
+		importRunId: String(lifecycleRun.id),
+		now: heartbeatAt,
+	}),
+	true,
+	"the running claim owner must update its heartbeat",
+);
+const heartbeatRead = await payload.findByID({
+	collection: "import-runs",
+	id: lifecycleRun.id,
+	depth: 0,
+	...access,
+});
+assert.equal(
+	heartbeatRead.heartbeatAt,
+	heartbeatAt.toISOString(),
+	"an independent Local API read must observe the committed heartbeat",
+);
+assert.equal(
+	await finishImportRun(payload, {
+		importRunId: String(lifecycleRun.id),
+		now: new Date("2026-09-18T12:02:00.000Z"),
+		status: "success",
+	}),
+	true,
+	"the running claim owner must win one terminal transition",
+);
+assert.equal(
+	await finishImportRun(payload, {
+		importRunId: String(lifecycleRun.id),
+		now: new Date("2026-09-18T12:03:00.000Z"),
+		status: "failed",
+	}),
+	false,
+	"a terminal import run must reject a second terminal transition",
+);
+assert.equal(
+	await claimQueuedImportRun(payload, {
+		importRunId: String(lifecycleRun.id),
+		now: new Date("2026-09-18T12:04:00.000Z"),
+	}),
+	undefined,
+	"a terminal import run must never restart",
+);
 
 const importRun = await payload.create({
 	collection: "import-runs",

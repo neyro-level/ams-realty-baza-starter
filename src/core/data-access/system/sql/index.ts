@@ -7,6 +7,16 @@ import type { Payload } from "payload";
  */
 export const systemSqlLayer = "src/core/data-access/system/sql" as const;
 
+export const approvedSystemSqlOperations = {
+	claimLeadDeliveryRow: {
+		invariant: "Exactly one due pending delivery can transition to sending.",
+		reason:
+			"Claim, attempt increment, and affected result must be one conditional statement.",
+	},
+} as const;
+
+type ApprovedSystemSqlOperation = keyof typeof approvedSystemSqlOperations;
+
 type DrizzleExecutor = {
 	execute: (query: unknown) => Promise<unknown>;
 };
@@ -22,11 +32,21 @@ export type ClaimedLeadDeliveryRow = {
 };
 
 function getDrizzle(payload: Payload): DrizzleExecutor {
-	const drizzle = (payload.db as { drizzle?: DrizzleExecutor } | undefined)?.drizzle;
+	const drizzle = (payload.db as { drizzle?: DrizzleExecutor } | undefined)
+		?.drizzle;
 	if (!drizzle?.execute) {
 		throw new Error("System SQL requires Payload Postgres drizzle.execute.");
 	}
 	return drizzle;
+}
+
+function executeApprovedSystemSql(
+	payload: Payload,
+	operation: ApprovedSystemSqlOperation,
+	query: unknown,
+): Promise<unknown> {
+	void approvedSystemSqlOperations[operation];
+	return getDrizzle(payload).execute(query);
 }
 
 function rowsFrom(result: unknown): Array<Record<string, unknown>> {
@@ -51,7 +71,10 @@ export async function claimLeadDeliveryRow(
 		return undefined;
 	}
 
-	const result = await getDrizzle(payload).execute(sql`
+	const result = await executeApprovedSystemSql(
+		payload,
+		"claimLeadDeliveryRow",
+		sql`
 		UPDATE lead_deliveries AS claimed
 		SET
 			status = 'sending',
@@ -70,7 +93,8 @@ export async function claimLeadDeliveryRow(
 			claimed.attempts,
 			claimed.idempotency_key,
 			claimed.job_id
-	`);
+	`,
+	);
 	const row = rowsFrom(result)[0];
 	if (!row) {
 		return undefined;
