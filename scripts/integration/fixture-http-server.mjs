@@ -87,6 +87,11 @@ export function startFixtureHttpServer(options = {}) {
 			});
 			return;
 		}
+		if (url.pathname === "/webhook-retry") {
+			request.resume();
+			request.on("end", () => send(503, "retry-later"));
+			return;
+		}
 		if (
 			url.pathname === "/api/internal/revalidate" &&
 			request.method === "POST" &&

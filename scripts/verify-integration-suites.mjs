@@ -279,7 +279,11 @@ const childEnv = {
 	AMS_ALLOW_TEST_DESTINATIONS: "true",
 	AMS_TEST_APPROVED_ORIGINS: fixture.origin,
 	OUTBOUND_ALLOWED_HOSTS: "127.0.0.1",
+	LEAD_OUTBOUND_HOSTS: "127.0.0.1",
 	INTEGRATION_FEED_URL: `${fixture.origin}/feed.xml`,
+	MAX_API_URL: `${fixture.origin}/webhook-retry`,
+	MAX_BOT_TOKEN: "fixture-max-token",
+	MAX_CHAT_ID: "fixture-max-chat",
 };
 
 if (prepared.fromZero) {

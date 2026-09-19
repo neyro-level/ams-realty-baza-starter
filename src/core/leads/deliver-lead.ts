@@ -1,10 +1,11 @@
-import type { Payload } from "payload";
-import { claimLeadDeliveryRow } from "../data-access/system/sql/index.ts";
+import type { Payload, TaskHandlerResult } from "payload";
 import { systemOverrideAccess } from "../data-access/system/overrides.ts";
+import { claimLeadDeliveryRow } from "../data-access/system/sql/index.ts";
 import {
 	parseOutboundHostList,
 	safeOutboundFetch,
 } from "../security/safe-outbound-client.ts";
+import { parseTestApprovedOrigins } from "../security/test-destinations.ts";
 import { sendCustomWebhookLead } from "./adapters/custom-webhook.ts";
 import { sendMaxLead } from "./adapters/max.ts";
 import {
@@ -23,6 +24,9 @@ export type DeliverLeadEnv = {
 	MAX_CHAT_ID?: string;
 	CUSTOM_WEBHOOK_URL?: string;
 	CUSTOM_WEBHOOK_HMAC_SECRET?: string;
+	AMS_ALLOW_TEST_DESTINATIONS?: string;
+	AMS_TEST_APPROVED_ORIGINS?: string;
+	NODE_ENV?: string;
 };
 
 export type DeliverLeadTaskResult = {
@@ -30,8 +34,12 @@ export type DeliverLeadTaskResult = {
 		httpAttempted: boolean;
 		outcome: string;
 	};
-	waitUntil?: Date;
 };
+
+export type QueueLeadDeliveryRetry = (input: {
+	leadDeliveryId: string;
+	waitUntil: Date;
+}) => Promise<string>;
 
 function asLeadRecord(doc: Record<string, unknown>): LeadRecord {
 	const consent = (doc.consent ?? {}) as {
@@ -96,6 +104,12 @@ async function invokeAdapter({
 	nowIso: string;
 }): Promise<{ result: LeadDeliveryResult; httpAttempted: boolean }> {
 	const allowedHosts = parseOutboundHostList(env.LEAD_OUTBOUND_HOSTS);
+	const approvedExactOrigins = parseTestApprovedOrigins(
+		env as NodeJS.ProcessEnv,
+	);
+	const approvedHttpHosts = approvedExactOrigins.map(
+		(origin) => new URL(origin).hostname,
+	);
 	if (allowedHosts.length === 0) {
 		return {
 			httpAttempted: false,
@@ -116,6 +130,8 @@ async function invokeAdapter({
 			transport: async (payload) => {
 				const response = await safeOutboundFetch(url, {
 					allowedHosts,
+					approvedExactOrigins,
+					approvedHttpHosts,
 					method: "POST",
 					headers: {
 						authorization: `Bearer ${env.MAX_BOT_TOKEN}`,
@@ -156,6 +172,8 @@ async function invokeAdapter({
 			transport: async (request) => {
 				const response = await safeOutboundFetch(request.url, {
 					allowedHosts,
+					approvedExactOrigins,
+					approvedHttpHosts,
 					method: request.method,
 					headers: request.headers,
 					body: request.body,
@@ -181,12 +199,14 @@ export async function runDeliverLeadTask({
 	leadDeliveryId,
 	nowIso,
 	env,
+	queueRetry,
 }: {
 	payload: Payload;
 	leadDeliveryId: string;
 	nowIso: string;
 	env: DeliverLeadEnv;
-}): Promise<DeliverLeadTaskResult> {
+	queueRetry: QueueLeadDeliveryRetry;
+}): Promise<TaskHandlerResult<"deliverLead"> & DeliverLeadTaskResult> {
 	const claimed = await claimLeadDeliveryRow(payload, {
 		deliveryId: leadDeliveryId,
 		nowIso,
@@ -253,14 +273,24 @@ export async function runDeliverLeadTask({
 	});
 	await persistDelivery(payload, completed);
 
+	if (completed.status === "pending" && completed.nextAttemptAt) {
+		const retryJobId = await queueRetry({
+			leadDeliveryId: completed.id,
+			waitUntil: new Date(completed.nextAttemptAt),
+		});
+		await payload.update({
+			collection: "lead-deliveries",
+			id: Number(completed.id),
+			data: { jobId: retryJobId },
+			depth: 0,
+			...access,
+		});
+	}
+
 	return {
 		output: {
 			httpAttempted: adapterResult.httpAttempted,
 			outcome: completed.status,
 		},
-		waitUntil:
-			completed.status === "pending" && completed.nextAttemptAt
-				? new Date(completed.nextAttemptAt)
-				: undefined,
 	};
 }

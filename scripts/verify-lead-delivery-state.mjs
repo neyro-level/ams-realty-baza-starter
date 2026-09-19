@@ -47,17 +47,18 @@ const permanent = completeLeadDeliveryAttempt({
 		redactedNote: "Destination config is invalid.",
 	},
 });
-assert.equal(permanent.status, "failed");
+assert.equal(permanent.status, "abandoned");
 assert.equal(permanent.lastErrorKind, "permanent");
-assert.equal(permanent.abandonedReason, undefined);
+assert.equal(permanent.abandonedReason, "permanent");
 
 const missingAdapter = completeLeadDeliveryAttempt({
 	delivery: { ...claimed, id: "delivery-3", channelId: "unknown" },
 	nowIso: "2026-09-16T12:03:00.000Z",
 	result: { kind: "missing_adapter", channelId: "unknown" },
 });
-assert.equal(missingAdapter.status, "failed");
+assert.equal(missingAdapter.status, "abandoned");
 assert.equal(missingAdapter.lastErrorKind, "permanent");
+assert.equal(missingAdapter.abandonedReason, "permanent");
 
 const delivered = completeLeadDeliveryAttempt({
 	delivery: claimed,

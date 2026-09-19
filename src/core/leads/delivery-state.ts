@@ -154,7 +154,8 @@ export function completeLeadDeliveryAttempt({
 
 	return {
 		...clearActiveClaim(delivery),
-		status: "failed",
+		status: "abandoned",
+		abandonedReason: "permanent",
 		lastErrorKind: "permanent",
 		lastErrorRedacted: redactedNote,
 		attemptLog: appendAttemptLog(delivery.attemptLog, {

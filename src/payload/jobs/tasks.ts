@@ -7,7 +7,10 @@ import {
 	finishImportRun,
 	touchImportRunHeartbeat,
 } from "../../core/data-access/ingest/sql/index.ts";
-import { inspectPayloadJob } from "../../core/data-access/system/jobs/index.ts";
+import {
+	inspectPayloadJob,
+	listPayloadJobsByConcurrencyKey,
+} from "../../core/data-access/system/jobs/index.ts";
 import { systemOverrideAccess } from "../../core/data-access/system/overrides.ts";
 import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
 import { dispatchDueFeeds } from "../../core/ingest/dispatch-due-feeds.ts";
@@ -104,17 +107,20 @@ async function queueTask({
 	task,
 	queue,
 	input,
+	waitUntil,
 }: {
 	req: PayloadRequest;
 	task: PayloadJobTaskSlug;
 	queue: string;
 	input: Record<string, unknown>;
+	waitUntil?: Date;
 }) {
 	return systemQueueJob({
 		req,
 		task: task as never,
 		queue,
 		input: input as never,
+		waitUntil,
 	});
 }
 
@@ -550,31 +556,68 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 
 			let queuedPending = 0;
 			for (const delivery of duePending.docs) {
+				let liveJobId: string | undefined;
 				if (delivery.jobId) {
-					let live = false;
 					try {
 						const job = await inspectPayloadJob(
 							req.payload,
 							String(delivery.jobId),
 						);
-						live = isLiveFuturePayloadJob(
+						if (
+							isLiveFuturePayloadJob(
+								{
+									waitUntil:
+										typeof job.waitUntil === "string" ? job.waitUntil : null,
+									completedAt:
+										typeof job.completedAt === "string"
+											? job.completedAt
+											: null,
+									processing: Boolean(
+										(job as { processing?: boolean }).processing,
+									),
+								},
+								nowDate(),
+							)
+						) {
+							liveJobId = String(job.id);
+						}
+					} catch {
+						liveJobId = undefined;
+					}
+				}
+
+				if (!liveJobId) {
+					const matchingJobs = await listPayloadJobsByConcurrencyKey(
+						req.payload,
+						{
+							concurrencyKey: `lead-delivery:${delivery.id}`,
+							taskSlug: payloadJobTaskSlugs.deliverLead,
+						},
+					);
+					const liveJob = matchingJobs.docs.find((job) =>
+						isLiveFuturePayloadJob(
 							{
-								waitUntil:
-									typeof job.waitUntil === "string" ? job.waitUntil : null,
-								completedAt:
-									typeof job.completedAt === "string" ? job.completedAt : null,
-								processing: Boolean(
-									(job as { processing?: boolean }).processing,
-								),
+								waitUntil: job.waitUntil,
+								completedAt: job.completedAt,
+								processing: job.processing,
 							},
 							nowDate(),
-						);
-					} catch {
-						live = false;
+						),
+					);
+					liveJobId = liveJob ? String(liveJob.id) : undefined;
+				}
+
+				if (liveJobId) {
+					if (String(delivery.jobId ?? "") !== liveJobId) {
+						await req.payload.update({
+							collection: "lead-deliveries",
+							id: delivery.id,
+							data: { jobId: liveJobId },
+							req,
+							...systemOverrideAccess("system-job"),
+						});
 					}
-					if (live) {
-						continue;
-					}
+					continue;
 				}
 
 				const queuedJob = (await queueTask({
@@ -626,6 +669,19 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					MAX_CHAT_ID: runtimeEnv.MAX_CHAT_ID,
 					CUSTOM_WEBHOOK_URL: runtimeEnv.CUSTOM_WEBHOOK_URL,
 					CUSTOM_WEBHOOK_HMAC_SECRET: runtimeEnv.CUSTOM_WEBHOOK_HMAC_SECRET,
+					AMS_ALLOW_TEST_DESTINATIONS: process.env.AMS_ALLOW_TEST_DESTINATIONS,
+					AMS_TEST_APPROVED_ORIGINS: process.env.AMS_TEST_APPROVED_ORIGINS,
+					NODE_ENV: process.env.NODE_ENV,
+				},
+				queueRetry: async ({ leadDeliveryId, waitUntil }) => {
+					const queued = (await queueTask({
+						req,
+						task: payloadJobTaskSlugs.deliverLead,
+						queue: payloadJobQueues.leadDeliveries,
+						input: { leadDeliveryId },
+						waitUntil,
+					})) as { id: number | string };
+					return String(queued.id);
 				},
 			});
 			return result;

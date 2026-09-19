@@ -13,13 +13,17 @@ import {
 } from "../../src/core/data-access/public/catalog.ts";
 import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
+import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
 import {
 	createControllableClock,
 	installRuntimeClock,
 	resetRuntimeClock,
 } from "../../src/core/time/clock.ts";
 import { requirePayloadRuntime } from "../../src/payload/env.ts";
-import { payloadJobTaskSlugs } from "../../src/payload/jobs/registry.ts";
+import {
+	payloadJobQueues,
+	payloadJobTaskSlugs,
+} from "../../src/payload/jobs/registry.ts";
 import { payloadJobTasks } from "../../src/payload/jobs/tasks.ts";
 import { projectConfig } from "../../src/project/project.config.ts";
 
@@ -512,6 +516,191 @@ const purgedDelivery = await payload.findByID({
 assert.deepEqual(purgedDelivery.attemptLog, []);
 assert.equal(purgedDelivery.lastErrorRedacted, null);
 assert.ok(purgedDelivery.diagnosticsPurgedAt);
+
+async function createRetryFixture(label: string, phone: string) {
+	const retryLead = await payload.create({
+		collection: "leads",
+		data: {
+			name: `Retry ${label}`,
+			phoneE164: phone,
+			formKind: "callback",
+			sourcePage: "/retry-proof",
+			status: "new",
+			consent: {
+				accepted: true,
+				version: "test",
+				consentedAt: clock.nowIso(),
+			},
+			idempotencyKey: `itest-retry-lead-${label}-${suffix}`,
+			retentionUntil: "2099-01-01T00:00:00.000Z",
+			retentionMode: "anonymize",
+		},
+		...access,
+	});
+	return payload.create({
+		collection: "lead-deliveries",
+		data: {
+			lead: retryLead.id,
+			channelId: "max",
+			channelKind: "messenger",
+			status: "pending",
+			attempts: 0,
+			nextAttemptAt: clock.nowIso(),
+			idempotencyKey: `itest-retry-delivery-${label}-${suffix}`,
+		},
+		...access,
+	});
+}
+
+async function findDeliveryJobs(deliveryId: number | string) {
+	return payload.find({
+		collection: "payload-jobs",
+		where: {
+			and: [
+				{ taskSlug: { equals: payloadJobTaskSlugs.deliverLead } },
+				{ concurrencyKey: { equals: `lead-delivery:${deliveryId}` } },
+			],
+		},
+		limit: 10,
+		depth: 0,
+		...access,
+	});
+}
+
+const deliverTask = payloadJobTasks.find(
+	(task) => task.slug === payloadJobTaskSlugs.deliverLead,
+);
+if (typeof deliverTask?.handler !== "function") {
+	throw new Error("deliverLead handler is missing");
+}
+
+const scheduledRetryDelivery = await createRetryFixture(
+	"scheduled",
+	"+79990000004",
+);
+const scheduledResult = await deliverTask.handler({
+	req: { payload, user: undefined } as never,
+	input: { leadDeliveryId: String(scheduledRetryDelivery.id) },
+	job: {} as never,
+} as never);
+assert.deepEqual(
+	Object.keys(scheduledResult).sort(),
+	["output"],
+	"Payload task result must contain only supported handler fields",
+);
+const scheduledDeliveryAfter = await payload.findByID({
+	collection: "lead-deliveries",
+	id: scheduledRetryDelivery.id,
+	depth: 0,
+	...access,
+});
+assert.equal(scheduledDeliveryAfter.status, "pending");
+assert.ok(scheduledDeliveryAfter.jobId);
+const scheduledJobs = await findDeliveryJobs(scheduledRetryDelivery.id);
+assert.equal(
+	scheduledJobs.totalDocs,
+	1,
+	"retry must queue exactly one future job",
+);
+const scheduledJob = scheduledJobs.docs[0];
+assert.equal(scheduledJob.queue, payloadJobQueues.leadDeliveries);
+assert.equal(scheduledJob.taskSlug, payloadJobTaskSlugs.deliverLead);
+assert.deepEqual(scheduledJob.input, {
+	leadDeliveryId: String(scheduledRetryDelivery.id),
+});
+assert.equal(scheduledJob.waitUntil, scheduledDeliveryAfter.nextAttemptAt);
+assert.ok(new Date(scheduledJob.waitUntil ?? 0) > clock.now());
+
+const enqueueCrashDelivery = await createRetryFixture("crash", "+79990000005");
+await assert.rejects(
+	() =>
+		runDeliverLeadTask({
+			payload,
+			leadDeliveryId: String(enqueueCrashDelivery.id),
+			nowIso: clock.nowIso(),
+			env: {
+				LEAD_OUTBOUND_HOSTS: "127.0.0.1",
+				MAX_API_URL: process.env.MAX_API_URL,
+				MAX_BOT_TOKEN: process.env.MAX_BOT_TOKEN,
+				MAX_CHAT_ID: process.env.MAX_CHAT_ID,
+				AMS_ALLOW_TEST_DESTINATIONS: process.env.AMS_ALLOW_TEST_DESTINATIONS,
+				AMS_TEST_APPROVED_ORIGINS: process.env.AMS_TEST_APPROVED_ORIGINS,
+				NODE_ENV: process.env.NODE_ENV,
+			},
+			queueRetry: async () => {
+				throw new Error("fixture enqueue crash");
+			},
+		}),
+	/fixture enqueue crash/,
+);
+const crashPending = await payload.findByID({
+	collection: "lead-deliveries",
+	id: enqueueCrashDelivery.id,
+	depth: 0,
+	...access,
+});
+assert.equal(crashPending.status, "pending");
+assert.equal(crashPending.jobId, null);
+assert.ok(crashPending.nextAttemptAt);
+
+clock.setIso(crashPending.nextAttemptAt ?? "2026-09-18T12:01:00.000Z");
+const recoveryTask = payloadJobTasks.find(
+	(task) => task.slug === payloadJobTaskSlugs.recoverLeadDeliveries,
+);
+if (typeof recoveryTask?.handler !== "function") {
+	throw new Error("recoverLeadDeliveries handler is missing");
+}
+await recoveryTask.handler({
+	req: { payload, user: undefined } as never,
+	input: {},
+	job: {} as never,
+} as never);
+const recoveredCrashDelivery = await payload.findByID({
+	collection: "lead-deliveries",
+	id: enqueueCrashDelivery.id,
+	depth: 0,
+	...access,
+});
+assert.ok(recoveredCrashDelivery.jobId, "sweeper must recover enqueue failure");
+assert.equal((await findDeliveryJobs(enqueueCrashDelivery.id)).totalDocs, 1);
+await recoveryTask.handler({
+	req: { payload, user: undefined } as never,
+	input: {},
+	job: {} as never,
+} as never);
+assert.equal(
+	(await findDeliveryJobs(enqueueCrashDelivery.id)).totalDocs,
+	1,
+	"attached live job must prevent duplicate requeue",
+);
+
+const attachCrashDelivery = await createRetryFixture(
+	"attach-crash",
+	"+79990000006",
+);
+const futureJob = await payload.jobs.queue({
+	task: payloadJobTaskSlugs.deliverLead,
+	queue: payloadJobQueues.leadDeliveries,
+	input: { leadDeliveryId: String(attachCrashDelivery.id) },
+	waitUntil: new Date(clock.now().getTime() + 10 * 60_000),
+});
+await recoveryTask.handler({
+	req: { payload, user: undefined } as never,
+	input: {},
+	job: {} as never,
+} as never);
+const repairedAttach = await payload.findByID({
+	collection: "lead-deliveries",
+	id: attachCrashDelivery.id,
+	depth: 0,
+	...access,
+});
+assert.equal(repairedAttach.jobId, String(futureJob.id));
+assert.equal(
+	(await findDeliveryJobs(attachCrashDelivery.id)).totalDocs,
+	1,
+	"live future job found by concurrency key must prevent duplicate requeue",
+);
 
 const feedSource = await payload.create({
 	collection: "feed-sources",

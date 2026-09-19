@@ -305,6 +305,9 @@ export interface FeedSource {
   feedUrlRef: string;
   enabled?: boolean | null;
   refreshIntervalMinutes: number;
+  /**
+   * Required when the source is enabled. Create/enable without a value sets now; dispatcher does not skip null rows.
+   */
   nextDueAt?: string | null;
   /**
    * Last dispatch attempt time for feed health diagnostics.

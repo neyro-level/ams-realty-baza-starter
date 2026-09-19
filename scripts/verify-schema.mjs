@@ -39,7 +39,9 @@ DECLARE
 		'lead_deliveries_stale_sending_idx',
 		'feed_sources_enabled_due_idx',
 		'properties_public_catalog_idx',
-		'properties_public_sitemap_idx'
+		'properties_public_sitemap_idx',
+		'payload_jobs_wait_until_idx',
+		'payload_jobs_concurrency_key_idx'
 	];
 	required_index text;
 	required_constraints text[] := ARRAY[

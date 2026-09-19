@@ -6,16 +6,19 @@ export async function systemQueueJob({
 	task,
 	queue,
 	input,
+	waitUntil,
 }: {
 	req: PayloadRequest;
 	task: never;
 	queue: string;
 	input: never;
+	waitUntil?: Date;
 }) {
 	return req.payload.jobs.queue({
 		task,
 		queue,
 		input,
+		waitUntil,
 		req,
 		...systemOverrideAccess("system-job"),
 	});
