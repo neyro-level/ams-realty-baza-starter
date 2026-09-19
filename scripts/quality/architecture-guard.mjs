@@ -1,9 +1,13 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import {
+	findCacheGraphViolations,
+	findPackageBoundaryViolations,
+	findUiPersistenceViolations,
+} from "./architecture-rules.mjs";
+import {
 	assertSqlOperationManifest,
 	findSqlGovernanceViolations,
-	runSqlGovernanceSelfTest,
 } from "./sql-governance.mjs";
 
 const root = process.cwd();
@@ -37,17 +41,18 @@ if (existsSync(path.join(root, "packages", "ui", "src", "contracts"))) {
 	);
 }
 
-const persistenceImport =
-	/from\s+["'](?:payload|@payloadcms\/[^"']+|pg|prisma|@prisma\/[^"']+)["']/;
-for (const file of filesUnder("packages/ui")) {
-	if (persistenceImport.test(readFileSync(file, "utf8")))
-		report(file, "UI imports persistence");
-}
-const contractsForbidden =
-	/from\s+["'](?:next\/[^"']+|payload|@payloadcms\/[^"']+|pg|prisma|@prisma\/[^"']+)["']/;
-for (const file of filesUnder("packages/contracts")) {
-	if (contractsForbidden.test(readFileSync(file, "utf8")))
-		report(file, "contracts import runtime/persistence");
+const packageBoundaryFiles = [
+	...filesUnder("packages/ui"),
+	...filesUnder("packages/contracts"),
+	...filesUnder("src/core"),
+];
+for (const violation of findPackageBoundaryViolations(
+	packageBoundaryFiles.map((file) => ({
+		name: relative(file),
+		content: readFileSync(file, "utf8"),
+	})),
+)) {
+	violations.push(violation);
 }
 
 for (const file of filesUnder("src")) {
@@ -103,6 +108,8 @@ const fixtureRuntimeFiles = [
 	...filesUnder("src/components/fixture"),
 	...filesUnder("src/app/(site)"),
 ];
+const persistenceImport =
+	/from\s+["'](?:payload|@payloadcms\/[^"']+|pg|prisma|@prisma\/[^"']+)["']/;
 for (const file of fixtureRuntimeFiles) {
 	if (persistenceImport.test(readFileSync(file, "utf8")))
 		report(file, "fixture website imports persistence");
@@ -282,7 +289,6 @@ if (
 }
 
 const sourceFiles = filesUnder("src");
-runSqlGovernanceSelfTest();
 for (const violation of findSqlGovernanceViolations(
 	sourceFiles.map((file) => ({
 		name: relative(file),
@@ -318,31 +324,22 @@ for (const file of sourceFiles) {
 	}
 }
 
-for (const file of [
-	...filesUnder("src/core/ingest"),
-	...filesUnder("src/payload/jobs"),
-	...filesUnder("src/core/cache"),
-]) {
-	if (/from\s+["']next\//.test(readFileSync(file, "utf8"))) {
-		report(file, "top-level next/* import in ingest/job/cache graph");
-	}
+for (const violation of findCacheGraphViolations(
+	sourceFiles.map((file) => ({
+		name: relative(file),
+		content: readFileSync(file, "utf8"),
+	})),
+)) {
+	violations.push(violation);
 }
 
-for (const file of filesUnder("src/core/cache")) {
-	const name = relative(file);
-	const content = readFileSync(file, "utf8");
-	if (
-		/import\(["']next\/cache["']\)/.test(content) &&
-		name !== "src/core/cache/in-process.ts"
-	) {
-		report(file, "lazy next/cache is only allowed in the in-process adapter");
-	}
-	if (
-		name === "src/core/cache/http-revalidate.ts" &&
-		/next\/cache/.test(content)
-	) {
-		report(file, "HTTP cache adapter must not import next/cache");
-	}
+for (const violation of findUiPersistenceViolations(
+	filesUnder("packages/ui").map((file) => ({
+		name: relative(file),
+		content: readFileSync(file, "utf8"),
+	})),
+)) {
+	violations.push(violation);
 }
 
 const payloadConfig = readFileSync(

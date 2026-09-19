@@ -23,7 +23,7 @@ export default {
 			name: "ui-has-no-persistence-dependencies",
 			severity: "error",
 			from: { path: "^packages/ui/" },
-			to: { path: "^(?:payload|@payloadcms/|pg$|prisma$|@prisma/)" },
+			to: { path: "^(?:next/|payload|@payloadcms/|pg$|prisma$|@prisma/)" },
 		},
 		{
 			name: "contracts-have-no-runtime-or-persistence-dependencies",

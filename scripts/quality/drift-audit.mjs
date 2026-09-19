@@ -66,16 +66,6 @@ for (const path of extraTokenFiles) {
 	violations.push(`${relative(root, path).replaceAll("\\", "/")}: extra token file`);
 }
 
-const persistenceHits = walk(join(root, "packages", "ui", "src"), new Set([".ts", ".tsx"]))
-	.filter((path) => {
-		const source = readFileSync(path, "utf8");
-		return /\b(?:localStorage|sessionStorage|indexedDB)\b/.test(source);
-	})
-	.map((path) => relative(root, path).replaceAll("\\", "/"));
-for (const path of persistenceHits) {
-	violations.push(`${path}: UI must not own browser persistence`);
-}
-
 if (violations.length) {
 	console.error(violations.join("\n"));
 	process.exit(1);

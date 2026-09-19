@@ -59,23 +59,3 @@ export function assertSqlOperationManifest(name, content) {
 		);
 	}
 }
-
-export function runSqlGovernanceSelfTest() {
-	const broken = findSqlGovernanceViolations([
-		{
-			name: "src/core/ingest/broken-sql.ts",
-			content: "await db.execute(sql`SELECT 1`)",
-		},
-	]);
-	assert.equal(broken.length, 1, "broken raw SQL path fixture must fail");
-	assert.equal(
-		findSqlGovernanceViolations([
-			{
-				name: "src/payload/migrations/fixture.ts",
-				content: "await db.execute(sql`SELECT 1`)",
-			},
-		]).length,
-		0,
-		"migration SQL fixture must remain allowed",
-	);
-}
