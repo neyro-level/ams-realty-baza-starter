@@ -14,7 +14,9 @@ export type YrlFeedInput = {
 	allowedImageHosts: ReadonlySet<string>;
 	signal?: AbortSignal;
 	onOffer?: (offer: NormalizedFeedOffer) => void | Promise<void>;
+	onIssue?: (issue: FeedNormalizationIssue) => void | Promise<void>;
 	collectOffers?: boolean;
+	collectIssues?: boolean;
 	maxNestingDepth?: number;
 	maxAttributes?: number;
 	maxTextNodeChars?: number;
@@ -23,6 +25,7 @@ export type YrlFeedInput = {
 
 export type YrlFeedParseStats = {
 	offersSeen: number;
+	maxBufferedOffersObserved: number;
 	maxRetainedCharsObserved: number;
 	parserCompleted: boolean;
 	criticalStructuralAnomaly: boolean;
@@ -50,7 +53,9 @@ export async function parseYrlFeed({
 	allowedImageHosts,
 	signal,
 	onOffer,
+	onIssue,
 	collectOffers = Boolean(onOffer) === false,
+	collectIssues = Boolean(onIssue) === false,
 	maxNestingDepth = DEFAULT_MAX_NESTING,
 	maxAttributes = DEFAULT_MAX_ATTRIBUTES,
 	maxTextNodeChars = DEFAULT_MAX_TEXT_NODE,
@@ -61,6 +66,7 @@ export async function parseYrlFeed({
 	const issues: FeedNormalizationIssue[] = [];
 	const stats: YrlFeedParseStats = {
 		offersSeen: 0,
+		maxBufferedOffersObserved: 0,
 		maxRetainedCharsObserved: 0,
 		parserCompleted: false,
 		criticalStructuralAnomaly: false,
@@ -71,6 +77,45 @@ export async function parseYrlFeed({
 	let currentText = "";
 	let active: ActiveOffer | undefined;
 	let stopError: Error | undefined;
+	type PendingDelivery =
+		| { type: "offer"; value: NormalizedFeedOffer }
+		| { type: "issue"; value: FeedNormalizationIssue };
+	let pendingDeliveries: PendingDelivery[] = [];
+
+	const recordIssue = (issue: FeedNormalizationIssue) => {
+		if (collectIssues) issues.push(issue);
+		if (onIssue) pendingDeliveries.push({ type: "issue", value: issue });
+	};
+
+	const recordOffer = (offer: NormalizedFeedOffer) => {
+		if (collectOffers) offers.push(offer);
+		if (onOffer) pendingDeliveries.push({ type: "offer", value: offer });
+		stats.maxBufferedOffersObserved = Math.max(
+			stats.maxBufferedOffersObserved,
+			pendingDeliveries.filter((delivery) => delivery.type === "offer").length,
+		);
+	};
+
+	const flushDeliveries = async () => {
+		const deliveries = pendingDeliveries;
+		pendingDeliveries = [];
+		for (const delivery of deliveries) {
+			if (delivery.type === "offer") await onOffer?.(delivery.value);
+			else await onIssue?.(delivery.value);
+		}
+	};
+
+	const writeWithBackpressure = async (value: string) => {
+		let offset = 0;
+		while (offset < value.length) {
+			const tagEnd = value.indexOf(">", offset);
+			const end = tagEnd === -1 ? value.length : tagEnd + 1;
+			parser.write(value.slice(offset, end));
+			offset = end;
+			await flushDeliveries();
+			if (stopError) break;
+		}
+	};
 
 	const failCritical = (message: string) => {
 		stats.criticalStructuralAnomaly = true;
@@ -83,7 +128,7 @@ export async function parseYrlFeed({
 
 	parser.on("error", (error) => {
 		if (active) {
-			issues.push({
+			recordIssue({
 				severity: "error",
 				code: "feed.offer_invalid",
 				externalId: active.raw.externalId || undefined,
@@ -126,7 +171,7 @@ export async function parseYrlFeed({
 			active.stack.push(name);
 			active.bytes += name.length + attributeCount * 8;
 			if (active.bytes > maxOfferBytes) {
-				issues.push({
+				recordIssue({
 					severity: "error",
 					code: "feed.offer_invalid",
 					externalId: active.raw.externalId || undefined,
@@ -141,7 +186,7 @@ export async function parseYrlFeed({
 		if (stopError || !value) return;
 		if (value.length > maxTextNodeChars) {
 			if (active) {
-				issues.push({
+				recordIssue({
 					severity: "error",
 					code: "feed.offer_invalid",
 					externalId: active.raw.externalId || undefined,
@@ -166,7 +211,7 @@ export async function parseYrlFeed({
 				active.bytes,
 			);
 			if (active.bytes > maxOfferBytes) {
-				issues.push({
+				recordIssue({
 					severity: "error",
 					code: "feed.offer_invalid",
 					externalId: active.raw.externalId || undefined,
@@ -193,10 +238,9 @@ export async function parseYrlFeed({
 			if (name === "offer") {
 				stats.offersSeen += 1;
 				const normalized = normalizeYrlOffer(active.raw, allowedImageHosts);
-				issues.push(...normalized.issues);
+				for (const issue of normalized.issues) recordIssue(issue);
 				if (normalized.ok) {
-					if (collectOffers) offers.push(normalized.offer);
-					void onOffer?.(normalized.offer);
+					recordOffer(normalized.offer);
 				}
 				active = undefined;
 			}
@@ -209,29 +253,32 @@ export async function parseYrlFeed({
 				failCritical("Feed parser was cancelled.");
 				break;
 			}
-			parser.write(decoder.decode(chunk, { stream: true }));
+			await writeWithBackpressure(decoder.decode(chunk, { stream: true }));
 			if (stopError) break;
 		}
 		if (!stopError && !signal?.aborted) {
-			parser.write(decoder.decode());
+			await writeWithBackpressure(decoder.decode());
 			parser.close();
+			await flushDeliveries();
 			stats.parserCompleted = !stats.criticalStructuralAnomaly;
 		}
 	} catch (error) {
 		stats.criticalStructuralAnomaly = true;
 		stats.parserCompleted = false;
 		if (!stopError) {
-			stopError = error instanceof Error ? error : new Error("Feed parser failed.");
+			stopError =
+				error instanceof Error ? error : new Error("Feed parser failed.");
 		}
 	}
 
 	if (stats.criticalStructuralAnomaly) {
-		issues.push({
+		recordIssue({
 			severity: "error",
 			code: "feed.offer_invalid",
 			messageRedacted: "Feed XML had a critical structural anomaly.",
 		});
 	}
+	await flushDeliveries();
 
 	return { offers, issues, stats };
 }
@@ -244,7 +291,11 @@ function emptyRawOffer(attributes: Record<string, string>): RawYrlOffer {
 	};
 }
 
-function assignOfferField(raw: RawYrlOffer, stack: string[], text: string): void {
+function assignOfferField(
+	raw: RawYrlOffer,
+	stack: string[],
+	text: string,
+): void {
 	if (!text || stack.length < 2) return;
 	const path = stack.slice(1).join("/");
 	switch (path) {

@@ -17,6 +17,7 @@ import { payloadJobTaskSlugs } from "../../src/payload/jobs/registry.ts";
 import { payloadJobTasks } from "../../src/payload/jobs/tasks.ts";
 import {
 	claimQueuedImportRun,
+	consumeDeactivationApproval,
 	finishImportRun,
 	touchImportRunHeartbeat,
 } from "../../src/core/data-access/ingest/sql/index.ts";
@@ -454,6 +455,58 @@ assert.equal(
 	}),
 	undefined,
 	"a terminal import run must never restart",
+);
+await payload.update({
+	collection: "feed-sources",
+	id: feedSource.id,
+	data: {
+		deactivationApproval: {
+			runId: lifecycleRun.id,
+			expiresAt: "2026-09-18T13:00:00.000Z",
+			consumedAt: null,
+		},
+	},
+	...access,
+});
+assert.equal(
+	await consumeDeactivationApproval(payload, {
+		feedSourceId: String(feedSource.id),
+		importRunId: String(lifecycleRun.id),
+		now: new Date("2026-09-18T12:05:00.000Z"),
+	}),
+	false,
+	"database approval consumption must reject a row without approvedAt",
+);
+await payload.update({
+	collection: "feed-sources",
+	id: feedSource.id,
+	data: {
+		deactivationApproval: {
+			runId: lifecycleRun.id,
+			approvedAt: "2026-09-18T12:00:00.000Z",
+			expiresAt: "2026-09-18T13:00:00.000Z",
+			consumedAt: null,
+		},
+	},
+	...access,
+});
+assert.equal(
+	await consumeDeactivationApproval(payload, {
+		feedSourceId: String(feedSource.id),
+		importRunId: String(lifecycleRun.id),
+		now: new Date("2026-09-18T12:05:00.000Z"),
+	}),
+	true,
+	"complete matching approval must be consumed once",
+);
+assert.equal(
+	await consumeDeactivationApproval(payload, {
+		feedSourceId: String(feedSource.id),
+		importRunId: String(lifecycleRun.id),
+		now: new Date("2026-09-18T12:05:00.000Z"),
+	}),
+	false,
+	"consumed approval must not be reusable",
 );
 
 const importRun = await payload.create({

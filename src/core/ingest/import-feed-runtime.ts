@@ -9,7 +9,10 @@ import {
 	type FeedSourceBaselinePatch,
 } from "./feed-lifecycle.ts";
 import { parseAllowedImageHosts } from "./image-hosts.ts";
-import type { NormalizedFeedOffer } from "./feed-normalization.ts";
+import type {
+	FeedNormalizationIssue,
+	NormalizedFeedOffer,
+} from "./feed-normalization.ts";
 import { parseYrlFeed } from "./yrl-parser.ts";
 import { startImportHeartbeat } from "./dispatch-due-feeds.ts";
 import { projectConfig } from "../../project/project.config.ts";
@@ -32,6 +35,7 @@ export type ImportFeedSourceSnapshot = {
 export type ImportFeedRuntimeDeps = {
 	now: () => Date;
 	heartbeatIntervalMs?: number;
+	ingestBatchSize?: number;
 	claimQueuedImportRun: (input: {
 		importRunId: string;
 		now: Date;
@@ -82,7 +86,45 @@ export type ImportFeedRuntimeResult =
 			status: "success" | "unchanged" | "suspicious" | "interrupted" | "failed";
 			ingest?: FeedIngestResult;
 			cacheInvalidated?: boolean;
+			maxBufferedOffersObserved?: number;
 	  };
+
+function emptyIngestResult(): FeedIngestResult {
+	return {
+		offeredCount: 0,
+		createdCount: 0,
+		updatedCount: 0,
+		skippedCount: 0,
+		warningCount: 0,
+		errorCount: 0,
+		invalidatedTargets: [],
+	};
+}
+
+function mergeIngestResult(
+	target: FeedIngestResult,
+	batch: FeedIngestResult,
+): void {
+	for (const key of [
+		"offeredCount",
+		"createdCount",
+		"updatedCount",
+		"skippedCount",
+		"warningCount",
+		"errorCount",
+	] as const) {
+		target[key] += batch[key];
+	}
+	for (const next of batch.invalidatedTargets) {
+		if (
+			!target.invalidatedTargets.some(
+				(current) => JSON.stringify(current) === JSON.stringify(next),
+			)
+		) {
+			target.invalidatedTargets.push(next);
+		}
+	}
+}
 
 export async function runImportFeed(
 	deps: ImportFeedRuntimeDeps,
@@ -98,8 +140,10 @@ export async function runImportFeed(
 	}
 
 	const heartbeat = startImportHeartbeat({
-		intervalMs: deps.heartbeatIntervalMs ?? projectConfig.importHeartbeatIntervalMs,
-		tick: () => deps.touchHeartbeat({ importRunId: input.importRunId, now: deps.now() }),
+		intervalMs:
+			deps.heartbeatIntervalMs ?? projectConfig.importHeartbeatIntervalMs,
+		tick: () =>
+			deps.touchHeartbeat({ importRunId: input.importRunId, now: deps.now() }),
 	});
 
 	try {
@@ -131,32 +175,64 @@ export async function runImportFeed(
 			return { claimed: true, status: "unchanged" };
 		}
 
-		const offers: NormalizedFeedOffer[] = [];
 		const parse = deps.parseFeed ?? parseYrlFeed;
+		const ingest = deps.ingest ?? ingestNormalizedFeed;
+		const repository = deps.createRepository(source.id);
+		const batchSize = deps.ingestBatchSize ?? projectConfig.ingestBatchSize;
+		if (!Number.isInteger(batchSize) || batchSize < 1) {
+			throw new Error("ingestBatchSize must be a positive integer.");
+		}
+		const context = {
+			feedSourceId: source.id,
+			feedSourceCode: source.code,
+			importRunId: input.importRunId,
+			market: source.market,
+			nowIso: now.toISOString(),
+		};
+		let offerBatch: NormalizedFeedOffer[] = [];
+		let issueBatch: FeedNormalizationIssue[] = [];
+		let maxBufferedOffersObserved = 0;
+		const ingestResult = emptyIngestResult();
+		const flushBatch = async () => {
+			if (offerBatch.length === 0 && issueBatch.length === 0) return;
+			const currentOffers = offerBatch;
+			const currentIssues = issueBatch;
+			offerBatch = [];
+			issueBatch = [];
+			mergeIngestResult(
+				ingestResult,
+				await ingest({
+					context,
+					offers: currentOffers,
+					issues: currentIssues,
+					repository,
+				}),
+			);
+		};
 		const parsed = await parse({
 			stream: fetched.body,
 			allowedImageHosts: deps.allowedImageHosts,
-			onOffer: (offer) => {
-				offers.push(offer);
+			onOffer: async (offer) => {
+				offerBatch.push(offer);
+				maxBufferedOffersObserved = Math.max(
+					maxBufferedOffersObserved,
+					offerBatch.length,
+				);
+				if (offerBatch.length + issueBatch.length >= batchSize)
+					await flushBatch();
 			},
+			onIssue: async (issue) => {
+				issueBatch.push(issue);
+				if (offerBatch.length + issueBatch.length >= batchSize)
+					await flushBatch();
+			},
+			collectOffers: false,
+			collectIssues: false,
 		});
+		await flushBatch();
 		const bodyHash = (await fetched.sha256) ?? undefined;
-		const ingest = deps.ingest ?? ingestNormalizedFeed;
-		const repository = deps.createRepository(source.id);
-		const ingestResult = await ingest({
-			context: {
-				feedSourceId: source.id,
-				feedSourceCode: source.code,
-				importRunId: input.importRunId,
-				market: source.market,
-				nowIso: deps.now().toISOString(),
-			},
-			offers,
-			issues: parsed.issues,
-			repository,
-		});
 
-		const seenBefore = deps.now();
+		const seenBefore = now;
 		const plannedDeactivations = await repository.countMissingActive({
 			feedSourceId: source.id,
 			seenBeforeIso: seenBefore.toISOString(),
@@ -166,7 +242,7 @@ export async function runImportFeed(
 			nowIso: seenBefore.toISOString(),
 			approval: source.deactivationApproval,
 		});
-		const decision = decideFeedRunCompletion({
+		const decisionInput = {
 			nowIso: seenBefore.toISOString(),
 			sourceEnabled: source.enabled,
 			parserCompleted: parsed.stats.parserCompleted,
@@ -180,10 +256,24 @@ export async function runImportFeed(
 			plannedDeactivations,
 			maxDeactivationsPerRun: source.maxDeactivationsPerRun,
 			hasValidDeactivationApproval,
-			fetchStatus: "fetched",
+			fetchStatus: "fetched" as const,
 			feedHash: bodyHash,
 			lastFeedHash: source.lastFeedHash ?? undefined,
-		});
+		};
+		let decision = decideFeedRunCompletion(decisionInput);
+		if (decision.reason === "approved_deactivation") {
+			const consumed = await deps.consumeDeactivationApproval?.({
+				feedSourceId: source.id,
+				importRunId: input.importRunId,
+				now: seenBefore,
+			});
+			if (!consumed) {
+				decision = decideFeedRunCompletion({
+					...decisionInput,
+					hasValidDeactivationApproval: false,
+				});
+			}
+		}
 
 		if (decision.canDeactivateMissing && plannedDeactivations > 0) {
 			await repository.deactivateMissing({
@@ -192,13 +282,6 @@ export async function runImportFeed(
 				seenBeforeIso: seenBefore.toISOString(),
 				nowIso: deps.now().toISOString(),
 			});
-			if (hasValidDeactivationApproval) {
-				await deps.consumeDeactivationApproval?.({
-					feedSourceId: source.id,
-					importRunId: input.importRunId,
-					now: deps.now(),
-				});
-			}
 			if (ingestResult.invalidatedTargets.length === 0) {
 				ingestResult.invalidatedTargets = [
 					{ type: "tag", tag: "properties" },
@@ -208,8 +291,13 @@ export async function runImportFeed(
 		}
 
 		let cacheOk = true;
-		if (ingestResult.invalidatedTargets.length > 0 && deps.invalidatePublicCache) {
-			const cacheResult = await deps.invalidatePublicCache(ingestResult.invalidatedTargets);
+		if (
+			ingestResult.invalidatedTargets.length > 0 &&
+			deps.invalidatePublicCache
+		) {
+			const cacheResult = await deps.invalidatePublicCache(
+				ingestResult.invalidatedTargets,
+			);
 			cacheOk = cacheResult.ok;
 			if (!cacheOk) {
 				ingestResult.warningCount += 1;
@@ -246,13 +334,15 @@ export async function runImportFeed(
 			status: decision.status,
 			ingest: ingestResult,
 			cacheInvalidated: cacheOk,
+			maxBufferedOffersObserved,
 		};
 	} catch {
 		await deps.finishRun({
 			importRunId: input.importRunId,
 			now: deps.now(),
 			status: "failed",
-			lastErrorRedacted: "Import feed failed without exposing destination details.",
+			lastErrorRedacted:
+				"Import feed failed without exposing destination details.",
 		});
 		return { claimed: true, status: "failed" };
 	} finally {
@@ -260,9 +350,15 @@ export async function runImportFeed(
 	}
 }
 
-export function parseFeedUrlRef(feedUrlRef: string, env: NodeJS.ProcessEnv = process.env): string {
+export function parseFeedUrlRef(
+	feedUrlRef: string,
+	env: NodeJS.ProcessEnv = process.env,
+): string {
 	const value = env[feedUrlRef];
-	if (!value || (!value.startsWith("https://") && !value.startsWith("http://"))) {
+	if (
+		!value ||
+		(!value.startsWith("https://") && !value.startsWith("http://"))
+	) {
 		throw new Error("Feed URL reference is not configured.");
 	}
 	return value;

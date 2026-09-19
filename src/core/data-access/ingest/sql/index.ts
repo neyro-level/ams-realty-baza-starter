@@ -43,7 +43,8 @@ export const approvedIngestSqlOperations = {
 			"The guarded bulk transition must use the exact safety-count predicate.",
 	},
 	consumeDeactivationApproval: {
-		invariant: "A matching, unexpired approval can be consumed only once.",
+		invariant:
+			"A matching approval with approvedAt and a future expiry can be consumed only once.",
 		reason:
 			"Approval validation and consumption require one conditional update.",
 	},
@@ -350,9 +351,11 @@ export async function consumeDeactivationApproval(
 		SET deactivation_approval_consumed_at = ${now}::timestamptz
 		WHERE id = ${input.feedSourceId}::integer
 			AND deactivation_approval_run_id_id = ${input.importRunId}::integer
+			AND deactivation_approval_approved_at IS NOT NULL
+			AND deactivation_approval_approved_at <= ${now}::timestamptz
 			AND deactivation_approval_consumed_at IS NULL
 			AND deactivation_approval_expires_at IS NOT NULL
-			AND deactivation_approval_expires_at >= ${now}::timestamptz
+			AND deactivation_approval_expires_at > ${now}::timestamptz
 		RETURNING id
 	`,
 	);

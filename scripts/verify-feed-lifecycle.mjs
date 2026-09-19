@@ -129,6 +129,7 @@ assert.equal(
 		nowIso,
 		approval: {
 			runId: "8",
+			approvedAt: "2026-09-16T11:00:00.000Z",
 			expiresAt: "2026-09-16T16:00:00.000Z",
 		},
 	}),
@@ -140,6 +141,7 @@ assert.equal(
 		nowIso,
 		approval: {
 			runId: "7",
+			approvedAt: "2026-09-16T10:00:00.000Z",
 			expiresAt: "2026-09-16T11:00:00.000Z",
 		},
 	}),
@@ -151,6 +153,7 @@ assert.equal(
 		nowIso,
 		approval: {
 			runId: "7",
+			approvedAt: "2026-09-16T11:00:00.000Z",
 			expiresAt: "2026-09-16T16:00:00.000Z",
 			consumedAt: nowIso,
 		},
@@ -163,10 +166,36 @@ assert.equal(
 		nowIso,
 		approval: {
 			runId: "7",
+			approvedAt: "2026-09-16T11:00:00.000Z",
 			expiresAt: "2026-09-16T16:00:00.000Z",
 		},
 	}),
 	true,
+);
+assert.equal(
+	isDeactivationApprovalValid({
+		importRunId: "7",
+		nowIso,
+		approval: {
+			runId: "7",
+			expiresAt: "2026-09-16T16:00:00.000Z",
+		},
+	}),
+	false,
+	"approval without approvedAt must be denied",
+);
+assert.equal(
+	isDeactivationApprovalValid({
+		importRunId: "7",
+		nowIso,
+		approval: {
+			runId: "7",
+			approvedAt: "2026-09-16T13:00:00.000Z",
+			expiresAt: "2026-09-16T16:00:00.000Z",
+		},
+	}),
+	false,
+	"approval from the future must be denied",
 );
 
 assert.deepEqual(

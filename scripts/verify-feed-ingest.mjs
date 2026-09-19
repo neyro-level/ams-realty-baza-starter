@@ -316,6 +316,159 @@ const skipped = await runImportFeed(
 );
 assert.equal(skipped.claimed, false);
 
+let largestIngestBatch = 0;
+let boundedIngestCalls = 0;
+const boundedRuntime = await runImportFeed(
+	{
+		now: () => new Date("2026-09-18T06:00:00.000Z"),
+		ingestBatchSize: 37,
+		claimQueuedImportRun: async () => "bounded-run",
+		touchHeartbeat: async () => undefined,
+		loadFeedSource: async () => ({
+			id: "bounded-source",
+			code: "bounded",
+			enabled: true,
+			market: "secondary",
+			feedUrlRef: "BOUNDED_FEED_URL",
+			lastOfferCount: null,
+			safetyThresholdPercent: 30,
+			maxDeactivationsPerRun: 50,
+		}),
+		resolveFeedUrl: () => "https://feeds.example.test/bounded.xml",
+		fetchFeed: async () => ({
+			status: "fetched",
+			body: [],
+			sha256: Promise.resolve("bounded-hash"),
+		}),
+		parseFeed: async ({ onOffer }) => {
+			for (let index = 0; index < 10_001; index += 1) {
+				await onOffer?.({ ...offer, externalId: `bounded-${index}` });
+			}
+			return {
+				offers: [],
+				issues: [],
+				stats: {
+					offersSeen: 10_001,
+					maxRetainedCharsObserved: 0,
+					maxBufferedOffersObserved: 1,
+					parserCompleted: true,
+					criticalStructuralAnomaly: false,
+				},
+			};
+		},
+		createRepository: () => createRepository(),
+		ingest: async ({ offers, issues }) => {
+			boundedIngestCalls += 1;
+			largestIngestBatch = Math.max(
+				largestIngestBatch,
+				offers.length + issues.length,
+			);
+			return {
+				offeredCount: offers.length,
+				createdCount: offers.length,
+				updatedCount: 0,
+				skippedCount: 0,
+				warningCount: 0,
+				errorCount: 0,
+				invalidatedTargets: [],
+			};
+		},
+		finishRun: async () => undefined,
+		recordSourceContact: async () => undefined,
+		allowedImageHosts: new Set(),
+	},
+	{ feedSourceId: "bounded-source", importRunId: "bounded-run" },
+);
+assert.equal(boundedRuntime.claimed, true);
+assert.equal(boundedRuntime.status, "success");
+assert.equal(boundedRuntime.ingest?.offeredCount, 10_001);
+assert.ok(
+	boundedIngestCalls > 1,
+	"large feed must be ingested through awaited batches",
+);
+assert.ok(
+	largestIngestBatch <= 37,
+	"ingest batch must stay within its configured bound",
+);
+assert.ok(
+	(boundedRuntime.maxBufferedOffersObserved ?? Number.POSITIVE_INFINITY) <= 37,
+	"runtime must never buffer more offers than the configured batch bound",
+);
+
+let approvalDeactivationCalls = 0;
+let approvalFinishStatus;
+const approvalRepository = {
+	...createRepository(),
+	countMissingActive: async () => 51,
+	deactivateMissing: async () => {
+		approvalDeactivationCalls += 1;
+		return 51;
+	},
+};
+const rejectedApproval = await runImportFeed(
+	{
+		now: () => new Date("2026-09-18T06:00:00.000Z"),
+		claimQueuedImportRun: async () => "approval-run",
+		touchHeartbeat: async () => undefined,
+		loadFeedSource: async () => ({
+			id: "approval-source",
+			code: "approval",
+			enabled: true,
+			market: "secondary",
+			feedUrlRef: "APPROVAL_FEED_URL",
+			lastOfferCount: 100,
+			safetyThresholdPercent: 30,
+			maxDeactivationsPerRun: 50,
+			deactivationApproval: {
+				runId: "approval-run",
+				approvedAt: "2026-09-18T05:00:00.000Z",
+				expiresAt: "2026-09-18T07:00:00.000Z",
+			},
+		}),
+		resolveFeedUrl: () => "https://feeds.example.test/approval.xml",
+		fetchFeed: async () => ({
+			status: "fetched",
+			body: [],
+			sha256: Promise.resolve("approval-hash"),
+		}),
+		parseFeed: async () => ({
+			offers: [],
+			issues: [],
+			stats: {
+				offersSeen: 100,
+				maxRetainedCharsObserved: 0,
+				maxBufferedOffersObserved: 0,
+				parserCompleted: true,
+				criticalStructuralAnomaly: false,
+			},
+		}),
+		createRepository: () => approvalRepository,
+		ingest: async () => ({
+			offeredCount: 100,
+			createdCount: 0,
+			updatedCount: 0,
+			skippedCount: 100,
+			warningCount: 0,
+			errorCount: 0,
+			invalidatedTargets: [],
+		}),
+		consumeDeactivationApproval: async () => false,
+		finishRun: async ({ status }) => {
+			approvalFinishStatus = status;
+		},
+		recordSourceContact: async () => undefined,
+		allowedImageHosts: new Set(),
+	},
+	{ feedSourceId: "approval-source", importRunId: "approval-run" },
+);
+assert.equal(rejectedApproval.status, "suspicious");
+assert.equal(approvalFinishStatus, "suspicious");
+assert.equal(
+	approvalDeactivationCalls,
+	0,
+	"failed one-time approval consumption must prevent destructive deactivation",
+);
+
 const { chunkCacheTargets, postBatchedHttpRevalidate } = await import(
 	"../src/core/cache/http-revalidate.ts"
 );

@@ -209,6 +209,7 @@ function suspiciousOrApproved(
 
 export type DeactivationApprovalSnapshot = {
 	runId?: string | number | null;
+	approvedAt?: string | null;
 	expiresAt?: string | null;
 	consumedAt?: string | null;
 };
@@ -222,8 +223,17 @@ export function isDeactivationApprovalValid(input: {
 	if (!approval) return false;
 	if (approval.consumedAt) return false;
 	if (String(approval.runId ?? "") !== input.importRunId) return false;
-	if (!approval.expiresAt) return false;
-	return new Date(approval.expiresAt).getTime() >= new Date(input.nowIso).getTime();
+	if (!approval.approvedAt || !approval.expiresAt) return false;
+	const now = new Date(input.nowIso).getTime();
+	const approvedAt = new Date(approval.approvedAt).getTime();
+	const expiresAt = new Date(approval.expiresAt).getTime();
+	return (
+		Number.isFinite(now) &&
+		Number.isFinite(approvedAt) &&
+		Number.isFinite(expiresAt) &&
+		approvedAt <= now &&
+		expiresAt > now
+	);
 }
 
 export type FeedSourceBaselineInput = {

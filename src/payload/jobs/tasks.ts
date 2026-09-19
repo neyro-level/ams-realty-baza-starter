@@ -223,6 +223,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 										: source.deactivationApproval?.runId == null
 											? undefined
 											: String(source.deactivationApproval.runId),
+								approvedAt: source.deactivationApproval?.approvedAt,
 								expiresAt: source.deactivationApproval?.expiresAt,
 								consumedAt: source.deactivationApproval?.consumedAt,
 							},

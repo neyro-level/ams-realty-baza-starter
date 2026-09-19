@@ -35,6 +35,22 @@ assert.ok(
 	"Parser retained too much of the full feed.",
 );
 
+let streamedOfferCount = 0;
+const bounded = await parseYrlFeed({
+	stream: chunkUtf8(buildMinimalFeed(10_001), 256 * 1024),
+	allowedImageHosts,
+	collectOffers: false,
+	onOffer: async () => {
+		streamedOfferCount += 1;
+	},
+});
+assert.equal(streamedOfferCount, 10_001);
+assert.equal(bounded.offers.length, 0);
+assert.ok(
+	bounded.stats.maxBufferedOffersObserved <= 1,
+	"parser must await offer delivery before it reads beyond the next XML tag boundary",
+);
+
 const headers = buildConditionalFeedHeaders({
 	etag: '"known-etag"',
 	lastModified: "Wed, 16 Sep 2026 09:00:00 GMT",
@@ -161,6 +177,15 @@ function buildLargeFeed(count) {
 	}
 
 	return `<?xml version="1.0" encoding="utf-8"?><realty-feed><generation-date>2026-09-16T09:00:00+03:00</generation-date>${offers.join("")}</realty-feed>`;
+}
+
+function buildMinimalFeed(count) {
+	const offers = Array.from(
+		{ length: count },
+		(_, index) =>
+			`<offer id="bounded-${index}"><type>продажа</type><category>квартира</category><price><value>${1_000_000 + index}</value><currency>RUR</currency></price></offer>`,
+	);
+	return `<realty-feed>${offers.join("")}</realty-feed>`;
 }
 
 async function* chunkUtf8(value, chunkSize) {

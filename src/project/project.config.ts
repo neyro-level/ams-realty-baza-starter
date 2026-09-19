@@ -3,6 +3,7 @@ export const projectConfig = {
 	dispatcherIntervalMinutes: 5,
 	maintenanceIntervalMinutes: 15,
 	dispatchBatchSize: 3,
+	ingestBatchSize: 100,
 	importHeartbeatIntervalMs: 15_000,
 	approvalTtlMinutes: 240,
 	leadRetentionDays: null as number | null,
@@ -10,11 +11,7 @@ export const projectConfig = {
 	staleDataSlaMinutes: 30,
 	cacheInvalidationMode: "http" as const,
 	cacheProofStatus: "http" as const,
-	reservedNamespaces: [
-		"/novostroyki",
-		"/komplex",
-		"/journal",
-	],
+	reservedNamespaces: ["/novostroyki", "/komplex", "/journal"],
 	indexedCatalogFilterKeys: [
 		"category",
 		"dealType",
