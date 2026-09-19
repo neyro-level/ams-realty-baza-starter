@@ -31,12 +31,20 @@ export function assertLocalTestDatabaseUri(uri) {
 		throw new Error("Test DATABASE_URI is not a valid URL.");
 	}
 	const host = parsed.hostname.toLowerCase();
+	if (parsed.protocol !== "postgres:" && parsed.protocol !== "postgresql:") {
+		throw new Error("Integration tests require a PostgreSQL URI.");
+	}
 	if (host !== "127.0.0.1" && host !== "localhost") {
 		throw new Error("Integration tests only accept loopback PostgreSQL.");
 	}
 	const database = decodeURIComponent(parsed.pathname.replace(/^\//, ""));
 	if (!/^[a-z0-9_]+_test$/.test(database)) {
 		throw new Error("Integration test database name must end with _test.");
+	}
+	if (/(?:^|_)(?:prod|production|live)(?:_|$)/.test(database)) {
+		throw new Error(
+			"Production-looking database names are forbidden for integration tests.",
+		);
 	}
 	return { parsed, database };
 }
@@ -46,7 +54,7 @@ export function deriveTestDatabaseUri(sourceUri) {
 	const current = decodeURIComponent(parsed.pathname.replace(/^\//, ""));
 	const database = current.endsWith("_test")
 		? current
-		: `${current.replace(/[^a-z0-9_]+/gi, "_")}_task10_test`.toLowerCase();
+		: `${current.replace(/[^a-z0-9_]+/gi, "_")}_integration_test`.toLowerCase();
 	parsed.pathname = `/${database}`;
 	return parsed.toString();
 }

@@ -17,7 +17,7 @@ workflows:
               - corepack prepare pnpm@11.5.1 --activate
               - node scripts/ci/assert-exact-head.mjs
               - pnpm install --frozen-lockfile
-              - pnpm verify
+              - pnpm verify:merge-standard
 
   merge-risky:
     inputs:
@@ -31,10 +31,22 @@ workflows:
       - name: verify-risky-exact-head
         cubes:
           - name: verify
-            image: node:24.20.0-bookworm
+            image:
+              name: postgres:18-bookworm
+              entrypoint: ""
+            env:
+              DATABASE_URI_TEST: postgresql://postgres@127.0.0.1:5432/ams_realtbase_ci_test
+              PAYLOAD_SECRET: sourcecraft-risky-gate-test-only-secret
             script:
+              - apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git xz-utils
+              - curl -fsSLO https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz
+              - tar -xJf node-v24.20.0-linux-x64.tar.xz -C /usr/local --strip-components=1
               - corepack enable
               - corepack prepare pnpm@11.5.1 --activate
               - node scripts/ci/assert-exact-head.mjs
+              - install -d -o postgres -g postgres /tmp/ams-pgdata
+              - su postgres -c "initdb -D /tmp/ams-pgdata --auth-local=trust --auth-host=trust"
+              - su postgres -c "pg_ctl -D /tmp/ams-pgdata -o '-c listen_addresses=127.0.0.1' -w start"
+              - su postgres -c "createdb -h 127.0.0.1 ams_realtbase_ci_test"
               - pnpm install --frozen-lockfile
-              - pnpm verify
+              - pnpm verify:merge-risky

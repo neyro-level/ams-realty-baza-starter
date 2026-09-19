@@ -2,33 +2,33 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import {
-	deriveTestDatabaseUri,
-	loadLocalEnv,
-} from "./integration/env.mjs";
-import {
-	prepareIntegrationDatabase,
-	runPayloadMigrations,
-	psqlOnTest,
-} from "./integration/test-database.mjs";
-import { startFixtureHttpServer } from "./integration/fixture-http-server.mjs";
-import { createMemoryFeedRepository } from "./integration/memory-feed-repository.mjs";
-import {
-	createControllableClock,
-	installRuntimeClock,
-	resetRuntimeClock,
-} from "../src/core/time/clock.ts";
+	decideFeedRunCompletion,
+	runImportFeed,
+} from "../src/core/ingest/index.ts";
 import {
 	claimLeadDeliveryForSending,
 	completeLeadDeliveryAttempt,
 	isLiveFuturePayloadJob,
 	retryBackoffMs,
 } from "../src/core/leads/index.ts";
-import { decideFeedRunCompletion, runImportFeed } from "../src/core/ingest/index.ts";
 import {
 	createSafeFeedOutboundFetch,
 	safeOutboundFetch,
 } from "../src/core/security/safe-outbound-client.ts";
 import { parseTestApprovedOrigins } from "../src/core/security/test-destinations.ts";
+import {
+	createControllableClock,
+	installRuntimeClock,
+	resetRuntimeClock,
+} from "../src/core/time/clock.ts";
+import { deriveTestDatabaseUri, loadLocalEnv } from "./integration/env.mjs";
+import { startFixtureHttpServer } from "./integration/fixture-http-server.mjs";
+import { createMemoryFeedRepository } from "./integration/memory-feed-repository.mjs";
+import {
+	prepareIntegrationDatabase,
+	psqlOnTest,
+	runPayloadMigrations,
+} from "./integration/test-database.mjs";
 
 loadLocalEnv();
 
@@ -87,7 +87,10 @@ assert.equal(
 	),
 	false,
 );
-assert.equal(claimLeadDeliveryForSending(retried, clock.nowIso())?.status, "sending");
+assert.equal(
+	claimLeadDeliveryForSending(retried, clock.nowIso())?.status,
+	"sending",
+);
 
 const interruptedDecision = decideFeedRunCompletion({
 	nowIso: clock.nowIso(),
@@ -192,6 +195,16 @@ assert.equal(
 );
 
 const sourceUri = process.env.DATABASE_URI_TEST || process.env.DATABASE_URI;
+if (
+	process.env.AMS_REQUIRE_INTEGRATION_DB === "true" &&
+	!process.env.DATABASE_URI_TEST
+) {
+	await fixture.close();
+	resetRuntimeClock();
+	throw new Error(
+		"Required integration proof needs an explicit DATABASE_URI_TEST; DATABASE_URI fallback is forbidden.",
+	);
+}
 if (!sourceUri) {
 	await fixture.close();
 	resetRuntimeClock();
@@ -202,15 +215,19 @@ if (!sourceUri) {
 	process.exit(0);
 }
 
-const preferredUri = process.env.DATABASE_URI_TEST || deriveTestDatabaseUri(sourceUri);
-const prepared = await prepareIntegrationDatabase(preferredUri, sourceUri);
+const preferredUri =
+	process.env.DATABASE_URI_TEST || deriveTestDatabaseUri(sourceUri);
+const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {
 	await fixture.close();
 	resetRuntimeClock();
-	throw new Error("verify:integration requires PAYLOAD_SECRET when reusing the local database.");
+	throw new Error(
+		"verify:integration requires PAYLOAD_SECRET when reusing the local database.",
+	);
 }
-const testSecret = process.env.PAYLOAD_SECRET || randomBytes(24).toString("hex");
+const testSecret =
+	process.env.PAYLOAD_SECRET || randomBytes(24).toString("hex");
 const childEnv = {
 	...process.env,
 	DATABASE_URI: testUri,
@@ -231,16 +248,20 @@ for (const [key, value] of Object.entries(childEnv)) {
 	process.env[key] = value;
 }
 
-execFileSync("pnpm", ["exec", "payload", "run", "scripts/integration/payload-suites.ts"], {
-	stdio: "inherit",
-	shell: process.platform === "win32",
-	env: {
-		...childEnv,
-		NODE_OPTIONS: [process.env.NODE_OPTIONS, "--conditions=react-server"]
-			.filter(Boolean)
-			.join(" "),
+execFileSync(
+	"pnpm",
+	["exec", "payload", "run", "scripts/integration/payload-suites.ts"],
+	{
+		stdio: "inherit",
+		shell: process.platform === "win32",
+		env: {
+			...childEnv,
+			NODE_OPTIONS: [process.env.NODE_OPTIONS, "--conditions=react-server"]
+				.filter(Boolean)
+				.join(" "),
+		},
 	},
-});
+);
 
 const unique = psqlOnTest(
 	testUri,

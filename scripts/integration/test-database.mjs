@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
 
+import { assertLocalTestDatabaseUri } from "./env.mjs";
+
 function psql(uri, sql) {
 	try {
 		return execFileSync(
@@ -23,58 +25,36 @@ function adminUri(uri) {
 	return parsed.toString();
 }
 
-export function assertLoopbackDatabaseUri(uri) {
-	let parsed;
-	try {
-		parsed = new URL(uri);
-	} catch {
-		throw new Error("Test DATABASE_URI is not a valid URL.");
-	}
-	const host = parsed.hostname.toLowerCase();
-	if (host !== "127.0.0.1" && host !== "localhost") {
-		throw new Error("Integration tests only accept loopback PostgreSQL.");
-	}
-	return parsed;
-}
-
 function adminUriFrom(uri) {
 	return adminUri(uri);
 }
 
-export async function prepareIntegrationDatabase(preferredUri, fallbackUri) {
-	const preferred = assertLoopbackDatabaseUri(preferredUri);
-	const database = decodeURIComponent(preferred.pathname.replace(/^\//, ""));
+export async function prepareIntegrationDatabase(preferredUri) {
+	const { database } = assertLocalTestDatabaseUri(preferredUri);
 	const admin = adminUriFrom(preferredUri);
 	const exists = psql(
 		admin,
 		`SELECT 1 FROM pg_database WHERE datname = '${database.replace(/'/g, "''")}'`,
 	);
 	if (!exists) {
-		try {
-			if (!/^[a-z0-9_]+$/.test(database)) {
-				throw new Error("Unsafe test database name.");
-			}
-			psql(admin, `CREATE DATABASE ${database}`);
-		} catch {
-			assertLoopbackDatabaseUri(fallbackUri);
-			return { uri: fallbackUri, fromZero: false };
-		}
+		psql(admin, `CREATE DATABASE ${database}`);
 	}
 
-	if (/_test$/.test(database)) {
-		psql(preferredUri, "DROP SCHEMA IF EXISTS public CASCADE");
-		psql(preferredUri, "CREATE SCHEMA public");
-		psql(preferredUri, "GRANT ALL ON SCHEMA public TO PUBLIC");
-		return { uri: preferredUri, fromZero: true };
-	}
-
-	return { uri: preferredUri, fromZero: false };
+	psql(preferredUri, "DROP SCHEMA IF EXISTS public CASCADE");
+	psql(preferredUri, "CREATE SCHEMA public");
+	psql(preferredUri, "GRANT ALL ON SCHEMA public TO PUBLIC");
+	return { uri: preferredUri, fromZero: true };
 }
 
 export function runPayloadMigrations(env) {
 	execFileSync("pnpm", ["exec", "payload", "migrate"], {
 		stdio: "pipe",
-		env,
+		env: {
+			...env,
+			NODE_OPTIONS: [env.NODE_OPTIONS, "--conditions=react-server"]
+				.filter(Boolean)
+				.join(" "),
+		},
 		encoding: "utf8",
 		shell: process.platform === "win32",
 	});

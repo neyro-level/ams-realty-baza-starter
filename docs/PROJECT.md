@@ -46,12 +46,21 @@ Canonical URL map: `02_PRODUCT_STRUCTURE.md`. Knobs source: `src/project/project
 
 ## Verification
 
-Единственная обязательная поверхность:
+Обязательные поверхности разделены по риску:
 
 ```bash
 pnpm verify:daily
 pnpm verify
 pnpm verify:schema
+pnpm verify:merge-standard
+pnpm verify:merge-risky
 ```
+
+`verify:merge-standard` не запускает PostgreSQL suite. `verify:merge-risky`
+требует явный `DATABASE_URI_TEST` на loopback (`127.0.0.1`/`localhost`) с именем
+базы `*_test`, выполняет миграции и Payload integration suites, затем build.
+Production-looking имена (`prod`, `production`, `live`) и fallback к
+`DATABASE_URI` запрещены до любой мутации. Локальный контур использует native
+PostgreSQL; Docker/WSL не запускаются автоматически.
 
 Секретные значения не записываются в этот документ.

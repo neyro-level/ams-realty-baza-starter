@@ -6,7 +6,9 @@ const required = [
 	"merge-risky:",
 	"expected_commit_sha",
 	"assert-exact-head.mjs",
-	"pnpm verify",
+	"pnpm verify:merge-standard",
+	"pnpm verify:merge-risky",
+	"DATABASE_URI_TEST",
 ];
 const forbidden = [
 	/^\s*push\s*:/m,
