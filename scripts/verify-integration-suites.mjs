@@ -28,6 +28,7 @@ import { startFixtureHttpServer } from "./integration/fixture-http-server.mjs";
 import { createMemoryFeedRepository } from "./integration/memory-feed-repository.mjs";
 import {
 	prepareIntegrationDatabase,
+	proveLeadDeliveryRelationalMigration,
 	provePropertyNumericMigration,
 	psqlOnTest,
 	runPayloadMigrations,
@@ -256,6 +257,8 @@ const preferredUri =
 	process.env.DATABASE_URI_TEST || deriveTestDatabaseUri(sourceUri);
 await prepareIntegrationDatabase(preferredUri);
 provePropertyNumericMigration(preferredUri);
+await prepareIntegrationDatabase(preferredUri);
+proveLeadDeliveryRelationalMigration(preferredUri);
 const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {

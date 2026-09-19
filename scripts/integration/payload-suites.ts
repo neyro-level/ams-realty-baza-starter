@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import { getPayload } from "payload";
 import config from "../../payload.config.ts";
 import {
+	claimQueuedImportRun,
+	consumeDeactivationApproval,
+	finishImportRun,
+	touchImportRunHeartbeat,
+} from "../../src/core/data-access/ingest/sql/index.ts";
+import {
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
 } from "../../src/core/data-access/public/catalog.ts";
@@ -15,12 +21,7 @@ import {
 import { requirePayloadRuntime } from "../../src/payload/env.ts";
 import { payloadJobTaskSlugs } from "../../src/payload/jobs/registry.ts";
 import { payloadJobTasks } from "../../src/payload/jobs/tasks.ts";
-import {
-	claimQueuedImportRun,
-	consumeDeactivationApproval,
-	finishImportRun,
-	touchImportRunHeartbeat,
-} from "../../src/core/data-access/ingest/sql/index.ts";
+import { projectConfig } from "../../src/project/project.config.ts";
 
 requirePayloadRuntime();
 
@@ -360,12 +361,157 @@ const ownerDeleteLead = await payload.create({
 	},
 	...access,
 });
+const ownerDeleteDelivery = await payload.create({
+	collection: "lead-deliveries",
+	data: {
+		lead: ownerDeleteLead.id,
+		channelId: `owner-delete-${suffix}`,
+		channelKind: "messenger",
+		status: "pending",
+		attempts: 0,
+		idempotencyKey: `itest-owner-delete-delivery-${suffix}`,
+	},
+	...access,
+});
 await payload.delete({
 	collection: "leads",
 	id: ownerDeleteLead.id,
 	overrideAccess: false,
 	user: owner,
 });
+await assert.rejects(
+	() =>
+		payload.findByID({
+			collection: "lead-deliveries",
+			id: ownerDeleteDelivery.id,
+			...access,
+		}),
+	/not found/i,
+	"owner lead delete must cascade to linked deliveries",
+);
+
+const retentionLead = await payload.create({
+	collection: "leads",
+	data: {
+		name: "Retention PII",
+		phoneRaw: "+7 999 000 00 03",
+		phoneE164: "+79990000003",
+		email: "retention@example.test",
+		message: "private retention message",
+		formKind: "callback",
+		sourcePage: "/retention-proof",
+		status: "new",
+		consent: {
+			accepted: true,
+			version: "test",
+			consentedAt: clock.nowIso(),
+		},
+		idempotencyKey: `itest-retention-${suffix}`,
+		retentionUntil: "2026-09-18T11:00:00.000Z",
+		retentionMode: "anonymize",
+		fraudFingerprint: "irreversible-but-private-marker",
+	},
+	...access,
+});
+const retentionDelivery = await payload.create({
+	collection: "lead-deliveries",
+	data: {
+		lead: retentionLead.id,
+		channelId: `retention-${suffix}`,
+		channelKind: "messenger",
+		status: "failed",
+		attempts: 1,
+		idempotencyKey: `itest-retention-delivery-${suffix}`,
+		lastErrorKind: "retryable",
+		lastErrorRedacted: "private retention message",
+		attemptLog: [
+			{
+				attemptedAt: clock.nowIso(),
+				outcome: "retryable",
+				redactedNote: "+79990000003",
+			},
+		],
+	},
+	...access,
+});
+
+for (const [role, user] of [
+	["owner", owner],
+	["admin", admin],
+] as const) {
+	const visible = await payload.find({
+		collection: "lead-deliveries",
+		overrideAccess: false,
+		user,
+		where: { id: { equals: retentionDelivery.id } },
+	});
+	assert.equal(visible.totalDocs, 1, `${role} must read delivery diagnostics`);
+}
+let editorDeliveryDenied = false;
+try {
+	const result = await payload.find({
+		collection: "lead-deliveries",
+		overrideAccess: false,
+		user: editor,
+		where: { id: { equals: retentionDelivery.id } },
+	});
+	editorDeliveryDenied = result.totalDocs === 0;
+} catch {
+	editorDeliveryDenied = true;
+}
+assert.equal(
+	editorDeliveryDenied,
+	true,
+	"editor must not read delivery diagnostics",
+);
+
+const retentionTask = payloadJobTasks.find(
+	(task) => task.slug === payloadJobTaskSlugs.leadRetentionCleanup,
+);
+if (typeof retentionTask?.handler !== "function") {
+	throw new Error("leadRetentionCleanup handler is missing");
+}
+const mutableProjectConfig = projectConfig as {
+	leadRetentionDays: number | null;
+};
+const previousLeadRetentionDays = mutableProjectConfig.leadRetentionDays;
+mutableProjectConfig.leadRetentionDays = 90;
+try {
+	await retentionTask.handler({
+		req: { payload, user: undefined } as never,
+		input: {},
+		job: {} as never,
+	} as never);
+} finally {
+	mutableProjectConfig.leadRetentionDays = previousLeadRetentionDays;
+}
+
+const anonymizedLead = await payload.findByID({
+	collection: "leads",
+	id: retentionLead.id,
+	depth: 0,
+	...access,
+});
+assert.equal(anonymizedLead.name, "Anonymized lead");
+assert.equal(anonymizedLead.phoneRaw, null);
+assert.equal(anonymizedLead.phoneE164, "+00000000000");
+assert.equal(anonymizedLead.email, null);
+assert.equal(anonymizedLead.message, null);
+assert.equal(anonymizedLead.fraudFingerprint, null);
+assert.ok(
+	anonymizedLead.piiPurgedAt,
+	"anonymize must preserve shell and mark PII purge",
+);
+
+const purgedDelivery = await payload.findByID({
+	collection: "lead-deliveries",
+	id: retentionDelivery.id,
+	depth: 0,
+	...access,
+});
+assert.deepEqual(purgedDelivery.attemptLog, []);
+assert.equal(purgedDelivery.lastErrorRedacted, null);
+assert.ok(purgedDelivery.diagnosticsPurgedAt);
 
 const feedSource = await payload.create({
 	collection: "feed-sources",

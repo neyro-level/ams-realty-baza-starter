@@ -82,6 +82,22 @@ BEGIN
 	) THEN
 		RAISE EXCEPTION 'Missing feed source delete guard trigger';
 	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1
+		FROM pg_constraint constraint_row
+		JOIN pg_attribute column_row
+			ON column_row.attrelid = constraint_row.conrelid
+			AND column_row.attnum = ANY (constraint_row.conkey)
+		WHERE constraint_row.conrelid = 'lead_deliveries'::regclass
+			AND constraint_row.conname = 'lead_deliveries_lead_id_leads_id_fk'
+			AND constraint_row.contype = 'f'
+			AND constraint_row.confdeltype = 'c'
+			AND column_row.attname = 'lead_id'
+			AND column_row.attnotnull
+	) THEN
+		RAISE EXCEPTION 'Lead delivery relation must be NOT NULL with ON DELETE CASCADE';
+	END IF;
 END $$;
 `);
 
@@ -230,8 +246,12 @@ BEGIN
 		NULL;
 	END;
 
-	DELETE FROM lead_deliveries WHERE lead_deliveries.lead_id = fixture_lead_id;
 	DELETE FROM leads WHERE leads.id = fixture_lead_id;
+	IF EXISTS (
+		SELECT 1 FROM lead_deliveries WHERE lead_deliveries.lead_id = fixture_lead_id
+	) THEN
+		RAISE EXCEPTION 'Lead delete did not cascade to linked deliveries';
+	END IF;
 	DELETE FROM properties WHERE properties.feed_source_id = fixture_feed_source_id;
 	DELETE FROM feed_sources WHERE feed_sources.id = fixture_feed_source_id;
 END $$;

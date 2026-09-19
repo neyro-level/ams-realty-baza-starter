@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
+import { leadDeliveryRelationalContractUpSql } from "../../src/payload/migrations/20260919_151000.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
 function psql(uri, sql) {
@@ -128,6 +129,60 @@ export function provePropertyNumericMigration(testUri) {
 		"UPDATE properties SET total_area = 1.234",
 		/properties_total_area_invariant/i,
 	);
+}
+
+export function proveLeadDeliveryRelationalMigration(testUri) {
+	psql(
+		testUri,
+		`
+		CREATE TABLE leads (id serial PRIMARY KEY);
+		CREATE TABLE lead_deliveries (
+			id serial PRIMARY KEY,
+			lead_id integer,
+			CONSTRAINT lead_deliveries_lead_id_leads_id_fk
+				FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE SET NULL
+		);
+		INSERT INTO leads DEFAULT VALUES;
+		INSERT INTO lead_deliveries (lead_id) VALUES (1);
+		INSERT INTO lead_deliveries (lead_id) VALUES (NULL);
+	`,
+	);
+	expectPsqlFailure(
+		testUri,
+		leadDeliveryRelationalContractUpSql,
+		/relational retention migration stopped/i,
+	);
+	const relationAfterFailure = psql(
+		testUri,
+		"SELECT confdeltype FROM pg_constraint WHERE conname = 'lead_deliveries_lead_id_leads_id_fk'",
+	);
+	if (relationAfterFailure !== "n") {
+		throw new Error("Rejected relational migration changed the previous FK.");
+	}
+
+	psql(testUri, "DELETE FROM lead_deliveries WHERE lead_id IS NULL");
+	psql(testUri, leadDeliveryRelationalContractUpSql);
+	const contract = psql(
+		testUri,
+		`SELECT constraint_row.confdeltype::text || '|' || column_row.attnotnull::text
+		 FROM pg_constraint constraint_row
+		 JOIN pg_attribute column_row
+		 ON column_row.attrelid = constraint_row.conrelid
+		 AND column_row.attnum = ANY (constraint_row.conkey)
+		 WHERE constraint_row.conname = 'lead_deliveries_lead_id_leads_id_fk'
+		 AND column_row.attname = 'lead_id'`,
+	);
+	if (contract !== "c|true") {
+		throw new Error(
+			`Relational migration did not install cascade/not-null: ${contract}`,
+		);
+	}
+	psql(testUri, "DELETE FROM leads WHERE id = 1");
+	if (psql(testUri, "SELECT count(*) FROM lead_deliveries") !== "0") {
+		throw new Error(
+			"Lead delete did not cascade on the previous non-empty fixture.",
+		);
+	}
 }
 
 export function psqlOnTest(testUri, sql) {
