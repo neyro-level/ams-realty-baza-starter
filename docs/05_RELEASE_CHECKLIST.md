@@ -1,6 +1,6 @@
 # Release Checklist
 
-Статус: `Owner-operated demo contour exists; Plan №5 pre-production alignment in progress`. PII retention days remain `NEEDS_OWNER`; существующий live contour не доказывает готовность нового SHA к release.
+Статус: `Plan №5 pre-production alignment PASS on main@089b0fb7`. Owner-operated demo contour существует, но этот SHA не выпускался. PII retention days остаются `NEEDS_OWNER`; финальный proof не заменяет отдельный release, rollout и live smoke.
 
 ## Перед Pull Request
 

@@ -1,22 +1,23 @@
 # Backlog
 
-Статус: `Plan №5 / EXECUTION` — EPIC-01…11 доставлены; EPIC-12 является этим
-source-of-truth sync, EPIC-13 — следующий и последний pre-production proof.
+Статус: `Plan №5 / COMPLETED` — EPIC-01…13 доставлены в SourceCraft
+`main@089b0fb7a259b88fd1abd01683886d21ca34c2d1`. Финальный RISKY Gate №118 и
+post-merge `verify:daily` прошли; production не выпускался.
 
 Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN №5.md`. Статус exact snapshot: `AMS-REALTBASE-RESIDUAL-ALIGN` v1 `APPROVED`. Beads graph создаётся и reconciles из этого snapshot.
 
 ## NOW
 
-- `EPIC-13` — final Core 5.5 / UI Core 5.0 exact-SHA proof на чистом `main` после
-  merge EPIC-12. Требует isolated test DB, previous-schema fixture, zero skipped
-  required integration suites и RISKY SourceCraft Gate.
+- Активной implementation-программы нет. Следующий scope начинается только по
+  новой команде владельца; production release остаётся отдельным lifecycle.
 
 ## DONE IN PLAN №5
 
-- `EPIC-01…11` — mandatory gates, access/cache/numeric/data/job boundaries,
-  architecture/UI guards и UI cleanup доставлены в SourceCraft `main`;
-- `EPIC-12` — canonical docs синхронизируются этим PR; после merge не исполнять
-  повторно;
+- `EPIC-01…12` — mandatory gates, access/cache/numeric/data/job boundaries,
+  architecture/UI guards, UI cleanup и canonical docs доставлены в SourceCraft
+  `main`;
+- `EPIC-13` — exact-head Core 5.5 / UI Core 5.0 proof закрыт на PR 101,
+  RISKY Gate №118 и merge `089b0fb7`; повторно не исполнять без нового SHA;
 - exact PR/SHA/run evidence хранится в Task Manager ledgers, а не дублируется в
   backlog.
 
@@ -28,8 +29,10 @@ source-of-truth sync, EPIC-13 — следующий и последний pre-p
 
 ## Политика доставки
 
-- Каждый EPIC: новая ветка от `main`, SourceCraft PR, `MERGE_AFTER_GATE`, удаление ветки.
-- Production и GitHub не входят в этот план.
+- Новый независимый stream: отдельная ветка/worktree от актуального `main`,
+  SourceCraft PR и профильный Gate перед merge.
+- Production требует отдельной команды. GitHub используется только как зеркало
+  канонического SourceCraft `main`.
 
 ## Закрытый CORE-ALIGN v1
 

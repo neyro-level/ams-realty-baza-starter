@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Plan №5 / EXECUTION` — `AMS-REALTBASE-RESIDUAL-ALIGN` v1 утверждён владельцем. EPIC-01…11 доставлены в SourceCraft `main`; этот документ фиксирует EPIC-12 source-of-truth sync, после которого EPIC-13 выполняет финальный exact-SHA proof. Exact execution state хранится в локальном stealth Beads. Production и GitHub остаются вне графа.
+Статус: `Plan №5 / COMPLETED` — `AMS-REALTBASE-RESIDUAL-ALIGN` v1 полностью доставлен в SourceCraft `main@089b0fb7a259b88fd1abd01683886d21ca34c2d1`. Финальный pre-production proof: `proofs/final-core-5.5-ui-5.0.md`; SourceCraft RISKY Gate №118 — PASS. Production не выпускался. GitHub остаётся неканоническим mirror, а не рабочим Source of Truth.
 
 ## Канонические документы
 
@@ -24,7 +24,7 @@
 1. `../AGENTS.md` — project router и invariants.
 2. Этот файл — карта Source of Truth.
 3. Один профильный документ из таблицы выше.
-4. Релевантный раздел `AMS_MASTER_PLAN №5.md` и текущая задача Beads.
+4. Релевантный раздел закрытого `AMS_MASTER_PLAN №5.md` только для acceptance/evidence завершённой программы.
 5. ADR/module/research только когда на них ссылается текущий scope.
 
 Исторические планы и proofs не являются инструкцией к повторному исполнению.
@@ -33,7 +33,7 @@
 
 ## Нормативные источники
 
-- `docs/AMS_MASTER_PLAN №5.md` — текущий APPROVED и исполняемый план остаточного выравнивания (`AMS-REALTBASE-RESIDUAL-ALIGN` v1). Демо: local PostgreSQL + MEDIA_DIR; production и GitHub вне графа.
+- `docs/AMS_MASTER_PLAN №5.md` — закрытый APPROVED план остаточного выравнивания (`AMS-REALTBASE-RESIDUAL-ALIGN` v1), полностью доставленный на `main@089b0fb7`. Демо: local PostgreSQL + MEDIA_DIR; production не входил в граф.
 - `docs/AMS_MASTER_PLAN №4.md` — закрытый APPROVED Core Align (`AMS-REALTBASE-CORE-ALIGN` v1, `main@f8344de`).
 - `docs/AMS_MASTER_PLAN №3.md` — закрытый APPROVED corrections EPIC 11–21 (`AMS-REALTBASE-CORRECTIONS` v3, `main@14e9bf53`).
 - `docs/AMS_MASTER_PLAN №2.md` — закрытый утверждённый hardening (`AMS-REALTBASE-HARDENING` v2, `main@f39826c`).

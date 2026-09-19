@@ -7,7 +7,7 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Master plan: `docs/AMS_MASTER_PLAN №5.md` (`Plan ID: AMS-REALTBASE-RESIDUAL-ALIGN`, `Version: v1`, `Status: APPROVED`). Закрытый Core Align: `docs/AMS_MASTER_PLAN №4.md`. Закрытый corrections: `docs/AMS_MASTER_PLAN №3.md`. Закрытый hardening: `docs/AMS_MASTER_PLAN №2.md`. Исторический v1.0: `AMS_PROJECT_ARCHITECTURE_v1.0.md`.
+- Последний закрытый master plan: `docs/AMS_MASTER_PLAN №5.md` (`Plan ID: AMS-REALTBASE-RESIDUAL-ALIGN`, `Version: v1`, `Status: APPROVED`, доставлен полностью). Ранее закрыты Core Align: `docs/AMS_MASTER_PLAN №4.md`, corrections: `docs/AMS_MASTER_PLAN №3.md` и hardening: `docs/AMS_MASTER_PLAN №2.md`. Исторический v1.0: `AMS_PROJECT_ARCHITECTURE_v1.0.md`.
 - Operational graph: локальный stealth Beads после approved import; `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
@@ -16,8 +16,8 @@
 
 1. `docs/README.md`.
 2. Профильный канонический документ из карты.
-3. Релевантный раздел APPROVED `docs/AMS_MASTER_PLAN №5.md`.
-4. `docs/04_BACKLOG.md` и текущая задача Beads.
+3. `docs/04_BACKLOG.md` — текущий статус и следующий разрешённый scope.
+4. Релевантный раздел закрытого `docs/AMS_MASTER_PLAN №5.md` только для исторического acceptance/evidence.
 5. `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` только в пределах текущего scope.
 
 ## Invariants
