@@ -9,12 +9,23 @@ const queueModule = await import(
 const registryModule = await import(
 	pathToFileURL(join(root, "src/payload/jobs/registry.ts")).href
 );
-const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-const tasksSource = readFileSync(join(root, "src/payload/jobs/tasks.ts"), "utf8");
+const packageJson = JSON.parse(
+	readFileSync(join(root, "package.json"), "utf8"),
+);
+const tasksSource = readFileSync(
+	join(root, "src/payload/jobs/tasks.ts"),
+	"utf8",
+);
 
 const expectedQueues = new Map([
-	["system", { limit: 5, disableScheduling: false, staticTasks: ["dispatchDueFeeds"] }],
-	["imports", { limit: 1, disableScheduling: true, programmaticTasks: ["importFeed"] }],
+	[
+		"system",
+		{ limit: 5, disableScheduling: false, staticTasks: ["dispatchDueFeeds"] },
+	],
+	[
+		"imports",
+		{ limit: 1, disableScheduling: true, programmaticTasks: ["importFeed"] },
+	],
 	[
 		"maintenance",
 		{
@@ -88,7 +99,10 @@ for (const [queue, expected] of expectedQueues) {
 		.map((item) => item.slug)
 		.sort();
 
-	if (JSON.stringify(staticTasks) !== JSON.stringify([...(expected.staticTasks ?? [])].sort())) {
+	if (
+		JSON.stringify(staticTasks) !==
+		JSON.stringify([...(expected.staticTasks ?? [])].sort())
+	) {
 		throw new Error(`Queue "${queue}" static task registry mismatch.`);
 	}
 
@@ -134,10 +148,15 @@ for (const entry of registry) {
 		throw new Error(`Missing Payload task handler for "${entry.slug}".`);
 	}
 
-	const taskSlice = tasksSource.slice(slugIndex, tasksSource.indexOf("\n\t},", slugIndex));
+	const taskSlice = tasksSource.slice(
+		slugIndex,
+		tasksSource.indexOf("\n\t},", slugIndex),
+	);
 
 	if (entry.trigger === "programmatic" && taskSlice.includes("schedule:")) {
-		throw new Error(`Programmatic task "${entry.slug}" must not declare schedule.`);
+		throw new Error(
+			`Programmatic task "${entry.slug}" must not declare schedule.`,
+		);
 	}
 
 	if (entry.trigger === "static" && !taskSlice.includes("schedule:")) {
@@ -186,7 +205,9 @@ if (!payloadConfig.includes("enableConcurrencyControl: true")) {
 	throw new Error("Payload jobs must enable concurrency control.");
 }
 
-if (!payloadConfig.includes("shouldAutoRun: async () => runtimeEnv.JOBS_AUTORUN")) {
+if (
+	!payloadConfig.includes("shouldAutoRun: async () => runtimeEnv.JOBS_AUTORUN")
+) {
 	throw new Error("Payload jobs autoRun must be gated by JOBS_AUTORUN.");
 }
 
@@ -198,9 +219,14 @@ if (!tasksSource.includes("claimDueFeedSources")) {
 	throw new Error("dispatchDueFeeds must use atomic claimDueFeedSources.");
 }
 
-const ingestSql = readFileSync(join(root, "src/core/data-access/ingest/sql/index.ts"), "utf8");
+const ingestSql = readFileSync(
+	join(root, "src/core/data-access/ingest/sql/index.ts"),
+	"utf8",
+);
 if (!ingestSql.includes("source.next_due_at IS NULL")) {
-	throw new Error("claimDueFeedSources must include enabled sources with null nextDueAt.");
+	throw new Error(
+		"claimDueFeedSources must include enabled sources with null nextDueAt.",
+	);
 }
 
 if (!tasksSource.includes("claimQueuedImportRun")) {
@@ -232,10 +258,19 @@ const revalidateRoute = readFileSync(
 	"utf8",
 );
 if (!revalidateRoute.includes("invalidateCacheTargets")) {
-	throw new Error("HTTP revalidate route must call the in-process invalidator.");
+	throw new Error(
+		"HTTP revalidate route must call the in-process invalidator.",
+	);
+}
+if (!revalidateRoute.includes("executeInternalRevalidation")) {
+	throw new Error(
+		"HTTP revalidate route must delegate auth and validation to its canonical executor.",
+	);
 }
 if (/from\s+["']next\/cache["']/.test(revalidateRoute)) {
-	throw new Error("HTTP revalidate route must not top-level import next/cache.");
+	throw new Error(
+		"HTTP revalidate route must not top-level import next/cache.",
+	);
 }
 
 const httpAdapter = readFileSync(
@@ -246,36 +281,14 @@ if (httpAdapter.includes("next/cache")) {
 	throw new Error("HTTP cache adapter must not import next/cache.");
 }
 
-const liveB2Configured = Boolean(
-	process.env.DATABASE_URI_TEST?.trim() &&
-		process.env.INTERNAL_REVALIDATE_BASE_URL?.trim() &&
-		process.env.REVALIDATE_SECRET?.trim(),
+const routeExecutor = readFileSync(
+	join(root, "src", "core", "cache", "internal-route-executor.ts"),
+	"utf8",
 );
-if (liveB2Configured) {
-	const base = process.env.INTERNAL_REVALIDATE_BASE_URL.replace(/\/$/, "");
-	try {
-		const response = await fetch(`${base}/api/internal/revalidate`, {
-			method: "POST",
-			headers: {
-				"content-type": "application/json",
-				"x-ams-revalidate-secret": process.env.REVALIDATE_SECRET,
-			},
-			body: JSON.stringify({
-				targets: [{ type: "tag", tag: "properties" }],
-				reason: "epic-05-b2-probe",
-			}),
-		});
-		if (!response.ok) {
-			console.log(
-				`Jobs config verified. B2 live self-call NOT PROVEN (HTTP ${response.status}).`,
-			);
-		} else {
-			console.log("Jobs config verified. B2 live self-call PASS.");
-		}
-	} catch {
-		console.log("Jobs config verified. B2 live self-call NOT PROVEN (network).");
-	}
-} else {
-	console.log("Jobs config verified. B2 live self-call NOT PROVEN (no DATABASE_URI_TEST).");
+if (routeExecutor.includes("next/cache")) {
+	throw new Error(
+		"Internal Route Handler executor must not import next/cache.",
+	);
 }
 
+console.log("Jobs config verified.");

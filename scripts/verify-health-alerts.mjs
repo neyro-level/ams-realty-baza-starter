@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { buildOperationalAlerts } from "../src/core/operations/alerts.ts";
 import {
 	assertNoPiiInDiagnostics,
 	evaluateProductionRetentionReadiness,
 	planLeadRetentionRun,
 	planRetentionActions,
 } from "../src/core/leads/index.ts";
+import { buildOperationalAlerts } from "../src/core/operations/alerts.ts";
 
 const alerts = buildOperationalAlerts({
 	feeds: {
@@ -31,7 +31,9 @@ const alerts = buildOperationalAlerts({
 
 assert.ok(alerts.some((alert) => alert.code === "feeds_suspicious_runs"));
 assert.ok(alerts.some((alert) => alert.code === "delivery_stale_sending"));
-assert.ok(alerts.some((alert) => alert.code === "storage_media_dir_unavailable"));
+assert.ok(
+	alerts.some((alert) => alert.code === "storage_media_dir_unavailable"),
+);
 
 const cacheAlerts = buildOperationalAlerts({
 	feeds: {
@@ -57,7 +59,9 @@ const cacheAlerts = buildOperationalAlerts({
 		invalidationStaleBeyondSla: true,
 	},
 });
-assert.ok(cacheAlerts.some((alert) => alert.code === "cache_invalidation_failure"));
+assert.ok(
+	cacheAlerts.some((alert) => alert.code === "cache_invalidation_failure"),
+);
 
 const serialized = JSON.stringify(alerts).toLowerCase();
 for (const forbidden of [
@@ -197,8 +201,11 @@ assert.equal(
 	true,
 );
 
-const { isCacheInvalidationStaleBeyondSla, recordCacheInvalidationOutcome, resetCacheInvalidationSlaState } =
-	await import("../src/core/cache/invalidation-sla.ts");
+const {
+	isCacheInvalidationStaleBeyondSla,
+	recordCacheInvalidationOutcome,
+	resetCacheInvalidationSlaState,
+} = await import("../src/core/cache/invalidation-sla.ts");
 resetCacheInvalidationSlaState();
 recordCacheInvalidationOutcome(false, "2026-09-18T11:00:00.000Z");
 assert.equal(
@@ -219,10 +226,10 @@ assert.equal(
 	evaluateRuntimeEnv({ NEXT_PHASE: "phase-production-build" }, "build").ok,
 	true,
 );
-assert.deepEqual(
-	evaluateRuntimeEnv({}, "migrate").missing,
-	["DATABASE_URI", "PAYLOAD_SECRET"],
-);
+assert.deepEqual(evaluateRuntimeEnv({}, "migrate").missing, [
+	"DATABASE_URI",
+	"PAYLOAD_SECRET",
+]);
 assert.ok(
 	evaluateRuntimeEnv(
 		{ NODE_ENV: "production", AMS_PROFILE: "REALTY_BASE" },
@@ -239,6 +246,7 @@ const productionLike = {
 	NEXT_PUBLIC_SERVER_URL: "https://start-baza.ams24.ru",
 	MEDIA_DIR: "/var/lib/ams-realty-baza/media",
 	REVALIDATE_SECRET: "fixture-runtime-revalidate-secret-32chars",
+	INTERNAL_REVALIDATE_BASE_URL: "http://127.0.0.1:3000",
 };
 assert.equal(evaluateRuntimeEnv(productionLike, "runtime").ok, true);
 assert.ok(
@@ -255,9 +263,32 @@ assert.ok(
 );
 assert.ok(
 	evaluateRuntimeEnv(
+		{ ...productionLike, INTERNAL_REVALIDATE_BASE_URL: "" },
+		"runtime",
+	).missing.includes("INTERNAL_REVALIDATE_BASE_URL"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{ ...productionLike, INTERNAL_REVALIDATE_BASE_URL: "not-a-url" },
+		"runtime",
+	).missing.includes("INTERNAL_REVALIDATE_BASE_URL"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
 		{ ...productionLike, LEAD_CHANNELS: "max" },
 		"runtime",
 	).missing.includes("MAX_BOT_TOKEN"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{
+			...productionLike,
+			LEAD_CHANNELS: "max",
+			MAX_BOT_TOKEN: "fixture-token",
+			MAX_CHAT_ID: "fixture-chat",
+		},
+		"runtime",
+	).missing.includes("LEAD_OUTBOUND_HOSTS"),
 );
 assert.ok(
 	evaluateRuntimeEnv(
@@ -310,6 +341,17 @@ assert.equal(
 		"build",
 	).ok,
 	true,
+);
+assert.equal(
+	evaluateRuntimeEnv(
+		{
+			DATABASE_URI: "postgresql://127.0.0.1:5432/ams_realtbase",
+			PAYLOAD_SECRET: "fixture-runtime-payload-secret-at-least-32-chars",
+		},
+		"migrate",
+	).ok,
+	true,
+	"HTTP self-call settings must not be required for migrations",
 );
 assert.ok(
 	!evaluateRuntimeEnv(productionLike, "runtime").missing.some((key) =>
@@ -437,7 +479,8 @@ assert.ok(
 		},
 	}).some(
 		(alert) =>
-			alert.code === "production_retention_unready" && alert.severity === "critical",
+			alert.code === "production_retention_unready" &&
+			alert.severity === "critical",
 	),
 );
 

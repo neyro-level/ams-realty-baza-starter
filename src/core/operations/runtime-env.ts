@@ -53,8 +53,14 @@ export function requiredKeysForMode(mode: RuntimeEnvMode): string[] {
 function collectConditionalRuntimeKeys(env: NodeJS.ProcessEnv): string[] {
 	const missing: string[] = [];
 	const cacheMode = env.CACHE_INVALIDATION_MODE?.trim() || "http";
-	if (cacheMode === "http" && !env.REVALIDATE_SECRET?.trim()) {
-		missing.push("REVALIDATE_SECRET");
+	if (cacheMode === "http") {
+		if (!env.REVALIDATE_SECRET?.trim()) {
+			missing.push("REVALIDATE_SECRET");
+		}
+		const internalBaseUrl = env.INTERNAL_REVALIDATE_BASE_URL?.trim();
+		if (!internalBaseUrl || !isHttpOrigin(internalBaseUrl)) {
+			missing.push("INTERNAL_REVALIDATE_BASE_URL");
+		}
 	}
 
 	if (env.PAYLOAD_DB_PUSH === "true") {
@@ -81,6 +87,10 @@ function collectConditionalRuntimeKeys(env: NodeJS.ProcessEnv): string[] {
 					missing.push(key);
 				}
 			}
+		}
+
+		if (ids.length > 0 && !env.LEAD_OUTBOUND_HOSTS?.trim()) {
+			missing.push("LEAD_OUTBOUND_HOSTS");
 		}
 	}
 
@@ -109,13 +119,21 @@ export function evaluateRuntimeEnv(
 		}
 	}
 
-	if (mode === "runtime" && env.AMS_PROFILE?.trim() && env.AMS_PROFILE !== "REALTY_BASE") {
+	if (
+		mode === "runtime" &&
+		env.AMS_PROFILE?.trim() &&
+		env.AMS_PROFILE !== "REALTY_BASE"
+	) {
 		missing.push("AMS_PROFILE");
 	}
 
 	if (mode === "runtime") {
 		const origin = env.NEXT_PUBLIC_SERVER_URL?.trim();
-		if (origin && !isHttpOrigin(origin) && !missing.includes("NEXT_PUBLIC_SERVER_URL")) {
+		if (
+			origin &&
+			!isHttpOrigin(origin) &&
+			!missing.includes("NEXT_PUBLIC_SERVER_URL")
+		) {
 			missing.push("NEXT_PUBLIC_SERVER_URL");
 		}
 

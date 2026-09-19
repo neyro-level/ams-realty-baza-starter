@@ -162,7 +162,9 @@ const firstClaim = await dispatchDueFeeds({
 			},
 		];
 	},
-	createQueuedImportRun: async ({ feedSourceId }) => ({ id: `run-${feedSourceId}` }),
+	createQueuedImportRun: async ({ feedSourceId }) => ({
+		id: `run-${feedSourceId}`,
+	}),
 	enqueueImportFeed: async () => ({ id: "job-1" }),
 	attachJobId: async () => undefined,
 });
@@ -190,7 +192,9 @@ const concurrent = await Promise.all([
 					]
 				: [];
 		},
-		createQueuedImportRun: async ({ feedSourceId }) => ({ id: `run-${feedSourceId}` }),
+		createQueuedImportRun: async ({ feedSourceId }) => ({
+			id: `run-${feedSourceId}`,
+		}),
 		enqueueImportFeed: async () => ({ id: "job-1" }),
 		attachJobId: async () => undefined,
 	}),
@@ -202,7 +206,10 @@ const concurrent = await Promise.all([
 		attachJobId: async () => undefined,
 	}),
 ]);
-assert.equal(concurrent[0].dispatched.length + concurrent[1].dispatched.length, 1);
+assert.equal(
+	concurrent[0].dispatched.length + concurrent[1].dispatched.length,
+	1,
+);
 
 let ticks = 0;
 const heartbeat = startImportHeartbeat({
@@ -226,7 +233,10 @@ assert.equal(
 	false,
 	"normalized ingest must not wrap heartbeat in a DB transaction",
 );
-const runtimeSource = readFileSync("src/core/ingest/import-feed-runtime.ts", "utf8");
+const runtimeSource = readFileSync(
+	"src/core/ingest/import-feed-runtime.ts",
+	"utf8",
+);
 assert.ok(
 	runtimeSource.includes("const heartbeat = startImportHeartbeat"),
 	"heartbeat must start in import runtime, outside ingestNormalizedFeed",
@@ -236,7 +246,10 @@ assert.ok(
 		runtimeSource.indexOf("const ingest = deps.ingest"),
 	"heartbeat must be scheduled before ingest work",
 );
-const heartbeatSource = readFileSync("src/core/ingest/dispatch-due-feeds.ts", "utf8");
+const heartbeatSource = readFileSync(
+	"src/core/ingest/dispatch-due-feeds.ts",
+	"utf8",
+);
 assert.ok(
 	heartbeatSource.includes("setInterval"),
 	"heartbeat must tick on an interval outside ingest work",
@@ -306,7 +319,25 @@ assert.equal(skipped.claimed, false);
 const { chunkCacheTargets, postBatchedHttpRevalidate } = await import(
 	"../src/core/cache/http-revalidate.ts"
 );
-assert.equal(chunkCacheTargets(new Array(33).fill({ type: "tag", tag: "properties" })).length, 2);
+const { executeInternalRevalidation } = await import(
+	"../src/core/cache/internal-route-executor.ts"
+);
+let unauthorizedInvalidation = false;
+const unauthorized = await executeInternalRevalidation({
+	expectedSecret: "expected-secret",
+	providedSecret: "wrong-secret",
+	body: { targets: [{ type: "tag", tag: "properties" }] },
+	invalidate: async () => {
+		unauthorizedInvalidation = true;
+	},
+});
+assert.equal(unauthorized.status, 404);
+assert.equal(unauthorizedInvalidation, false);
+assert.equal(
+	chunkCacheTargets(new Array(33).fill({ type: "tag", tag: "properties" }))
+		.length,
+	2,
+);
 let postedBodies = 0;
 const httpOk = await postBatchedHttpRevalidate({
 	baseUrl: "https://start-baza.ams24.ru",
@@ -319,7 +350,9 @@ const httpOk = await postBatchedHttpRevalidate({
 		postedBodies += 1;
 		const body = JSON.parse(String(init.body));
 		assert.equal(body.targets.length, 2);
-		return new Response(JSON.stringify({ revalidated: true, count: 2 }), { status: 200 });
+		return new Response(JSON.stringify({ revalidated: true, count: 2 }), {
+			status: 200,
+		});
 	},
 });
 assert.equal(httpOk.ok, true);
@@ -363,20 +396,32 @@ const nullDueDispatch = await dispatchDueFeeds({
 					},
 				]
 			: [],
-	createQueuedImportRun: async ({ feedSourceId }) => ({ id: `run-${feedSourceId}` }),
+	createQueuedImportRun: async ({ feedSourceId }) => ({
+		id: `run-${feedSourceId}`,
+	}),
 	enqueueImportFeed: async () => ({ id: "job-null" }),
 	attachJobId: async () => undefined,
 });
 assert.equal(nullDueDispatch.dispatched.length, 1);
 
-const importRuntime = readFileSync("src/core/ingest/import-feed-runtime.ts", "utf8");
-const ownerFeed = readFileSync("src/core/ingest/owner-feed-operations.ts", "utf8");
+const importRuntime = readFileSync(
+	"src/core/ingest/import-feed-runtime.ts",
+	"utf8",
+);
+const ownerFeed = readFileSync(
+	"src/core/ingest/owner-feed-operations.ts",
+	"utf8",
+);
 assert.ok(
-	importRuntime.includes("safetyThresholdPercent: source.safetyThresholdPercent"),
+	importRuntime.includes(
+		"safetyThresholdPercent: source.safetyThresholdPercent",
+	),
 	"import runtime must use source safetyThresholdPercent",
 );
 assert.ok(
-	importRuntime.includes("maxDeactivationsPerRun: source.maxDeactivationsPerRun"),
+	importRuntime.includes(
+		"maxDeactivationsPerRun: source.maxDeactivationsPerRun",
+	),
 	"import runtime must use source maxDeactivationsPerRun",
 );
 assert.equal(
@@ -453,7 +498,12 @@ function createRepository() {
 					(!record.lastSeenAt || record.lastSeenAt < seenBeforeIso),
 			).length;
 		},
-		async deactivateMissing({ feedSourceId, importRunId, seenBeforeIso, nowIso }) {
+		async deactivateMissing({
+			feedSourceId,
+			importRunId,
+			seenBeforeIso,
+			nowIso,
+		}) {
 			let count = 0;
 			for (const record of byId.values()) {
 				if (

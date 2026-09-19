@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
+import { postBatchedHttpRevalidate } from "../src/core/cache/http-revalidate.ts";
+import { executeInternalRevalidation } from "../src/core/cache/internal-route-executor.ts";
 import {
 	decideFeedRunCompletion,
 	runImportFeed,
@@ -112,10 +114,44 @@ const interruptedDecision = decideFeedRunCompletion({
 assert.equal(interruptedDecision.canDeactivateMissing, false);
 assert.equal(interruptedDecision.status, "interrupted");
 
-const fixture = await startFixtureHttpServer();
+const revalidateSecret = "fixture-revalidate-secret-at-least-32-chars";
+const invalidatedTargets = [];
+const fixture = await startFixtureHttpServer({
+	handleRevalidateRequest: ({ secret, body }) =>
+		executeInternalRevalidation({
+			expectedSecret: revalidateSecret,
+			providedSecret: typeof secret === "string" ? secret : null,
+			body,
+			invalidate: async (targets) => invalidatedTargets.push(...targets),
+		}),
+});
 process.env.AMS_ALLOW_TEST_DESTINATIONS = "true";
 process.env.AMS_TEST_APPROVED_ORIGINS = fixture.origin;
 assert.deepEqual(parseTestApprovedOrigins(process.env), [fixture.origin]);
+
+const revalidation = await postBatchedHttpRevalidate({
+	baseUrl: fixture.origin,
+	secret: revalidateSecret,
+	targets: [
+		{ type: "tag", tag: "properties" },
+		{ type: "path", path: "/nedvizhimost", routeType: "page" },
+	],
+	reason: "required-integration-proof",
+});
+assert.deepEqual(revalidation, { ok: true, count: 2 });
+assert.equal(
+	fixture.getRevalidationRequestCount(),
+	1,
+	"one bounded batch must produce one authenticated HTTP self-call",
+);
+assert.deepEqual(
+	invalidatedTargets,
+	[
+		{ type: "tag", tag: "properties" },
+		{ type: "path", path: "/nedvizhimost", routeType: "page" },
+	],
+	"the internal Route Handler executor must invoke the in-process invalidator boundary",
+);
 
 await assert.rejects(
 	() =>

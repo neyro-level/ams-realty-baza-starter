@@ -1,25 +1,10 @@
-import { NextResponse, type NextRequest } from "next/server";
-import {
-	cacheInvalidationRequestSchema,
-	invalidateCacheTargets,
-	type CacheTarget,
-} from "../../../../core/cache/invalidator.ts";
+import { type NextRequest, NextResponse } from "next/server";
+import { executeInternalRevalidation } from "../../../../core/cache/internal-route-executor.ts";
+import { invalidateCacheTargets } from "../../../../core/cache/invalidator.ts";
 import { redactRecord } from "../../../../core/security/redaction.ts";
 
 export const runtime = "nodejs";
 
-const allowedPathPrefixes = [
-	"/",
-	"/nedvizhimost",
-	"/obekty",
-	"/uslugi",
-	"/o-kompanii",
-	"/ipoteka",
-	"/prodat",
-	"/sdat",
-	"/kontakty",
-] as const;
-const allowedTags = new Set(["site", "properties", "property", "media"]);
 const rateWindowMs = 60_000;
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 
@@ -48,46 +33,24 @@ function rateLimited(request: NextRequest): boolean {
 	return current.count > rateLimitPerMinute();
 }
 
-function hasValidSecret(request: NextRequest): boolean {
-	const expected = process.env.REVALIDATE_SECRET;
-	const actual = request.headers.get("x-ams-revalidate-secret");
-	return Boolean(expected && actual && actual === expected);
-}
-
-function allowedTarget(target: CacheTarget): boolean {
-	if (target.type === "tag") return allowedTags.has(target.tag);
-	return allowedPathPrefixes.some(
-		(prefix) => target.path === prefix || target.path.startsWith(`${prefix}/`),
-	);
-}
-
 export async function POST(request: NextRequest) {
 	if (rateLimited(request)) {
 		return NextResponse.json({ error: "rate_limited" }, { status: 429 });
 	}
 
-	if (!hasValidSecret(request)) {
-		return NextResponse.json({ error: "not_found" }, { status: 404 });
-	}
+	const result = await executeInternalRevalidation({
+		expectedSecret: process.env.REVALIDATE_SECRET,
+		providedSecret: request.headers.get("x-ams-revalidate-secret"),
+		body: await request.json().catch(() => undefined),
+		invalidate: invalidateCacheTargets,
+	});
 
-	const payload = cacheInvalidationRequestSchema.safeParse(await request.json());
-	if (!payload.success) {
-		return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
-	}
-
-	const deniedTargets = payload.data.targets.filter((target) => !allowedTarget(target));
-	if (deniedTargets.length > 0) {
+	if (result.deniedTargets) {
 		console.warn(
 			"cache revalidation denied",
-			redactRecord({ targets: deniedTargets, reason: payload.data.reason }),
+			redactRecord({ targets: result.deniedTargets }),
 		);
-		return NextResponse.json({ error: "target_not_allowed" }, { status: 403 });
 	}
 
-	await invalidateCacheTargets(payload.data.targets);
-
-	return NextResponse.json({
-		revalidated: true,
-		count: payload.data.targets.length,
-	});
+	return NextResponse.json(result.body, { status: result.status });
 }

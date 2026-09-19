@@ -139,7 +139,7 @@ requireIncludes(
 	"cache revalidation must keep application rate limiting",
 );
 requireIncludes(
-	"src/app/api/internal/revalidate/route.ts",
+	"src/core/cache/internal-route-executor.ts",
 	"allowedTarget",
 	"cache revalidation targets must be allowlisted",
 );
