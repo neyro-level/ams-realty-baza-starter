@@ -88,7 +88,7 @@ export function SiteHeaderView(props: SiteHeaderViewProps) {
 	const headerClass = compactSticky
 		? "fixed left-3 right-3 top-3 z-50 mx-auto h-13 max-w-site-frame-floating rounded-2xl border border-[var(--border)] bg-[var(--surface-card)]/96 shadow-[var(--site-header-shadow-primary)] backdrop-blur-xl transition-all duration-300 lg:h-26.5"
 		: docked
-			? "fixed left-3 right-3 top-3 z-50 mx-auto h-17 max-w-site-frame-floating rounded-[18px] border border-[var(--border)] bg-[var(--surface-card)]/96 shadow-[var(--site-header-shadow-secondary)] backdrop-blur-xl transition-all duration-300 lg:h-26.5"
+			? "fixed left-3 right-3 top-3 z-50 mx-auto h-17 max-w-site-frame-floating rounded-floating-header border border-[var(--border)] bg-[var(--surface-card)]/96 shadow-[var(--site-header-shadow-secondary)] backdrop-blur-xl transition-all duration-300 lg:h-26.5"
 			: "fixed left-0 right-0 top-0 z-50 h-17 border-b border-[var(--border)] bg-[var(--surface-card)]/92 shadow-[var(--site-header-shadow-tertiary)] backdrop-blur-xl transition-all duration-300 lg:h-26.5";
 	const propertyObjectMobileHideClass =
 		propertyObjectPage && docked

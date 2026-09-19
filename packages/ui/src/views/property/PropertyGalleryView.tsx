@@ -90,7 +90,7 @@ export function PropertyGalleryView({
 								className="h-full w-full border-0"
 							/>
 							{safeVideoUrls.length > 1 ? (
-								<div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 rounded-[15px] bg-[var(--surface-dark)]/80 p-1.5 backdrop-blur-sm">
+								<div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 rounded-media-switcher bg-[var(--surface-dark)]/80 p-1.5 backdrop-blur-sm">
 									{safeVideoUrls.map((url, index) => (
 										<Button
 											variant="plain"

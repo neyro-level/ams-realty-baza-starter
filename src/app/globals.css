@@ -33,7 +33,7 @@
     margin: 0;
     background: var(--background);
     color: var(--foreground);
-    font-family: var(--font-sans);
+    font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   }
 
   a {
@@ -78,14 +78,6 @@
   --request-modal-shadow-action-hover: 0 6px 16px var(--shell-effect-contrast);
   --home-shadow-action: 0 4px 12px var(--home-action-shadow);
   --home-shadow-action-hover: 0 6px 16px var(--home-action-shadow-hover);
-  --home-shadow-hero-card: 0 1px 2px var(--home-hero-card-shadow);
-  --home-shadow-service-icon: inset 0 1px 0 var(--home-services-icon-inset), 0 10px 24px var(--home-surface-shadow);
-  --home-shadow-service-card-hover: 0 12px 28px var(--home-surface-shadow);
-  --home-shadow-service-icon-hover: inset 0 1px 0 var(--home-services-icon-inset-hover), 0 14px 30px var(--home-services-shadow-hover);
-  --home-shadow-why-panel: 0 22px 60px var(--home-surface-shadow);
-  --home-shadow-why-photo: 0 18px 46px var(--home-why-photo-shadow);
-  --home-shadow-mobile-card: 0 14px 36px var(--home-mobile-card-shadow), inset 0 1px 0 var(--home-mobile-highlight);
-  --home-shadow-mobile-action: 0 8px 18px var(--home-mobile-action-shadow);
   --site-radius-sm: 8px;
   --site-radius-md: 10px;
   --site-radius-lg: 12px;
@@ -93,7 +85,6 @@
   --site-radius-full: 999px;
   --radius: 8px;
   --site-font-weight-medium: 500;
-  --site-font-weight-support: 560;
   --site-font-weight-semibold: 600;
   --site-font-weight-strong: 650;
   --site-font-weight-bold: 700;
@@ -132,10 +123,7 @@
   --motion-duration-fast: 180ms;
   --motion-duration-short: 200ms;
   --motion-duration-standard: 250ms;
-  --motion-duration-medium: 300ms;
   --motion-duration-extended: 350ms;
-  --motion-duration-slow: 500ms;
-  --motion-duration-loop: 1200ms;
   --motion-ease-standard: ease;
   --motion-ease-balanced: ease-in-out;
   --motion-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
@@ -215,7 +203,6 @@
   --site-type-footer-title: clamp(23px, 6.8vw, 27px);
   --site-leading-compressed: 0.96;
   --site-leading-flat: 1;
-  --site-leading-display-tight: 1.05;
   --site-leading-hero-tight: 1.06;
   --site-leading-feature-tight: 1.08;
   --site-leading-section-tight: 1.1;
@@ -228,7 +215,6 @@
   --site-leading-subtitle: 1.24;
   --site-leading-tight-copy: 1.25;
   --site-leading-card-compact: 1.28;
-  --site-leading-card-default: 1.3;
   --site-leading-card-relaxed: 1.35;
   --site-leading-compact-copy: 1.375;
   --site-leading-supportive: 1.4;
@@ -239,7 +225,6 @@
   --site-leading-content: 1.6;
   --site-leading-body-compact: 1.62;
   --site-leading-body-relaxed: 1.65;
-  --site-leading-prose: 1.68;
   --site-leading-body: 1.7;
   --site-leading-micro: 14px;
   --site-leading-label: 15px;
@@ -271,8 +256,6 @@
   --site-tracking-emphasis: 0.16em;
   --site-tracking-spaced: 0.18em;
   --site-tracking-expanded: 0.19em;
-  --site-tracking-brand: 0.28em;
-  --site-tracking-brand-wide: 0.44em;
   --primary: #8a1515;
   --primary-hover: #630e0e;
   --primary-foreground: #ffffff;
@@ -315,6 +298,8 @@
   --site-radius-soft: 7px;
   --site-radius-callout: 9px;
   --site-radius-emphasis: 14px;
+  --site-radius-media-switcher: 15px;
+  --site-radius-floating-header: 18px;
   --overlay-soft: rgba(23, 22, 26, 0.18);
   --overlay-default: rgba(23, 22, 26, 0.42);
   --focus-ring: var(--ring);
@@ -362,11 +347,6 @@
   --expert-request-modal-surface-primary: #fff7f7;
   --expert-request-modal-surface-secondary: #2a292c;
   --field-content-primary: #777375;
-  --home-services-icon-surface-end: #eeeeec;
-  --home-interest-surface: #f5f5f5;
-  --home-new-buildings-border: #e6dcdc;
-  --home-why-surface: #f5f5f3;
-  --home-prefooter-action-hover: #313136;
   --house-project-preview-visual-primary: #c8c8c6;
   --html-sitemap-border-primary: #e7e7e3;
   --html-sitemap-content-primary: #1c1b1f;
@@ -500,30 +480,6 @@
   --dialog-effect-primary: rgba(23,22,26,0.18);
   --home-action-shadow: rgba(138, 21, 21, 0.2);
   --home-action-shadow-hover: rgba(138, 21, 21, 0.3);
-  --home-hero-card-shadow: rgba(0, 0, 0, 0.02);
-  --home-hero-overlay-transparent: rgba(24, 24, 26, 0.02);
-  --home-hero-overlay-strong: rgba(16, 16, 17, 0.16);
-  --home-services-panel-highlight: rgba(255, 255, 255, 0.98);
-  --home-services-panel-base: rgba(250, 250, 250, 0.96);
-  --home-services-border: rgba(138, 21, 21, 0.08);
-  --home-services-icon-highlight: rgba(255, 255, 255, 0.96);
-  --home-transparent: rgba(255, 255, 255, 0);
-  --home-services-icon-inset: rgba(255, 255, 255, 0.9);
-  --home-surface-shadow: rgba(24, 24, 26, 0.06);
-  --home-services-icon-inset-hover: rgba(255, 255, 255, 0.95);
-  --home-services-shadow-hover: rgba(138, 21, 21, 0.12);
-  --home-why-divider: rgba(24, 24, 26, 0.1);
-  --home-why-photo-border: rgba(138, 21, 21, 0.36);
-  --home-why-photo-shadow: rgba(24, 24, 26, 0.12);
-  --home-prefooter-border-strong: rgba(227, 227, 225, 0.9);
-  --home-prefooter-border-soft: rgba(227, 227, 225, 0.58);
-  --home-prefooter-border-hover: rgba(138, 21, 21, 0.22);
-  --home-mobile-highlight: rgba(255, 255, 255, 0.72);
-  --home-mobile-border: rgba(255, 255, 255, 0.74);
-  --home-mobile-surface-start: rgba(255, 255, 255, 0.94);
-  --home-mobile-surface-end: rgba(255, 255, 255, 0.82);
-  --home-mobile-card-shadow: rgba(17, 17, 17, 0.12);
-  --home-mobile-action-shadow: rgba(0, 0, 0, 0.16);
   --sheet-effect-primary: rgba(23,22,26,0.2);
   --shell-effect-secondary: rgba(16, 16, 17, 0.24);
   --shell-effect-tertiary: rgba(227, 227, 225, 0.88);
@@ -713,7 +669,9 @@
   --radius-soft: var(--site-radius-soft);
   --radius-callout: var(--site-radius-callout);
   --radius-emphasis: var(--site-radius-emphasis);
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --radius-media-switcher: var(--site-radius-media-switcher);
+  --radius-floating-header: var(--site-radius-floating-header);
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --color-site-burgundy: var(--accent);
   --color-site-burgundy-dark: var(--accent-hover);

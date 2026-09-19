@@ -11,10 +11,16 @@ assert.ok(leadForm.includes("FieldLabel htmlFor={ids.phone}"));
 assert.ok(leadForm.includes("FieldError"));
 assert.ok(leadForm.includes("successRef.current?.focus()"));
 
-const starterPages = read("packages/ui/src/views/starter/StarterPages.tsx");
+const starterHome = read("packages/ui/src/views/home/StarterHomePageView.tsx");
+const starterPages = [
+	starterHome,
+	read("packages/ui/src/views/catalog/StarterCatalogPageView.tsx"),
+	read("packages/ui/src/views/property/StarterPropertyPageView.tsx"),
+	read("packages/ui/src/views/marketing/StarterMarketingPageView.tsx"),
+].join("\n");
 assert.equal([...starterPages.matchAll(/<h1\b/g)].length >= 4, true);
-assert.ok(starterPages.includes("export function HomeHeroSection"));
-assert.ok(starterPages.includes("export function HomeServicesSection"));
+assert.ok(starterHome.includes("export function HomeHeroSection"));
+assert.ok(starterHome.includes("export function HomeServicesSection"));
 
 const homePage = read("src/app/(site)/page.tsx");
 assert.equal(

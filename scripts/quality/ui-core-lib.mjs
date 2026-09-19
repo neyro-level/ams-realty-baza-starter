@@ -47,7 +47,6 @@ export function collectDesignFindings(root) {
 	const roots = [join(root, "src"), join(root, "packages", "ui", "src")];
 	return roots
 		.flatMap((directory) => walk(directory))
-		.filter((path) => !path.endsWith("home-page.css"))
 		.flatMap((path) => {
 			const file = relative(root, path).replaceAll("\\", "/");
 			return scanDesignLiterals(readFileSync(path, "utf8"), file);
