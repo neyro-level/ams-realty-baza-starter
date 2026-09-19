@@ -12,7 +12,7 @@ Git platform=SOURCECRAFT_PRIMARY
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Программа `AMS-REALTBASE-CORE-ALIGN` использует `MERGE_AFTER_GATE` в `main` по эпикам. Production в этот план не входит. GitHub не является delivery surface.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. APPROVED программа `AMS-REALTBASE-RESIDUAL-ALIGN` использует `MERGE_AFTER_GATE` в `main` по эпикам. Production в этот план не входит. GitHub не является delivery surface.
 
 ## Stack и ownership
 
