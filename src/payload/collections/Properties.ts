@@ -8,6 +8,7 @@ import {
 	returnFieldToFeed,
 	shouldRecordManualOwnership,
 } from "../../core/ingest/manual-ownership.ts";
+import { normalizePropertyNumericWrite } from "../../core/ingest/numeric-invariants.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) =>
@@ -87,6 +88,7 @@ export const Properties: CollectionConfig = {
 	hooks: {
 		beforeChange: [
 			({ data, originalDoc, req }) => {
+				normalizePropertyNumericWrite(data);
 				const priceMinor =
 					data.priceMinor === undefined
 						? originalDoc?.priceMinor
@@ -312,6 +314,7 @@ export const Properties: CollectionConfig = {
 			type: "number",
 			min: 0,
 			index: true,
+			admin: { step: 1 },
 		},
 		{
 			name: "currency",
@@ -323,6 +326,7 @@ export const Properties: CollectionConfig = {
 			name: "pricePerMeterMinor",
 			type: "number",
 			min: 0,
+			admin: { step: 1 },
 		},
 		{
 			name: "rooms",
@@ -334,16 +338,19 @@ export const Properties: CollectionConfig = {
 			name: "totalArea",
 			type: "number",
 			min: 0,
+			admin: { step: 0.01 },
 		},
 		{
 			name: "livingArea",
 			type: "number",
 			min: 0,
+			admin: { step: 0.01 },
 		},
 		{
 			name: "kitchenArea",
 			type: "number",
 			min: 0,
+			admin: { step: 0.01 },
 		},
 		{
 			name: "floor",

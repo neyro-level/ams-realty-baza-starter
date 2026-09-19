@@ -10,20 +10,6 @@ export {
 	startImportHeartbeat,
 } from "./dispatch-due-feeds.ts";
 export {
-	computeScheduleAfterClaim,
-	isEnabledFeedDue,
-	normalizeEnabledFeedNextDueAt,
-} from "./feed-schedule.ts";
-export {
-	parseFeedUrlRef,
-	parseImageHostEnv,
-	runImportFeed,
-} from "./import-feed-runtime.ts";
-export {
-	approveSuspiciousDeactivation,
-	queueManualFeedImport,
-} from "./owner-feed-operations.ts";
-export {
 	buildConditionalFeedHeaders,
 	type FetchFeedResult,
 	fetchConditionalFeed,
@@ -37,17 +23,11 @@ export {
 	ingestNormalizedFeed,
 } from "./feed-ingest.ts";
 export {
-	applyPublishedSlugPolicy,
-	importOwnedFields,
-	returnFieldToFeed,
-	shouldRecordManualOwnership,
-} from "./manual-ownership.ts";
-export {
+	buildFeedSourceBaselinePatch,
 	computeTransientRetryAt,
 	decideFeedRunCompletion,
 	decideStaleRunRecovery,
 	isDeactivationApprovalValid,
-	buildFeedSourceBaselinePatch,
 } from "./feed-lifecycle.ts";
 export {
 	type FeedNormalizationIssue,
@@ -57,13 +37,38 @@ export {
 	type RawYrlOffer,
 } from "./feed-normalization.ts";
 export {
+	computeScheduleAfterClaim,
+	isEnabledFeedDue,
+	normalizeEnabledFeedNextDueAt,
+} from "./feed-schedule.ts";
+export {
+	getApprovedImageOutboundHosts,
 	type ImageHostValidationResult,
+	isLocalCmsMediaSrc,
 	parseAllowedImageHosts,
 	toNextImageRemotePatterns,
-	isLocalCmsMediaSrc,
-	getApprovedImageOutboundHosts,
 	validateExternalImageUrl,
 } from "./image-hosts.ts";
+export {
+	parseFeedUrlRef,
+	parseImageHostEnv,
+	runImportFeed,
+} from "./import-feed-runtime.ts";
+export {
+	applyPublishedSlugPolicy,
+	importOwnedFields,
+	returnFieldToFeed,
+	shouldRecordManualOwnership,
+} from "./manual-ownership.ts";
+export {
+	normalizeAreaM2,
+	normalizePropertyNumericWrite,
+	requireMoneyMinor,
+} from "./numeric-invariants.ts";
+export {
+	approveSuspiciousDeactivation,
+	queueManualFeedImport,
+} from "./owner-feed-operations.ts";
 export {
 	parseYrlFeed,
 	type YrlFeedParseResult,

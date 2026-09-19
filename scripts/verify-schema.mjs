@@ -6,16 +6,22 @@ loadLocalEnv();
 const databaseUri = process.env.DATABASE_URI;
 
 if (!databaseUri) {
-	console.error("verify:schema requires DATABASE_URI for a local PostgreSQL database.");
+	console.error(
+		"verify:schema requires DATABASE_URI for a local PostgreSQL database.",
+	);
 	process.exit(2);
 }
 
 function psql(sql) {
 	try {
-		execFileSync("psql", ["-X", "-v", "ON_ERROR_STOP=1", "-d", databaseUri, "-c", sql], {
-			stdio: "pipe",
-			env: { ...process.env, PGPASSWORD: process.env.PGPASSWORD ?? "" },
-		});
+		execFileSync(
+			"psql",
+			["-X", "-v", "ON_ERROR_STOP=1", "-d", databaseUri, "-c", sql],
+			{
+				stdio: "pipe",
+				env: { ...process.env, PGPASSWORD: process.env.PGPASSWORD ?? "" },
+			},
+		);
 	} catch (error) {
 		const stderr = error.stderr?.toString("utf8")?.trim();
 		throw new Error(stderr || "psql command failed");
@@ -36,6 +42,14 @@ DECLARE
 		'properties_public_sitemap_idx'
 	];
 	required_index text;
+	required_constraints text[] := ARRAY[
+		'properties_price_minor_invariant',
+		'properties_price_per_meter_minor_invariant',
+		'properties_total_area_invariant',
+		'properties_living_area_invariant',
+		'properties_kitchen_area_invariant'
+	];
+	required_constraint text;
 BEGIN
 	FOREACH required_index IN ARRAY required_indexes LOOP
 		IF NOT EXISTS (
@@ -45,6 +59,18 @@ BEGIN
 				AND indexname = required_index
 		) THEN
 			RAISE EXCEPTION 'Missing required index: %', required_index;
+		END IF;
+	END LOOP;
+
+	FOREACH required_constraint IN ARRAY required_constraints LOOP
+		IF NOT EXISTS (
+			SELECT 1
+			FROM pg_constraint
+			WHERE conrelid = 'properties'::regclass
+				AND conname = required_constraint
+				AND contype = 'c'
+		) THEN
+			RAISE EXCEPTION 'Missing required property numeric constraint: %', required_constraint;
 		END IF;
 	END LOOP;
 
@@ -77,7 +103,12 @@ BEGIN
 		market,
 		category,
 		deal_type,
-		title
+		title,
+		price_minor,
+		price_per_meter_minor,
+		total_area,
+		living_area,
+		kitchen_area
 	)
 	VALUES (
 		fixture_feed_source_id,
@@ -87,8 +118,51 @@ BEGIN
 		'secondary',
 		'apartment',
 		'sale',
-		'Verify schema offer 1'
+		'Verify schema offer 1',
+		123400,
+		10000,
+		12.34,
+		10.25,
+		2.09
 	);
+
+	BEGIN
+		UPDATE properties
+		SET price_minor = 1234.5
+		WHERE feed_source_id = fixture_feed_source_id;
+		RAISE EXCEPTION 'Expected fractional minor units to fail';
+	EXCEPTION WHEN check_violation THEN
+		NULL;
+	END;
+
+	BEGIN
+		UPDATE properties
+		SET total_area = 12.345
+		WHERE feed_source_id = fixture_feed_source_id;
+		RAISE EXCEPTION 'Expected area precision above two decimals to fail';
+	EXCEPTION WHEN check_violation THEN
+		NULL;
+	END;
+
+	BEGIN
+		UPDATE properties
+		SET living_area = -1
+		WHERE feed_source_id = fixture_feed_source_id;
+		RAISE EXCEPTION 'Expected negative area to fail';
+	EXCEPTION WHEN check_violation THEN
+		NULL;
+	END;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM properties
+		WHERE feed_source_id = fixture_feed_source_id
+			AND price_minor = 123400
+			AND total_area = 12.34
+			AND living_area = 10.25
+			AND kitchen_area = 2.09
+	) THEN
+		RAISE EXCEPTION 'Valid numeric values were not preserved';
+	END IF;
 
 	BEGIN
 		INSERT INTO properties (

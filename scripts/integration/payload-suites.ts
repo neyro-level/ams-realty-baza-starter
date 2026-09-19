@@ -86,6 +86,47 @@ assert.equal(
 );
 
 const suffix = `${Date.now()}`;
+const numericPropertyBase = {
+	origin: "manual" as const,
+	status: "active" as const,
+	market: "secondary" as const,
+	category: "apartment" as const,
+	dealType: "sale" as const,
+	title: "Numeric invariant probe",
+};
+await assert.rejects(
+	() =>
+		payload.create({
+			collection: "properties",
+			data: {
+				...numericPropertyBase,
+				slug: `integration-fractional-money-${suffix}`,
+				priceMinor: 100.5,
+			},
+			...access,
+		}),
+	/safe integer/,
+	"System writes must reject fractional minor units before PostgreSQL",
+);
+await assert.rejects(
+	() =>
+		payload.create({
+			collection: "properties",
+			data: {
+				...numericPropertyBase,
+				slug: `integration-area-precision-${suffix}`,
+				totalArea: 12.345,
+			},
+			overrideAccess: false,
+			user: {
+				id: 10_002,
+				collection: "users",
+				roles: ["admin"],
+			} as never,
+		}),
+	/two decimal places/,
+	"Admin writes must reject area precision above two decimals",
+);
 const publishedPage = await payload.create({
 	collection: "pages",
 	data: {

@@ -3,6 +3,7 @@ import {
 	type ImageHostIssueCode,
 	validateExternalImageUrl,
 } from "./image-hosts.ts";
+import { normalizeAreaM2 } from "./numeric-invariants.ts";
 
 export const normalizedFeedImageSchema = z.object({
 	url: z.string().url(),
@@ -132,9 +133,18 @@ export function normalizeYrlOffer(
 		priceMinor: parseMoneyToMinor(rawOffer.price),
 		currency: normalizeCurrency(rawOffer.currency),
 		rooms: parseOptionalNumber(rawOffer.rooms),
-		totalArea: parseAreaToSquareMeters(rawOffer.totalArea, rawOffer.totalAreaUnit),
-		livingArea: parseAreaToSquareMeters(rawOffer.livingArea, rawOffer.livingAreaUnit),
-		kitchenArea: parseAreaToSquareMeters(rawOffer.kitchenArea, rawOffer.kitchenAreaUnit),
+		totalArea: parseAreaToSquareMeters(
+			rawOffer.totalArea,
+			rawOffer.totalAreaUnit,
+		),
+		livingArea: parseAreaToSquareMeters(
+			rawOffer.livingArea,
+			rawOffer.livingAreaUnit,
+		),
+		kitchenArea: parseAreaToSquareMeters(
+			rawOffer.kitchenArea,
+			rawOffer.kitchenAreaUnit,
+		),
 		floor: parseOptionalNumber(rawOffer.floor),
 		floors: parseOptionalNumber(rawOffer.floors),
 		region: rawOffer.region,
@@ -211,6 +221,7 @@ function parseAreaToSquareMeters(
 		return undefined;
 	}
 	const normalizedUnit = (unit ?? "sqm").trim().toLowerCase();
+	let squareMeters: number;
 	if (
 		normalizedUnit === "sqm" ||
 		normalizedUnit === "кв.м" ||
@@ -218,15 +229,23 @@ function parseAreaToSquareMeters(
 		normalizedUnit === "m2" ||
 		normalizedUnit === "м2"
 	) {
-		return amount;
+		squareMeters = amount;
+	} else if (
+		normalizedUnit === "sqft" ||
+		normalizedUnit === "sq.ft" ||
+		normalizedUnit === "ft2"
+	) {
+		squareMeters = amount * 0.09290304;
+	} else if (
+		normalizedUnit === "ha" ||
+		normalizedUnit === "hectare" ||
+		normalizedUnit === "га"
+	) {
+		squareMeters = amount * 10_000;
+	} else {
+		squareMeters = amount;
 	}
-	if (normalizedUnit === "sqft" || normalizedUnit === "sq.ft" || normalizedUnit === "ft2") {
-		return amount * 0.09290304;
-	}
-	if (normalizedUnit === "ha" || normalizedUnit === "hectare" || normalizedUnit === "га") {
-		return amount * 10_000;
-	}
-	return amount;
+	return normalizeAreaM2(squareMeters, "round", "feedAreaM2") ?? undefined;
 }
 
 function parseCoordinate(value: string | undefined): number | undefined {

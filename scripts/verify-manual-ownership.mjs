@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
 import {
+	applyDerivedFieldsOnWrite,
+	bankersRoundToInteger,
+	calculatePropertyDerivedFields,
+} from "../src/core/ingest/derived-fields.ts";
+import { ingestNormalizedFeed } from "../src/core/ingest/index.ts";
+import {
 	applyPublishedSlugPolicy,
 	collectChangedImportOwnedFields,
 	mergeManualOverrides,
@@ -7,11 +13,10 @@ import {
 	shouldRecordManualOwnership,
 } from "../src/core/ingest/manual-ownership.ts";
 import {
-	applyDerivedFieldsOnWrite,
-	bankersRoundToInteger,
-	calculatePropertyDerivedFields,
-} from "../src/core/ingest/derived-fields.ts";
-import { ingestNormalizedFeed } from "../src/core/ingest/index.ts";
+	normalizeAreaM2,
+	normalizePropertyNumericWrite,
+	requireMoneyMinor,
+} from "../src/core/ingest/numeric-invariants.ts";
 
 assert.equal(
 	shouldRecordManualOwnership({ userId: 1, source: "import" }),
@@ -32,10 +37,14 @@ assert.deepEqual(first, [
 	{ field: "title", setAt: "2026-09-18T12:00:00.000Z", setBy: 7 },
 ]);
 assert.equal(returnFieldToFeed(first, "title").length, 0);
-assert.deepEqual(collectChangedImportOwnedFields({ title: "A" }, { title: "A" }), []);
-assert.deepEqual(collectChangedImportOwnedFields({ title: "B" }, { title: "A" }), [
-	"title",
-]);
+assert.deepEqual(
+	collectChangedImportOwnedFields({ title: "A" }, { title: "A" }),
+	[],
+);
+assert.deepEqual(
+	collectChangedImportOwnedFields({ title: "B" }, { title: "A" }),
+	["title"],
+);
 
 assert.equal(
 	applyPublishedSlugPolicy({
@@ -52,21 +61,45 @@ const derived = calculatePropertyDerivedFields({
 });
 assert.equal(derived.pricePerMeterMinor, 20_000_000);
 assert.equal(
-	calculatePropertyDerivedFields({ priceMinor: null, totalArea: 50 }).pricePerMeterMinor,
+	calculatePropertyDerivedFields({ priceMinor: null, totalArea: 50 })
+		.pricePerMeterMinor,
 	null,
 );
 assert.equal(
-	calculatePropertyDerivedFields({ priceMinor: 10_000_000_00, totalArea: 0 }).pricePerMeterMinor,
+	calculatePropertyDerivedFields({ priceMinor: 10_000_000_00, totalArea: 0 })
+		.pricePerMeterMinor,
 	null,
 );
 assert.equal(
-	calculatePropertyDerivedFields({ priceMinor: 10_000_000_00, totalArea: -1 }).pricePerMeterMinor,
+	calculatePropertyDerivedFields({ priceMinor: 10_000_000_00, totalArea: -1 })
+		.pricePerMeterMinor,
 	null,
 );
 assert.equal(bankersRoundToInteger(2.5), 2);
 assert.equal(bankersRoundToInteger(3.5), 4);
+assert.equal(requireMoneyMinor(123_45, "priceMinor"), 123_45);
+assert.throws(() => requireMoneyMinor(123.45, "priceMinor"), /safe integer/);
+assert.equal(normalizeAreaM2(12.34), 12.34);
+assert.equal(normalizeAreaM2(100 * 0.09290304, "round"), 9.29);
+assert.throws(() => normalizeAreaM2(12.345), /two decimal places/);
+const numericWrite = {
+	priceMinor: 123_45,
+	pricePerMeterMinor: 10_00,
+	totalArea: 12.34,
+	livingArea: 10.2,
+	kitchenArea: 2,
+};
+normalizePropertyNumericWrite(numericWrite);
+assert.deepEqual(numericWrite, {
+	priceMinor: 123_45,
+	pricePerMeterMinor: 10_00,
+	totalArea: 12.34,
+	livingArea: 10.2,
+	kitchenArea: 2,
+});
 assert.equal(
-	calculatePropertyDerivedFields({ priceMinor: 5, totalArea: 2 }).pricePerMeterMinor,
+	calculatePropertyDerivedFields({ priceMinor: 5, totalArea: 2 })
+		.pricePerMeterMinor,
 	2,
 );
 assert.deepEqual(
