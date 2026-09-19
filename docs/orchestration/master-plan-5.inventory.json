@@ -1,0 +1,2058 @@
+{
+	"schema_version": 2,
+	"beads_prefix": "ral5",
+	"source": {
+		"plan_id": "AMS-REALTBASE-RESIDUAL-ALIGN",
+		"path": "docs/AMS_MASTER_PLAN №5.md",
+		"version": "v1",
+		"status": "APPROVED",
+		"approved_by": "owner",
+		"approved_at": "2026-09-19T13:38:27+03:00",
+		"sha256": "2678b9213418995250751767b0a191004afd423f9dc9973006fa1cc80ee08bc9",
+		"epic_anchors": [
+			"EPIC-01",
+			"EPIC-02",
+			"EPIC-03",
+			"EPIC-04",
+			"EPIC-05",
+			"EPIC-06",
+			"EPIC-07",
+			"EPIC-08",
+			"EPIC-09",
+			"EPIC-10",
+			"EPIC-11",
+			"EPIC-12",
+			"EPIC-13"
+		]
+	},
+	"nodes": [
+		{
+			"key": "EPIC-01",
+			"title": "Mandatory verification contract",
+			"type": "epic",
+			"source_anchor": "EPIC-01",
+			"goal": "STANDARD and RISKY merge surfaces differ, and RISKY cannot pass without isolated PostgreSQL/Payload proof.",
+			"scope": [
+				"package scripts",
+				"SourceCraft manual workflows",
+				"isolated test DB guard"
+			],
+			"acceptance_criteria": [
+				"verify:merge-standard and verify:merge-risky are materially different",
+				"verify:integration:required fails without a safe isolated test database",
+				"exact-head mismatch fails and no production database is accepted"
+			],
+			"depends_on": [],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:foundation",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-01-01",
+			"title": "Implement EPIC-01: Mandatory verification contract",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-01",
+			"source_anchor": "EPIC-01",
+			"goal": "STANDARD and RISKY merge surfaces differ, and RISKY cannot pass without isolated PostgreSQL/Payload proof.",
+			"scope": [
+				"package scripts",
+				"SourceCraft manual workflows",
+				"isolated test DB guard"
+			],
+			"acceptance_criteria": [
+				"verify:merge-standard and verify:merge-risky are materially different",
+				"verify:integration:required fails without a safe isolated test database",
+				"exact-head mismatch fails and no production database is accepted"
+			],
+			"required_checks": [
+				"pnpm verify:daily",
+				"pnpm verify:integration:required negative proof",
+				"pnpm verify:merge-standard"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:foundation",
+				"work:implementation",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "TASK-01-DELIVERY",
+			"title": "Deliver EPIC-01 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-01",
+			"source_anchor": "EPIC-01",
+			"goal": "Merge EPIC-01 through one exact-head STANDARD gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"STANDARD exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft STANDARD gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft STANDARD gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-01-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:foundation",
+				"work:delivery",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "EPIC-02",
+			"title": "Public/System Gateway and explicit Local API modes",
+			"type": "epic",
+			"source_anchor": "EPIC-02",
+			"goal": "Public and user operations respect access while privileged operations are enumerated System/Ingest operations.",
+			"scope": [
+				"public gateway",
+				"system gateway",
+				"Payload Local API calls",
+				"private fields"
+			],
+			"acceptance_criteria": [
+				"public reads use overrideAccess:false with bounded DTO output",
+				"anonymous REST and private fields remain denied",
+				"owner/admin/system/editor/public matrix is covered by real DB tests"
+			],
+			"depends_on": [
+				"EPIC-01"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-02-01",
+			"title": "Implement EPIC-02: Public/System Gateway and explicit Local API modes",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-02",
+			"source_anchor": "EPIC-02",
+			"goal": "Public and user operations respect access while privileged operations are enumerated System/Ingest operations.",
+			"scope": [
+				"public gateway",
+				"system gateway",
+				"Payload Local API calls",
+				"private fields"
+			],
+			"acceptance_criteria": [
+				"public reads use overrideAccess:false with bounded DTO output",
+				"anonymous REST and private fields remain denied",
+				"owner/admin/system/editor/public matrix is covered by real DB tests"
+			],
+			"required_checks": [
+				"pnpm verify:public-gateway",
+				"pnpm verify:security-boundaries",
+				"pnpm quality:architecture",
+				"pnpm verify:integration:required",
+				"pnpm verify:merge-risky"
+			],
+			"depends_on": [
+				"TASK-01-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:implementation",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "TASK-02-DELIVERY",
+			"title": "Deliver EPIC-02 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-02",
+			"source_anchor": "EPIC-02",
+			"goal": "Merge EPIC-02 through one exact-head RISKY gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"RISKY exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft RISKY gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-02-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:delivery",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "EPIC-03",
+			"title": "HTTP cache contract and runtime env fail-fast",
+			"type": "epic",
+			"source_anchor": "EPIC-03",
+			"goal": "HTTP invalidation is unambiguous and runtime fails closed when self-call or lead allowlist configuration is incomplete.",
+			"scope": [
+				"cache adapters",
+				"runtime env",
+				"HTTP self-call proof"
+			],
+			"acceptance_criteria": [
+				"HTTP mode requires secret and internal base URL only at runtime",
+				"active lead channels require LEAD_OUTBOUND_HOSTS",
+				"one batched authenticated self-call invalidates without recursion or top-level next/cache"
+			],
+			"depends_on": [
+				"EPIC-01"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-03-01",
+			"title": "Implement EPIC-03: HTTP cache contract and runtime env fail-fast",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-03",
+			"source_anchor": "EPIC-03",
+			"goal": "HTTP invalidation is unambiguous and runtime fails closed when self-call or lead allowlist configuration is incomplete.",
+			"scope": [
+				"cache adapters",
+				"runtime env",
+				"HTTP self-call proof"
+			],
+			"acceptance_criteria": [
+				"HTTP mode requires secret and internal base URL only at runtime",
+				"active lead channels require LEAD_OUTBOUND_HOSTS",
+				"one batched authenticated self-call invalidates without recursion or top-level next/cache"
+			],
+			"required_checks": [
+				"pnpm verify:jobs-config",
+				"pnpm verify:feed-ingest",
+				"pnpm verify:health-alerts",
+				"pnpm verify:security-boundaries",
+				"pnpm verify:integration:required",
+				"pnpm verify:merge-risky"
+			],
+			"depends_on": [
+				"TASK-01-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:implementation",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "TASK-03-DELIVERY",
+			"title": "Deliver EPIC-03 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-03",
+			"source_anchor": "EPIC-03",
+			"goal": "Merge EPIC-03 through one exact-head RISKY gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"RISKY exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft RISKY gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-03-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:delivery",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "EPIC-04",
+			"title": "Property numeric DB invariants",
+			"type": "epic",
+			"source_anchor": "EPIC-04",
+			"goal": "Money is integer minor units and areas satisfy decimal(10,2) semantics at every write boundary.",
+			"scope": [
+				"Payload property schema",
+				"migration",
+				"normalization",
+				"schema verifier"
+			],
+			"acceptance_criteria": [
+				"clean and previous-data migrations preserve valid values",
+				"fractional money and invalid area precision fail deterministically",
+				"manual, Admin, and feed writes share the same invariant"
+			],
+			"depends_on": [
+				"EPIC-01"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-04-01",
+			"title": "Implement EPIC-04: Property numeric DB invariants",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-04",
+			"source_anchor": "EPIC-04",
+			"goal": "Money is integer minor units and areas satisfy decimal(10,2) semantics at every write boundary.",
+			"scope": [
+				"Payload property schema",
+				"migration",
+				"normalization",
+				"schema verifier"
+			],
+			"acceptance_criteria": [
+				"clean and previous-data migrations preserve valid values",
+				"fractional money and invalid area precision fail deterministically",
+				"manual, Admin, and feed writes share the same invariant"
+			],
+			"required_checks": [
+				"pnpm verify:schema",
+				"pnpm verify:feed-ingest",
+				"pnpm verify:integration:required",
+				"pnpm verify:merge-risky"
+			],
+			"depends_on": [
+				"TASK-01-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:implementation",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "TASK-04-DELIVERY",
+			"title": "Deliver EPIC-04 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-04",
+			"source_anchor": "EPIC-04",
+			"goal": "Merge EPIC-04 through one exact-head RISKY gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"RISKY exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft RISKY gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-04-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:delivery",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "EPIC-05",
+			"title": "Dispatcher lifecycle and narrow SQL governance",
+			"type": "epic",
+			"source_anchor": "EPIC-05",
+			"goal": "Feed lifecycle transitions are atomic and remaining SQL is minimal, justified, and guarded.",
+			"scope": [
+				"dispatcher claim",
+				"heartbeat",
+				"terminal transitions",
+				"SQL allowlist and ADR"
+			],
+			"acceptance_criteria": [
+				"two contenders produce one claim winner and terminal runs cannot restart",
+				"heartbeat is visible to an independent reader during a long import",
+				"unsupported application primitive falls back only to a narrow ADR-governed SQL operation"
+			],
+			"depends_on": [
+				"EPIC-01"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-05-01",
+			"title": "Implement EPIC-05: Dispatcher lifecycle and narrow SQL governance",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-05",
+			"source_anchor": "EPIC-05",
+			"goal": "Feed lifecycle transitions are atomic and remaining SQL is minimal, justified, and guarded.",
+			"scope": [
+				"dispatcher claim",
+				"heartbeat",
+				"terminal transitions",
+				"SQL allowlist and ADR"
+			],
+			"acceptance_criteria": [
+				"two contenders produce one claim winner and terminal runs cannot restart",
+				"heartbeat is visible to an independent reader during a long import",
+				"unsupported application primitive falls back only to a narrow ADR-governed SQL operation"
+			],
+			"required_checks": [
+				"pnpm verify:jobs-config",
+				"pnpm verify:feed-lifecycle",
+				"pnpm verify:operational-recovery",
+				"pnpm verify:security-boundaries",
+				"pnpm verify:integration:required",
+				"pnpm verify:merge-risky"
+			],
+			"depends_on": [
+				"TASK-01-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:implementation",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "TASK-05-DELIVERY",
+			"title": "Deliver EPIC-05 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-05",
+			"source_anchor": "EPIC-05",
+			"goal": "Merge EPIC-05 through one exact-head RISKY gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"RISKY exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft RISKY gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-05-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:delivery",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "EPIC-06",
+			"title": "Bounded ingest and deactivation approval correctness",
+			"type": "epic",
+			"source_anchor": "EPIC-06",
+			"goal": "Large feeds use bounded backpressure and destructive deactivation requires complete safe input and valid one-time approval.",
+			"scope": [
+				"parser runtime",
+				"bounded batches",
+				"deactivation decision and approval"
+			],
+			"acceptance_criteria": [
+				"10k+ synthetic feed never buffers beyond the internal batch bound",
+				"truncated or anomalous input performs zero mass deactivation",
+				"approval requires matching run, approvedAt, future expiry, and unconsumed state"
+			],
+			"depends_on": [
+				"EPIC-01"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-06-01",
+			"title": "Implement EPIC-06: Bounded ingest and deactivation approval correctness",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-06",
+			"source_anchor": "EPIC-06",
+			"goal": "Large feeds use bounded backpressure and destructive deactivation requires complete safe input and valid one-time approval.",
+			"scope": [
+				"parser runtime",
+				"bounded batches",
+				"deactivation decision and approval"
+			],
+			"acceptance_criteria": [
+				"10k+ synthetic feed never buffers beyond the internal batch bound",
+				"truncated or anomalous input performs zero mass deactivation",
+				"approval requires matching run, approvedAt, future expiry, and unconsumed state"
+			],
+			"required_checks": [
+				"pnpm verify:feed-parser",
+				"pnpm verify:feed-ingest",
+				"pnpm verify:feed-lifecycle",
+				"pnpm verify:manual-ownership",
+				"pnpm verify:integration:required",
+				"pnpm verify:merge-risky"
+			],
+			"depends_on": [
+				"TASK-01-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:implementation",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "TASK-06-DELIVERY",
+			"title": "Deliver EPIC-06 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-06",
+			"source_anchor": "EPIC-06",
+			"goal": "Merge EPIC-06 through one exact-head RISKY gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"RISKY exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft RISKY gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-06-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:delivery",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "EPIC-07",
+			"title": "Lead access and retention relational contract",
+			"type": "epic",
+			"source_anchor": "EPIC-07",
+			"goal": "Lead PII follows the approved role matrix and delete/anonymize retention has a consistent relational result.",
+			"scope": [
+				"lead access",
+				"lead-delivery FK migration",
+				"retention",
+				"alerts"
+			],
+			"acceptance_criteria": [
+				"delete removes a lead and all linked deliveries",
+				"anonymize removes PII and linked diagnostics while preserving the allowed business shell",
+				"null policy makes no destructive mutation and emits a safe operational alert"
+			],
+			"depends_on": [
+				"EPIC-01",
+				"EPIC-02"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-07-01",
+			"title": "Implement EPIC-07: Lead access and retention relational contract",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-07",
+			"source_anchor": "EPIC-07",
+			"goal": "Lead PII follows the approved role matrix and delete/anonymize retention has a consistent relational result.",
+			"scope": [
+				"lead access",
+				"lead-delivery FK migration",
+				"retention",
+				"alerts"
+			],
+			"acceptance_criteria": [
+				"delete removes a lead and all linked deliveries",
+				"anonymize removes PII and linked diagnostics while preserving the allowed business shell",
+				"null policy makes no destructive mutation and emits a safe operational alert"
+			],
+			"required_checks": [
+				"pnpm verify:lead-intake",
+				"pnpm verify:lead-outbox",
+				"pnpm verify:health-alerts",
+				"pnpm verify:security-boundaries",
+				"pnpm verify:schema",
+				"pnpm verify:integration:required",
+				"pnpm verify:merge-risky"
+			],
+			"depends_on": [
+				"TASK-01-DELIVERY",
+				"TASK-02-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:implementation",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "TASK-07-DELIVERY",
+			"title": "Deliver EPIC-07 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-07",
+			"source_anchor": "EPIC-07",
+			"goal": "Merge EPIC-07 through one exact-head RISKY gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"RISKY exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft RISKY gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-07-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:delivery",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "EPIC-08",
+			"title": "Lead retry scheduling and terminal states",
+			"type": "epic",
+			"source_anchor": "EPIC-08",
+			"goal": "Retryable delivery explicitly queues one future Payload job and permanent or exhausted outcomes become abandoned.",
+			"scope": [
+				"deliverLead task",
+				"queue scheduling",
+				"recovery sweeper",
+				"terminal states"
+			],
+			"acceptance_criteria": [
+				"Payload jobs table contains one future retry with the correct waitUntil and stable ID input",
+				"enqueue crash leaves a recoverable pending row without duplicate live jobs",
+				"permanent and exhausted outcomes are abandoned and task output matches installed Payload types"
+			],
+			"depends_on": [
+				"EPIC-01",
+				"EPIC-07"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-08-01",
+			"title": "Implement EPIC-08: Lead retry scheduling and terminal states",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-08",
+			"source_anchor": "EPIC-08",
+			"goal": "Retryable delivery explicitly queues one future Payload job and permanent or exhausted outcomes become abandoned.",
+			"scope": [
+				"deliverLead task",
+				"queue scheduling",
+				"recovery sweeper",
+				"terminal states"
+			],
+			"acceptance_criteria": [
+				"Payload jobs table contains one future retry with the correct waitUntil and stable ID input",
+				"enqueue crash leaves a recoverable pending row without duplicate live jobs",
+				"permanent and exhausted outcomes are abandoned and task output matches installed Payload types"
+			],
+			"required_checks": [
+				"pnpm verify:lead-delivery-state",
+				"pnpm verify:lead-outbox",
+				"pnpm verify:max-adapter",
+				"pnpm verify:custom-webhook-adapter",
+				"pnpm verify:operational-recovery",
+				"pnpm verify:integration:required",
+				"pnpm verify:merge-risky"
+			],
+			"depends_on": [
+				"TASK-01-DELIVERY",
+				"TASK-07-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:implementation",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "TASK-08-DELIVERY",
+			"title": "Deliver EPIC-08 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-08",
+			"source_anchor": "EPIC-08",
+			"goal": "Merge EPIC-08 through one exact-head RISKY gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"RISKY exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft RISKY gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-08-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:backend",
+				"work:delivery",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "EPIC-09",
+			"title": "Aggregate architecture guards",
+			"type": "epic",
+			"source_anchor": "EPIC-09",
+			"goal": "Corrected architecture boundaries are regression-tested by one coherent guard surface with positive and negative fixtures.",
+			"scope": [
+				"dependency cruiser",
+				"architecture guard",
+				"guard self-tests"
+			],
+			"acceptance_criteria": [
+				"Local API access, raw SQL, cache graph, UI persistence, and contracts boundaries are guarded",
+				"each critical rule has a positive and intentionally broken fixture",
+				"legitimate DTO and pure-type imports remain allowed"
+			],
+			"depends_on": [
+				"EPIC-02",
+				"EPIC-03",
+				"EPIC-04",
+				"EPIC-05",
+				"EPIC-06",
+				"EPIC-07",
+				"EPIC-08"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:consolidation",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-09-01",
+			"title": "Implement EPIC-09: Aggregate architecture guards",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-09",
+			"source_anchor": "EPIC-09",
+			"goal": "Corrected architecture boundaries are regression-tested by one coherent guard surface with positive and negative fixtures.",
+			"scope": [
+				"dependency cruiser",
+				"architecture guard",
+				"guard self-tests"
+			],
+			"acceptance_criteria": [
+				"Local API access, raw SQL, cache graph, UI persistence, and contracts boundaries are guarded",
+				"each critical rule has a positive and intentionally broken fixture",
+				"legitimate DTO and pure-type imports remain allowed"
+			],
+			"required_checks": [
+				"pnpm quality:architecture",
+				"pnpm quality:guards",
+				"pnpm verify:daily",
+				"pnpm verify:merge-standard"
+			],
+			"depends_on": [
+				"TASK-02-DELIVERY",
+				"TASK-03-DELIVERY",
+				"TASK-04-DELIVERY",
+				"TASK-05-DELIVERY",
+				"TASK-06-DELIVERY",
+				"TASK-07-DELIVERY",
+				"TASK-08-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:consolidation",
+				"work:implementation",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "TASK-09-DELIVERY",
+			"title": "Deliver EPIC-09 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-09",
+			"source_anchor": "EPIC-09",
+			"goal": "Merge EPIC-09 through one exact-head STANDARD gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"STANDARD exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft STANDARD gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft STANDARD gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-09-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:consolidation",
+				"work:delivery",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "EPIC-10",
+			"title": "UI Core verification gate",
+			"type": "epic",
+			"source_anchor": "EPIC-10",
+			"goal": "One deterministic UI Core matrix catches project-authored design and ownership drift without false structural geometry failures.",
+			"scope": [
+				"UI Core scanner",
+				"a11y and SEO aggregation",
+				"client and primitive ownership reports"
+			],
+			"acceptance_criteria": [
+				"known arbitrary radius fixtures and broken font or primitive ownership fixtures fail",
+				"CSS variables and structural geometry are allowed",
+				"every UI rule is classified mechanical, targeted, visual, manual, or N/A"
+			],
+			"depends_on": [],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:ui",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-10-01",
+			"title": "Implement EPIC-10: UI Core verification gate",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-10",
+			"source_anchor": "EPIC-10",
+			"goal": "One deterministic UI Core matrix catches project-authored design and ownership drift without false structural geometry failures.",
+			"scope": [
+				"UI Core scanner",
+				"a11y and SEO aggregation",
+				"client and primitive ownership reports"
+			],
+			"acceptance_criteria": [
+				"known arbitrary radius fixtures and broken font or primitive ownership fixtures fail",
+				"CSS variables and structural geometry are allowed",
+				"every UI rule is classified mechanical, targeted, visual, manual, or N/A"
+			],
+			"required_checks": [
+				"pnpm quality:design-tokens",
+				"pnpm verify:drift",
+				"pnpm verify:a11y-starter",
+				"pnpm verify:seo-contracts",
+				"pnpm verify:ui-core",
+				"pnpm verify:merge-standard"
+			],
+			"depends_on": [],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:ui",
+				"work:implementation",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "TASK-10-DELIVERY",
+			"title": "Deliver EPIC-10 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-10",
+			"source_anchor": "EPIC-10",
+			"goal": "Merge EPIC-10 through one exact-head STANDARD gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"STANDARD exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft STANDARD gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft STANDARD gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-10-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:ui",
+				"work:delivery",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "EPIC-11",
+			"title": "UI drift cleanup and ownership",
+			"type": "epic",
+			"source_anchor": "EPIC-11",
+			"goal": "Verified UI drift is removed without redesign and package, view, client, and peer ownership are explicit.",
+			"scope": [
+				"design literals",
+				"dead donor CSS",
+				"StarterPages ownership",
+				"react-dom peer"
+			],
+			"acceptance_criteria": [
+				"UI Core passes with no unjustified design literals",
+				"dead donor CSS has no live package path and public UI exports remain stable",
+				"representative responsive visual matrix shows no redesign"
+			],
+			"depends_on": [
+				"EPIC-10"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:ui",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-11-01",
+			"title": "Implement EPIC-11: UI drift cleanup and ownership",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-11",
+			"source_anchor": "EPIC-11",
+			"goal": "Verified UI drift is removed without redesign and package, view, client, and peer ownership are explicit.",
+			"scope": [
+				"design literals",
+				"dead donor CSS",
+				"StarterPages ownership",
+				"react-dom peer"
+			],
+			"acceptance_criteria": [
+				"UI Core passes with no unjustified design literals",
+				"dead donor CSS has no live package path and public UI exports remain stable",
+				"representative responsive visual matrix shows no redesign"
+			],
+			"required_checks": [
+				"pnpm verify:ui-core",
+				"pnpm verify:a11y-starter",
+				"pnpm verify:seo-contracts",
+				"pnpm typecheck",
+				"pnpm lint",
+				"pnpm build",
+				"pnpm verify:merge-standard"
+			],
+			"depends_on": [
+				"TASK-10-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:ui",
+				"work:implementation",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "TASK-11-DELIVERY",
+			"title": "Deliver EPIC-11 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-11",
+			"source_anchor": "EPIC-11",
+			"goal": "Merge EPIC-11 through one exact-head STANDARD gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"STANDARD exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft STANDARD gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft STANDARD gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-11-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:ui",
+				"work:delivery",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "EPIC-12",
+			"title": "Source-of-truth sync",
+			"type": "epic",
+			"source_anchor": "EPIC-12",
+			"goal": "Project docs describe the merged implementation and commands exactly without rewriting history or moving normative documents.",
+			"scope": [
+				"architecture",
+				"project docs",
+				"font contract",
+				"reading order and commands"
+			],
+			"acceptance_criteria": [
+				"all links and commands resolve to current code",
+				"docs make no unsupported infrastructure, mode, or PASS claim",
+				"historical proofs and root normative documents remain intact"
+			],
+			"depends_on": [
+				"EPIC-02",
+				"EPIC-03",
+				"EPIC-04",
+				"EPIC-05",
+				"EPIC-06",
+				"EPIC-07",
+				"EPIC-08",
+				"EPIC-09",
+				"EPIC-11"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:final",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-12-01",
+			"title": "Implement EPIC-12: Source-of-truth sync",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-12",
+			"source_anchor": "EPIC-12",
+			"goal": "Project docs describe the merged implementation and commands exactly without rewriting history or moving normative documents.",
+			"scope": [
+				"architecture",
+				"project docs",
+				"font contract",
+				"reading order and commands"
+			],
+			"acceptance_criteria": [
+				"all links and commands resolve to current code",
+				"docs make no unsupported infrastructure, mode, or PASS claim",
+				"historical proofs and root normative documents remain intact"
+			],
+			"required_checks": [
+				"pnpm verify:clone-readiness",
+				"pnpm quality:architecture",
+				"pnpm verify:daily",
+				"pnpm verify:merge-standard"
+			],
+			"depends_on": [
+				"TASK-02-DELIVERY",
+				"TASK-03-DELIVERY",
+				"TASK-04-DELIVERY",
+				"TASK-05-DELIVERY",
+				"TASK-06-DELIVERY",
+				"TASK-07-DELIVERY",
+				"TASK-08-DELIVERY",
+				"TASK-09-DELIVERY",
+				"TASK-11-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:final",
+				"work:implementation",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "TASK-12-DELIVERY",
+			"title": "Deliver EPIC-12 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-12",
+			"source_anchor": "EPIC-12",
+			"goal": "Merge EPIC-12 through one exact-head STANDARD gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"STANDARD exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft STANDARD gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft STANDARD gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-12-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 2,
+			"labels": [
+				"wave:final",
+				"work:delivery",
+				"risk:standard"
+			]
+		},
+		{
+			"key": "EPIC-13",
+			"title": "Final Core 5.5 and UI Core 5.0 proof",
+			"type": "epic",
+			"source_anchor": "EPIC-13",
+			"goal": "One exact-SHA evidence package proves the completed pre-production contract and identifies every unproven production-only claim.",
+			"scope": [
+				"exact-SHA final proof",
+				"clean and upgrade DB",
+				"18A",
+				"access and UI matrices"
+			],
+			"acceptance_criteria": [
+				"all mandatory suites run on the exact head SHA with zero skipped required suites",
+				"clean DB, previous-data migration, 18A, access, and UI evidence is reproducible",
+				"blocker or major findings and production claims are absent from the final report"
+			],
+			"depends_on": [
+				"EPIC-02",
+				"EPIC-03",
+				"EPIC-04",
+				"EPIC-05",
+				"EPIC-06",
+				"EPIC-07",
+				"EPIC-08",
+				"EPIC-09",
+				"EPIC-10",
+				"EPIC-11",
+				"EPIC-12"
+			],
+			"delivery_mode": "MERGE_AFTER_GATE",
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"plan"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"approved source drift"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:final",
+				"approval:owner-approved",
+				"delivery:merge-after-gate"
+			]
+		},
+		{
+			"key": "TASK-13-01",
+			"title": "Implement EPIC-13: Final Core 5.5 and UI Core 5.0 proof",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "implementation",
+			"parent_key": "EPIC-13",
+			"source_anchor": "EPIC-13",
+			"goal": "One exact-SHA evidence package proves the completed pre-production contract and identifies every unproven production-only claim.",
+			"scope": [
+				"exact-SHA final proof",
+				"clean and upgrade DB",
+				"18A",
+				"access and UI matrices"
+			],
+			"acceptance_criteria": [
+				"all mandatory suites run on the exact head SHA with zero skipped required suites",
+				"clean DB, previous-data migration, 18A, access, and UI evidence is reproducible",
+				"blocker or major findings and production claims are absent from the final report"
+			],
+			"required_checks": [
+				"pnpm verify:merge-risky",
+				"pnpm verify:schema",
+				"pnpm verify:ui-core",
+				"pnpm build",
+				"pnpm verify:daily"
+			],
+			"depends_on": [
+				"TASK-02-DELIVERY",
+				"TASK-03-DELIVERY",
+				"TASK-04-DELIVERY",
+				"TASK-05-DELIVERY",
+				"TASK-06-DELIVERY",
+				"TASK-07-DELIVERY",
+				"TASK-08-DELIVERY",
+				"TASK-09-DELIVERY",
+				"TASK-10-DELIVERY",
+				"TASK-11-DELIVERY",
+				"TASK-12-DELIVERY"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"edit",
+				"test",
+				"commit",
+				"push"
+			],
+			"stop_conditions": [
+				"scope expansion",
+				"production or production database",
+				"destructive data action",
+				"new secret",
+				"paid or irreversible external action",
+				"github"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:final",
+				"work:implementation",
+				"risk:risky"
+			]
+		},
+		{
+			"key": "TASK-13-DELIVERY",
+			"title": "Deliver EPIC-13 to SourceCraft main",
+			"type": "task",
+			"role": "implementation",
+			"work_kind": "delivery",
+			"parent_key": "EPIC-13",
+			"source_anchor": "EPIC-13",
+			"goal": "Merge EPIC-13 through one exact-head RISKY gate, delete the epic branch, and do not touch GitHub or production.",
+			"scope": [
+				"SourceCraft PR",
+				"diff review",
+				"RISKY exact-head gate",
+				"merge and safe cleanup"
+			],
+			"acceptance_criteria": [
+				"PR source, target, and exact head SHA are verified",
+				"SourceCraft RISKY gate passes on that exact head SHA",
+				"merge to canonical main succeeds and branch cleanup is safe",
+				"GitHub and production are not changed"
+			],
+			"required_checks": [
+				"PR source/target/head SHA",
+				"SourceCraft RISKY gate",
+				"post-merge main ancestry"
+			],
+			"depends_on": [
+				"TASK-13-01"
+			],
+			"required_context": [
+				"docs/AMS_MASTER_PLAN №5.md",
+				"docs/03_ARCHITECTURE.md",
+				"docs/PROJECT.md"
+			],
+			"allowed_actions": [
+				"read",
+				"commit",
+				"push",
+				"create_pr",
+				"merge"
+			],
+			"stop_conditions": [
+				"production",
+				"github",
+				"gate not proven",
+				"PR head changed"
+			],
+			"priority": 1,
+			"labels": [
+				"wave:final",
+				"work:delivery",
+				"risk:risky"
+			]
+		}
+	]
+}
