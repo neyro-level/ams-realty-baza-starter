@@ -290,20 +290,27 @@ for (const file of [...filesUnder("src"), ...filesUnder("scripts")]) {
 	}
 }
 
-for (const file of [
-	"src/project/collections/Leads.ts",
-	"src/project/collections/LeadDeliveries.ts",
-]) {
-	const content = read(file);
-	assert.ok(
-		content.includes("adminsAndOwners"),
-		`${file}: reads must be role protected`,
-	);
-	assert.ok(
-		content.includes("ownersOnly"),
-		`${file}: deletes must be owner-only`,
-	);
-}
+const leadsCollection = read("src/project/collections/Leads.ts");
+assert.ok(!leadsCollection.includes("adminsAndOwners"));
+assert.match(leadsCollection, /create:\s*systemGatewayOnly/);
+assert.match(leadsCollection, /read:\s*ownersOnly/);
+assert.match(leadsCollection, /update:\s*ownersOnly/);
+assert.match(leadsCollection, /delete:\s*ownersOnly/);
+
+const deliveriesCollection = read("src/project/collections/LeadDeliveries.ts");
+assert.ok(!deliveriesCollection.includes("adminsAndOwners"));
+assert.match(deliveriesCollection, /create:\s*systemGatewayOnly/);
+assert.match(deliveriesCollection, /read:\s*ownersOnly/);
+assert.match(deliveriesCollection, /update:\s*systemGatewayOnly/);
+assert.match(deliveriesCollection, /delete:\s*ownersOnly/);
+assert.ok(
+	deliveriesCollection.includes('hasRole(req.user, ["owner"])'),
+	"manual lead delivery retry must be owner-only",
+);
+assert.ok(
+	deliveriesCollection.includes("retryLeadDeliveryThroughSystemGateway"),
+	"manual retry must mutate delivery state through a named System Gateway",
+);
 
 assert.equal(
 	read("src/project/collections/Properties.ts").includes(
@@ -339,8 +346,8 @@ requireIncludes(
 );
 requireIncludes(
 	"src/project/collections/Leads.ts",
-	"Collection `create` stays adminsAndOwners",
-	"Leads collection create must remain non-public",
+	"Generic collection create stays closed",
+	"Leads collection generic create must remain system-only",
 );
 
 assert.equal(

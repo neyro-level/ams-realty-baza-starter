@@ -1,11 +1,11 @@
 import type { CollectionConfig, PayloadRequest } from "payload";
-import { retryLeadDelivery } from "../../core/leads/owner-delivery-operations.ts";
-import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
 import {
-	adminsAndOwners,
 	hasRole,
 	ownersOnly,
+	systemGatewayOnly,
 } from "../../core/access/roles.ts";
+import { retryLeadDeliveryThroughSystemGateway } from "../../core/data-access/system/lead-delivery-retry.ts";
+import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
 import { projectConfig } from "../project.config.ts";
 
 export const LeadDeliveries: CollectionConfig = {
@@ -26,9 +26,9 @@ export const LeadDeliveries: CollectionConfig = {
 			"Owner operations: delivery state, manual retry/recovery and safe diagnostics. CRM channel rows may exist, but CRM adapter execution is deferred until owner enables it.",
 	},
 	access: {
-		create: adminsAndOwners,
-		read: adminsAndOwners,
-		update: adminsAndOwners,
+		create: systemGatewayOnly,
+		read: ownersOnly,
+		update: systemGatewayOnly,
 		delete: ownersOnly,
 	},
 	endpoints: [
@@ -36,7 +36,7 @@ export const LeadDeliveries: CollectionConfig = {
 			path: "/:id/retry",
 			method: "post",
 			handler: async (req: PayloadRequest) => {
-				if (!hasRole(req.user, ["owner", "admin"])) {
+				if (!hasRole(req.user, ["owner"])) {
 					return Response.json({ error: "forbidden" }, { status: 403 });
 				}
 				const id = String(req.routeParams?.id ?? "");
@@ -44,7 +44,7 @@ export const LeadDeliveries: CollectionConfig = {
 					return Response.json({ error: "invalid_payload" }, { status: 400 });
 				}
 				try {
-					const result = await retryLeadDelivery({
+					const result = await retryLeadDeliveryThroughSystemGateway({
 						payload: req.payload,
 						req,
 						deliveryId: id,

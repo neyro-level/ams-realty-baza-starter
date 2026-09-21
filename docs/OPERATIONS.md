@@ -109,7 +109,7 @@ Emergency unstuck of a stuck `processing=true` job is the documented operation `
 
 ## Lead operations
 
-- Delivery retry: owner/admin работает с `lead-deliveries`; safe manual retry — `status=pending`, `nextAttemptAt` в безопасное время, stale claim/job fields очищаются только при доказанном orphan/stale состоянии. Raw payload/response, PII и secrets не пишутся в diagnostics.
+- Delivery retry: только owner вызывает controlled endpoint `POST /api/lead-deliveries/:id/retry`; generic create/update delivery state закрыты для owner/admin и выполняются только именованными system paths. Safe retry переводит строку в `pending`, выставляет `nextAttemptAt` и очищает stale claim/job fields только при доказанном orphan/stale состоянии. Raw payload/response, PII и secrets не пишутся в diagnostics.
 - Delivery recovery: `recoverLeadDeliveries` возвращает stale `sending` в `pending` и ставит redacted diagnostic; due pending delivery без `jobId` ставится в queue `lead-deliveries`.
 - Missing adapter/channel outage: delivery остаётся в delivery state machine как retryable/permanent; успешный HTTP intake лида не откатывается после сохранения лида и delivery rows в собственной БД.
 - CRM token recovery не выполняется до подключения CRM adapter. CRM adapter отложен владельцем; текущие recovery flows покрывают messenger/custom webhook и общий delivery state.

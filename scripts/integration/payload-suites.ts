@@ -13,8 +13,8 @@ import {
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
 } from "../../src/core/data-access/public/catalog.ts";
-import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
 import { submitPublicLead } from "../../src/core/data-access/public/leads.ts";
+import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
 import { defineLeadDeliveryPolicy } from "../../src/core/leads/delivery-policy.ts";
@@ -29,6 +29,7 @@ import {
 	installRuntimeClock,
 	resetRuntimeClock,
 } from "../../src/core/time/clock.ts";
+import { LeadDeliveries } from "../../src/project/collections/LeadDeliveries.ts";
 import { requirePayloadRuntime } from "../../src/project/env.ts";
 import {
 	payloadJobQueues,
@@ -501,80 +502,149 @@ const owner = { id: 10_001, collection: "users", roles: ["owner"] } as never;
 const admin = { id: 10_002, collection: "users", roles: ["admin"] } as never;
 const editor = { id: 10_003, collection: "users", roles: ["editor"] } as never;
 
-for (const [role, user] of [
-	["owner", owner],
-	["admin", admin],
-] as const) {
-	const visible = await payload.find({
-		collection: "leads",
-		overrideAccess: false,
-		user,
-		where: { id: { equals: lead.id } },
-	});
-	assert.equal(visible.totalDocs, 1, `${role} must read operational lead data`);
+async function assertRoleReadDenied(
+	collection: "leads" | "lead-deliveries",
+	id: number | string,
+	role: string,
+	user: typeof owner | null,
+) {
+	let denied = false;
+	try {
+		const result = await payload.find({
+			collection,
+			overrideAccess: false,
+			user,
+			where: { id: { equals: id } },
+		});
+		denied = result.totalDocs === 0;
+	} catch {
+		denied = true;
+	}
+	assert.equal(denied, true, `${role} must not read ${collection}`);
 }
 
-let editorDenied = false;
-try {
-	const editorResult = await payload.find({
-		collection: "leads",
-		overrideAccess: false,
-		user: editor,
-		where: { id: { equals: lead.id } },
-	});
-	editorDenied = editorResult.totalDocs === 0;
-} catch {
-	editorDenied = true;
-}
-assert.equal(editorDenied, true, "editor must not read operational lead data");
-
-const updatedByAdmin = await payload.update({
+const ownerLead = await payload.findByID({
 	collection: "leads",
 	id: lead.id,
-	data: { status: "in_progress" },
 	overrideAccess: false,
-	user: admin,
+	user: owner,
+});
+assert.equal(ownerLead.phoneE164, "+79990000001");
+assert.equal(ownerLead.name, "Integration");
+for (const [role, user] of [
+	["anonymous", null],
+	["editor", editor],
+	["admin", admin],
+] as const) {
+	await assertRoleReadDenied("leads", lead.id, role, user);
+}
+const systemLead = await payload.findByID({
+	collection: "leads",
+	id: lead.id,
+	...access,
+});
+assert.equal(systemLead.phoneE164, "+79990000001");
+
+const updatedByOwner = await payload.update({
+	collection: "leads",
+	id: lead.id,
+	data: {
+		status: "in_progress",
+		message: "Owner-only PII update proof",
+	},
+	overrideAccess: false,
+	user: owner,
 });
 assert.equal(
-	updatedByAdmin.status,
+	updatedByOwner.status,
 	"in_progress",
-	"admin must update operational lead data",
+	"owner must update operational lead data",
+);
+assert.equal(updatedByOwner.message, "Owner-only PII update proof");
+
+for (const [role, user] of [
+	["anonymous", null],
+	["editor", editor],
+	["admin", admin],
+] as const) {
+	await assert.rejects(
+		() =>
+			payload.update({
+				collection: "leads",
+				id: lead.id,
+				data: { status: "processed" },
+				overrideAccess: false,
+				user,
+			}),
+		`${role} must not update leads`,
+	);
+}
+await payload.update({
+	collection: "leads",
+	id: lead.id,
+	data: {
+		status: "new",
+		fraudFingerprint: "system-only-pii-update-proof",
+	},
+	...access,
+});
+assert.equal(
+	(
+		await payload.findByID({
+			collection: "leads",
+			id: lead.id,
+			...access,
+		})
+	).fraudFingerprint,
+	"system-only-pii-update-proof",
 );
 
-let editorUpdateDenied = false;
-try {
-	await payload.update({
-		collection: "leads",
-		id: lead.id,
-		data: { status: "processed" },
-		overrideAccess: false,
-		user: editor,
-	});
-} catch {
-	editorUpdateDenied = true;
+for (const [role, user] of [
+	["anonymous", null],
+	["editor", editor],
+	["admin", admin],
+	["owner", owner],
+] as const) {
+	await assert.rejects(
+		() =>
+			payload.create({
+				collection: "leads",
+				data: {
+					name: `Denied ${role}`,
+					phoneE164: "+79990000008",
+					formKind: "callback",
+					sourcePage: "/denied-create",
+					consent: {
+						accepted: true,
+						version: "test",
+						consentedAt: clock.nowIso(),
+					},
+					idempotencyKey: `itest-denied-create-${role}-${suffix}`,
+					retentionMode: "delete",
+				},
+				overrideAccess: false,
+				user,
+			} as never),
+		`${role} must not use generic lead create`,
+	);
 }
-assert.equal(
-	editorUpdateDenied,
-	true,
-	"editor must not update operational lead data",
-);
 
-let adminDeleteDenied = false;
-try {
-	await payload.delete({
-		collection: "leads",
-		id: lead.id,
-		overrideAccess: false,
-		user: admin,
-	});
-} catch {
-	adminDeleteDenied = true;
+for (const [role, user] of [
+	["anonymous", null],
+	["editor", editor],
+	["admin", admin],
+] as const) {
+	await assert.rejects(
+		() =>
+			payload.delete({
+				collection: "leads",
+				id: lead.id,
+				overrideAccess: false,
+				user,
+			}),
+		`${role} must not delete leads`,
+	);
 }
-assert.equal(
-	adminDeleteDenied,
-	true,
-	"admin must not perform owner-only destructive operations",
-);
 
 const ownerDeleteLead = await payload.create({
 	collection: "leads",
@@ -624,6 +694,65 @@ await assert.rejects(
 	"owner lead delete must cascade to linked deliveries",
 );
 
+const directDeleteLead = await payload.create({
+	collection: "leads",
+	data: {
+		name: "Direct delivery delete proof",
+		phoneE164: "+79990000012",
+		formKind: "callback",
+		sourcePage: "/",
+		status: "new",
+		consent: {
+			accepted: true,
+			version: "test",
+			consentedAt: clock.nowIso(),
+		},
+		idempotencyKey: `itest-direct-delete-${suffix}`,
+		retentionMode: "delete",
+	},
+	...access,
+});
+const directOwnerDeleteDelivery = await payload.create({
+	collection: "lead-deliveries",
+	data: {
+		lead: directDeleteLead.id,
+		channelId: `direct-owner-delete-${suffix}`,
+		channelKind: "messenger",
+		status: "pending",
+		attempts: 0,
+		idempotencyKey: `itest-direct-owner-delete-${suffix}`,
+	},
+	...access,
+});
+await payload.delete({
+	collection: "lead-deliveries",
+	id: directOwnerDeleteDelivery.id,
+	overrideAccess: false,
+	user: owner,
+});
+const directSystemDeleteDelivery = await payload.create({
+	collection: "lead-deliveries",
+	data: {
+		lead: directDeleteLead.id,
+		channelId: `direct-system-delete-${suffix}`,
+		channelKind: "messenger",
+		status: "pending",
+		attempts: 0,
+		idempotencyKey: `itest-direct-system-delete-${suffix}`,
+	},
+	...access,
+});
+await payload.delete({
+	collection: "lead-deliveries",
+	id: directSystemDeleteDelivery.id,
+	...access,
+});
+await payload.delete({
+	collection: "leads",
+	id: directDeleteLead.id,
+	...access,
+});
+
 const retentionLead = await payload.create({
 	collection: "leads",
 	data: {
@@ -669,35 +798,93 @@ const retentionDelivery = await payload.create({
 	...access,
 });
 
+const ownerDelivery = await payload.findByID({
+	collection: "lead-deliveries",
+	id: retentionDelivery.id,
+	overrideAccess: false,
+	user: owner,
+});
+assert.equal(ownerDelivery.lastErrorKind, "retryable");
 for (const [role, user] of [
-	["owner", owner],
+	["anonymous", null],
+	["editor", editor],
 	["admin", admin],
 ] as const) {
-	const visible = await payload.find({
-		collection: "lead-deliveries",
-		overrideAccess: false,
+	await assertRoleReadDenied(
+		"lead-deliveries",
+		retentionDelivery.id,
+		role,
 		user,
-		where: { id: { equals: retentionDelivery.id } },
-	});
-	assert.equal(visible.totalDocs, 1, `${role} must read delivery diagnostics`);
-}
-let editorDeliveryDenied = false;
-try {
-	const result = await payload.find({
-		collection: "lead-deliveries",
-		overrideAccess: false,
-		user: editor,
-		where: { id: { equals: retentionDelivery.id } },
-	});
-	editorDeliveryDenied = result.totalDocs === 0;
-} catch {
-	editorDeliveryDenied = true;
+	);
 }
 assert.equal(
-	editorDeliveryDenied,
-	true,
-	"editor must not read delivery diagnostics",
+	(
+		await payload.findByID({
+			collection: "lead-deliveries",
+			id: retentionDelivery.id,
+			...access,
+		})
+	).lastErrorKind,
+	"retryable",
 );
+
+for (const [role, user] of [
+	["anonymous", null],
+	["editor", editor],
+	["admin", admin],
+	["owner", owner],
+] as const) {
+	await assert.rejects(
+		() =>
+			payload.update({
+				collection: "lead-deliveries",
+				id: retentionDelivery.id,
+				data: { nextAttemptAt: clock.nowIso() },
+				overrideAccess: false,
+				user,
+			}),
+		`${role} must not use generic delivery update`,
+	);
+	await assert.rejects(
+		() =>
+			payload.create({
+				collection: "lead-deliveries",
+				data: {
+					lead: retentionLead.id,
+					channelId: `denied-${role}-${suffix}`,
+					channelKind: "messenger",
+					status: "pending",
+					attempts: 0,
+					idempotencyKey: `itest-denied-delivery-${role}-${suffix}`,
+				},
+				overrideAccess: false,
+				user,
+			} as never),
+		`${role} must not use generic delivery create`,
+	);
+}
+for (const [role, user] of [
+	["anonymous", null],
+	["editor", editor],
+	["admin", admin],
+] as const) {
+	await assert.rejects(
+		() =>
+			payload.delete({
+				collection: "lead-deliveries",
+				id: retentionDelivery.id,
+				overrideAccess: false,
+				user,
+			}),
+		`${role} must not delete lead deliveries`,
+	);
+}
+await payload.update({
+	collection: "lead-deliveries",
+	id: retentionDelivery.id,
+	data: { nextAttemptAt: clock.nowIso() },
+	...access,
+});
 
 const retentionTask = payloadJobTasks.find(
 	(task) => task.slug === payloadJobTaskSlugs.leadRetentionCleanup,
@@ -796,6 +983,50 @@ async function findDeliveryJobs(deliveryId: number | string) {
 		...access,
 	});
 }
+
+const retryEndpoint = Array.isArray(LeadDeliveries.endpoints)
+	? LeadDeliveries.endpoints.find((endpoint) => endpoint.path === "/:id/retry")
+	: undefined;
+assert.ok(retryEndpoint, "lead delivery retry endpoint must exist");
+const manualRetryDelivery = await createRetryFixture(
+	"manual-owner",
+	"+79990000013",
+);
+for (const [role, user, context] of [
+	["anonymous", null, undefined],
+	["editor", editor, undefined],
+	["admin", admin, undefined],
+	["system", undefined, { systemGatewayOperation: "system-job" }],
+] as const) {
+	const response = await retryEndpoint.handler({
+		payload,
+		user,
+		context,
+		routeParams: { id: String(manualRetryDelivery.id) },
+	} as never);
+	assert.equal(response.status, 403, `${role} retry endpoint must deny`);
+}
+const ownerRetryResponse = await retryEndpoint.handler({
+	payload,
+	user: owner,
+	routeParams: { id: String(manualRetryDelivery.id) },
+} as never);
+assert.equal(ownerRetryResponse.status, 200, "owner retry endpoint must allow");
+const ownerRetryBody = (await ownerRetryResponse.json()) as {
+	ok?: boolean;
+	jobId?: string;
+};
+assert.equal(ownerRetryBody.ok, true);
+assert.ok(ownerRetryBody.jobId);
+const manualRetryAfter = await payload.findByID({
+	collection: "lead-deliveries",
+	id: manualRetryDelivery.id,
+	depth: 0,
+	...access,
+});
+assert.equal(manualRetryAfter.status, "pending");
+assert.equal(manualRetryAfter.jobId, ownerRetryBody.jobId);
+assert.equal((await findDeliveryJobs(manualRetryDelivery.id)).totalDocs, 1);
 
 const deliverTask = payloadJobTasks.find(
 	(task) => task.slug === payloadJobTaskSlugs.deliverLead,

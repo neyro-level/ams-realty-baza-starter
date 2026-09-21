@@ -35,7 +35,7 @@
 | Stale-data SLA | `staleDataSlaMinutes = 30` |
 | Cache | mode `http`, proof status `http`, in-process not claimed |
 | Feed images | external HTTPS, exact hosts from `EXTERNAL_IMAGE_HOSTS` via `src/core/ingest/image-hosts.ts`; Variant B: feed `unoptimized` + `sizes` + aspect ratio; local CMS media may use Next optimizer |
-| Lead routing | public intake `POST /api/public/leads` only; generic Payload `leads` create is not public; live channels require credentialRef + `LEAD_OUTBOUND_HOSTS` |
+| Lead routing/access | public intake `POST /api/public/leads` only; generic `leads` create and `lead-deliveries` create/update are system-only; lead/PII read-update-delete and delivery read/delete/manual retry are owner-only; `admin` has no lead capability; see `docs/adr/ADR-LEAD-ACCESS-MODEL.md` |
 | Lead delivery policy | `project.config.ts` → one validated `leadDelivery` policy; routing is `all-enabled`, max attempts derive from retry ladder length |
 | Channel capability risk | MAX sends an idempotency header but native provider idempotency and external lookup are unproven; custom webhook uses required HMAC + idempotency header with receiver registry; both may return unknown delivery certainty after transport failure |
 | Indexed catalog filters | `category`, `dealType`, `city`, `district`, `rooms` in `project.config.ts`; other query params are `noindex` |

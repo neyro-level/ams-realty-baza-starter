@@ -1,8 +1,14 @@
 import type { Payload, PayloadRequest } from "payload";
-import { appendAttemptLog } from "./delivery-state.ts";
 import type { LeadDeliveryPolicy } from "./delivery-policy.ts";
+import { appendAttemptLog } from "./delivery-state.ts";
 
 const requestAccess = { overrideAccess: false as const };
+
+export type LeadDeliveryOperationAccess = {
+	overrideAccess: boolean;
+	req?: PayloadRequest;
+	context?: Record<string, unknown>;
+};
 
 export async function retryLeadDelivery({
 	payload,
@@ -12,6 +18,7 @@ export async function retryLeadDelivery({
 	nowIso,
 	enqueue,
 	policy,
+	access,
 }: {
 	payload: Payload;
 	req?: PayloadRequest;
@@ -20,13 +27,14 @@ export async function retryLeadDelivery({
 	nowIso: string;
 	enqueue: (leadDeliveryId: string) => Promise<string>;
 	policy: LeadDeliveryPolicy;
+	access?: LeadDeliveryOperationAccess;
 }): Promise<{ jobId: string }> {
+	const operationAccess = access ?? { ...requestAccess, req };
 	const delivery = await payload.findByID({
 		collection: "lead-deliveries",
 		id: deliveryId,
 		depth: 0,
-		req,
-		...requestAccess,
+		...operationAccess,
 	});
 
 	if (delivery.status === "sending") {
@@ -66,8 +74,7 @@ export async function retryLeadDelivery({
 			lastErrorKind: null,
 			attemptLog,
 		},
-		req,
-		...requestAccess,
+		...operationAccess,
 	});
 
 	const jobId = await enqueue(String(delivery.id));
@@ -75,8 +82,7 @@ export async function retryLeadDelivery({
 		collection: "lead-deliveries",
 		id: deliveryId,
 		data: { jobId },
-		req,
-		...requestAccess,
+		...operationAccess,
 	});
 	return { jobId };
 }

@@ -12,13 +12,13 @@
 POST /api/public/leads
 ```
 
-Generic Payload REST `leads.create` остаётся `adminsAndOwners` и deny-anonymous. Это не public create коллекции, а отдельный classified route.
+Generic Payload REST/Local API `leads.create` закрыт для пользовательских ролей. Это не public create коллекции: запись разрешена только classified route через именованный System Gateway.
 
 Транзакционная запись lead + enabled `lead-deliveries` идёт через System Gateway `overrideAccess` в `createPayloadLeadOutboxRepository`. Анонимный Local API create без gateway запрещён.
 
 Sweeper `recoverLeadDeliveries` — primary scheduler. Immediate `deliverLead` enqueue после commit — ускорение: ошибка enqueue не откатывает lead.
 
-Idempotency: клиентский ключ или стабильный hash(`phoneE164`, `formKind`, `sourcePage`, `consentVersion`). Timestamp не является единственной основой.
+Idempotency: browser создаёт UUID `requestAttemptId`; exact retry сохраняет тот же attempt ID, новая осознанная отправка получает новый. Server строит unique `lead:<requestAttemptId>`.
 
 Fraud fingerprint: keyed HMAC по `PAYLOAD_SECRET`, без raw IP/UA.
 

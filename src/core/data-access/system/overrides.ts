@@ -2,6 +2,7 @@ type SystemOperation =
 	| "bootstrap-owner"
 	| "controlled-maintenance"
 	| "system-job"
+	| "owner-lead-delivery-retry"
 	| "migration-helper"
 	| "trusted-inspection"
 	| "payload-jobs-inspect"

@@ -108,6 +108,50 @@ assert.ok(
 	"leads must keep agency workflow separate from delivery state",
 );
 
+const roleRequest = (role) => ({
+	req: {
+		user: role
+			? { id: `verify-${role}`, collection: "users", roles: [role] }
+			: null,
+	},
+});
+for (const role of [null, "editor", "admin"]) {
+	assert.equal(await Leads.access.read(roleRequest(role)), false);
+	assert.equal(await Leads.access.update(roleRequest(role)), false);
+	assert.equal(await LeadDeliveries.access.read(roleRequest(role)), false);
+}
+assert.equal(await Leads.access.read(roleRequest("owner")), true);
+assert.equal(await Leads.access.update(roleRequest("owner")), true);
+assert.equal(await LeadDeliveries.access.read(roleRequest("owner")), true);
+assert.equal(await Leads.access.create(roleRequest("owner")), false);
+assert.equal(await LeadDeliveries.access.create(roleRequest("owner")), false);
+assert.equal(await LeadDeliveries.access.update(roleRequest("owner")), false);
+
+for (const fieldName of [
+	"name",
+	"phoneRaw",
+	"phoneE164",
+	"email",
+	"message",
+	"fraudFingerprint",
+]) {
+	const field = findField(Leads.fields, fieldName);
+	assert.equal(await field?.access?.read?.(roleRequest("admin")), false);
+	assert.equal(await field?.access?.read?.(roleRequest("owner")), true);
+}
+
+const retryEndpoint = LeadDeliveries.endpoints?.find(
+	(endpoint) => endpoint.path === "/:id/retry",
+);
+assert.ok(retryEndpoint, "lead-deliveries must expose controlled retry");
+for (const role of [null, "editor", "admin"]) {
+	const response = await retryEndpoint.handler({
+		...roleRequest(role).req,
+		routeParams: { id: "verify-denied" },
+	});
+	assert.equal(response.status, 403, `${role ?? "anonymous"} retry must deny`);
+}
+
 assert.equal(
 	existsSync(join(root, "src", "app", "owner-operations")),
 	false,
@@ -119,7 +163,9 @@ assert.ok(
 	"feed-sources must expose controlled owner endpoints",
 );
 assert.ok(
-	FeedSources.endpoints?.some((endpoint) => endpoint.path.includes("manual-import")),
+	FeedSources.endpoints?.some((endpoint) =>
+		endpoint.path.includes("manual-import"),
+	),
 	"feed-sources must expose manual import",
 );
 assert.ok(
@@ -135,16 +181,20 @@ assert.equal(await ImportRuns.access.create({ req: {} }), false);
 assert.equal(await ImportRuns.access.update({ req: {} }), false);
 
 assert.ok(
-	existsSync(join(root, "src", "core", "data-access", "system", "jobs", "unstuck.ts")),
+	existsSync(
+		join(root, "src", "core", "data-access", "system", "jobs", "unstuck.ts"),
+	),
 	"payload-jobs unstuck must live in system/jobs",
 );
 assert.ok(
-	existsSync(join(root, "src", "core", "data-access", "system", "jobs", "inspect.ts")),
+	existsSync(
+		join(root, "src", "core", "data-access", "system", "jobs", "inspect.ts"),
+	),
 	"payload-jobs inspect must live in system/jobs",
 );
 
 const payloadConfig = readFileSync(join(root, "payload.config.ts"), "utf8");
-assert.equal(payloadConfig.includes("slug: \"payload-jobs\""), false);
+assert.equal(payloadConfig.includes('slug: "payload-jobs"'), false);
 assert.equal(payloadConfig.includes("jobsCollectionOverrides"), false);
 
 const propertiesSource = readFileSync(

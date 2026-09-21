@@ -1,20 +1,28 @@
 import type { CollectionConfig, FieldAccess } from "payload";
-import { adminsAndOwners, hasRole, ownersOnly } from "../../core/access/roles.ts";
+import {
+	hasRole,
+	ownersOnly,
+	systemGatewayOnly,
+} from "../../core/access/roles.ts";
+
+const ownerPiiFieldAccess: FieldAccess = ({ req }) =>
+	hasRole(req.user, ["owner"]);
+const systemPiiCreateAccess: FieldAccess = () => false;
 
 const piiFieldAccess: {
 	read: FieldAccess;
 	create: FieldAccess;
 	update: FieldAccess;
 } = {
-	read: ({ req }) => hasRole(req.user, ["owner", "admin"]),
-	create: ({ req }) => hasRole(req.user, ["owner", "admin"]),
-	update: ({ req }) => hasRole(req.user, ["owner", "admin"]),
+	read: ownerPiiFieldAccess,
+	create: systemPiiCreateAccess,
+	update: ownerPiiFieldAccess,
 };
 
 export const Leads: CollectionConfig = {
 	slug: "leads",
 	// Public intake is POST /api/public/leads via Public Gateway + System Gateway.
-	// Collection `create` stays adminsAndOwners; it is not a public REST endpoint.
+	// Generic collection create stays closed; only a named System Gateway may persist.
 	versions: false,
 	admin: {
 		group: "Operations",
@@ -24,9 +32,9 @@ export const Leads: CollectionConfig = {
 			"Owner operations: agency workflow status and PII retention. External delivery state lives in Lead Deliveries.",
 	},
 	access: {
-		create: adminsAndOwners,
-		read: adminsAndOwners,
-		update: adminsAndOwners,
+		create: systemGatewayOnly,
+		read: ownersOnly,
+		update: ownersOnly,
 		delete: ownersOnly,
 	},
 	fields: [

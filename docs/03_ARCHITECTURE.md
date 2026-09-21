@@ -63,6 +63,13 @@ Reusable UI не импортирует Payload, DB clients или persistence t
 | Public Gateway | `overrideAccess: false`, `user: null`, context marker `public-read`, collection access filters published/public rows, output только DTO |
 | User/Admin | Payload request user и collection access; Local API вызов обязан явно указывать access mode |
 | System Gateway | `systemOverrideAccess(<named operation>)`; whitelist операций находится в `src/core/data-access/system/overrides.ts` |
+
+Lead access следует Core 5.5 и `docs/adr/ADR-LEAD-ACCESS-MODEL.md`: generic
+lead create и delivery create/update доступны только именованным System Gateway;
+lead/PII read-update-delete, delivery read/delete и manual retry доступны только
+owner. Роль admin не наследует эти capability. Manual retry после owner auth
+выполняет state transition через `owner-lead-delivery-retry`, а не generic Admin
+mutation.
 | Ingest Gateway | feed-owned mutation через ingest repository; manual field overrides и published slug не перезаписываются |
 
 Anonymous generic Payload REST для deny-list/system-only collections возвращает
