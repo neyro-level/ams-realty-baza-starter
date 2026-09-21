@@ -29,6 +29,10 @@ domain: start-baza.ams24.ru, noindex
 
 ## C. Client Timeweb staging
 
+Статический reference package: `deploy/clients/timeweb/README.md`. Его файлы
+нужно скопировать и адаптировать в client clone; они не являются вторым runtime
+starter и не доказывают доступ к реальному Timeweb.
+
 - отдельный Timeweb VPS или другой явно одобренный runtime;
 - отдельная Timeweb Managed PostgreSQL;
 - отдельный Timeweb S3-compatible Object Storage;

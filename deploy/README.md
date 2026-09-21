@@ -23,3 +23,6 @@ Rollback: switch `AMS_REALTBASE_IMAGE` back to the previous known-good immutable
 tag and restart the compose project. Database rollback is separate and requires
 restore evidence before destructive changes. Local PostgreSQL backups live
 outside the app container and must be protected by server backup policy.
+
+The client clone reference is separate: `deploy/clients/timeweb/README.md`.
+It does not change this starter demo topology and contains no live credentials.
