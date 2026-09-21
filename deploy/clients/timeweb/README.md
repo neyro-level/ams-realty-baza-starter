@@ -20,12 +20,15 @@ prove a live Timeweb connection.
 
 1. Create separate staging Managed PostgreSQL and S3 resources.
 2. Copy `env.client.example` outside Git and fill it from Secret Master.
-3. Install `@payloadcms/storage-s3@3.89.0` in the client clone. Its peer contract
-   matches the pinned Payload `3.89.0`; the starter dependency set stays clean.
-4. Apply the reviewed changes in `payload/activation.patch.md`, using
-   `payload/s3-plugin.example.ts` as a reference rather than a direct import.
-5. Set provider values from the current Timeweb panel/docs. Do not infer ACL,
-   public URL, signed-download policy or addressing mode.
+3. Commit the client identity change so the checkout is clean, then run
+   `pnpm clone:activate-timeweb-storage`. It installs the exact compatible
+   `@payloadcms/storage-s3@3.90.1` peer for Payload `3.90.1`, applies the
+   versioned config and validates types. The starter dependency set stays clean.
+4. Fill `S3_ENDPOINT=https://s3.twcstorage.ru`, `S3_REGION=ru-1`, bucket,
+   credentials and the client-safe `S3_PREFIX` from the Timeweb dashboard and
+   Secret Master. Do not commit credentials.
+5. Decide public/private URL, ACL and signed-download policy explicitly from
+   the client requirement and provider evidence.
 6. Run clean migrations against staging with `PAYLOAD_DB_PUSH=false`.
 7. Validate Nginx placeholders, backup, monitoring and one jobs owner.
 8. Complete every item in `proofs/CLIENT_TIMEWEB_PROOF.md` before any client
@@ -37,8 +40,8 @@ prove a live Timeweb connection.
   confirms `@payloadcms/storage-s3`, `collections`, `bucket`, AWS
   `S3ClientConfig`, conditional `enabled` and automatic local-storage disable.
 - Timeweb S3: https://timeweb.cloud/docs/s3-storage/manage-storage/s3-guide
-  confirms S3-compatible credentials and provider connection data from the
-  bucket dashboard.
+  confirms path-style endpoint `https://s3.twcstorage.ru`, region `ru-1`,
+  S3-compatible credentials and provider connection data from the dashboard.
 - Timeweb PostgreSQL: https://timeweb.cloud/docs/dbaas/postgresql/ confirms
   managed PostgreSQL availability, including PostgreSQL 18.
 - Physical and logical backups:

@@ -21,17 +21,34 @@ function git(args, cwd = dir) {
 	});
 }
 
+function pnpm(args) {
+	const cli = process.env.npm_execpath;
+	if (!cli) throw new Error("pnpm CLI path is unavailable; run this through pnpm.");
+	return execFileSync(process.execPath, [cli, ...args], {
+		cwd: dir,
+		stdio: "inherit",
+	});
+}
+
 try {
 	execFileSync("git", ["worktree", "add", "--detach", dir, "HEAD"], {
 		cwd: root,
 		stdio: "pipe",
 	});
+	for (const relativePath of [
+		"package.json",
+		"scripts/clone-activate-timeweb-storage.mjs",
+		"scripts/verify-timeweb-blueprint.mjs",
+		"deploy/clients/timeweb/README.md",
+		"deploy/clients/timeweb/env.client.example",
+		"deploy/clients/timeweb/payload/activation.patch.md",
+		"deploy/clients/timeweb/payload/s3-plugin.example.ts",
+	]) {
+		copyFileSync(path.join(root, relativePath), path.join(dir, relativePath));
+	}
 
 	const configPath = path.join(dir, "src", "project", "site.config.ts");
 	const projectPath = path.join(dir, "docs", "PROJECT.md");
-	copyFileSync(path.join(root, "src", "project", "site.config.ts"), configPath);
-	copyFileSync(path.join(root, "docs", "PROJECT.md"), projectPath);
-	git(["add", "-N", "--", "src/project/site.config.ts"]);
 	const config = readFileSync(configPath, "utf8");
 	const project = readFileSync(projectPath, "utf8");
 	assert.ok(config.includes('projectKind: "starter-demo"'));
@@ -45,6 +62,53 @@ try {
 		projectPath,
 		project.replaceAll("AMS Realty Baza Starter", "Clone Agency"),
 	);
+	git([
+		"add",
+		"--",
+		"package.json",
+		"scripts/clone-activate-timeweb-storage.mjs",
+		"scripts/verify-timeweb-blueprint.mjs",
+		"deploy/clients/timeweb/README.md",
+		"deploy/clients/timeweb/env.client.example",
+		"deploy/clients/timeweb/payload/activation.patch.md",
+		"deploy/clients/timeweb/payload/s3-plugin.example.ts",
+		"src/project/site.config.ts",
+		"docs/PROJECT.md",
+	]);
+	git([
+		"-c",
+		"user.name=AMS Clone Verification",
+		"-c",
+		"user.email=clone-verification@localhost",
+		"commit",
+		"-m",
+		"test: establish client clone identity",
+	]);
+
+	pnpm(["clone:activate-timeweb-storage"]);
+	const firstActivationDiff = git(["diff", "--stat"]);
+	assert.match(firstActivationDiff, /payload\.config\.ts/);
+	assert.match(firstActivationDiff, /pnpm-lock\.yaml/);
+	assert.equal(
+		JSON.parse(readFileSync(path.join(dir, "package.json"), "utf8"))
+			.dependencies["@payloadcms/storage-s3"],
+		"3.90.1",
+	);
+	assert.ok(
+		readFileSync(path.join(dir, "payload.config.ts"), "utf8").includes(
+			"plugins: [timewebS3Plugin]",
+		),
+	);
+	assert.ok(
+		readFileSync(
+			path.join(dir, "src", "project", "client-readiness.config.ts"),
+			"utf8",
+		).includes('mediaStorage: "timeweb-s3"'),
+	);
+
+	const beforeRepeat = git(["diff"]);
+	pnpm(["clone:activate-timeweb-storage"]);
+	assert.equal(git(["diff"]), beforeRepeat, "repeat activation must be a no-op");
 
 	const cloneDocs = readFileSync(path.join(root, "docs", "CLONE_ONBOARDING.md"), "utf8");
 	assert.ok(cloneDocs.includes("local PostgreSQL"));
@@ -55,7 +119,7 @@ try {
 	assert.equal(git(["diff", "--", "src/core"]).trim(), "");
 	assert.equal(git(["diff", "--", "packages"]).trim(), "");
 	assert.notEqual(git(["diff", "--", "src/project"]).trim(), "");
-	assert.notEqual(git(["diff", "--", "docs/PROJECT.md"]).trim(), "");
+	assert.equal(git(["diff", "--", "docs/PROJECT.md"]).trim(), "");
 } finally {
 	try {
 		execFileSync("git", ["worktree", "remove", "--force", dir], {
@@ -67,4 +131,6 @@ try {
 	}
 }
 
-console.log("verify:clone-readiness: git diff src/core = 0; git diff packages = 0");
+console.log(
+	"verify:clone-readiness: client S3 activation + typecheck + idempotence PASS; core/packages diff = 0",
+);

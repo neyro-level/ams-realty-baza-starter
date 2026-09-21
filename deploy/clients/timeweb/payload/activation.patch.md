@@ -1,13 +1,15 @@
 # Payload S3 activation patch
 
-Apply this as a reviewed client-clone change, not to the starter.
+This is the review checklist for the automated client-clone activation. Do not
+apply it manually to the starter.
 
-1. Verify the clone still uses Payload `3.89.0`, then install
-   `@payloadcms/storage-s3@3.89.0`. Recheck official compatibility if Payload has
-   changed; do not mix package lines.
-2. Move the example factory under `src/project/` and validate S3 env in the
-   project's single env owner.
-3. Add `timewebS3Plugin` to the Payload `plugins` array for `media`.
+1. Verify `projectKind: "client"`, commit the client identity and start from a
+   clean checkout.
+2. Run `pnpm clone:activate-timeweb-storage`. The command verifies Payload
+   `3.90.1`, installs exact `@payloadcms/storage-s3@3.90.1`, copies the pinned
+   factory under `src/project/`, updates the single env owner and runs typecheck.
+3. Confirm `timewebS3Plugin` is the only Payload Media storage adapter and
+   `S3_PREFIX` is unique to this client/environment.
 4. Remove the client production dependency on `staticDir`/`MEDIA_DIR` while
    keeping external feed image URLs unchanged.
 5. Keep `PAYLOAD_DB_PUSH=false`; create and review migrations for any collection
@@ -16,6 +18,6 @@ Apply this as a reviewed client-clone change, not to the starter.
    the client requirement and provider evidence. The blueprint does not guess.
 7. Prove an Admin upload, read/access behavior, delete and rollback in staging.
 
-The Payload adapter automatically disables local storage for configured
-collections while enabled. Do not implement permanent local/S3 dual mode in the
-starter.
+The generated config explicitly disables local storage for Media. A repeated
+activation command must be a no-op. Do not implement permanent local/S3 dual
+mode in the starter.

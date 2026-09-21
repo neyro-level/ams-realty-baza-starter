@@ -74,10 +74,11 @@ export function validateBlueprint(input) {
 	]) {
 		if (!proof.includes(marker)) add(`proof-marker:${marker}`);
 	}
-	if (
+	const hasStorageAdapter = Boolean(
 		input.packageJson.dependencies?.["@payloadcms/storage-s3"] ||
-		input.packageJson.devDependencies?.["@payloadcms/storage-s3"]
-	) {
+			input.packageJson.devDependencies?.["@payloadcms/storage-s3"],
+	);
+	if (input.projectKind !== "client" && hasStorageAdapter) {
 		add("starter-storage-s3-dependency");
 	}
 	return errors;
@@ -94,7 +95,14 @@ const files = new Map(
 const packageJson = JSON.parse(
 	fs.readFileSync(path.join(root, "package.json"), "utf8"),
 );
-assert.deepEqual(validateBlueprint({ files, packageJson }), []);
+const siteConfig = fs.readFileSync(
+	path.join(root, "src/project/site.config.ts"),
+	"utf8",
+);
+const projectKind = siteConfig.includes('projectKind: "client"')
+	? "client"
+	: "starter-demo";
+assert.deepEqual(validateBlueprint({ files, packageJson, projectKind }), []);
 
 const invalidFiles = new Map(files);
 invalidFiles.set(
@@ -102,7 +110,7 @@ invalidFiles.set(
 	`${invalidFiles.get("compose/client.compose.yml.example")}\nservices:\n  second-owner:\n    environment:\n      JOBS_AUTORUN: true\n`,
 );
 assert.ok(
-	validateBlueprint({ files: invalidFiles, packageJson }).includes(
+	validateBlueprint({ files: invalidFiles, packageJson, projectKind }).includes(
 		"jobs-owner-count",
 	),
 	"negative fixture must reject a second jobs owner",

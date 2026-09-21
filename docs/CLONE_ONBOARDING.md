@@ -24,12 +24,17 @@ domain: start-baza.ams24.ru, noindex
 2. Переименовать package/project identity.
 3. Изменить identity в `src/project/site.config.ts` и установить
    `projectKind: "client"`.
-4. Заполнить `docs/PROJECT.md` и `src/project/client-readiness.config.ts`:
+4. Зафиксировать client identity отдельным commit, убедиться в clean checkout и
+   выполнить `pnpm clone:activate-timeweb-storage`. Команда добавляет точно
+   совместимый `@payloadcms/storage-s3@3.90.1`, подключает Media к Timeweb S3,
+   добавляет client-only env schema и выполняет typecheck. Повторный запуск —
+   безопасный no-op; starter demo команда не изменяет.
+5. Заполнить `docs/PROJECT.md` и `src/project/client-readiness.config.ts`:
    client domain, retention, allowlists и enabled lead channels.
-5. Использовать отдельные локальные PostgreSQL, секреты и media-каталог;
+6. Использовать отдельные локальные PostgreSQL и секреты;
    секреты хранить только в Secret Master.
-6. Заменить fixture-контент, контакты и правовые тексты.
-7. Выполнить `pnpm install --frozen-lockfile`, `pnpm verify:daily` и
+7. Заменить fixture-контент, контакты и правовые тексты.
+8. Выполнить `pnpm install --frozen-lockfile`, `pnpm verify:daily` и
    `pnpm verify:client-readiness --mode=fixture-client`.
 
 После Design Intake нового клиента UI cleanup выполняется отдельно:
@@ -56,7 +61,7 @@ starter и не доказывают доступ к реальному Timeweb.
 - отдельный Timeweb VPS или другой явно одобренный runtime;
 - отдельная Timeweb Managed PostgreSQL;
 - отдельный Timeweb S3-compatible Object Storage;
-- Payload media вручную подключена к S3 adapter;
+- Payload media подключена командой `pnpm clone:activate-timeweb-storage`;
 - изображения фидов остаются внешними URL, если нет отдельного решения;
 - ровно один jobs-active runtime;
 - Nginx, отдельный staging-домен и staging-секреты;
