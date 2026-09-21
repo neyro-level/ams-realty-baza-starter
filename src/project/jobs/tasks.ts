@@ -662,6 +662,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				payload: req.payload,
 				leadDeliveryId: String(input.leadDeliveryId),
 				nowIso: nowIso(),
+				policy: projectConfig.leadDelivery,
 				env: {
 					LEAD_OUTBOUND_HOSTS: runtimeEnv.LEAD_OUTBOUND_HOSTS,
 					MAX_API_URL: runtimeEnv.MAX_API_URL,

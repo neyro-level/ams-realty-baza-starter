@@ -29,14 +29,21 @@ export {
 	appendAttemptLog,
 	claimLeadDeliveryForSending,
 	completeLeadDeliveryAttempt,
-	leadDeliveryMaxAttempts,
 	type LeadDeliveryStateRecord,
 	recoverStaleSendingDelivery,
 	retryBackoffMs,
 } from "./delivery-state.ts";
 export {
+	defineLeadDeliveryPolicy,
+	leadDeliveryMaxAttempts,
+	type LeadDeliveryPolicy,
+	type LeadDeliveryRoutingMode,
+} from "./delivery-policy.ts";
+export {
+	leadChannelCapabilities,
 	parseLeadChannelIds,
 	resolveEnabledLeadChannels,
+	type LeadChannelCapabilities,
 	type LeadChannelEnv,
 } from "./channels.ts";
 export { hitInProcessLeadRateLimit } from "./in-process-rate-limit.ts";

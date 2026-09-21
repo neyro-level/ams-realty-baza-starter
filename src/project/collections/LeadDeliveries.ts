@@ -1,7 +1,12 @@
 import type { CollectionConfig, PayloadRequest } from "payload";
 import { retryLeadDelivery } from "../../core/leads/owner-delivery-operations.ts";
 import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
-import { adminsAndOwners, hasRole, ownersOnly } from "../../core/access/roles.ts";
+import {
+	adminsAndOwners,
+	hasRole,
+	ownersOnly,
+} from "../../core/access/roles.ts";
+import { projectConfig } from "../project.config.ts";
 
 export const LeadDeliveries: CollectionConfig = {
 	slug: "lead-deliveries",
@@ -45,6 +50,7 @@ export const LeadDeliveries: CollectionConfig = {
 						deliveryId: id,
 						actorUserId: String(req.user?.id ?? "unknown"),
 						nowIso: new Date().toISOString(),
+						policy: projectConfig.leadDelivery,
 						enqueue: async (leadDeliveryId) => {
 							const queued = (await systemQueueJob({
 								req,
@@ -60,8 +66,7 @@ export const LeadDeliveries: CollectionConfig = {
 					return Response.json(
 						{
 							error: "retry_rejected",
-							code:
-								error instanceof Error ? error.message : "retry_rejected",
+							code: error instanceof Error ? error.message : "retry_rejected",
 						},
 						{ status: 409 },
 					);

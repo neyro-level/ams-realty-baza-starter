@@ -1,5 +1,6 @@
 import type { Payload, PayloadRequest } from "payload";
 import { appendAttemptLog } from "./delivery-state.ts";
+import type { LeadDeliveryPolicy } from "./delivery-policy.ts";
 
 const requestAccess = { overrideAccess: false as const };
 
@@ -10,6 +11,7 @@ export async function retryLeadDelivery({
 	actorUserId,
 	nowIso,
 	enqueue,
+	policy,
 }: {
 	payload: Payload;
 	req?: PayloadRequest;
@@ -17,6 +19,7 @@ export async function retryLeadDelivery({
 	actorUserId: string;
 	nowIso: string;
 	enqueue: (leadDeliveryId: string) => Promise<string>;
+	policy: LeadDeliveryPolicy;
 }): Promise<{ jobId: string }> {
 	const delivery = await payload.findByID({
 		collection: "lead-deliveries",
@@ -33,7 +36,9 @@ export async function retryLeadDelivery({
 		throw new Error("Manual retry is not allowed for a delivered row.");
 	}
 	if (delivery.jobId) {
-		throw new Error("Manual retry requires no live job identity on the delivery.");
+		throw new Error(
+			"Manual retry requires no live job identity on the delivery.",
+		);
 	}
 
 	const attemptLog = appendAttemptLog(
@@ -46,6 +51,7 @@ export async function retryLeadDelivery({
 			safeCode: "manual_retry",
 			redactedNote: `Manual retry requested by user ${actorUserId}.`,
 		},
+		policy,
 	);
 
 	await payload.update({

@@ -18,6 +18,7 @@ import {
 	safeOutboundFetch,
 } from "../src/core/security/safe-outbound-client.ts";
 import { parseTestApprovedOrigins } from "../src/core/security/test-destinations.ts";
+import { projectConfig } from "../src/project/project.config.ts";
 import {
 	createControllableClock,
 	installRuntimeClock,
@@ -58,11 +59,12 @@ assert.equal(claimed?.status, "sending");
 const retried = completeLeadDeliveryAttempt({
 	delivery: claimed,
 	nowIso: clock.nowIso(),
+	policy: projectConfig.leadDelivery,
 	result: {
 		kind: "retryable",
 		safeCode: "timeout",
 		redactedNote: "timeout",
-		backoffMs: retryBackoffMs(1),
+		backoffMs: retryBackoffMs(1, projectConfig.leadDelivery),
 	},
 });
 assert.equal(retried.status, "pending");

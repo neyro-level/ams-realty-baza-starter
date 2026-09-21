@@ -618,6 +618,7 @@ await assert.rejects(
 			payload,
 			leadDeliveryId: String(enqueueCrashDelivery.id),
 			nowIso: clock.nowIso(),
+			policy: projectConfig.leadDelivery,
 			env: {
 				LEAD_OUTBOUND_HOSTS: "127.0.0.1",
 				MAX_API_URL: process.env.MAX_API_URL,
