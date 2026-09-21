@@ -13,8 +13,9 @@ import type {
 import type { PublicCatalogProperty, PublicCatalogResult } from "./catalog";
 import type { PublicCatalogFacetsResult } from "./catalog";
 import type { PublicPageRecord } from "./pages";
+import { siteConfig } from "../../../project/site.config.ts";
 
-const brandName = "AMS Realty Baza Starter";
+const brandName = siteConfig.brandName;
 const logo = {
 	kind: "managed" as const,
 	src: "/fixture/logo.svg",
@@ -24,7 +25,11 @@ const logo = {
 };
 
 function rub(priceMinor: number) {
-	return `${new Intl.NumberFormat("ru-RU").format(priceMinor / 100)} ₽`;
+	return new Intl.NumberFormat(siteConfig.locale, {
+		style: "currency",
+		currency: siteConfig.currency,
+		maximumFractionDigits: 0,
+	}).format(priceMinor / 100);
 }
 
 function compact<T>(items: (T | null | undefined | false)[]): T[] {
@@ -57,7 +62,7 @@ export function toPropertyCardDTO(property: PublicCatalogProperty): PropertyCard
 			? {
 					priceMinor: property.priceMinor,
 					pricePerMeterMinor: property.pricePerMeterMinor ?? undefined,
-					currency: property.currency ?? "RUB",
+					currency: property.currency ?? siteConfig.currency,
 					period: property.dealType === "rent" ? "month" : "total",
 					label: rub(property.priceMinor),
 				}

@@ -8,11 +8,11 @@
 AMS_PROFILE=REALTY_BASE
 DELIVERY_PROFILE=COMMERCIAL
 Mode=BUILD
-Git platform=SOURCECRAFT_PRIMARY
+Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. APPROVED программа `AMS-REALTBASE-RESIDUAL-ALIGN` использует `MERGE_AFTER_GATE` в `main` по эпикам. Production в этот план не входит. GitHub не является delivery surface.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №6 v4 APPROVED после отмены GitHub-primary; Developer execution разрешён после CLEAN reconciliation revised graph. Используется `MERGE_AFTER_GATE` в SourceCraft; GitHub получает только fast-forward mirror canonical `main`. Production в Plan №6 не входит.
 
 ## Stack и ownership
 
@@ -35,7 +35,9 @@ Major upgrade требует отдельного решения и targeted pro
 | Public reads | `src/core/data-access/public` | только Public Gateway policy и DTO output |
 | Privileged operations | `src/core/data-access/system` | именованные system operations; `overrideAccess: true` только здесь |
 | Feed mutation | `src/core/data-access/ingest` | ingest gateway и утверждённые atomic SQL operations |
-| Schema/auth/migrations/jobs | `src/payload` | единственный backend/schema owner |
+| Project schema/config | `src/project/collections`, `src/project/env.ts`, `src/project/jobs` | Payload остаётся единственным backend/schema owner |
+| Generic access helpers | `src/core/access` | переиспользуемые роли без project-specific schema |
+| Payload migration history | `migrations` | канонический корневой каталог, заданный в `payload.config.ts` |
 | Cache invalidation | `src/core/cache` | internal HTTP revalidation contract; in-process executor только внутри Next runtime |
 
 ```text
@@ -47,6 +49,12 @@ public UI
 ```
 
 Reusable UI не импортирует Payload, DB clients или persistence types. Configurable outbound HTTP проходит через Safe Outbound Client; raw anonymous business REST закрывается на edge и Payload boundary. Public Gateway: `src/core/data-access/public`. System Gateway: `src/core/data-access/system`.
+
+## Env и runtime config
+
+`src/project/env.ts` — единственный владелец typed schema, определения режима и списка обязательных runtime-полей. `src/core/operations/runtime-env.ts` является только compatibility re-export и не содержит второй матрицы. Режимы: `build`, `development`, `migrate`, `runtime`, `test`; build не требует production secrets, а runtime fail-fast выполняется через instrumentation до обслуживания трафика.
+
+Прямое чтение `process.env` в runtime-коде допускается только для framework mode (`NODE_ENV`) и изолированных test-only переключателей (`AMS_ALLOW_TEST_DESTINATIONS`, `AMS_TEST_APPROVED_ORIGINS`). Остальные project runtime knobs читаются через `runtimeEnv`.
 
 ## Access modes
 

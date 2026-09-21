@@ -2,6 +2,7 @@ import "server-only";
 
 import type { PageSEOContract } from "@ams/realtbase-contracts";
 import type { Payload } from "payload";
+import { siteConfig } from "../../../project/site.config.ts";
 import { publicGatewayPolicy } from "./policy";
 
 export type PublicPageRecord = {
@@ -18,9 +19,9 @@ function pageSeo(
 	noindex?: boolean | null,
 ): PageSEOContract {
 	const canonicalPath = slug === "home" ? "/" : `/${slug}`;
-	const seoTitle = title.includes("AMS Realty Baza Starter")
+	const seoTitle = title.includes(siteConfig.brandName)
 		? title
-		: `${title} — AMS Realty Baza Starter`;
+		: `${title} — ${siteConfig.brandName}`;
 
 	return {
 		title: seoTitle,

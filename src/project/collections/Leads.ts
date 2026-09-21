@@ -1,5 +1,5 @@
 import type { CollectionConfig, FieldAccess } from "payload";
-import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
+import { adminsAndOwners, hasRole, ownersOnly } from "../../core/access/roles.ts";
 
 const piiFieldAccess: {
 	read: FieldAccess;

@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { publicPageReadAccess } from "../../core/data-access/public/access-mode.ts";
-import { projectConfig } from "../../project/project.config.ts";
-import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
+import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
+import { projectConfig } from "../project.config.ts";
 
 export const Pages: CollectionConfig = {
 	slug: "pages",

@@ -38,7 +38,7 @@ export function planLeadRetentionRun(leadRetentionDays: number | null): LeadRete
 }
 
 export function evaluateProductionRetentionReadiness(input: {
-	runtimeMode: "build" | "migrate" | "runtime" | "development";
+	runtimeMode: "build" | "migrate" | "runtime" | "development" | "test";
 	publicLeadIntakeEnabled: boolean;
 	enabledLeadChannelCount: number;
 	leadRetentionDays: number | null;

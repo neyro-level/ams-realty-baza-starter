@@ -5,7 +5,7 @@ import {
 	mediaOverwriteDisabled,
 	uniqueMediaFilename,
 } from "../../core/storage/local-fs.ts";
-import { adminsAndOwners, ownersOnly } from "../access/roles.ts";
+import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
 
 const allowedMimeTypes = [
 	"image/jpeg",

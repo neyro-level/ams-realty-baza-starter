@@ -1,15 +1,22 @@
 # Backlog
 
-Статус: `Plan №5 / COMPLETED` — EPIC-01…13 доставлены в SourceCraft
-`main@089b0fb7a259b88fd1abd01683886d21ca34c2d1`. Финальный RISKY Gate №118 и
-post-merge `verify:daily` прошли; production не выпускался.
+Статус: `Plan №6 / APPROVED` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4.
+SourceCraft возвращён как primary, GitHub остаётся one-way mirror. v3 execution
+приостановлен; production исключён.
 
-Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN №5.md`. Статус exact snapshot: `AMS-REALTBASE-RESIDUAL-ALIGN` v1 `APPROVED`. Beads graph создаётся и reconciles из этого snapshot.
+Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md`. Exact v4 утверждён; revised inventory должен пройти Validate → Import → Reconcile до Developer execution.
 
 ## NOW
 
-- Активной implementation-программы нет. Следующий scope начинается только по
-  новой команде владельца; production release остаётся отдельным lifecycle.
+- Reconcile revised v4 graph и выполнить уникальный SourceCraft restoration EPIC-10.
+- После SourceCraft recovery продолжить незакрытую часть EPIC-05 и независимые ready epics.
+- Production release остаётся отдельным lifecycle и этим планом запрещён.
+
+## PRESERVED EXECUTION EVIDENCE
+
+- EPIC-01…04 v3 доставлены в interim GitHub history и не переоткрываются.
+- TASK-05-01 имеет отдельный commit/checkpoint; TASK-05-02 не claimed и не доставлен.
+- Локальные незакоммиченные изменения TASK-05-02 сохраняются как checkpoint, но не считаются выполнением.
 
 ## DONE IN PLAN №5
 

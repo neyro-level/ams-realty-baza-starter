@@ -6,7 +6,7 @@ import {
 import {
 	propertyNumericInvariantsDownSql,
 	propertyNumericInvariantsUpSql,
-} from "../../core/data-access/system/sql/property-numeric-invariants.ts";
+} from "../src/core/data-access/system/sql/property-numeric-invariants.ts";
 
 export async function up({ db }: MigrateUpArgs): Promise<void> {
 	await db.execute(sql.raw(propertyNumericInvariantsUpSql));

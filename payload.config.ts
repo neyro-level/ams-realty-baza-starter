@@ -1,19 +1,23 @@
 import { postgresAdapter } from "@payloadcms/db-postgres";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { buildConfig } from "payload";
 import sharp from "sharp";
-import { FeedSources } from "./src/payload/collections/FeedSources.ts";
-import { ImportIssues } from "./src/payload/collections/ImportIssues.ts";
-import { ImportRuns } from "./src/payload/collections/ImportRuns.ts";
-import { LeadDeliveries } from "./src/payload/collections/LeadDeliveries.ts";
-import { Leads } from "./src/payload/collections/Leads.ts";
-import { Media } from "./src/payload/collections/Media.ts";
-import { Pages } from "./src/payload/collections/Pages.ts";
-import { Properties } from "./src/payload/collections/Properties.ts";
-import { Redirects } from "./src/payload/collections/Redirects.ts";
-import { Users } from "./src/payload/collections/Users.ts";
-import { runtimeEnv } from "./src/payload/env.ts";
-import { payloadJobsAutoRun } from "./src/payload/jobs/queues.ts";
-import { payloadJobTasks } from "./src/payload/jobs/tasks.ts";
+import { FeedSources } from "./src/project/collections/FeedSources.ts";
+import { ImportIssues } from "./src/project/collections/ImportIssues.ts";
+import { ImportRuns } from "./src/project/collections/ImportRuns.ts";
+import { LeadDeliveries } from "./src/project/collections/LeadDeliveries.ts";
+import { Leads } from "./src/project/collections/Leads.ts";
+import { Media } from "./src/project/collections/Media.ts";
+import { Pages } from "./src/project/collections/Pages.ts";
+import { Properties } from "./src/project/collections/Properties.ts";
+import { Redirects } from "./src/project/collections/Redirects.ts";
+import { Users } from "./src/project/collections/Users.ts";
+import { runtimeEnv } from "./src/project/env.ts";
+import { payloadJobsAutoRun } from "./src/project/jobs/queues.ts";
+import { payloadJobTasks } from "./src/project/jobs/tasks.ts";
+
+const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 const databaseUri =
 	runtimeEnv.DATABASE_URI ??
@@ -41,7 +45,7 @@ export default buildConfig({
 	csrf: runtimeEnv.NEXT_PUBLIC_SERVER_URL ? [runtimeEnv.NEXT_PUBLIC_SERVER_URL] : [],
 	cookiePrefix: "payload",
 	db: postgresAdapter({
-		migrationDir: "src/payload/migrations",
+		migrationDir: resolve(projectRoot, "migrations"),
 		pool: {
 			connectionString: databaseUri,
 			max: runtimeEnv.DATABASE_POOL_MAX,
@@ -62,6 +66,6 @@ export default buildConfig({
 	serverURL: runtimeEnv.NEXT_PUBLIC_SERVER_URL,
 	sharp,
 	typescript: {
-		outputFile: "src/payload/payload-types.ts",
+		outputFile: resolve(projectRoot, "src/project/payload-types.ts"),
 	},
 });

@@ -24,11 +24,11 @@ import {
 	isLocalMediaReady,
 	readDataVolumeFreeRatio,
 } from "../../../../core/storage/local-fs.ts";
-import { runtimeEnv } from "../../../../payload/env.ts";
+import { runtimeEnv } from "../../../../project/env.ts";
 import {
 	programmaticPayloadJobTasks,
 	staticPayloadJobTasks,
-} from "../../../../payload/jobs/registry.ts";
+} from "../../../../project/jobs/registry.ts";
 import { projectConfig } from "../../../../project/project.config.ts";
 
 export const runtime = "nodejs";
@@ -40,7 +40,7 @@ function nowIso() {
 
 function hasValidSecret(request: Request): boolean {
 	const expected =
-		process.env.INTERNAL_HEALTH_SECRET ?? process.env.REVALIDATE_SECRET;
+		runtimeEnv.INTERNAL_HEALTH_SECRET ?? runtimeEnv.REVALIDATE_SECRET;
 	const actual = request.headers.get("x-ams-health-secret");
 	return Boolean(expected && actual && actual === expected);
 }

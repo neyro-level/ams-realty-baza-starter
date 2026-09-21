@@ -90,7 +90,7 @@ assert.equal(
 
 assert.equal(
 	findSqlGovernanceViolations([
-		fixture("allowed", "migration-sql", "src/payload/migrations/fixture.ts"),
+		fixture("allowed", "migration-sql", "migrations/fixture.ts"),
 	]).length,
 	0,
 	"migration SQL fixture must remain allowed",

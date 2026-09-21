@@ -30,7 +30,7 @@ Atlas implementation evidence:
 
 - `src/core/ingest/yrl-parser.ts` — streaming XML → normalized offer;
 - `src/shared/types/feed-import.ts` — normalized schema;
-- `src/payload/collections/Properties.ts` — persisted fields;
+- `src/project/collections/Properties.ts` — persisted fields;
 - `src/core/data-access/public/queries.ts` — Public Gateway mapping/filtering;
 - `tests/fixtures/yrl-secondary.xml` и `yrl-newbuild.xml` — точная форма примеров;
 - `tests/unit/import-stage1.unit.spec.ts` — proof нормализации.

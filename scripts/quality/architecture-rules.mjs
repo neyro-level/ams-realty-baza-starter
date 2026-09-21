@@ -85,7 +85,7 @@ export function findPackageBoundaryViolations(entries) {
 			}
 			if (
 				isUi &&
-				(target.startsWith("src/payload/") || target.startsWith("src/project/"))
+				target.startsWith("src/project/")
 			) {
 				violations.push(
 					`${file}: UI imports application persistence ${target}`,
@@ -102,7 +102,7 @@ export function findPackageBoundaryViolations(entries) {
 function isCacheGraph(file) {
 	return (
 		file.startsWith("src/core/ingest/") ||
-		file.startsWith("src/payload/jobs/") ||
+		file.startsWith("src/project/jobs/") ||
 		file.startsWith("src/core/cache/")
 	);
 }

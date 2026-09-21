@@ -10,6 +10,7 @@ import {
 	buildPropertyJsonLd,
 	JsonLdScript,
 } from "@/core/seo/structured-data";
+import { siteConfig } from "@/project/site.config";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export async function generateMetadata({
 	if (!("property" in state)) {
 		if (state.lifecycle.kind === "gone") {
 			return toMetadata({
-				title: "Объект снят с публикации — AMS Realty Baza Starter",
+				title: `Объект снят с публикации — ${siteConfig.brandName}`,
 				description:
 					"Объект больше не публикуется. Посмотрите актуальные предложения в каталоге.",
 				canonicalPath: `/obekty/${slug}`,
@@ -37,7 +38,7 @@ export async function generateMetadata({
 	const { property } = state;
 	const robots = getPropertyRobots(property);
 	return toMetadata({
-		title: `${property.title} — AMS Realty Baza Starter`,
+		title: `${property.title} — ${siteConfig.brandName}`,
 		description: property.description,
 		canonicalPath: property.href,
 		indexing: robots.indexing,

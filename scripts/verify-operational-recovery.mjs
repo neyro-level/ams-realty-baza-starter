@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { isLiveFuturePayloadJob } from "../src/core/leads/index.ts";
-import { payloadJobTaskSlugs } from "../src/payload/jobs/registry.ts";
+import { payloadJobTaskSlugs } from "../src/project/jobs/registry.ts";
 
 const operations = readFileSync("docs/OPERATIONS.md", "utf8");
-const jobs = readFileSync("src/payload/jobs/tasks.ts", "utf8");
+const jobs = readFileSync("src/project/jobs/tasks.ts", "utf8");
 const feedSources = readFileSync(
-	"src/payload/collections/FeedSources.ts",
+	"src/project/collections/FeedSources.ts",
 	"utf8",
 );
 const leadDeliveries = readFileSync(
-	"src/payload/collections/LeadDeliveries.ts",
+	"src/project/collections/LeadDeliveries.ts",
 	"utf8",
 );
 
@@ -56,7 +56,7 @@ assert.ok(
 	"controlled manual retry endpoint is required",
 );
 
-const recoverSource = readFileSync("src/payload/jobs/tasks.ts", "utf8");
+const recoverSource = readFileSync("src/project/jobs/tasks.ts", "utf8");
 assert.ok(
 	recoverSource.includes("inspectPayloadJob"),
 	"orphan recovery must inspect jobs through the system gateway",

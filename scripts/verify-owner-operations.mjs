@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { FeedSources } from "../src/payload/collections/FeedSources.ts";
-import { ImportIssues } from "../src/payload/collections/ImportIssues.ts";
-import { ImportRuns } from "../src/payload/collections/ImportRuns.ts";
-import { LeadDeliveries } from "../src/payload/collections/LeadDeliveries.ts";
-import { Leads } from "../src/payload/collections/Leads.ts";
+import { FeedSources } from "../src/project/collections/FeedSources.ts";
+import { ImportIssues } from "../src/project/collections/ImportIssues.ts";
+import { ImportRuns } from "../src/project/collections/ImportRuns.ts";
+import { LeadDeliveries } from "../src/project/collections/LeadDeliveries.ts";
+import { Leads } from "../src/project/collections/Leads.ts";
 
 const root = process.cwd();
 
@@ -148,7 +148,7 @@ assert.equal(payloadConfig.includes("slug: \"payload-jobs\""), false);
 assert.equal(payloadConfig.includes("jobsCollectionOverrides"), false);
 
 const propertiesSource = readFileSync(
-	join(root, "src", "payload", "collections", "Properties.ts"),
+	join(root, "src", "project", "collections", "Properties.ts"),
 	"utf8",
 );
 assert.equal(
@@ -187,18 +187,15 @@ assert.ok(
 	"PROJECT.md mapping must exclude CRM/telegram keys",
 );
 
-const envSource = readFileSync(join(root, "src", "payload", "env.ts"), "utf8");
+const envSource = readFileSync(join(root, "src", "project", "env.ts"), "utf8");
 assert.ok(
 	/NEXT_PUBLIC_SERVER_URL:\s*optionalString/.test(envSource),
 	"NEXT_PUBLIC_SERVER_URL must not use optionalUrl at Zod parse",
 );
 
-const runtimeEnvSource = readFileSync(
-	join(root, "src", "core", "operations", "runtime-env.ts"),
-	"utf8",
-);
+const runtimeEnvSource = envSource;
 assert.ok(
-	runtimeEnvSource.includes('missing.push("LEAD_CHANNELS")'),
+	runtimeEnvSource.includes('addInvalid(missing, "LEAD_CHANNELS")'),
 	"unknown LEAD_CHANNELS must fail-fast at runtime",
 );
 

@@ -1,0 +1,1638 @@
+{
+  "schema_version": 2,
+  "beads_prefix": "ams6",
+  "source": {
+    "plan_id": "AMS-REALTBASE-STARTER-FINAL-FREEZE",
+    "path": "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md",
+    "version": "v4",
+    "status": "APPROVED",
+    "approved_by": "owner",
+    "approved_at": "2026-09-21T16:44:45+03:00",
+    "sha256": "5f59679931b3cdce87d10eae93e4cce7e0ee3184911d67a95f4e04db298cf563",
+    "epic_anchors": [
+      "EPIC-01",
+      "EPIC-02",
+      "EPIC-03",
+      "EPIC-04",
+      "EPIC-05",
+      "EPIC-06",
+      "EPIC-07",
+      "EPIC-08",
+      "EPIC-09",
+      "EPIC-10"
+    ]
+  },
+  "nodes": [
+    {
+      "key": "EPIC-01",
+      "title": "Historical GitHub bootstrap (delivered, superseded)",
+      "type": "epic",
+      "source_anchor": "EPIC-01",
+      "goal": "Preserve the closed v3 GitHub bootstrap and its exact execution evidence without reopening or reusing its identity.",
+      "scope": [
+        "closed v3 evidence",
+        "immutable EPIC-01 identity",
+        "no new implementation"
+      ],
+      "acceptance_criteria": [
+        "EPIC-01 remains closed",
+        "historical GitHub evidence remains attached",
+        "SourceCraft restoration uses EPIC-10"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-01--github-primary-cutover--manual-gate-bootstrap",
+        "AGENTS.md",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "reopen closed work",
+        "rewrite historical evidence",
+        "production"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-01-01",
+      "title": "Implement GitHub primary cutover",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-01",
+      "source_anchor": "EPIC-01",
+      "goal": "Project canon, CI policy and exact-head guard operate only through GitHub primary.",
+      "scope": [
+        "active project docs",
+        ".github/workflows/manual-gate.yml",
+        "CI exact-head and policy guards",
+        "remove .sourcecraft/ci.yaml"
+      ],
+      "acceptance_criteria": [
+        "provider-neutral SHA assertion compares expected, GitHub and checkout SHAs",
+        "bootstrap trigger is restricted to codex/github-primary-bootstrap",
+        "no deploy job exists",
+        "quality guards no longer require SourceCraft"
+      ],
+      "required_checks": [
+        "pnpm quality:guards",
+        "pnpm verify:daily",
+        "pnpm verify:merge-risky",
+        "GitHub bootstrap run exact head"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-01--github-primary-cutover--manual-gate-bootstrap",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "scope expansion",
+        "production",
+        "SourceCraft write",
+        "GitHub permission failure",
+        "baseline drift",
+        "new secret"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "work:implementation",
+        "risk:risky",
+        "pilot"
+      ]
+    },
+    {
+      "key": "TASK-01-DELIVERY",
+      "title": "Deliver EPIC-01 through GitHub",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-01",
+      "source_anchor": "EPIC-01",
+      "goal": "Merge the GitHub-primary cutover through one exact-head RISKY gate.",
+      "scope": [
+        "GitHub PR",
+        "full diff review",
+        "RISKY exact-head Actions gate",
+        "merge and remote/worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and head SHA are verified",
+        "bootstrap RISKY run passes on exact PR head",
+        "merge reaches GitHub main",
+        "SourceCraft and production remain unchanged"
+      ],
+      "required_checks": [
+        "GitHub PR source/target/head",
+        "GitHub bootstrap RISKY run",
+        "post-merge GitHub main ancestry"
+      ],
+      "depends_on": [
+        "TASK-01-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-01--github-primary-cutover--manual-gate-bootstrap",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "production",
+        "SourceCraft write",
+        "gate not proven",
+        "PR head changed"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "EPIC-02",
+      "title": "Canonical folder-form alignment",
+      "type": "epic",
+      "source_anchor": "EPIC-02",
+      "goal": "Runtime ownership uses canonical Core 5.5 paths with unchanged migration semantics.",
+      "scope": [
+        "src/project path owners",
+        "root migrations",
+        "imports and guards",
+        "generated Payload types/import map"
+      ],
+      "acceptance_criteria": [
+        "old live src/payload references are zero",
+        "migration history and schema semantics are unchanged",
+        "Payload import map and types regenerate cleanly"
+      ],
+      "depends_on": [
+        "EPIC-01"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-02--canonical-folder-form-alignment",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "migration semantic change",
+        "generated contract drift"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-02-01",
+      "title": "Align canonical project and migration paths",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-02",
+      "source_anchor": "EPIC-02",
+      "goal": "Schema, auth, jobs, env and migrations resolve from canonical project-owned paths.",
+      "scope": [
+        "path moves",
+        "import rewrites",
+        "Payload migrationDir",
+        "generated artifacts",
+        "architecture guards"
+      ],
+      "acceptance_criteria": [
+        "canonical target tree matches the plan",
+        "old live path inventory is empty",
+        "clean and existing migration paths remain valid"
+      ],
+      "required_checks": [
+        "pnpm payload:generate:types",
+        "pnpm payload:generate:importmap",
+        "pnpm verify:schema",
+        "pnpm quality:architecture",
+        "pnpm quality:guards",
+        "pnpm verify:merge-risky"
+      ],
+      "depends_on": [
+        "TASK-01-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-02--canonical-folder-form-alignment",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "migration semantic change",
+        "unexpected generated diff",
+        "new secret"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "work:implementation",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-02-DELIVERY",
+      "title": "Deliver EPIC-02 through GitHub",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-02",
+      "source_anchor": "EPIC-02",
+      "goal": "Merge canonical path alignment through one exact-head RISKY gate.",
+      "scope": [
+        "GitHub PR",
+        "diff review",
+        "RISKY gate",
+        "merge and cleanup"
+      ],
+      "acceptance_criteria": [
+        "exact PR head passes RISKY gate",
+        "GitHub main contains path move",
+        "migration semantics remain proven"
+      ],
+      "required_checks": [
+        "GitHub PR source/target/head",
+        "GitHub RISKY gate",
+        "post-merge ancestry"
+      ],
+      "depends_on": [
+        "TASK-02-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-02--canonical-folder-form-alignment",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "production",
+        "gate not proven",
+        "PR head changed"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "EPIC-03",
+      "title": "Unified env and runtime config contract",
+      "type": "epic",
+      "source_anchor": "EPIC-03",
+      "goal": "One project-owned env schema provides deterministic mode-aware fail-closed runtime validation.",
+      "scope": [
+        "env schema owner",
+        "runtime config facade",
+        "conditional validation",
+        "mode matrix tests"
+      ],
+      "acceptance_criteria": [
+        "one schema owner exists",
+        "direct process.env drift is mechanically rejected",
+        "build and runtime modes pass deterministic fixtures"
+      ],
+      "depends_on": [
+        "EPIC-02"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-03--unified-env--runtime-config-contract",
+        "docs/03_ARCHITECTURE.md",
+        ".env.example"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "secret exposure",
+        "build compatibility regression",
+        "weakened validation"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:c",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-03-01",
+      "title": "Implement unified env and runtime config",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-03",
+      "source_anchor": "EPIC-03",
+      "goal": "All runtime consumers use one validated config surface without breaking build-time behavior.",
+      "scope": [
+        "src/project/env.ts",
+        "runtime config consumers",
+        "env guards",
+        "positive and negative mode fixtures"
+      ],
+      "acceptance_criteria": [
+        "mode matrix is deterministic",
+        "known required values fail closed",
+        "loopback revalidation remains allowed",
+        "no unused env knobs are added"
+      ],
+      "required_checks": [
+        "pnpm verify:jobs-config",
+        "pnpm verify:security-boundaries",
+        "pnpm quality:guards",
+        "pnpm typecheck",
+        "pnpm build",
+        "pnpm verify:merge-risky"
+      ],
+      "depends_on": [
+        "TASK-02-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-03--unified-env--runtime-config-contract",
+        "docs/03_ARCHITECTURE.md",
+        ".env.example"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "secret exposure",
+        "build regression",
+        "validation weakening"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:c",
+        "work:implementation",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-03-DELIVERY",
+      "title": "Deliver EPIC-03 through GitHub",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-03",
+      "source_anchor": "EPIC-03",
+      "goal": "Merge the unified env contract through one exact-head RISKY gate.",
+      "scope": [
+        "GitHub PR",
+        "diff review",
+        "RISKY gate",
+        "merge and cleanup"
+      ],
+      "acceptance_criteria": [
+        "exact PR head passes RISKY gate",
+        "GitHub main contains one env owner",
+        "no secret is exposed"
+      ],
+      "required_checks": [
+        "GitHub PR source/target/head",
+        "GitHub RISKY gate",
+        "post-merge ancestry"
+      ],
+      "depends_on": [
+        "TASK-03-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-03--unified-env--runtime-config-contract",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "production",
+        "gate not proven",
+        "PR head changed"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:c",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "EPIC-04",
+      "title": "Project identity and client readiness gate",
+      "type": "epic",
+      "source_anchor": "EPIC-04",
+      "goal": "A client clone cannot silently retain starter identity or demo topology.",
+      "scope": [
+        "site identity config",
+        "runtime hardcode removal",
+        "client readiness guard",
+        "clone checklist"
+      ],
+      "acceptance_criteria": [
+        "starter identity is centralized",
+        "invalid client fixture fails",
+        "valid fixture passes",
+        "snapshot clone verification remains distinct"
+      ],
+      "depends_on": [
+        "EPIC-03"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-04--project-identity--client-readiness-gate",
+        "docs/PROJECT.md",
+        "docs/CLONE_ONBOARDING.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "starter placeholder accepted in client mode",
+        "topology ambiguity"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-04-01",
+      "title": "Implement identity and client readiness",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-04",
+      "source_anchor": "EPIC-04",
+      "goal": "Client-mode configuration rejects starter identity, demo runtime defaults and incomplete deployment decisions.",
+      "scope": [
+        "site.config.ts",
+        "metadata/SEO consumers",
+        "verify:client-readiness",
+        "negative and positive client fixtures",
+        "clone onboarding"
+      ],
+      "acceptance_criteria": [
+        "hardcoded starter runtime identity is removed",
+        "invalid fixture fails for every required rule",
+        "valid client fixture passes",
+        "tests and historical docs are not false positives"
+      ],
+      "required_checks": [
+        "pnpm verify:clone-readiness",
+        "pnpm verify:client-readiness --mode=fixture-client",
+        "pnpm verify:seo-contracts",
+        "pnpm verify:ui-core",
+        "pnpm typecheck",
+        "pnpm lint",
+        "pnpm verify:merge-standard"
+      ],
+      "depends_on": [
+        "TASK-03-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-04--project-identity--client-readiness-gate",
+        "docs/PROJECT.md",
+        "docs/CLONE_ONBOARDING.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "invalid client fixture passes",
+        "unapproved topology decision"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-04-DELIVERY",
+      "title": "Deliver EPIC-04 through GitHub",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-04",
+      "source_anchor": "EPIC-04",
+      "goal": "Merge identity and readiness changes through one exact-head STANDARD gate.",
+      "scope": [
+        "GitHub PR",
+        "diff review",
+        "STANDARD gate",
+        "merge and cleanup"
+      ],
+      "acceptance_criteria": [
+        "exact PR head passes STANDARD gate",
+        "GitHub main rejects invalid client fixtures"
+      ],
+      "required_checks": [
+        "GitHub PR source/target/head",
+        "GitHub STANDARD gate",
+        "post-merge ancestry"
+      ],
+      "depends_on": [
+        "TASK-04-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-04--project-identity--client-readiness-gate",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "production",
+        "gate not proven",
+        "PR head changed"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "EPIC-05",
+      "title": "Config-driven lead delivery policy",
+      "type": "epic",
+      "source_anchor": "EPIC-05",
+      "goal": "One typed project policy drives lead retry, timeout and recovery behavior without a speculative routing engine.",
+      "scope": [
+        "project delivery policy",
+        "core policy injection",
+        "recovery consistency",
+        "channel capabilities"
+      ],
+      "acceptance_criteria": [
+        "changed test policy changes nextAttemptAt and waitUntil consistently",
+        "recovery does not duplicate jobs",
+        "required integration suites do not skip"
+      ],
+      "depends_on": [
+        "EPIC-02"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-05--config-driven-lead-delivery-policy",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "PII exposure",
+        "state schema change",
+        "duplicate live job risk"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-05-01",
+      "title": "Define and test lead delivery policy",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-05",
+      "source_anchor": "EPIC-05",
+      "goal": "Typed project policy and domain behavior are implemented independently of shared jobs integration.",
+      "scope": [
+        "policy type/defaults/validation",
+        "delivery-state policy input",
+        "channel capability contract",
+        "domain fixtures"
+      ],
+      "acceptance_criteria": [
+        "hardcoded project-tunable values leave core",
+        "invalid policy fails",
+        "routing remains all enabled channels",
+        "domain fixtures prove timing behavior"
+      ],
+      "required_checks": [
+        "pnpm verify:lead-delivery-state",
+        "pnpm verify:max-adapter",
+        "pnpm verify:custom-webhook-adapter",
+        "pnpm typecheck"
+      ],
+      "depends_on": [
+        "TASK-02-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-05--config-driven-lead-delivery-policy",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "PII exposure",
+        "state schema change",
+        "speculative routing expansion"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "work:implementation",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-05-02",
+      "title": "Integrate lead policy with jobs and recovery",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-05",
+      "source_anchor": "EPIC-05",
+      "goal": "Jobs, handlers and recovery consume the same validated policy after the env contract is merged.",
+      "scope": [
+        "shared jobs/tasks integration",
+        "waitUntil consistency",
+        "stale sending recovery",
+        "required DB integration proof"
+      ],
+      "acceptance_criteria": [
+        "handler and waitUntil use identical computed schedule",
+        "recovery creates no duplicate live job",
+        "all required integration suites run with zero skip"
+      ],
+      "required_checks": [
+        "pnpm verify:lead-outbox",
+        "pnpm verify:lead-delivery-state",
+        "pnpm verify:operational-recovery",
+        "pnpm verify:integration:required",
+        "pnpm verify:merge-risky"
+      ],
+      "depends_on": [
+        "TASK-05-01",
+        "TASK-10-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-05--config-driven-lead-delivery-policy",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "unsafe test database",
+        "required suite skipped",
+        "duplicate live job risk"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "work:implementation",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-05-DELIVERY",
+      "title": "Deliver EPIC-05 through SourceCraft",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-05",
+      "source_anchor": "EPIC-05",
+      "goal": "Merge lead delivery policy through one exact-head RISKY gate.",
+      "scope": [
+        "SourceCraft PR",
+        "diff review",
+        "RISKY gate",
+        "merge and cleanup"
+      ],
+      "acceptance_criteria": [
+        "exact PR head passes RISKY gate",
+        "SourceCraft main contains consistent policy-driven jobs and recovery"
+      ],
+      "required_checks": [
+        "SourceCraft PR source/target/head",
+        "SourceCraft RISKY gate",
+        "post-merge ancestry"
+      ],
+      "depends_on": [
+        "TASK-05-01",
+        "TASK-05-02"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-05--config-driven-lead-delivery-policy",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "production",
+        "gate not proven",
+        "PR head changed"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "EPIC-06",
+      "title": "Module manifests and activation governance",
+      "type": "epic",
+      "source_anchor": "EPIC-06",
+      "goal": "Optional module activation has project-owned manifests and a mechanical guard without activating modules.",
+      "scope": [
+        "docs/modules manifests",
+        "common manifest schema",
+        "PROJECT mapping",
+        "activation guard"
+      ],
+      "acceptance_criteria": [
+        "Novostroyki, Journal and Agents manifests exist",
+        "source marker with disabled project module fails",
+        "no second framework is introduced"
+      ],
+      "depends_on": [
+        "EPIC-02",
+        "EPIC-10"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-06--module-manifests--activation-governance",
+        "docs/PROJECT.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "module activation",
+        "second governance framework",
+        "false activation"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:c",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-06-01",
+      "title": "Implement module manifests and governance guard",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-06",
+      "source_anchor": "EPIC-06",
+      "goal": "Module documentation and source markers agree mechanically with PROJECT activation state.",
+      "scope": [
+        "docs/modules",
+        "manifest schema/readme",
+        "PROJECT mapping",
+        "quality guard fixtures"
+      ],
+      "acceptance_criteria": [
+        "all three manifests satisfy the common schema",
+        "negative fixture fails",
+        "disabled modules remain inactive"
+      ],
+      "required_checks": [
+        "pnpm quality:guards",
+        "pnpm quality:architecture",
+        "pnpm verify:daily",
+        "pnpm verify:merge-standard"
+      ],
+      "depends_on": [
+        "TASK-02-DELIVERY",
+        "TASK-10-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-06--module-manifests--activation-governance",
+        "docs/PROJECT.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "module activation",
+        "false positive guard",
+        "second framework"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:c",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-06-DELIVERY",
+      "title": "Deliver EPIC-06 through SourceCraft",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-06",
+      "source_anchor": "EPIC-06",
+      "goal": "Merge module governance through one exact-head STANDARD gate.",
+      "scope": [
+        "SourceCraft PR",
+        "diff review",
+        "STANDARD gate",
+        "merge and cleanup"
+      ],
+      "acceptance_criteria": [
+        "exact PR head passes STANDARD gate",
+        "SourceCraft main contains manifests and activation guard"
+      ],
+      "required_checks": [
+        "SourceCraft PR source/target/head",
+        "SourceCraft STANDARD gate",
+        "post-merge ancestry"
+      ],
+      "depends_on": [
+        "TASK-06-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-06--module-manifests--activation-governance",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "production",
+        "gate not proven",
+        "PR head changed"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:c",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "EPIC-07",
+      "title": "Timeweb client production blueprint",
+      "type": "epic",
+      "source_anchor": "EPIC-07",
+      "goal": "First-client Timeweb activation has a validated static blueprint without changing starter runtime or claiming live proof.",
+      "scope": [
+        "Managed PostgreSQL reference",
+        "S3 activation reference",
+        "immutable artifact compose",
+        "nginx/backup/monitoring proof templates"
+      ],
+      "acceptance_criteria": [
+        "blueprint has no credentials or demo domain",
+        "Managed PostgreSQL and S3 are required for client production",
+        "live provider claims remain NOT PROVEN"
+      ],
+      "depends_on": [
+        "EPIC-04",
+        "EPIC-10"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-07--timeweb-client-production-blueprint",
+        "docs/CLONE_ONBOARDING.md",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "real credentials",
+        "guessed provider value",
+        "live proof claim"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:e",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-07-01",
+      "title": "Create static Timeweb client blueprint",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-07",
+      "source_anchor": "EPIC-07",
+      "goal": "Project-owned reference files make clone activation repeatable while leaving demo runtime local.",
+      "scope": [
+        "deploy/clients/timeweb reference tree",
+        "static validation",
+        "client readiness integration",
+        "official documentation verification"
+      ],
+      "acceptance_criteria": [
+        "no secret values or demo domain exist",
+        "immutable artifact and one jobs owner are explicit",
+        "S3 adapter is not added to starter dependencies",
+        "live states are NOT PROVEN"
+      ],
+      "required_checks": [
+        "pnpm verify:client-readiness --mode=fixture-client",
+        "pnpm quality:guards",
+        "pnpm verify:daily",
+        "pnpm verify:merge-risky"
+      ],
+      "depends_on": [
+        "TASK-04-DELIVERY",
+        "TASK-10-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-07--timeweb-client-production-blueprint",
+        "docs/CLONE_ONBOARDING.md",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "real credential",
+        "guessed provider config",
+        "starter S3 runtime dependency",
+        "live proof claim"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:e",
+        "work:implementation",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-07-DELIVERY",
+      "title": "Deliver EPIC-07 through SourceCraft",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-07",
+      "source_anchor": "EPIC-07",
+      "goal": "Merge the static blueprint through one exact-head RISKY gate without rollout.",
+      "scope": [
+        "SourceCraft PR",
+        "diff review",
+        "RISKY gate",
+        "merge and cleanup"
+      ],
+      "acceptance_criteria": [
+        "exact PR head passes RISKY gate",
+        "SourceCraft main contains only static blueprint evidence",
+        "no production action occurs"
+      ],
+      "required_checks": [
+        "SourceCraft PR source/target/head",
+        "SourceCraft RISKY gate",
+        "post-merge ancestry"
+      ],
+      "depends_on": [
+        "TASK-07-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-07--timeweb-client-production-blueprint",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "production",
+        "gate not proven",
+        "PR head changed"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:e",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "EPIC-08",
+      "title": "Token report mode and clone UI cleanup workflow",
+      "type": "epic",
+      "source_anchor": "EPIC-08",
+      "goal": "One existing analyzer provides report mode and preserves deterministic DEAD-token enforcement for client clones.",
+      "scope": [
+        "design token analyzer refactor",
+        "tokens:report command",
+        "module-reserved contract",
+        "clone onboarding"
+      ],
+      "acceptance_criteria": [
+        "only one analyzer exists",
+        "temporary dead token is reported and fails quality gate",
+        "valid module-reserved token is retained"
+      ],
+      "depends_on": [
+        "EPIC-06"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-08--token-report-mode--clone-ui-cleanup-workflow",
+        "docs/DESIGN.md",
+        "docs/PROJECT.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "automatic destructive prune",
+        "second analyzer",
+        "DEAD gate weakening"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-08-01",
+      "title": "Add report mode to existing token analyzer",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-08",
+      "source_anchor": "EPIC-08",
+      "goal": "Clone UI cleanup uses one analyzer for human-readable reporting and mechanical failure.",
+      "scope": [
+        "scripts/quality/design-tokens.mjs",
+        "tokens:report script",
+        "positive/negative fixtures",
+        "module-reserved integration",
+        "onboarding docs"
+      ],
+      "acceptance_criteria": [
+        "report classifies token state",
+        "quality command still fails on DEAD",
+        "module-reserved requires active manifest contract",
+        "no automatic deletion occurs"
+      ],
+      "required_checks": [
+        "pnpm tokens:report",
+        "pnpm quality:design-tokens",
+        "pnpm verify:drift",
+        "pnpm verify:ui-core",
+        "pnpm verify:merge-standard"
+      ],
+      "depends_on": [
+        "TASK-06-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-08--token-report-mode--clone-ui-cleanup-workflow",
+        "docs/DESIGN.md",
+        "docs/PROJECT.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "automatic token deletion",
+        "second analyzer",
+        "DEAD semantics change"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-08-DELIVERY",
+      "title": "Deliver EPIC-08 through SourceCraft",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-08",
+      "source_anchor": "EPIC-08",
+      "goal": "Merge token report workflow through one exact-head STANDARD gate.",
+      "scope": [
+        "SourceCraft PR",
+        "diff review",
+        "STANDARD gate",
+        "merge and cleanup"
+      ],
+      "acceptance_criteria": [
+        "exact PR head passes STANDARD gate",
+        "SourceCraft main retains one analyzer and DEAD enforcement"
+      ],
+      "required_checks": [
+        "SourceCraft PR source/target/head",
+        "SourceCraft STANDARD gate",
+        "post-merge ancestry"
+      ],
+      "depends_on": [
+        "TASK-08-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-08--token-report-mode--clone-ui-cleanup-workflow",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "production",
+        "gate not proven",
+        "PR head changed"
+      ],
+      "priority": 2,
+      "labels": [
+        "wave:d",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "EPIC-09",
+      "title": "Documentation cleanup, exact-head proof and starter freeze",
+      "type": "epic",
+      "source_anchor": "EPIC-09",
+      "goal": "One exact SourceCraft main SHA has a clean active reading path, complete pre-production evidence and immutable starter freeze reference.",
+      "scope": [
+        "active documentation path",
+        "clone onboarding",
+        "final drift and Core proof",
+        "UI proof",
+        "freeze evidence and tag"
+      ],
+      "acceptance_criteria": [
+        "P0 and P1 are zero",
+        "required RISKY gate passes exact head",
+        "final proof distinguishes NOT PROVEN live claims",
+        "starter-freeze-v1 points to proven SourceCraft main SHA"
+      ],
+      "depends_on": [
+        "EPIC-01",
+        "EPIC-02",
+        "EPIC-03",
+        "EPIC-04",
+        "EPIC-05",
+        "EPIC-06",
+        "EPIC-07",
+        "EPIC-08",
+        "EPIC-10"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-09--documentation-cleanup--final-exact-head-proof--starter-freeze",
+        "docs/README.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "P0 or P1",
+        "required proof failure",
+        "tag conflict",
+        "source drift"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:f",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-09-01",
+      "title": "Complete final docs, proof and freeze preparation",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-09",
+      "source_anchor": "EPIC-09",
+      "goal": "Active docs and final evidence describe one proven pre-production starter snapshot without historical noise or live claims.",
+      "scope": [
+        "docs cleanup",
+        "final clone onboarding",
+        "full exact-head checks",
+        "Core 18A matrix",
+        "responsive UI proof",
+        "final-starter-freeze.md"
+      ],
+      "acceptance_criteria": [
+        "active reading path excludes legacy execution plans",
+        "all required suites run with zero skip",
+        "P0 and P1 are zero",
+        "final artifact records exact SHA and NOT PROVEN items"
+      ],
+      "required_checks": [
+        "pnpm contracts:test",
+        "pnpm contracts:check",
+        "pnpm quality:architecture",
+        "pnpm quality:guards",
+        "pnpm tokens:report",
+        "pnpm verify:client-readiness --mode=fixture-client",
+        "pnpm verify:security-boundaries",
+        "pnpm verify:integration:required",
+        "pnpm typecheck",
+        "pnpm lint",
+        "pnpm build",
+        "pnpm verify:merge-risky"
+      ],
+      "depends_on": [
+        "TASK-01-DELIVERY",
+        "TASK-02-DELIVERY",
+        "TASK-03-DELIVERY",
+        "TASK-04-DELIVERY",
+        "TASK-05-DELIVERY",
+        "TASK-06-DELIVERY",
+        "TASK-07-DELIVERY",
+        "TASK-08-DELIVERY",
+        "TASK-10-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-09--documentation-cleanup--final-exact-head-proof--starter-freeze",
+        "docs/README.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "P0 or P1",
+        "unsafe test database",
+        "required suite skipped",
+        "source drift"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:f",
+        "work:implementation",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-09-DELIVERY",
+      "title": "Deliver EPIC-09 and create SourceCraft starter freeze tag",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-09",
+      "source_anchor": "EPIC-09",
+      "goal": "Merge final proof through one exact-head RISKY gate and tag the proven SourceCraft main SHA without production release.",
+      "scope": [
+        "SourceCraft PR",
+        "full diff review",
+        "RISKY gate",
+        "merge",
+        "starter-freeze-v1 tag",
+        "safe cleanup"
+      ],
+      "acceptance_criteria": [
+        "exact PR head passes RISKY gate",
+        "SourceCraft main ancestry is proven",
+        "starter-freeze-v1 points to the proven main SHA",
+        "no SourceCraft write or production action occurs"
+      ],
+      "required_checks": [
+        "SourceCraft PR source/target/head",
+        "SourceCraft RISKY gate",
+        "post-merge SourceCraft main ancestry",
+        "SourceCraft tag target"
+      ],
+      "depends_on": [
+        "TASK-09-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-09--documentation-cleanup--final-exact-head-proof--starter-freeze",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge",
+        "tag"
+      ],
+      "stop_conditions": [
+        "production",
+        "SourceCraft write",
+        "gate not proven",
+        "PR head changed",
+        "tag conflict"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:f",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "EPIC-10",
+      "title": "SourceCraft primary restoration and history reconciliation",
+      "type": "epic",
+      "source_anchor": "EPIC-10",
+      "goal": "SourceCraft is restored as the canonical primary with completed v3 history preserved and GitHub reduced to a one-way mirror.",
+      "scope": [
+        "SourceCraft primary canon",
+        "manual SourceCraft exact-head gates",
+        "non-force history reconciliation",
+        "GitHub fast-forward mirror"
+      ],
+      "acceptance_criteria": [
+        "SourceCraft main contains completed v3 history",
+        "manual-only exact-head gate policy passes",
+        "GitHub mirror equals canonical SourceCraft main",
+        "production remains unchanged"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-10--sourcecraft-primary-restoration--history-reconciliation",
+        "AGENTS.md",
+        "docs/03_ARCHITECTURE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "production",
+        "force push",
+        "history rewrite",
+        "SourceCraft permission failure",
+        "unproven exact SHA"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:a",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "TASK-10-01",
+      "title": "Restore SourceCraft primary canon and gate policy",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "parent_key": "EPIC-10",
+      "source_anchor": "EPIC-10",
+      "goal": "The reconciliation branch restores SourceCraft-owned delivery configuration and active canon without losing completed v3 commits.",
+      "scope": [
+        "active project docs",
+        ".sourcecraft/ci.yaml",
+        "SourceCraft exact-head and policy guards",
+        "remove active GitHub gate workflow"
+      ],
+      "acceptance_criteria": [
+        "origin is SourceCraft and github is mirror",
+        "SourceCraft baseline is ancestor of reconciliation head",
+        "ordinary push and PR run no CI",
+        "no deploy job exists"
+      ],
+      "required_checks": [
+        "SourceCraft API access",
+        "SourceCraft push dry-run",
+        "git ancestry proof",
+        "pnpm quality:guards",
+        "git diff --check"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-10--sourcecraft-primary-restoration--history-reconciliation",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "production",
+        "force push",
+        "history rewrite",
+        "SourceCraft permission failure",
+        "new secret"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:a",
+        "work:implementation",
+        "risk:risky",
+        "pilot"
+      ]
+    },
+    {
+      "key": "TASK-10-DELIVERY",
+      "title": "Deliver SourceCraft restoration and mirror canonical main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "parent_key": "EPIC-10",
+      "source_anchor": "EPIC-10",
+      "goal": "Merge restoration through one exact-head SourceCraft RISKY gate, then fast-forward the canonical main to GitHub without production action.",
+      "scope": [
+        "SourceCraft PR",
+        "full diff review",
+        "RISKY exact-head SourceCraft gate",
+        "merge",
+        "SourceCraft-to-GitHub mirror",
+        "safe cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and head SHA are verified",
+        "RISKY run passes exact PR head",
+        "SourceCraft main contains the reconciliation history",
+        "GitHub main equals SourceCraft main without force",
+        "production remains unchanged"
+      ],
+      "required_checks": [
+        "SourceCraft PR source/target/head",
+        "SourceCraft RISKY gate",
+        "post-merge SourceCraft ancestry",
+        "SourceCraft/GitHub SHA equality"
+      ],
+      "depends_on": [
+        "TASK-10-01"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md#epic-10--sourcecraft-primary-restoration--history-reconciliation",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge",
+        "mirror"
+      ],
+      "stop_conditions": [
+        "production",
+        "force push",
+        "gate not proven",
+        "PR head changed",
+        "GitHub divergence"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:a",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    }
+  ]
+}

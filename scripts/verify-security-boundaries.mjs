@@ -68,16 +68,16 @@ for (const collection of [
 }
 
 const collectionFileBySlug = {
-	users: "src/payload/collections/Users.ts",
-	pages: "src/payload/collections/Pages.ts",
-	properties: "src/payload/collections/Properties.ts",
-	"feed-sources": "src/payload/collections/FeedSources.ts",
-	"import-runs": "src/payload/collections/ImportRuns.ts",
-	"import-issues": "src/payload/collections/ImportIssues.ts",
-	leads: "src/payload/collections/Leads.ts",
-	"lead-deliveries": "src/payload/collections/LeadDeliveries.ts",
-	media: "src/payload/collections/Media.ts",
-	redirects: "src/payload/collections/Redirects.ts",
+	users: "src/project/collections/Users.ts",
+	pages: "src/project/collections/Pages.ts",
+	properties: "src/project/collections/Properties.ts",
+	"feed-sources": "src/project/collections/FeedSources.ts",
+	"import-runs": "src/project/collections/ImportRuns.ts",
+	"import-issues": "src/project/collections/ImportIssues.ts",
+	leads: "src/project/collections/Leads.ts",
+	"lead-deliveries": "src/project/collections/LeadDeliveries.ts",
+	media: "src/project/collections/Media.ts",
+	redirects: "src/project/collections/Redirects.ts",
 };
 
 const classifiedPublicReadAccess = {
@@ -149,12 +149,12 @@ requireIncludes(
 	"health endpoint must require the internal health secret header",
 );
 requireIncludes(
-	"src/payload/collections/Users.ts",
+	"src/project/collections/Users.ts",
 	"maxLoginAttempts: 5",
 	"admin login must lock after repeated attempts",
 );
 requireIncludes(
-	"src/payload/collections/Media.ts",
+	"src/project/collections/Media.ts",
 	"mediaOverwriteDisabled",
 	"local media overwrite must stay disabled",
 );
@@ -174,12 +174,12 @@ requireIncludes(
 	"public lead intake must use the classified public gateway, not generic Payload REST",
 );
 requireIncludes(
-	"src/payload/jobs/tasks.ts",
+	"src/project/jobs/tasks.ts",
 	"skipped: decision.reason",
 	"missing lead retention policy must skip destructive cleanup",
 );
 requireIncludes(
-	"src/payload/jobs/tasks.ts",
+	"src/project/jobs/tasks.ts",
 	"input: { leadDeliveryId: String(delivery.id) }",
 	"lead delivery jobs must queue identifiers only",
 );
@@ -274,8 +274,8 @@ for (const file of [...filesUnder("src"), ...filesUnder("scripts")]) {
 }
 
 for (const file of [
-	"src/payload/collections/Leads.ts",
-	"src/payload/collections/LeadDeliveries.ts",
+	"src/project/collections/Leads.ts",
+	"src/project/collections/LeadDeliveries.ts",
 ]) {
 	const content = read(file);
 	assert.ok(
@@ -289,7 +289,7 @@ for (const file of [
 }
 
 assert.equal(
-	read("src/payload/collections/Properties.ts").includes(
+	read("src/project/collections/Properties.ts").includes(
 		"systemOverrideAccess",
 	),
 	false,
@@ -316,12 +316,12 @@ if (violations.length) {
 }
 
 requireIncludes(
-	"src/payload/collections/Leads.ts",
+	"src/project/collections/Leads.ts",
 	"POST /api/public/leads",
 	"Leads collection must document that public create is not generic REST",
 );
 requireIncludes(
-	"src/payload/collections/Leads.ts",
+	"src/project/collections/Leads.ts",
 	"Collection `create` stays adminsAndOwners",
 	"Leads collection create must remain non-public",
 );

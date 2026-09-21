@@ -17,12 +17,12 @@ const accessSource = readFileSync(
 	"utf8",
 );
 const propertiesSource = readFileSync(
-	"src/payload/collections/Properties.ts",
+	"src/project/collections/Properties.ts",
 	"utf8",
 );
-const pagesSource = readFileSync("src/payload/collections/Pages.ts", "utf8");
+const pagesSource = readFileSync("src/project/collections/Pages.ts", "utf8");
 const redirectsSource = readFileSync(
-	"src/payload/collections/Redirects.ts",
+	"src/project/collections/Redirects.ts",
 	"utf8",
 );
 const rawRestBoundary = JSON.parse(
