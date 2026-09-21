@@ -34,6 +34,7 @@
 		"verify:merge-standard": "pnpm verify:daily",
 		"verify:merge-risky": "node scripts/verify-merge-risky.mjs",
 		"verify:clone-readiness": "node scripts/verify-clone-readiness.mjs",
+		"verify:client-readiness": "node --experimental-strip-types scripts/verify-client-readiness.mjs",
 		"verify:a11y-starter": "node scripts/verify-a11y-starter.mjs",
 		"verify:drift": "node scripts/quality/drift-audit.mjs",
 		"verify:ui-core": "node scripts/quality/ui-core.mjs && pnpm quality:design-tokens && pnpm verify:drift && pnpm verify:a11y-starter && pnpm verify:seo-contracts",

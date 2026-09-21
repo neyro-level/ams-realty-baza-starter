@@ -1,6 +1,8 @@
 # Project — AMS Realty Baza Starter
 
-Статус: `Demo / REALTY_BASE`. Этот репозиторий — демо-проект. Runtime навсегда: local PostgreSQL + `MEDIA_DIR` на AMS Server. Закупка базы, S3 и любой платной инфраструктурной замены **не входит в проект**.
+Статус: `Demo / REALTY_BASE`. Текущий starter runtime: local PostgreSQL +
+`MEDIA_DIR` на AMS Server. Он проверяет шаблон, но не задаёт production-топологию
+клиентского клона. Закупка клиентской инфраструктуры **не входит в этот план**.
 
 ## Зафиксировано
 
@@ -16,7 +18,7 @@
 | Starter topology | AMS Server + Nginx + Next/Payload + local PostgreSQL + local `MEDIA_DIR` |
 | Managed PostgreSQL | не используется и не закупается в этом репозитории |
 | S3 runtime | не используется и не закупается; см. `docs/adr/ADR-LOCAL-STARTER-STORAGE.md` |
-| Client clone topology | вне этого демо-репозитория; здесь не планируется |
+| Client clone topology | Core 5.5 default: Timeweb VPS/approved runtime + Managed PostgreSQL + S3; deviation требует owner decision и ADR, если его требует Core |
 | Secrets | Secret Master `https://infisical.ams24.ru` |
 | Env mapping | Canonical knobs → starter env (no CRM / telegram keys): `DATABASE` → `DATABASE_URI`; public origin → `NEXT_PUBLIC_SERVER_URL`; media → `MEDIA_DIR`; Payload secret → `PAYLOAD_SECRET`; ISR secret → `REVALIDATE_SECRET`; lead channels → `LEAD_CHANNELS` (`max`, `custom-webhook` only) |
 | Demo domain | `start-baza.ams24.ru`, `noindex` |
@@ -36,8 +38,8 @@
 | Lead routing | public intake `POST /api/public/leads` only; generic Payload `leads` create is not public; live channels require credentialRef + `LEAD_OUTBOUND_HOSTS` |
 | Indexed catalog filters | `category`, `dealType`, `city`, `district`, `rooms` in `project.config.ts`; other query params are `noindex` |
 | Sitemap | shards of 50_000 URLs, `generateSitemaps`, generation `revalidate` 3600s |
-| Staging | separate DB + MEDIA_DIR + secrets; no production PII dump |
-| Backup | automatic `pg_dump` + `MEDIA_DIR` snapshot, rotation, offsite copy, integrity check |
+| Staging | client: separate Managed PostgreSQL + S3 + secrets; no production PII dump. Starter demo остаётся на local PG + MEDIA_DIR |
+| Backup | starter: automatic `pg_dump` + `MEDIA_DIR` snapshot; client: automatic managed DB + object-storage backup, rotation, integrity check |
 | Admin access | public+hardened until owner sets IP/VPN |
 | Field ownership | `manual → field override → owning feed`; foreign-feed identity is degenerate for REALTY_BASE |
 | Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
@@ -46,6 +48,8 @@
 Next.js 16 edge: `src/proxy.ts` + `export function proxy` (not `middleware.ts`). Anonymous `/api/{collection}` for deny-list and system-only slugs returns JSON `{ error: "notFound" }` 404 unless a Payload session cookie is present. Public lead create remains `POST /api/public/leads`.
 
 Canonical URL map: `02_PRODUCT_STRUCTURE.md`. Knobs source: `src/project/project.config.ts`.
+Identity source: `src/project/site.config.ts`. Client staging/release decisions:
+`src/project/client-readiness.config.ts` and `docs/CLONE_ONBOARDING.md`.
 
 ## Verification
 
@@ -59,6 +63,7 @@ pnpm verify:integration:required
 pnpm verify:merge-standard
 pnpm verify:merge-risky
 pnpm verify:ui-core
+pnpm verify:client-readiness
 ```
 
 `verify:merge-standard` не запускает PostgreSQL suite. `verify:merge-risky`
