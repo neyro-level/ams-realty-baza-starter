@@ -3,6 +3,7 @@ import type {
 	PropertyDetailsDTO,
 	PropertyListDTO,
 } from "@ams/realtbase-contracts";
+import { serializeJsonLdSafely } from "./json-ld.ts";
 import { absoluteUrl, siteBrandName } from "./site.ts";
 
 type JsonLd = Record<string, unknown>;
@@ -11,8 +12,8 @@ export function JsonLdScript({ data }: { data: JsonLd }) {
 	return (
 		<script
 			type="application/ld+json"
-			// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD script output is serialized from server-owned DTOs.
-			dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: the canonical serializer escapes HTML-significant code points.
+			dangerouslySetInnerHTML={{ __html: serializeJsonLdSafely(data) }}
 		/>
 	);
 }

@@ -1,15 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { submitPublicLead } from "../../../../core/data-access/public/leads.ts";
+import { getTrustedClientAddress } from "../../../../core/security/trusted-client-address.ts";
 
 export const runtime = "nodejs";
-
-function clientKey(request: NextRequest): string {
-	return (
-		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-		request.headers.get("x-real-ip") ||
-		"local"
-	);
-}
 
 export async function POST(request: NextRequest) {
 	let body: unknown;
@@ -24,7 +17,7 @@ export async function POST(request: NextRequest) {
 
 	const result = await submitPublicLead({
 		body,
-		rateLimitKey: clientKey(request),
+		rateLimitKey: getTrustedClientAddress(request),
 	});
 
 	if (!result.accepted) {

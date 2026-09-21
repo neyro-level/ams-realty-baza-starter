@@ -8,6 +8,7 @@ import {
 	prepareLeadIntake,
 	resolveEnabledLeadChannels,
 } from "../src/core/leads/index.ts";
+import { getTrustedClientAddress } from "../src/core/security/trusted-client-address.ts";
 
 const validPayload = {
 	name: "Иван Петров",
@@ -94,6 +95,27 @@ assert.equal(limitedInProcess?.code, "lead.rate_limited");
 
 const routeSource = readFileSync("src/app/api/public/leads/route.ts", "utf8");
 assert.equal(routeSource.includes("submitPublicLead"), true);
+assert.equal(routeSource.includes("getTrustedClientAddress"), true);
+assert.equal(routeSource.includes("x-forwarded-for"), false);
+assert.equal(
+	getTrustedClientAddress(
+		new Request("https://example.test", {
+			headers: {
+				"x-forwarded-for": "198.51.100.99",
+				"x-real-ip": "203.0.113.7",
+			},
+		}),
+	),
+	"203.0.113.7",
+);
+assert.equal(
+	getTrustedClientAddress(
+		new Request("https://example.test", {
+			headers: { "x-forwarded-for": "198.51.100.99" },
+		}),
+	),
+	"untrusted",
+);
 const boundary = JSON.parse(readFileSync("config/raw-rest-boundary.json", "utf8"));
 assert.equal(
 	boundary.allowedRouteFiles.includes("src/app/api/public/leads/route.ts"),

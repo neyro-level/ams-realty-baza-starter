@@ -249,10 +249,27 @@ for (const required of [
 	"private or link-local",
 	'redirect: "manual"',
 	"Outbound response exceeded max size",
+	"createPinnedDispatcher",
+	"dispatcher",
 ]) {
 	assert.ok(
 		outbound.includes(required),
 		`safe outbound client missing ${required}`,
+	);
+}
+
+for (const nginxFile of [
+	"deploy/nginx/start-baza.ams24.ru.conf",
+	"deploy/clients/timeweb/nginx/site.conf.example",
+]) {
+	const nginx = read(nginxFile);
+	assert.ok(
+		nginx.includes("proxy_set_header X-Real-IP $remote_addr;"),
+		`${nginxFile}: trusted client address must be overwritten by Nginx`,
+	);
+	assert.ok(
+		nginx.includes("limit_req zone="),
+		`${nginxFile}: edge rate limiting must remain active`,
 	);
 }
 

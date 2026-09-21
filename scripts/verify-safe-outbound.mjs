@@ -85,6 +85,22 @@ await rejects(
 
 await rejects(
 	() =>
+		safeOutboundFetch(publicUrl, {
+			allowedHosts: [publicHost, "redirect.example.test"],
+			resolveAddresses: async (host) =>
+				host === publicHost
+					? [{ address: "93.184.216.34", family: 4 }]
+					: [{ address: "10.0.0.2", family: 4 }],
+			fetchImpl: async () =>
+				jsonResponse(302, null, {
+					location: "https://redirect.example.test/private",
+				}),
+		}),
+	"private or link-local",
+);
+
+await rejects(
+	() =>
 		safeOutboundFetch(`http://${publicHost}/feed.xml`, {
 			allowedHosts,
 			resolveAddresses: async () => [{ address: "93.184.216.34", family: 4 }],
@@ -134,5 +150,37 @@ const ok = await safeOutboundFetch(publicUrl, {
 });
 assert.equal(ok.status, 200);
 assert.equal(await ok.text(), "ok");
+
+let resolutionCalls = 0;
+let dispatcherClosed = false;
+const pinnedDispatcher = {
+	dispatch() {
+		throw new Error("test dispatcher must be passed through, not invoked directly");
+	},
+	async close() {
+		dispatcherClosed = true;
+	},
+};
+const pinned = await safeOutboundFetch(publicUrl, {
+	allowedHosts,
+	resolveAddresses: async () => {
+		resolutionCalls += 1;
+		return resolutionCalls === 1
+			? [{ address: "93.184.216.34", family: 4 }]
+			: [{ address: "10.0.0.9", family: 4 }];
+	},
+	createDispatcher: (address) => {
+		assert.deepEqual(address, { address: "93.184.216.34", family: 4 });
+		return pinnedDispatcher;
+	},
+	fetchImpl: async (_url, init) => {
+		assert.equal(init.dispatcher, pinnedDispatcher);
+		return new Response("pinned");
+	},
+});
+assert.equal(await pinned.text(), "pinned");
+await new Promise((resolve) => setImmediate(resolve));
+assert.equal(resolutionCalls, 1, "connection must reuse the validated resolution");
+assert.equal(dispatcherClosed, true);
 
 console.log("verify-safe-outbound: ok");

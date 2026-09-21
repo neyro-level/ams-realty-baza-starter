@@ -9,7 +9,25 @@ import {
 	resolvePropertyPageLifecycle,
 	sanitizeExplicitRedirectPath,
 } from "../src/core/seo/property.ts";
+import { serializeJsonLdSafely } from "../src/core/seo/json-ld.ts";
 import { staticPublicUrlEntries } from "../src/core/seo/site.ts";
+
+const adversarialJsonLd = {
+	name: '</script><script>alert("json-ld")</script>',
+	description: "<&>\u2028\u2029quotes\"backslash\\",
+};
+const serializedJsonLd = serializeJsonLdSafely(adversarialJsonLd);
+assert.equal(serializedJsonLd.includes("</script"), false);
+for (const escaped of ["\\u003c", "\\u003e", "\\u0026", "\\u2028", "\\u2029"]) {
+	assert.ok(serializedJsonLd.includes(escaped));
+}
+assert.deepEqual(JSON.parse(serializedJsonLd), adversarialJsonLd);
+const structuredDataSource = readFileSync(
+	"src/core/seo/structured-data.tsx",
+	"utf8",
+);
+assert.ok(structuredDataSource.includes("serializeJsonLdSafely(data)"));
+assert.equal(structuredDataSource.includes("JSON.stringify(data)"), false);
 
 assert.deepEqual(catalogSeoParamPolicy.indexedFilterKeys, [
 	"category",

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { executeInternalRevalidation } from "../../../../core/cache/internal-route-executor.ts";
 import { invalidateCacheTargets } from "../../../../core/cache/invalidator.ts";
 import { redactRecord } from "../../../../core/security/redaction.ts";
+import { getTrustedClientAddress } from "../../../../core/security/trusted-client-address.ts";
 import { runtimeEnv } from "../../../../project/env.ts";
 
 export const runtime = "nodejs";
@@ -9,16 +10,8 @@ export const runtime = "nodejs";
 const rateWindowMs = 60_000;
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 
-function clientKey(request: NextRequest): string {
-	return (
-		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-		request.headers.get("x-real-ip") ||
-		"local"
-	);
-}
-
 function rateLimited(request: NextRequest): boolean {
-	const key = clientKey(request);
+	const key = getTrustedClientAddress(request);
 	const now = Date.now();
 	const current = rateBuckets.get(key);
 	if (!current || current.resetAt <= now) {

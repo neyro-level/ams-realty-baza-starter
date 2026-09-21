@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { isIP } from "node:net";
 import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
+import { Agent, type Dispatcher, fetch as undiciFetch } from "undici";
 
 const defaultTimeoutMs = 10_000;
 const defaultMaxBytes = 5 * 1024 * 1024;
@@ -10,6 +11,11 @@ type AddressRecord = {
 	address: string;
 	family: number;
 };
+
+type OutboundFetch = (
+	input: string | URL,
+	init: RequestInit & { dispatcher?: Dispatcher },
+) => Promise<Response>;
 
 type SafeOutboundOptions = {
 	allowedHosts: readonly string[];
@@ -22,8 +28,9 @@ type SafeOutboundOptions = {
 	body?: BodyInit | null;
 	signal?: AbortSignal;
 	maxRedirects?: number;
-	fetchImpl?: typeof fetch;
+	fetchImpl?: OutboundFetch;
 	resolveAddresses?: (host: string) => Promise<AddressRecord[]>;
+	createDispatcher?: (address: AddressRecord) => Dispatcher;
 };
 
 export type SafeOutboundStreamResult = {
@@ -76,7 +83,10 @@ function isUnsafeAddress(address: string): boolean {
 	return true;
 }
 
-async function assertSafeDestination(url: URL, options: SafeOutboundOptions): Promise<void> {
+async function assertSafeDestination(
+	url: URL,
+	options: SafeOutboundOptions,
+): Promise<AddressRecord | undefined> {
 	const host = url.hostname.toLowerCase();
 	const allowedHosts = new Set(options.allowedHosts.map((item) => item.toLowerCase()));
 	const approvedHttpHosts = new Set(
@@ -92,7 +102,7 @@ async function assertSafeDestination(url: URL, options: SafeOutboundOptions): Pr
 		(options.approvedExactOrigins ?? []).map((item) => item.toLowerCase()),
 	);
 	if (approvedExactOrigins.has(url.origin.toLowerCase())) {
-		return;
+		return undefined;
 	}
 
 	if (isUnsafeHostLiteral(host)) {
@@ -101,10 +111,31 @@ async function assertSafeDestination(url: URL, options: SafeOutboundOptions): Pr
 
 	const resolver = options.resolveAddresses ?? ((name: string) => lookup(name, { all: true, verbatim: true }));
 	const addresses = await resolver(host);
+	if (addresses.length === 0) {
+		throw new Error(`Outbound host did not resolve to an address: ${host}`);
+	}
 	if (addresses.some((item) => isUnsafeAddress(item.address))) {
 		throw new Error(`Outbound host resolves to a private or link-local address: ${host}`);
 	}
+	return addresses[0];
 }
+
+function createPinnedDispatcher(address: AddressRecord): Dispatcher {
+	return new Agent({
+		connect: {
+			autoSelectFamily: false,
+			lookup(_hostname, _options, callback) {
+				callback(null, address.address, address.family);
+			},
+		},
+	});
+}
+
+const defaultOutboundFetch: OutboundFetch = async (input, init) =>
+	(await undiciFetch(
+		input,
+		init as unknown as Parameters<typeof undiciFetch>[1],
+	)) as unknown as Response;
 
 function tapHashAndLimit(
 	body: ReadableStream<Uint8Array>,
@@ -172,7 +203,10 @@ async function openSafeRequest(
 	hops = 0,
 ): Promise<OpenedOutboundRequest> {
 	const url = new URL(input);
-	await assertSafeDestination(url, options);
+	const resolvedAddress = await assertSafeDestination(url, options);
+	const dispatcher = resolvedAddress
+		? (options.createDispatcher ?? createPinnedDispatcher)(resolvedAddress)
+		: undefined;
 
 	const controller = new AbortController();
 	const onExternalAbort = () => controller.abort();
@@ -181,19 +215,24 @@ async function openSafeRequest(
 		() => controller.abort(),
 		options.timeoutMs ?? defaultTimeoutMs,
 	);
+	let released = false;
 	const release = () => {
+		if (released) return;
+		released = true;
 		clearTimeout(timeoutId);
 		options.signal?.removeEventListener("abort", onExternalAbort);
+		void dispatcher?.close().catch(() => undefined);
 	};
 
 	try {
-		const fetchImpl = options.fetchImpl ?? fetch;
+		const fetchImpl = options.fetchImpl ?? defaultOutboundFetch;
 		const response = await fetchImpl(url, {
 			method: options.method ?? "GET",
 			headers: options.headers,
 			body: options.body,
 			redirect: "manual",
 			signal: controller.signal,
+			dispatcher,
 		});
 
 		if (
