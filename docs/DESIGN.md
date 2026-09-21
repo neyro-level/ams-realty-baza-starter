@@ -32,6 +32,21 @@ Anti-goals: новый visual language без owner approval; вторая primi
 
 ACTIVE = CORE ∪ SHADCN ∪ PROJECT. Documented RESERVED is not dead.
 
+### Module token reservations
+
+A reservation is valid only when the module has a manifest in `docs/modules/`,
+its state is documented in `docs/PROJECT.md`, and a row below explicitly names
+the token prefix. No family is reserved in the current starter.
+
+<!-- MODULE_TOKEN_RESERVATIONS_BEGIN -->
+| Module | Token prefix |
+|---|---|
+<!-- MODULE_TOKEN_RESERVATIONS_END -->
+
+`pnpm tokens:report` exposes the same analyzer as the fail gate. Supported
+options: `--format=table`, `--format=json`, `--dead-only`, `--explain=<token>`.
+The command is report-only and never deletes CSS.
+
 ## Page-level CSS policy
 
 Reusable visual rhythm goes through tokens and `Section` / `Container` variants. Page CSS may keep geometry (grid, flex, positioning, responsive relationships, intrinsic sizing). Forbidden: a second control pattern (`.home-btn-primary`); journal tokens outside journal module files.

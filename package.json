@@ -12,6 +12,7 @@
 		"build": "next build --webpack",
 		"start": "next start",
 		"ui:shadcn": "node scripts/ui-shadcn.mjs",
+		"tokens:report": "node scripts/quality/token-report.mjs",
 		"visual:atlas-css-parity": "node scripts/verify-atlas-css-parity.mjs",
 		"lint": "biome lint .",
 		"typecheck": "next typegen && tsc --noEmit",
