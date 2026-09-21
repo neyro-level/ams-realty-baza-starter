@@ -22,6 +22,10 @@ import {
 } from "../../core/ingest/import-feed-runtime.ts";
 import { createPayloadFeedIngestRepository } from "../../core/ingest/payload-feed-ingest-repository.ts";
 import { runDeliverLeadTask } from "../../core/leads/deliver-lead.ts";
+import {
+	recoverStaleSendingDelivery,
+	type LeadDeliveryStateRecord,
+} from "../../core/leads/delivery-state.ts";
 import { isLiveFuturePayloadJob } from "../../core/leads/job-liveness.ts";
 import {
 	anonymizeLeadFields,
@@ -32,7 +36,6 @@ import {
 import {
 	importStaleThresholdMs,
 	observedSuccessfulDurationMs,
-	pendingDeliveryOrphanThresholdMs,
 	queuedImportOrphanThresholdMs,
 } from "../../core/operations/recovery-thresholds.ts";
 import {
@@ -501,11 +504,10 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 		label: "Recover lead deliveries",
 		schedule: getStaticSchedule(payloadJobTaskSlugs.recoverLeadDeliveries),
 		handler: async ({ req }) => {
+			const recoveryNowIso = nowIso();
 			const staleThreshold = new Date(
 				nowDate().getTime() -
-					pendingDeliveryOrphanThresholdMs(
-						projectConfig.maintenanceIntervalMinutes,
-					),
+					projectConfig.leadDelivery.staleSendingThresholdMinutes * 60_000,
 			).toISOString();
 			const staleSending = await req.payload.find({
 				collection: "lead-deliveries",
@@ -522,18 +524,37 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 			});
 
 			for (const delivery of staleSending.docs) {
+				const recovered = recoverStaleSendingDelivery(
+					{
+						id: String(delivery.id),
+						lead: String(delivery.lead),
+						channelId: delivery.channelId,
+						status: "sending",
+						attempts: delivery.attempts,
+						nextAttemptAt: delivery.nextAttemptAt ?? undefined,
+						jobId: delivery.jobId ?? undefined,
+						claimedAt: delivery.claimedAt ?? undefined,
+						heartbeatAt: delivery.heartbeatAt ?? undefined,
+						attemptLog:
+							(delivery.attemptLog as LeadDeliveryStateRecord["attemptLog"]) ??
+							undefined,
+					},
+					recoveryNowIso,
+					projectConfig.leadDelivery,
+				);
+				if (!recovered) continue;
 				await req.payload.update({
 					collection: "lead-deliveries",
 					id: delivery.id,
 					data: {
-						status: "pending",
-						nextAttemptAt: nowIso(),
-						jobId: null,
-						claimedAt: null,
-						heartbeatAt: null,
-						lastErrorKind: "retryable",
-						lastErrorRedacted:
-							"Recovered by recoverLeadDeliveries: stale sending delivery.",
+						status: recovered.status,
+						nextAttemptAt: recovered.nextAttemptAt,
+						jobId: recovered.jobId ?? null,
+						claimedAt: recovered.claimedAt ?? null,
+						heartbeatAt: recovered.heartbeatAt ?? null,
+						lastErrorKind: recovered.lastErrorKind,
+						lastErrorRedacted: recovered.lastErrorRedacted,
+						attemptLog: recovered.attemptLog,
 					},
 					req,
 					...systemOverrideAccess("system-job"),
