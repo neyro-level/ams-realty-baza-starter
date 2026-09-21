@@ -1,0 +1,88 @@
+name: Manual exact-head gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_commit_sha:
+        description: Full PR head SHA
+        required: true
+        type: string
+      gate:
+        description: Verification profile
+        required: true
+        type: choice
+        options:
+          - standard
+          - risky
+  push:
+    branches:
+      - codex/github-primary-bootstrap
+
+permissions:
+  contents: read
+
+concurrency:
+  group: exact-head-${{ github.event_name }}-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  standard:
+    if: github.event_name == 'workflow_dispatch' && inputs.gate == 'standard'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EXPECTED_COMMIT_SHA: ${{ inputs.expected_commit_sha }}
+      CI_COMMIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - name: Enable pinned pnpm
+        run: corepack enable && corepack prepare pnpm@11.5.1 --activate
+      - name: Verify exact head
+        run: node scripts/ci/assert-exact-head.mjs
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run STANDARD gate
+        run: pnpm verify:merge-standard
+
+  risky:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.gate == 'risky')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      EXPECTED_COMMIT_SHA: ${{ github.event_name == 'push' && github.sha || inputs.expected_commit_sha }}
+      CI_COMMIT_SHA: ${{ github.sha }}
+      DATABASE_URI_TEST: postgresql://postgres@127.0.0.1:5432/ams_realtbase_ci_test
+      PAYLOAD_SECRET: github-risky-gate-test-only-secret
+    services:
+      postgres:
+        image: postgres:18-bookworm
+        env:
+          POSTGRES_DB: ams_realtbase_ci_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ams_realtbase_ci_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+      - name: Enable pinned pnpm
+        run: corepack enable && corepack prepare pnpm@11.5.1 --activate
+      - name: Verify exact head
+        run: node scripts/ci/assert-exact-head.mjs
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run RISKY gate
+        run: pnpm verify:merge-risky

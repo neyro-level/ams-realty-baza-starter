@@ -38,7 +38,7 @@ secrets: isolated project-specific Secret Master scope
 indexing: noindex until owner explicitly promotes the instance
 ```
 
-Immutable artifact format: full Next.js Docker image built from `Dockerfile` outside the production host. Server runtime uses `deploy/compose/start-baza.compose.yml`; public proxy uses `deploy/nginx/start-baza.ams24.ru.conf`. Release identity is recorded by `pnpm release:manifest`; generated `.release/` files are local evidence and are not committed. Обязательные границы: отдельная команда владельца, clean SourceCraft `main`, exact SHA, отсутствие build на production host, один rollout и live smoke. Известный рабочий artifact сохраняется для rollback.
+Immutable artifact format: full Next.js Docker image built from `Dockerfile` outside the production host. Server runtime uses `deploy/compose/start-baza.compose.yml`; public proxy uses `deploy/nginx/start-baza.ams24.ru.conf`. Release identity is recorded by `pnpm release:manifest`; generated `.release/` files are local evidence and are not committed. Обязательные границы: отдельная команда владельца, clean canonical GitHub `main`, exact SHA, отсутствие build на production host, один rollout и live smoke. Известный рабочий artifact сохраняется для rollback. Plan №6 не выполняет этот production lifecycle.
 
 Owner decision: local PostgreSQL 18 on AMS Server is the permanent demo canon, not a temporary substitute. Runtime database identity:
 
@@ -51,7 +51,7 @@ backup rehearsal: pg_dump custom format -> temporary restore database -> migrati
 
 Release sequence:
 
-1. Confirm clean canonical SourceCraft `main` and exact full SHA.
+1. Confirm clean canonical GitHub `main` and exact full SHA.
 2. Run `pnpm release:manifest` for local release identity evidence.
 3. Build one Docker image from the exact SHA outside the production host and tag it with the full SHA.
 4. Run Payload migrations from the same image against the local AMS Server PostgreSQL database.
@@ -88,7 +88,7 @@ Warning при <20% free, critical при <10% на data volume.
 
 Secret Master, self-hosted Infisical `https://infisical.ams24.ru`, является canonical source of truth для секретов и доступов AMS RealBaza. Все новые пароли, API tokens, SSH keys, database credentials и service credentials создаются и хранятся там. Doppler считается только legacy/import source, если старые секреты ещё не перенесены.
 
-Операционное правило: значения секретов не выводить в чат, markdown, логи или git. Для работы с секретами использовать trigger `подключись к секрет мастеру`. Канонический Git этого демо-репозитория — SourceCraft; GitHub в текущей программе не используется.
+Операционное правило: значения секретов не выводить в чат, markdown, логи или git. Для работы с секретами использовать trigger `подключись к секрет мастеру`. Канонический Git этого репозитория — GitHub `neyro-level/ams-realty-baza-starter`; SourceCraft остаётся только historical baseline без новых записей.
 
 Runtime secret scope for this application should be project-specific in Secret Master when the starter project is promoted beyond the current owner-operated AMS Server deployment. Current runtime values are materialized in `/etc/ams/realtbase/start-baza.env` with root-only permissions; values must not be printed to chat, markdown, logs or git. `ams-server/prod` may identify the shared AMS server access contour, but it is not a fallback for application `DATABASE_URI`, Payload secret, S3 credentials, revalidation secret, health secret or lead channel credentials.
 
@@ -174,4 +174,4 @@ pnpm verify:merge-risky
 `merge-standard` не требует DB. `merge-risky` требует safe isolated
 `DATABASE_URI_TEST`, выполняет required integration без skipped suites и build.
 Команда `pnpm verify` остаётся полной локальной suite, но не является вторым
-SourceCraft gate. Production proof выполняется только отдельной release-командой.
+GitHub gate. Production proof выполняется только отдельной release-командой.
