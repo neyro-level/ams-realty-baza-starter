@@ -14,6 +14,7 @@ import {
 import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
+import { defineLeadDeliveryPolicy } from "../../src/core/leads/delivery-policy.ts";
 import {
 	createControllableClock,
 	installRuntimeClock,
@@ -574,6 +575,44 @@ if (typeof deliverTask?.handler !== "function") {
 	throw new Error("deliverLead handler is missing");
 }
 
+const policyTimingDelivery = await createRetryFixture(
+	"policy-timing",
+	"+79990000003",
+);
+const timingPolicy = defineLeadDeliveryPolicy({
+	...projectConfig.leadDelivery,
+	retryScheduleMinutes: [0, 3, 9],
+	unknownDeliveryBackoffMinutes: 3,
+});
+let capturedWaitUntil: string | undefined;
+await runDeliverLeadTask({
+	payload,
+	leadDeliveryId: String(policyTimingDelivery.id),
+	nowIso: clock.nowIso(),
+	policy: timingPolicy,
+	env: {
+		LEAD_OUTBOUND_HOSTS: "127.0.0.1",
+		MAX_API_URL: process.env.MAX_API_URL,
+		MAX_BOT_TOKEN: process.env.MAX_BOT_TOKEN,
+		MAX_CHAT_ID: process.env.MAX_CHAT_ID,
+		AMS_ALLOW_TEST_DESTINATIONS: process.env.AMS_ALLOW_TEST_DESTINATIONS,
+		AMS_TEST_APPROVED_ORIGINS: process.env.AMS_TEST_APPROVED_ORIGINS,
+		NODE_ENV: process.env.NODE_ENV,
+	},
+	queueRetry: async ({ waitUntil }) => {
+		capturedWaitUntil = waitUntil.toISOString();
+		return "policy-timing-job";
+	},
+});
+const policyTimingAfter = await payload.findByID({
+	collection: "lead-deliveries",
+	id: policyTimingDelivery.id,
+	depth: 0,
+	...access,
+});
+assert.equal(policyTimingAfter.nextAttemptAt, "2026-09-18T12:03:00.000Z");
+assert.equal(capturedWaitUntil, policyTimingAfter.nextAttemptAt);
+
 const scheduledRetryDelivery = await createRetryFixture(
 	"scheduled",
 	"+79990000004",
@@ -618,6 +657,7 @@ await assert.rejects(
 			payload,
 			leadDeliveryId: String(enqueueCrashDelivery.id),
 			nowIso: clock.nowIso(),
+			policy: projectConfig.leadDelivery,
 			env: {
 				LEAD_OUTBOUND_HOSTS: "127.0.0.1",
 				MAX_API_URL: process.env.MAX_API_URL,
@@ -650,11 +690,42 @@ const recoveryTask = payloadJobTasks.find(
 if (typeof recoveryTask?.handler !== "function") {
 	throw new Error("recoverLeadDeliveries handler is missing");
 }
+const stalePolicyDelivery = await createRetryFixture(
+	"stale-policy",
+	"+79990000007",
+);
+const staleHeartbeat = new Date(
+	clock.now().getTime() - 16 * 60_000,
+).toISOString();
+await payload.update({
+	collection: "lead-deliveries",
+	id: stalePolicyDelivery.id,
+	data: {
+		status: "sending",
+		attempts: 1,
+		claimedAt: staleHeartbeat,
+		heartbeatAt: staleHeartbeat,
+	},
+	...access,
+});
 await recoveryTask.handler({
 	req: { payload, user: undefined } as never,
 	input: {},
 	job: {} as never,
 } as never);
+const stalePolicyAfter = await payload.findByID({
+	collection: "lead-deliveries",
+	id: stalePolicyDelivery.id,
+	depth: 0,
+	...access,
+});
+assert.equal(stalePolicyAfter.status, "pending");
+assert.ok(
+	stalePolicyAfter.attemptLog?.some(
+		(entry) => entry.safeCode === "stale_sending_recovered",
+	),
+	"15-minute policy must recover stale sending before the 30-minute orphan threshold",
+);
 const recoveredCrashDelivery = await payload.findByID({
 	collection: "lead-deliveries",
 	id: enqueueCrashDelivery.id,

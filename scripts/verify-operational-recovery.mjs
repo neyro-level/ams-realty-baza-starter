@@ -13,6 +13,10 @@ const leadDeliveries = readFileSync(
 	"src/project/collections/LeadDeliveries.ts",
 	"utf8",
 );
+const healthRoute = readFileSync(
+	"src/app/api/internal/healthz/route.ts",
+	"utf8",
+);
 
 for (const required of [
 	"Manual import",
@@ -35,10 +39,9 @@ assert.equal(payloadJobTaskSlugs.catalogLifecycle, "catalogLifecycle");
 
 for (const required of [
 	"Recovered by jobsJanitor",
-	"Recovered by recoverLeadDeliveries",
+	"recoverStaleSendingDelivery",
 	"contentPurgedAt: purgedAt",
 	'status: "interrupted"',
-	'status: "pending"',
 ]) {
 	assert.ok(jobs.includes(required), `jobs implementation missing ${required}`);
 }
@@ -74,8 +77,16 @@ assert.ok(
 	"jobs janitor must use queued import orphan threshold",
 );
 assert.ok(
-	jobs.includes("pendingDeliveryOrphanThresholdMs"),
-	"delivery recovery must use pending delivery orphan threshold",
+	jobs.includes("projectConfig.leadDelivery.staleSendingThresholdMinutes"),
+	"stale sending recovery must use the validated project policy",
+);
+assert.ok(
+	jobs.includes("recoverStaleSendingDelivery"),
+	"recovery job must delegate state transition to the core state helper",
+);
+assert.ok(
+	healthRoute.includes("pendingDeliveryOrphanThresholdMs"),
+	"orphan pending health threshold must keep the Core-derived formula",
 );
 assert.ok(
 	!jobs.includes("staleJobThresholdMs"),
@@ -86,7 +97,8 @@ assert.ok(
 	"lead retention must purge linked delivery diagnostics",
 );
 assert.ok(
-	jobs.includes('skipped: "missing_policy"') || jobs.includes("skipped: decision.reason"),
+	jobs.includes('skipped: "missing_policy"') ||
+		jobs.includes("skipped: decision.reason"),
 	"catalog/lead retention must skip without invented days",
 );
 

@@ -13,6 +13,7 @@ import {
 	type LeadDeliveryResult,
 	type LeadDeliveryStateRecord,
 } from "./delivery-state.ts";
+import type { LeadDeliveryPolicy } from "./delivery-policy.ts";
 import type { LeadDeliveryRecord, LeadRecord } from "./outbox.ts";
 
 const access = systemOverrideAccess("system-job");
@@ -200,12 +201,14 @@ export async function runDeliverLeadTask({
 	nowIso,
 	env,
 	queueRetry,
+	policy,
 }: {
 	payload: Payload;
 	leadDeliveryId: string;
 	nowIso: string;
 	env: DeliverLeadEnv;
 	queueRetry: QueueLeadDeliveryRetry;
+	policy: LeadDeliveryPolicy;
 }): Promise<TaskHandlerResult<"deliverLead"> & DeliverLeadTaskResult> {
 	const claimed = await claimLeadDeliveryRow(payload, {
 		deliveryId: leadDeliveryId,
@@ -270,6 +273,7 @@ export async function runDeliverLeadTask({
 		delivery: sendingState,
 		result: adapterResult.result,
 		nowIso,
+		policy,
 	});
 	await persistDelivery(payload, completed);
 

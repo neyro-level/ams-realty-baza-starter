@@ -1,3 +1,8 @@
+import {
+	leadDeliveryMaxAttempts,
+	type LeadDeliveryPolicy,
+} from "./delivery-policy.ts";
+
 export type LeadDeliveryStatus =
 	| "pending"
 	| "sending"
@@ -52,12 +57,6 @@ export type LeadDeliveryResult =
 	| { kind: "permanent"; safeCode: string; redactedNote: string }
 	| { kind: "missing_adapter"; channelId: string };
 
-export const leadDeliveryRetryLadderMinutes = [0, 1, 5, 15, 60, 240] as const;
-export const leadDeliveryMaxAttempts = leadDeliveryRetryLadderMinutes.length;
-const unknownRetryBackoffMs = 60 * 60 * 1000;
-const staleSendingThresholdMs = 15 * 60 * 1000;
-const maxAttemptLogEntries = 20;
-
 export function claimLeadDeliveryForSending(
 	delivery: LeadDeliveryStateRecord,
 	nowIso: string,
@@ -85,10 +84,12 @@ export function completeLeadDeliveryAttempt({
 	delivery,
 	result,
 	nowIso,
+	policy,
 }: {
 	delivery: LeadDeliveryStateRecord;
 	result: LeadDeliveryResult;
 	nowIso: string;
+	policy: LeadDeliveryPolicy;
 }): LeadDeliveryStateRecord {
 	if (result.kind === "delivered") {
 		return {
@@ -97,37 +98,45 @@ export function completeLeadDeliveryAttempt({
 			deliveredAt: nowIso,
 			lastErrorKind: undefined,
 			lastErrorRedacted: undefined,
-			attemptLog: appendAttemptLog(delivery.attemptLog, {
-				attemptedAt: nowIso,
-				safeCode: result.safeCode,
-				outcome: "delivered",
-				redactedNote: result.redactedNote,
-			}),
+			attemptLog: appendAttemptLog(
+				delivery.attemptLog,
+				{
+					attemptedAt: nowIso,
+					safeCode: result.safeCode,
+					outcome: "delivered",
+					redactedNote: result.redactedNote,
+				},
+				policy,
+			),
 		};
 	}
 
 	if (result.kind === "retryable" || result.kind === "unknown") {
-		if (delivery.attempts >= leadDeliveryMaxAttempts) {
+		if (delivery.attempts >= leadDeliveryMaxAttempts(policy)) {
 			return {
 				...clearActiveClaim(delivery),
 				status: "abandoned",
 				abandonedReason: "exhausted",
 				lastErrorKind: "retryable",
 				lastErrorRedacted: result.redactedNote,
-				attemptLog: appendAttemptLog(delivery.attemptLog, {
-					attemptedAt: nowIso,
-					safeCode: result.safeCode,
-					outcome: "retryable",
-					redactedNote: result.redactedNote,
-				}),
+				attemptLog: appendAttemptLog(
+					delivery.attemptLog,
+					{
+						attemptedAt: nowIso,
+						safeCode: result.safeCode,
+						outcome: "retryable",
+						redactedNote: result.redactedNote,
+					},
+					policy,
+				),
 			};
 		}
 
 		const backoffMs =
 			result.backoffMs ??
 			(result.kind === "unknown"
-				? unknownRetryBackoffMs
-				: retryBackoffMs(delivery.attempts));
+				? policy.unknownDeliveryBackoffMinutes * 60_000
+				: retryBackoffMs(delivery.attempts, policy));
 		return {
 			...clearActiveClaim(delivery),
 			status: "pending",
@@ -136,12 +145,16 @@ export function completeLeadDeliveryAttempt({
 			).toISOString(),
 			lastErrorKind: "retryable",
 			lastErrorRedacted: result.redactedNote,
-			attemptLog: appendAttemptLog(delivery.attemptLog, {
-				attemptedAt: nowIso,
-				safeCode: result.safeCode,
-				outcome: "retryable",
-				redactedNote: result.redactedNote,
-			}),
+			attemptLog: appendAttemptLog(
+				delivery.attemptLog,
+				{
+					attemptedAt: nowIso,
+					safeCode: result.safeCode,
+					outcome: "retryable",
+					redactedNote: result.redactedNote,
+				},
+				policy,
+			),
 		};
 	}
 
@@ -158,26 +171,34 @@ export function completeLeadDeliveryAttempt({
 		abandonedReason: "permanent",
 		lastErrorKind: "permanent",
 		lastErrorRedacted: redactedNote,
-		attemptLog: appendAttemptLog(delivery.attemptLog, {
-			attemptedAt: nowIso,
-			safeCode,
-			outcome: "permanent",
-			redactedNote,
-		}),
+		attemptLog: appendAttemptLog(
+			delivery.attemptLog,
+			{
+				attemptedAt: nowIso,
+				safeCode,
+				outcome: "permanent",
+				redactedNote,
+			},
+			policy,
+		),
 	};
 }
 
-export function retryBackoffMs(attempts: number): number {
+export function retryBackoffMs(
+	attempts: number,
+	policy: LeadDeliveryPolicy,
+): number {
 	const index = Math.min(
 		Math.max(attempts, 1),
-		leadDeliveryRetryLadderMinutes.length - 1,
+		policy.retryScheduleMinutes.length - 1,
 	);
-	return leadDeliveryRetryLadderMinutes[index] * 60_000;
+	return policy.retryScheduleMinutes[index] * 60_000;
 }
 
 export function recoverStaleSendingDelivery(
 	delivery: LeadDeliveryStateRecord,
 	nowIso: string,
+	policy: LeadDeliveryPolicy,
 ): LeadDeliveryStateRecord | undefined {
 	if (delivery.status !== "sending" || !delivery.heartbeatAt) {
 		return undefined;
@@ -185,7 +206,7 @@ export function recoverStaleSendingDelivery(
 
 	const staleFor =
 		new Date(nowIso).getTime() - new Date(delivery.heartbeatAt).getTime();
-	if (staleFor <= staleSendingThresholdMs) {
+	if (staleFor <= policy.staleSendingThresholdMinutes * 60_000) {
 		return undefined;
 	}
 
@@ -195,20 +216,25 @@ export function recoverStaleSendingDelivery(
 		nextAttemptAt: nowIso,
 		lastErrorKind: "retryable",
 		lastErrorRedacted: "Recovered stale sending delivery.",
-		attemptLog: appendAttemptLog(delivery.attemptLog, {
-			attemptedAt: nowIso,
-			safeCode: "stale_sending_recovered",
-			outcome: "retryable",
-			redactedNote: "Recovered stale sending delivery.",
-		}),
+		attemptLog: appendAttemptLog(
+			delivery.attemptLog,
+			{
+				attemptedAt: nowIso,
+				safeCode: "stale_sending_recovered",
+				outcome: "retryable",
+				redactedNote: "Recovered stale sending delivery.",
+			},
+			policy,
+		),
 	};
 }
 
 export function appendAttemptLog(
 	current: LeadDeliveryAttemptLog[] | undefined,
 	entry: LeadDeliveryAttemptLog,
+	policy: LeadDeliveryPolicy,
 ): LeadDeliveryAttemptLog[] {
-	return [...(current ?? []), entry].slice(-maxAttemptLogEntries);
+	return [...(current ?? []), entry].slice(-policy.maxAttemptLogEntries);
 }
 
 function clearActiveClaim(
