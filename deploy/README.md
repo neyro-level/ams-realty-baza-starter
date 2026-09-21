@@ -10,7 +10,7 @@ PostgreSQL instance.
 
 Release shape:
 
-1. Build immutable image from exact canonical GitHub `main` SHA outside the production
+1. Build immutable image from exact SourceCraft `main` SHA outside the production
    host.
 2. Run Payload migrations from the same image before rollout.
 3. Start one runtime through `deploy/compose/start-baza.compose.yml`.

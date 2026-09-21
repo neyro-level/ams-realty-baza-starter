@@ -61,7 +61,7 @@
 		"release:manifest": "node scripts/release-manifest.mjs",
 		"quality:architecture": "dependency-cruiser src packages scripts --config .dependency-cruiser.mjs --output-type err",
 		"quality:design-tokens": "node scripts/quality/design-tokens.mjs",
-		"quality:guards": "node scripts/quality/architecture-rules.self-test.mjs && node scripts/quality/architecture-guard.mjs && node scripts/quality/local-api-mode.mjs && node scripts/quality/design-tokens.mjs && node scripts/quality/github-actions-policy.mjs && node scripts/quality/ui-core.mjs",
+		"quality:guards": "node scripts/quality/architecture-rules.self-test.mjs && node scripts/quality/architecture-guard.mjs && node scripts/quality/local-api-mode.mjs && node scripts/quality/design-tokens.mjs && node scripts/quality/sourcecraft-policy.mjs && node scripts/quality/ui-core.mjs",
 		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm verify:jobs-config && pnpm verify:public-gateway && pnpm verify:feed-parser && pnpm verify:feed-ingest && pnpm verify:feed-lifecycle && pnpm verify:manual-ownership && pnpm verify:lead-intake && pnpm verify:lead-outbox && pnpm verify:lead-delivery-state && pnpm verify:max-adapter && pnpm verify:custom-webhook-adapter && pnpm verify:seo-contracts && pnpm verify:owner-operations && pnpm verify:health-alerts && pnpm verify:operational-recovery && pnpm verify:security-boundaries && pnpm verify:product-regression && pnpm verify:production-topology && pnpm verify:release-artifact && pnpm verify:integration && pnpm verify:clone-readiness && pnpm verify:a11y-starter && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
 		"verify:foundation": "pnpm verify"
 	},

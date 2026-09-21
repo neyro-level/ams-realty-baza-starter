@@ -1,15 +1,22 @@
 # Backlog
 
-Статус: `Plan №6 / ACTIVE` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v3
-APPROVED, импортирован в локальный stealth Task Manager. Canonical delivery —
-GitHub; SourceCraft не получает новых записей; production исключён.
+Статус: `Plan №6 / APPROVED` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4.
+SourceCraft возвращён как primary, GitHub остаётся one-way mirror. v3 execution
+приостановлен; production исключён.
 
-Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md`. Exact snapshot: `AMS-REALTBASE-STARTER-FINAL-FREEZE` v3 `APPROVED`; inventory — `docs/orchestration/master-plan-6.inventory.json`.
+Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md`. Exact v4 утверждён; revised inventory должен пройти Validate → Import → Reconcile до Developer execution.
 
 ## NOW
 
-- Выполнять следующую READY implementation-задачу reconciled Plan №6 graph.
-- Production release остаётся отдельным lifecycle и этим графом запрещён.
+- Reconcile revised v4 graph и выполнить уникальный SourceCraft restoration EPIC-10.
+- После SourceCraft recovery продолжить незакрытую часть EPIC-05 и независимые ready epics.
+- Production release остаётся отдельным lifecycle и этим планом запрещён.
+
+## PRESERVED EXECUTION EVIDENCE
+
+- EPIC-01…04 v3 доставлены в interim GitHub history и не переоткрываются.
+- TASK-05-01 имеет отдельный commit/checkpoint; TASK-05-02 не claimed и не доставлен.
+- Локальные незакоммиченные изменения TASK-05-02 сохраняются как checkpoint, но не считаются выполнением.
 
 ## DONE IN PLAN №5
 
@@ -29,10 +36,10 @@ GitHub; SourceCraft не получает новых записей; production 
 
 ## Политика доставки
 
-- Новый независимый stream: отдельная ветка/worktree от актуального GitHub
-  `main`, GitHub PR и один ручной exact-head STANDARD/RISKY Gate перед merge.
-- Обычный push/PR не запускает CI. SourceCraft не используется как fallback.
-- Production требует отдельной команды и не входит в Plan №6.
+- Новый независимый stream: отдельная ветка/worktree от актуального `main`,
+  SourceCraft PR и профильный Gate перед merge.
+- Production требует отдельной команды. GitHub используется только как зеркало
+  канонического SourceCraft `main`.
 
 ## Закрытый CORE-ALIGN v1
 

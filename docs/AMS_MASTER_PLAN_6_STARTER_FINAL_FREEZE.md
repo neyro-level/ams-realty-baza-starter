@@ -1,40 +1,41 @@
 # AMS MASTER PLAN №6 — STARTER FINAL FREEZE / CLIENT CLONE READINESS
 
 **Plan ID:** `AMS-REALTBASE-STARTER-FINAL-FREEZE`  
-**Version:** `v3`  
-**Status:** `APPROVED`  
-**Phase:** `APPROVAL_HANDOFF`  
-**Approved by:** `owner`  
-**Approved at:** `2026-09-21T13:48:30+03:00`  
-**Target:** GitHub `neyro-level/ams-realty-baza-starter`  
-**Canonical baseline:** GitHub `main@59ff2f8bd3908145ad7eda140d00f2d500dee347`  
-**Historical SourceCraft baseline:** `main@59ff2f8bd3908145ad7eda140d00f2d500dee347` — no further writes  
-**Canonical delivery surface:** GitHub `main`  
-**Repository mode:** `GITHUB_PRIMARY`  
+**Version:** `v4`
+**Status:** `APPROVED`
+**Phase:** `APPROVAL_HANDOFF`
+**Approved by:** owner
+**Approved at:** `2026-09-21T16:44:45+03:00`
+**Target:** SourceCraft `integrator-p/ams-realty-baza-starter`
+**Canonical baseline:** SourceCraft `main@59ff2f8bd3908145ad7eda140d00f2d500dee347`
+**Interim GitHub history:** `neyro-level/ams-realty-baza-starter` `main@f645993d67c64abc200beeef47fbf3ad742ee8b2`
+**Canonical delivery surface:** SourceCraft `main`
+**Repository mode:** `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`
 **Core:** `AMS REALTY PLATFORM CORE STANDARD 5.5 — SOLO + AI`  
 **UI:** `AMS UI CORE v5.0`  
 **Profile:** `AMS_PROFILE=REALTY_BASE`  
 **Delivery profile:** `COMMERCIAL`
 
-Version: v3
+Version: v4
 Status: APPROVED
 
-> Этот документ является новым Plan №6 и продолжает уже закрытую программу Plan №5, в которой были выполнены EPIC-01…13. Эпики нового плана получают собственные номера **EPIC-01…09**. Полная идентичность задачи всегда задаётся парой `Plan ID + Epic ID`, поэтому исторические идентификаторы не конфликтуют.
+> Этот документ является новым Plan №6 и продолжает уже закрытую программу Plan №5, в которой были выполнены EPIC-01…13. В Plan №6 используются **EPIC-01…10**. Полная идентичность задачи всегда задаётся парой `Plan ID + Epic ID`, поэтому исторические идентификаторы не конфликтуют.
 >
-> Перед стартом EPIC-01 обязательно повторно сверить canonical GitHub `main` с baseline. Если `main` изменился после `59ff2f8...`, зафиксировать новый exact SHA и повторно проверить только изменившийся scope до начала реализации. SourceCraft с этого owner decision не получает новых push, PR, Gate, merge или mirror updates.
+> v4 отменяет только ошибочный GitHub-primary delivery decision. Уже закрытый EPIC-01 сохраняется как historical evidence, а новый уникальный EPIC-10 возвращает SourceCraft primary, включает созданную GitHub-историю без force/rewrite и оставляет GitHub односторонним mirror. Production по-прежнему полностью исключён.
 
 ## 0. Архитектурный статус документа
 
 Вход владельца принят как `v0 DRAFT`. После первого assembly checkpoint
-`v1 REVIEW` owner изменил repository policy; `v2 REVIEW` зафиксировал GitHub
-primary. Текущая редакция `v3` прошла финальный четырёхпроходный аудит и
-утверждена владельцем exact фразой `План утвержден`.
+`v1 REVIEW` собрал исходный scope; `v2 REVIEW` и `v3 APPROVED` ошибочно
+зафиксировали GitHub primary. Новый owner input возвращает SourceCraft primary.
+Текущая редакция `v4 APPROVED` заменяет superseded v3 graph и разрешает
+reconciliation revised inventory, EPIC-10 delivery и Developer continuation.
 
 ```text
-Task Manager import: AUTHORIZED FOR EXACT v3 AFTER VALIDATE
-Developer handoff: AUTHORIZED AFTER CLEAN RECONCILE
+Task Manager import: AUTHORIZED FOR EXACT v4
+Developer handoff: AUTHORIZED AFTER CLEAN RECONCILIATION
 Production: OUT OF SCOPE
-Next gate: GitHub checkpoint → Validate → Init → Import → Reconcile → Developer
+Next gate: revised inventory → CLEAN reconciliation → Developer EPIC-10
 ```
 
 ### MASTER PLAN MAP
@@ -60,7 +61,7 @@ Major outcomes:
   clean active docs path and exact-head freeze proof
 
 Shared foundations:
-  EPIC-01 GitHub primary delivery contract
+  EPIC-10 SourceCraft primary restoration contract
   EPIC-02 path contract
   EPIC-03 env contract
   EPIC-06 module manifest contract
@@ -69,7 +70,7 @@ Data/schema:
   migration path moves without migration semantic changes
 
 External integrations:
-  GitHub repository, Pull Requests and manual exact-head Actions gates
+  SourceCraft repository, Pull Requests and manual exact-head SourceCraft gates; GitHub mirror only
   official Payload and Timeweb documentation
   no real Timeweb credentials required inside this plan
 
@@ -136,26 +137,41 @@ Needs owner: none before approval
 Result: v3 READY_FOR_OWNER_APPROVAL
 ```
 
-### Approval checkpoint and handoff boundary
-
-Exact фраза владельца `План утвержден` получена. Architect выполняет только
-следующую последовательность для утверждённого `v3`:
+### Revision packet MP6-R4
 
 ```text
-mark exact v3 APPROVED
-→ create task-owned worktree/branch codex/github-primary-bootstrap
-  from verified GitHub main baseline
-→ commit approved plan as the docs checkpoint
-→ push that branch only to GitHub; no SourceCraft write
-→ Validate → Init → Import → Reconcile in local stealth Beads
-→ hand off the same registered worktree/branch and APPROVED graph
-  to Task Manager Developer
+Source: explicit owner correction during EPIC-05
+Decision:
+  SourceCraft is canonical primary
+  GitHub is a one-way mirror of SourceCraft main
+  production remains excluded
+Accepted:
+  restore origin=SourceCraft and github=mirror
+  restore manual-only SourceCraft STANDARD/RISKY gates
+  preserve already closed EPIC-01…04 and TASK-05-01 evidence
+  reconcile their GitHub history into SourceCraft through unique EPIC-10 without force
+  preserve TASK-05-01 exact commit by merging canonical main into its branch, not rebasing it away
+  continue remaining epics only after exact v4 approval
+Rejected:
+  bidirectional sync or GitHub-to-SourceCraft mirror automation
+  loss/rewrite of completed implementation evidence
+  production action
+Needs owner:
+  exact v4 approval after final audit
 ```
 
-Первый checkpoint не merge и не production. Developer продолжает EPIC-01 в
-том же stream, добавляет repository-policy/workflow changes и создаёт один
-итоговый GitHub PR EPIC-01. Если GitHub push permission не подтверждён, docs
-checkpoint, Beads import и handoff не выполняются.
+### Approval checkpoint and handoff boundary
+
+Предыдущее approval v3 больше не разрешает execution: owner изменил repository
+mode. До точной фразы `План утверждён` / `План утвержден` для exact v4:
+
+```text
+do not import revised inventory
+do not claim new implementation tasks
+do not create or merge delivery PRs
+preserve completed ledgers and the EPIC-05 implementation checkpoint
+allow only read-only preflight and plan/canon restoration work
+```
 
 ---
 
@@ -291,85 +307,73 @@ Dedicated queue runner появляется только после доказа
 Для каждого EPIC обязательны: observable outcome, Source of Truth, scope in/out,
 entry/exit conditions, минимальные dependencies, acceptance, verification,
 delivery mode, rollback и stop conditions. Плановые delivery tasks используют
-`MERGE_AFTER_GATE` в GitHub; production не входит ни в один EPIC.
+`MERGE_AFTER_GATE` в SourceCraft; production не входит ни в один EPIC.
 
 Каждый EPIC выполняется как независимый delivery stream:
 
 ```text
-latest canonical GitHub main
+latest canonical SourceCraft origin/main
 → новая branch/worktree
 → только scope текущего EPIC
-→ implementation
-→ relevant checks
-→ commit
-→ push в GitHub
-→ GitHub Pull Request
-→ ручной STANDARD или RISKY exact-head GitHub Actions Gate
-→ merge в main
-→ зафиксировать merge SHA и delivery evidence без повторения уже пройденного Gate
-→ удалить epic branch/worktree
-→ следующий READY EPIC от нового main
+→ implementation + relevant local checks
+→ commit + push в SourceCraft
+→ SourceCraft Pull Request
+→ один ручной STANDARD или RISKY exact-head SourceCraft Gate
+→ merge в SourceCraft main
+→ зафиксировать merge SHA/evidence
+→ удалить clean epic branch/worktree
+→ по отдельной mirror-команде fast-forward SourceCraft main → GitHub main
+→ следующий READY EPIC от нового SourceCraft main
 ```
 
 Общие правила:
 
 - один EPIC = один PR;
-- unrelated cleanup запрещён;
-- `merge != production release`;
-- production не выполняется этим планом;
+- SourceCraft = primary, GitHub = mirror; reverse/bidirectional sync запрещён;
+- обычный push/PR не запускает CI;
+- один exact-head Gate перед merge для COMMERCIAL;
+- `merge != production release`; production не выполняется этим планом;
 - любой изменившийся exact SHA инвалидирует proof текущего EPIC;
-- final EPIC не исправляет найденные P0/P1 скрытно — он возвращает finding владельцу соответствующего EPIC;
-- GitHub является единственным canonical delivery surface;
-- SourceCraft не получает push, PR, Gate, merge или mirror update;
-- GitHub Actions не запускаются автоматически на обычный `push` или создание/обновление PR;
-- deploy workflows и production environments в рамках этого плана не создаются и не запускаются;
+- final EPIC возвращает P0/P1 finding владельцу owning EPIC;
+- deploy workflows и production environments не создаются и не запускаются;
 - secrets/PII не появляются в docs, fixtures, logs или commits;
-- RISKY EPIC использует `pnpm verify:merge-risky` с isolated `DATABASE_URI_TEST`;
-- required integration suites не имеют права silently `SKIP`.
-- один и тот же command graph не повторяется до и после merge без нового SHA
-  или отдельного доказанного риска;
-- локально заблокированный EPIC не останавливает программу, пока существует
-  другая независимая READY-работа.
+- RISKY EPIC использует isolated safe `DATABASE_URI_TEST` без skipped required suites;
+- одинаковый command graph не повторяется без нового SHA/риска;
+- заблокированный EPIC не останавливает независимую READY-работу.
 
 ---
 
 # 5. DEPENDENCY GRAPH
 
 ```text
-EPIC-01  GitHub primary cutover
-   │
-   └────────────→ EPIC-02  Canonical folder-form
-                      │
-                      ├────────────→ EPIC-03  Unified env/runtime contract
-                      │                  │
-                      │                  └────────→ EPIC-04  Project identity + client readiness
-                      │                                   │
-                      │                                   └────────→ EPIC-07  Timeweb client blueprint
-                      │
-                      ├────────────→ EPIC-05  Lead delivery project policy
-                      │
-                      └────────────→ EPIC-06  Module manifests/governance
+COMPLETED CHECKPOINT (preserved, not reopened):
+EPIC-01 → EPIC-02 → EPIC-03 → EPIC-04
+                    └────────→ TASK-05-01
+
+EPIC-10  SourceCraft primary restoration
+   ├────────────→ TASK-05-02  Lead policy integration / DB proof
+   ├────────────→ EPIC-06  Module manifests/governance
+   └────────────→ EPIC-07  Timeweb client blueprint
 
 EPIC-08  Token report / clone UI cleanup
    └── after EPIC-06 module contract; shared docs/guards are serialized
 
-EPIC-01…08
+EPIC-01…08 + EPIC-10
    └────────────→ EPIC-09  Docs cleanup + exact-head final proof + freeze
 ```
 
 Безопасные execution waves:
 
 ```text
-WAVE-A: EPIC-01
-WAVE-B: EPIC-02
-WAVE-C: EPIC-03 + EPIC-06
-WAVE-D: EPIC-04 + EPIC-05 + EPIC-08
-WAVE-E: EPIC-07
-WAVE-F: EPIC-09
+PRESERVED: EPIC-01…04 + TASK-05-01
+WAVE-A: EPIC-10
+WAVE-B: TASK-05-02 + EPIC-06 + EPIC-07
+WAVE-C: EPIC-08
+WAVE-D: EPIC-09
 ```
 
-EPIC-07 начинается после EPIC-04; EPIC-03 уже входит в его транзитивную
-dependency chain.
+EPIC-01…04 и TASK-05-01 не переоткрываются. EPIC-07 имеет выполненную contract
+dependency EPIC-04, но не начинается до восстановления SourceCraft в EPIC-10.
 
 EPIC-09 всегда последний.
 
@@ -377,16 +381,14 @@ EPIC-09 всегда последний.
 
 | Epic | Dependency | Type | Blocking scope | Причина / защита от блокировки |
 |---|---|---|---|---|
-| EPIC-01 | owner decision + canonical GitHub baseline | OWNER/EXTERNAL resolved | whole epic | GitHub primary подтверждён; bootstrap workflow доказывает cutover без SourceCraft |
-| EPIC-02 | EPIC-01 | HARD | whole epic | все новые streams должны идти только через GitHub primary |
-| EPIC-03 | EPIC-02 | HARD | whole epic | canonical owner `src/project/env.ts` появляется после path move |
-| EPIC-04 | EPIC-03 | CONTRACT | client-readiness tasks | identity использует отдельный `site.config.ts`; env contract должен быть frozen |
-| EPIC-05 | EPIC-02 | HARD | path owner | новый jobs path обязателен до изменения policy composition |
-| EPIC-05 | EPIC-03 | SOFT | shared `jobs/tasks` integration only | не выполнять конфликтующий integration task параллельно; domain policy/tests можно готовить независимо |
-| EPIC-06 | EPIC-02 | HARD | module marker/guard paths | guard должен строиться сразу на canonical `src/project/**` |
-| EPIC-07 | EPIC-04 | CONTRACT | blueprint validation | использует frozen client identity/readiness contract; EPIC-03 покрыт транзитивно |
+| EPIC-01…04 | historical v3 graph | SATISFIED | preserved evidence | закрыты и не переоткрываются; их commits включаются в SourceCraft history через EPIC-10 |
+| TASK-05-01 | EPIC-02 | SATISFIED | preserved evidence | закрытый checkpoint сохраняется без повторного claim |
+| EPIC-10 | owner decision + SourceCraft/GitHub ancestry preflight | OWNER/EXTERNAL resolved | all remaining delivery | SourceCraft primary восстанавливается без force; новые streams до этого запрещены |
+| TASK-05-02 | EPIC-10 + TASK-05-01 | HARD | remaining EPIC-05 scope | integration/DB proof выполняется только после canonical SourceCraft recovery |
+| EPIC-06 | EPIC-02 satisfied + EPIC-10 | HARD | whole epic | canonical paths уже доставлены; новый stream обязан идти через SourceCraft |
+| EPIC-07 | EPIC-04 satisfied + EPIC-10 | CONTRACT/HARD | blueprint validation | identity contract уже frozen; delivery ждёт SourceCraft recovery |
 | EPIC-08 | EPIC-06 | CONTRACT | module-reserved integration + shared files | `PROJECT.md`, `DESIGN.md` и quality guards не меняются параллельно |
-| EPIC-09 | EPIC-01…08 | HARD | final proof/freeze only | доказывает один итоговый GitHub SHA; implementation эпиков не блокируется им |
+| EPIC-09 | EPIC-01…08 + EPIC-10 | HARD | final proof/freeze only | доказывает один итоговый SourceCraft SHA; implementation эпиков не блокируется им |
 
 Cycles: `0`.
 
@@ -394,8 +396,8 @@ Cycles: `0`.
 
 | Prerequisite | Preflight | Fallback / stop condition |
 |---|---|---|
-| GitHub push/PR/Actions permissions | read-only preflight до EPIC-01 | EPIC-01 STOP; SourceCraft fallback запрещён |
-| GitHub bootstrap gate | exact branch trigger `codex/github-primary-bootstrap` | если exact-head GitHub run не PASS, cutover PR не merge |
+| SourceCraft push/PR/CI permissions | read-only preflight до EPIC-10 | EPIC-10 STOP; GitHub reverse fallback запрещён |
+| SourceCraft restoration gate | manual exact-head `merge-risky` workflow | если exact-head SourceCraft run не PASS, restoration PR не merge |
 | isolated native PostgreSQL test DB | проверить до первого RISKY Gate | не запускать destructive DB checks без safe `*_test`; продолжить STANDARD/docs scope |
 | Payload/Timeweb official docs | проверять exact вопрос перед EPIC-02/07 | при несовместимости вернуть finding в план, не угадывать API |
 | visual representative data | проверить перед EPIC-09 UI proof | записать `NOT PROVEN`; freeze блокируется только если это P0/P1 или обязательный acceptance |
@@ -405,21 +407,19 @@ Cycles: `0`.
 
 | Epic | Entry | Exit | Evidence tier | Delivery / rollback |
 |---|---|---|---|---|
-| EPIC-01 | GitHub and historical SourceCraft main both at `59ff2f8…` | GitHub primary canon, manual gates available, SourceCraft active delivery removed | exact-head GitHub bootstrap proof | GitHub `MERGE_AFTER_GATE`; revert cutover PR before later work |
-| EPIC-02 | exact baseline + Payload `migrationDir` contract verified | один canonical path, migrations unchanged semantically, old live refs = 0 | wired + DB migration proof | `MERGE_AFTER_GATE`; revert path-only commit |
-| EPIC-03 | EPIC-02 merged | один env schema owner и deterministic mode matrix | wired runtime/config proof | `MERGE_AFTER_GATE`; revert without changing secrets |
-| EPIC-04 | EPIC-03 contract frozen | starter identity centralized, fixture client rejected/accepted deterministically | wired build/SEO/readiness proof | `MERGE_AFTER_GATE`; revert identity/readiness stream |
-| EPIC-05 | EPIC-02 merged; EPIC-03 shared-file task serialized | one typed project delivery policy drives state, job and recovery | wired + required DB integration | `MERGE_AFTER_GATE`; revert policy injection while preserving state schema |
+| EPIC-01…04 | closed v3 ledgers and merge evidence | preserved immutable historical evidence | existing GitHub exact-head evidence | no reopen; history becomes ancestor of SourceCraft through EPIC-10 |
+| EPIC-10 | SourceCraft `59ff2f8…` is ancestor of interim GitHub `f645993…` | SourceCraft primary canon and manual gates restored; completed history preserved | exact-head SourceCraft restoration proof | SourceCraft `MERGE_AFTER_GATE`; revert restoration PR before later work |
+| EPIC-05 | TASK-05-01 preserved + EPIC-10 merged | one typed project delivery policy drives state, job and recovery | wired + required DB integration | `MERGE_AFTER_GATE`; revert policy injection while preserving state schema |
 | EPIC-06 | EPIC-02 merged | manifests and mechanical activation guard exist without activating modules | contract + guard proof | `MERGE_AFTER_GATE`; revert docs/guard stream |
 | EPIC-07 | EPIC-04 merged + fresh official docs | static Timeweb activation blueprint validated; live provider proof remains explicit `NOT PROVEN` | static contract only | `MERGE_AFTER_GATE`; revert blueprint files |
 | EPIC-08 | EPIC-06 module contract merged | one analyzer exposes report mode and preserves fail gate | wired CLI + positive/negative fixtures | `MERGE_AFTER_GATE`; revert analyzer/report split |
-| EPIC-09 | EPIC-01…08 merged | exact-head proof, P0/P1=0, clean docs path and immutable GitHub freeze ref | exact-head integrated proof | GitHub `MERGE_AFTER_GATE`; do not tag if proof fails |
+| EPIC-09 | EPIC-01…08 + EPIC-10 merged | exact-head proof, P0/P1=0, clean docs path and immutable SourceCraft freeze ref | exact-head integrated proof | SourceCraft `MERGE_AFTER_GATE`; do not tag if proof fails |
 
 ## 5.4 Deterministic stop / recovery matrix
 
 | Epic | Stop condition | Safe recovery / bypass |
 |---|---|---|
-| EPIC-01 | GitHub permission, baseline or exact-head bootstrap proof fails | do not import/merge; fix GitHub access or baseline, never fall back to SourceCraft |
+| EPIC-10 | SourceCraft permission, ancestry or exact-head restoration proof fails | do not import/merge; fix SourceCraft access or ancestry, never reverse-sync from GitHub |
 | EPIC-02 | migration semantics, generated types or import map change unexpectedly | revert path stream; keep previous canonical main; EPIC-03/05/06 remain blocked |
 | EPIC-03 | build-time compatibility or mode matrix cannot be preserved | revert env stream; do not weaken fail-closed rules; EPIC-06 may continue independently |
 | EPIC-04 | fixture client can pass with starter identity or invalid topology | do not merge; retain pre-identity main; EPIC-05/06 may continue if ready |
@@ -431,191 +431,113 @@ Cycles: `0`.
 
 ---
 
-# EPIC-01 — GITHUB PRIMARY CUTOVER + MANUAL GATE BOOTSTRAP
+# EPIC-01 — HISTORICAL GITHUB BOOTSTRAP (DELIVERED, SUPERSEDED)
 
-**Risk:** RISKY repository governance / CI  
-**Goal:** сделать GitHub единственным canonical repository и delivery surface,
-не используя SourceCraft и не создавая production delivery.
+**State:** CLOSED in v3; immutable historical evidence.
+**Boundary:** этот эпик не переоткрывается и не используется для новых задач.
 
-## 1.1 Owner decision
+EPIC-01 выполнил временный GitHub-primary bootstrap по ранее утверждённому v3.
+Решение о repository mode позднее отменено владельцем, но commit/PR/gate evidence
+остаётся фактом истории. Восстановление SourceCraft имеет новый ID `EPIC-10`,
+чтобы не менять смысл закрытого Beads node и его execution ledger.
 
-Зафиксировано владельцем:
+---
 
-```text
-Repository mode: GITHUB_PRIMARY
-GitHub PR / merge / freeze tag: allowed
-SourceCraft: no push, PR, Gate, merge or mirror update
-Production: fully out of scope
-```
+# EPIC-10 — SOURCECRAFT PRIMARY RESTORATION + HISTORY RECONCILIATION
 
-Это решение заменяет прежний project-local `SOURCECRAFT_PRIMARY` contract для
-всей будущей работы Plan №6. Исторический SourceCraft evidence остаётся
-историей и не переписывается как будто delivery происходил в GitHub.
+**Risk:** RISKY repository governance / CI
+**Goal:** вернуть SourceCraft единственным canonical repository, сохранить
+выполненную GitHub-историю и оставить GitHub односторонним mirror.
 
-## 1.2 Baseline and preflight
-
-До первой записи подтвердить:
+## 10.1 Owner decision
 
 ```text
-local HEAD = 59ff2f8bd3908145ad7eda140d00f2d500dee347
-GitHub main = 59ff2f8bd3908145ad7eda140d00f2d500dee347
-historical SourceCraft main = same SHA, read-only fact only
-GitHub push / PR / Actions permissions = available
+Repository mode: SOURCECRAFT_PRIMARY_GITHUB_MIRROR
+SourceCraft PR / merge / freeze tag: allowed
+GitHub: mirror only after SourceCraft main merge
+Production: forbidden in Plan №6
 ```
 
-Если GitHub `main` изменился, обновить baseline и повторить scope diff. Не
-использовать SourceCraft как fallback.
-
-## 1.3 Canonical project policy update
-
-Перевести active canon на GitHub primary:
+## 10.2 Baseline and reconciliation
 
 ```text
-AGENTS.md
-docs/README.md
-docs/03_ARCHITECTURE.md
-docs/04_BACKLOG.md
-docs/05_RELEASE_CHECKLIST.md
-docs/OPERATIONS.md
-docs/PROJECT.md where applicable
+SourceCraft main before restoration = 59ff2f8bd3908145ad7eda140d00f2d500dee347
+GitHub interim main = f645993d67c64abc200beeef47fbf3ad742ee8b2
+SourceCraft baseline must be an ancestor of the interim GitHub main
+No force push, reset, history rewrite or loss of completed EPIC-01…04 commits
 ```
 
-Правила:
+Create one restoration branch from the interim GitHub main, restore SourceCraft
+delivery policy on that branch, push it to SourceCraft and merge only through a
+SourceCraft RISKY PR/gate. The resulting SourceCraft merge SHA becomes canonical.
 
-- прошлые SourceCraft PR/Gate/SHA сохраняются только как historical evidence;
-- будущие branch/PR/merge/tag принадлежат GitHub;
-- GitHub не называется mirror;
-- production sections явно помечаются `OUT OF SCOPE FOR PLAN №6` и не
-  превращаются в workflow;
-- `DELIVERY_PROFILE=COMMERCIAL` сохраняется.
+## 10.3 Canonical project policy update
 
-## 1.4 CI policy migration
+Update active canon consistently:
 
-Удалить active SourceCraft-only delivery configuration:
+```text
+origin = SourceCraft integrator-p/ams-realty-baza-starter
+github = GitHub neyro-level/ams-realty-baza-starter (mirror)
+SourceCraft main = Source of Truth
+GitHub main = exact fast-forward mirror only
+historical GitHub PR/Actions evidence remains historical evidence
+```
+
+## 10.4 CI policy restoration
+
+Restore:
 
 ```text
 .sourcecraft/ci.yaml
-```
-
-SourceCraft-specific mechanical guard заменить GitHub-owned policy guard без
-ослабления zero-CI и exact-head invariants.
-
-Provider-specific exact-head assertion также заменить:
-
-```text
-scripts/ci/assert-exact-head.mjs
-  EXPECTED_COMMIT_SHA = requested full SHA
-  CI_COMMIT_SHA = GitHub GITHUB_SHA
-  git rev-parse HEAD = checked-out SHA
-  all three values must be equal full SHAs
-
 scripts/quality/sourcecraft-policy.mjs
-  → scripts/quality/github-actions-policy.mjs
-
-package.json quality:guards
-  → references only the GitHub policy guard
+EXPECTED_COMMIT_SHA + SOURCECRAFT_COMMIT_SHA + checkout exact-head assertion
+manual merge-standard / merge-risky only
 ```
 
-После migration active code/config не требует `SOURCECRAFT_COMMIT_SHA` и не
-читает `.sourcecraft/ci.yaml`. Historical documentation может сохранять слово
-SourceCraft только как явно обозначенное прошлое evidence.
+Remove active GitHub-primary delivery workflow/guard. No automatic SourceCraft
+push/PR triggers and no deploy workflow.
 
-Создать один project-owned GitHub Actions contract:
-
-```text
-.github/workflows/manual-gate.yml
-```
-
-После bootstrap он имеет только ручной `workflow_dispatch` и inputs:
+## 10.5 SourceCraft delivery and GitHub mirror sequence
 
 ```text
-expected_commit_sha
-gate = standard | risky
-```
-
-Обычные `push`, `pull_request` и `schedule` не запускают validation. Deploy,
-publish и production jobs отсутствуют.
-
-### One-time bootstrap trigger
-
-Поскольку manual workflow ещё отсутствует в default branch, EPIC-01 использует
-ровно один временный branch-specific trigger:
-
-```text
-push:
-  branches:
-    - codex/github-primary-bootstrap
-```
-
-Он запускает RISKY gate только для bootstrap branch, проверяет exact
-`GITHUB_SHA` через provider-neutral assertion и не выполняет deploy. После merge branch удаляется; trigger
-остаётся ограниченным этим зарезервированным именем и становится недостижимым
-для обычной разработки. Project policy запрещает повторно создавать этот
-branch после EPIC-01.
-
-## 1.5 GitHub delivery sequence
-
-```text
-GitHub main@baseline
-→ branch codex/github-primary-bootstrap
-→ project canon + CI policy migration
-→ push only to GitHub
-→ one-time exact-head GitHub RISKY run
-→ GitHub Pull Request
-→ verify PR head = proven SHA
+verify SourceCraft baseline ancestor of interim GitHub main
+→ restoration branch from interim GitHub main
+→ restore SourceCraft canon/config
+→ push branch to SourceCraft
+→ SourceCraft PR to main
+→ one exact-head SourceCraft RISKY gate
 → merge without force
-→ confirm GitHub main merge SHA
-→ remove SourceCraft from active local remote workflow
-→ delete bootstrap branch safely
+→ verify completed GitHub implementation SHAs are ancestors of SourceCraft main
+→ fast-forward SourceCraft origin/main to GitHub github/main without force
+→ verify exact SHA equality
 ```
 
-Новые clones получают `origin=GitHub`. Текущий checkout после подтверждённого
-merge также переводит `origin` на GitHub; SourceCraft remote удаляется из
-active local configuration, а не сохраняется как write fallback.
-
-## 1.6 Acceptance
+## 10.6 Acceptance
 
 ```text
-GitHub is the only active primary in canonical docs
-GitHub main and PR head SHAs are recorded
-manual STANDARD/RISKY exact-head gate is available from main
-ordinary push/PR does not auto-run CI
-no deploy/production workflow exists
-.sourcecraft/ci.yaml is absent
-active quality guards do not require SourceCraft
-active exact-head assertion does not require SOURCECRAFT_COMMIT_SHA
-SourceCraft received no new write during cutover
+origin points to SourceCraft and github points to GitHub
+SourceCraft main contains the completed EPIC-01…04 history
+manual exact-head SourceCraft STANDARD/RISKY gates pass policy guard
+ordinary push/PR runs no CI and no deploy workflow exists
+GitHub mirror can fast-forward without unique commits or force
+production unchanged
 ```
 
-Checks:
-
-```bash
-pnpm quality:guards
-pnpm verify:daily
-pnpm verify:merge-risky
-```
-
-Final CI evidence for EPIC-01 must come from the one-time GitHub bootstrap run
-on the exact PR head SHA.
-
-## 1.7 Stop conditions
-
-STOP и не merge, если:
+## 10.7 Stop conditions
 
 ```text
-GitHub permissions are insufficient
-bootstrap workflow runs on ordinary branches
-workflow contains deploy/publish/production action
-exact GITHUB_SHA cannot be proven
-project canon still names SourceCraft as active primary
-cutover requires any new SourceCraft write
+SourceCraft access or gate cannot be proven
+SourceCraft baseline is not an ancestor of interim GitHub main
+GitHub contains unique commits after SourceCraft restoration candidate is frozen
+force/non-fast-forward is required
+secrets or production action would be required
 ```
 
-## 1.8 Rollback
+## 10.8 Rollback
 
-До merge — закрыть GitHub PR и удалить bootstrap branch. После merge — revert
-cutover только через новый GitHub PR; SourceCraft не синхронизировать назад и
-не использовать как rollback repository.
+Before merge: close SourceCraft PR and keep both existing mains unchanged.
+After merge: revert only the restoration PR through SourceCraft; never rewrite
+either main and never use GitHub as an automatic reverse source.
 
 ---
 
@@ -623,6 +545,7 @@ cutover только через новый GitHub PR; SourceCraft не синх�
 
 **Risk:** RISKY  
 **Depends on:** EPIC-01  
+**Execution state:** CLOSED in v3; preserve ledger and merged commit evidence.
 **Goal:** убрать structural deviation от Core 5.5 до тиражирования starter.
 
 ## 2.1 Target structure
@@ -717,7 +640,7 @@ tests / integration scripts
 dependency-cruiser config
 architecture guards
 schema verification
-GitHub workflows и active CI/policy guards при наличии hardcoded paths
+SourceCraft workflows and active CI/policy guards при наличии hardcoded paths
 docs/03_ARCHITECTURE.md
 docs/PROJECT.md
 docs/OPERATIONS.md
@@ -807,6 +730,7 @@ Path-only move должен откатываться одним EPIC revert бе
 
 **Risk:** RISKY  
 **Depends on:** EPIC-02  
+**Execution state:** CLOSED in v3; preserve ledger and merged commit evidence.
 **Goal:** один понятный source of truth для env parsing + mode-aware fail-closed runtime validation.
 
 ## 3.1 Current problem
@@ -1053,6 +977,7 @@ test-only env начинает влиять на production parsing
 
 **Risk:** STANDARD  
 **Depends on:** EPIC-03  
+**Execution state:** CLOSED in v3; preserve ledger and merged commit evidence.
 **Goal:** исключить копирование starter identity/SEO/demo topology в клиентский проект.
 
 ## 4.1 Centralize project identity
@@ -1225,7 +1150,8 @@ pnpm verify:merge-standard
 # EPIC-05 — CONFIG-DRIVEN LEAD DELIVERY POLICY
 
 **Risk:** RISKY  
-**Depends on:** EPIC-02  
+**Depends on:** EPIC-02 satisfied; remaining TASK-05-02 also depends on EPIC-10
+**Execution state:** TASK-05-01 CLOSED at commit `0ac3ddba20dd9291ac1eb553500c7f972ef3cde4`; TASK-05-02 not claimed/delivered. After EPIC-10, merge canonical SourceCraft `main` into the preserved epic branch without rebasing away TASK-05-01 evidence, then finish TASK-05-02.
 **Goal:** вынести project-tunable delivery policy из core hardcodes без создания speculative routing engine.
 
 ## 5.1 Move project policy
@@ -1391,7 +1317,7 @@ pnpm verify:merge-risky
 # EPIC-06 — MODULE MANIFESTS + ACTIVATION GOVERNANCE
 
 **Risk:** STANDARD  
-**Depends on:** EPIC-02  
+**Depends on:** EPIC-02 satisfied + EPIC-10
 **Goal:** module activation из Core §22A превратить в механический project workflow.
 
 ## 6.1 Create directory
@@ -1552,7 +1478,7 @@ PROJECT module disabled
 # EPIC-07 — TIMEWEB CLIENT PRODUCTION BLUEPRINT
 
 **Risk:** RISKY architecture/reference  
-**Depends on:** EPIC-04 (`EPIC-03` транзитивно)  
+**Depends on:** EPIC-04 satisfied (`EPIC-03` транзитивно) + EPIC-10
 **Goal:** сделать первый client activation повторяемым, не превращая demo starter в dual-runtime system.
 
 ## 7.1 Boundary
@@ -1956,7 +1882,7 @@ pnpm verify:merge-standard
 # EPIC-09 — DOCUMENTATION CLEANUP + FINAL EXACT-HEAD PROOF + STARTER FREEZE
 
 **Risk:** RISKY verification  
-**Depends on:** EPIC-01…08 merged  
+**Depends on:** EPIC-01…08 + EPIC-10 merged
 **Goal:** оставить AI один ясный active reading path и заморозить starter перед первым client clone.
 
 ## 9.1 Historical plan cleanup
@@ -2206,8 +2132,8 @@ docs/proofs/final-starter-freeze.md
 Required fields:
 
 ```text
-canonical GitHub SHA
-historical SourceCraft SHA at cutover boundary
+canonical SourceCraft SHA
+interim GitHub SHA at restoration boundary
 Core/UI versions
 epic merge SHAs 01–08
 commands actually run
@@ -2246,7 +2172,7 @@ tag / immutable reference:
 starter-freeze-v1
 ```
 
-Tag создаётся только в GitHub на exact proven `main` SHA. SourceCraft tag или
+Tag создаётся только в SourceCraft на exact proven `main` SHA. GitHub tag или
 mirror update запрещены.
 
 ---
@@ -2255,7 +2181,7 @@ mirror update запрещены.
 
 | Finding | Owner EPIC |
 |---|---:|
-| SourceCraft active primary / missing GitHub gate | 01 |
+| SourceCraft primary restoration / missing SourceCraft gate | 01 |
 | `src/payload/**` structural drift | 02 |
 | migration folder drift | 02 |
 | duplicated env semantics | 03 |
@@ -2351,33 +2277,28 @@ live smoke
 # 9. EXECUTION ORDER
 
 ```text
-EPIC-01  GitHub primary cutover + manual gate bootstrap
-→ GitHub merge main
+PRESERVED CHECKPOINT
+EPIC-01…04 delivered under superseded v3
+TASK-05-01 committed; TASK-05-02 not claimed/delivered
 
-EPIC-02  Canonical folder-form
-→ GitHub merge main
+EPIC-10  SourceCraft primary restoration + manual gate bootstrap
+→ SourceCraft merge main
 
-EPIC-03  Unified env/runtime contract
-→ GitHub merge main
-
-EPIC-04  Identity + client readiness
-→ GitHub merge main
-
-EPIC-05  Lead delivery project policy
-→ GitHub merge main
+TASK-05-02  Lead delivery integration + required DB proof
+→ SourceCraft merge main
 
 EPIC-06  Module manifests/governance
-→ GitHub merge main
+→ SourceCraft merge main
 
 EPIC-07  Timeweb client blueprint
-→ GitHub merge main
+→ SourceCraft merge main
 
 EPIC-08  Token report / clone UI cleanup
-→ GitHub merge main
+→ SourceCraft merge main
 
 EPIC-09  Docs cleanup + exact-head proof + freeze
-→ GitHub merge main
-→ create GitHub tag starter-freeze-v1
+→ SourceCraft merge main
+→ create SourceCraft tag starter-freeze-v1
 → STOP
 → create first client clone
 ```
@@ -2387,7 +2308,7 @@ EPIC-02. EPIC-05 не меняет shared jobs integration одновремен�
 EPIC-08 не стартует до merge EPIC-06. Каждый поток сохраняет отдельные
 branch/worktree/PR и проходит собственный exact-head Gate.
 
-EPIC-09 начинается только после merge всех предшественников.
+EPIC-09 начинается только после merge EPIC-01…08 и EPIC-10.
 
 ---
 
@@ -2396,10 +2317,10 @@ EPIC-09 начинается только после merge всех предше
 План считается завершённым только когда одновременно выполнено:
 
 ```text
-[ ] GitHub is the only active primary
-[ ] SourceCraft received no new writes after owner cutover decision
-[ ] GitHub canonical main exact SHA зафиксирован
-[ ] manual exact-head GitHub STANDARD/RISKY gate доступен
+[ ] SourceCraft is the only active primary
+[ ] GitHub receives only SourceCraft-to-GitHub mirror writes
+[ ] SourceCraft canonical main exact SHA зафиксирован
+[ ] manual exact-head SourceCraft STANDARD/RISKY gate доступен
 [ ] automatic deploy/production workflow отсутствует
 [ ] canonical folder-form применён
 [ ] src/payload old runtime tree отсутствует
@@ -2452,8 +2373,6 @@ Plan-level verification: `PASS` на 2026-09-21 для Payload `3.89.0` и
 
 Official sources:
 
-- GitHub Actions workflow syntax: `https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax`;
-- GitHub manual workflow runs: `https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow`;
 - Payload migrations: `https://payloadcms.com/docs/database/migrations`;
 - Payload storage adapters: `https://payloadcms.com/docs/upload/storage-adapters`;
 - Timeweb S3 guide: `https://timeweb.cloud/docs/s3-storage/manage-storage/s3-guide`;
@@ -2464,10 +2383,11 @@ Official sources:
 Подтверждено:
 
 ```text
-GitHub Actions:
-- workflow_dispatch принимает события только когда workflow file находится в default branch
-- push branch filter ограничивает bootstrap run exact reserved branch
-- поэтому EPIC-01 сначала использует reserved-branch push proof, а после merge — manual dispatch from main
+SourceCraft:
+- manual workflows `merge-standard` и `merge-risky` принимают exact expected SHA
+- обычный push и создание PR не запускают CI
+- PR, exact-head Gate и merge выполняются через SourceCraft API без browser fallback
+- GitHub получает только fast-forward mirror canonical SourceCraft main
 
 Payload:
 - migrationDir configurable
@@ -2500,7 +2420,9 @@ Timeweb Cloud:
 | MP6-A05 | MINOR | post-merge verify дублировал exact-head Gate без нового SHA | `RESOLVED`: только merge identity/evidence |
 | MP6-A06 | MINOR | EPIC-07 повторял прямую и транзитивную dependency | `RESOLVED`: зависит только от EPIC-04 |
 | MP6-A07 | MINOR | site identity owner оставался альтернативой между двумя файлами | `RESOLVED`: отдельный `site.config.ts` |
-| MP6-A08 | MAJOR | active delivery был привязан к SourceCraft вопреки owner decision | `RESOLVED`: GitHub cutover EPIC-01, SourceCraft/production excluded |
+| MP6-A08 | MAJOR | owner отменил GitHub-primary после частичного выполнения v3 | `RESOLVED IN ASSEMBLY`: v4 возвращает SourceCraft primary, сохраняет GitHub-историю и оставляет production excluded |
+| MP6-A09 | BLOCKER | restoration переиспользовал уже закрытый Beads ID EPIC-01 | `RESOLVED`: EPIC-01 остаётся immutable historical evidence; restoration получил новый EPIC-10 |
+| MP6-A10 | MAJOR | TASK-05-01 checkpoint не входит в interim GitHub main и мог потерять exact evidence при rebase | `RESOLVED`: commit `0ac3ddba…` сохраняется; после EPIC-10 canonical main вливается в epic branch без rebase, затем выполняется TASK-05-02 |
 
 Это assembly register, а не финальный четырёхпроходный audit scorecard.
 
@@ -2508,9 +2430,10 @@ Timeweb Cloud:
 
 ## Before approval
 
-Открытых решений нет. Рекомендованный delivery mode для всех EPIC:
-`MERGE_AFTER_GATE` в GitHub; production исключён. Repository mode:
-`GITHUB_PRIMARY`. SourceCraft полностью исключён из будущего delivery.
+Repository mode решён владельцем: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`.
+Delivery mode для всех EPIC: `MERGE_AFTER_GATE` в SourceCraft; production
+исключён. До продолжения исполнения остаётся один обязательный owner gate:
+утверждение exact v4 после повторного финального аудита.
 
 ## Later / execution gate
 
@@ -2518,100 +2441,112 @@ Immutable reference: `starter-freeze-v1`. Если такой tag появитс
 task останавливается до безопасного выбора нового имени; это не блокирует
 предшествующие implementation EPIC.
 
-# 14. FINAL AUDIT FINDING REGISTER
+# 14. FINAL FOUR-PASS AUDIT — EXACT v4
 
 | ID | Severity | Pass | Finding / evidence | Resolution |
 |---|---|---|---|---|
-| MP6-F01 | MAJOR | Architecture / Delivery | current `assert-exact-head.mjs` required `SOURCECRAFT_COMMIT_SHA`, so the proposed GitHub gate was not implementable as written | `RESOLVED` in v3: provider-neutral `EXPECTED_COMMIT_SHA + CI_COMMIT_SHA + checkout` contract and guard migration added to EPIC-01 |
-| MP6-F02 | MAJOR | Executability | no explicit GitHub-only docs checkpoint existed between owner approval and Beads import | `RESOLVED` in v3: approval checkpoint/handoff boundary added; import is forbidden if GitHub push preflight fails |
+| MP6-F01 | HISTORICAL | Architecture / Delivery | v3 changed exact-head enforcement to GitHub | superseded by v4 SourceCraft restoration contract |
+| MP6-F02 | HISTORICAL | Executability | v3 approval/import targeted GitHub | superseded; revised graph cannot continue before exact v4 approval |
 | MP6-F03 | MINOR | Autonomy / Recovery | stop and recovery rules for several epics were implicit in global rules | `RESOLVED` in v3: deterministic stop/recovery matrix added for EPIC-01…09 |
-| MP6-F04 | QUESTION | External prerequisite | GitHub write/PR/Actions permission cannot be proven by repository static audit without entering credential scope | `ACCEPTED LIMIT`: preflight is mandatory before checkpoint/import; fail-closed stop; no SourceCraft fallback |
+| MP6-F04 | MAJOR | External prerequisite | SourceCraft write/PR/CI permission and exact-head gate must be reproven after restoration | `RESOLVED FOR READINESS`: API access and default branch PASS; push dry-run PASS; manual-only gate policy PASS; real exact-head run remains EPIC-10 execution evidence |
 | MP6-F05 | ALREADY_COVERED | Scope / Safety | risk of production entering implementation chain | `ALREADY_COVERED`: production excluded globally; EPIC-07 is static reference only; EPIC-09 creates tag, not rollout |
+| MP6-F06 | MAJOR | History reconciliation | SourceCraft main trails completed GitHub EPIC-01…04 history by 10 commits | `RESOLVED`: ancestry PASS and unique EPIC-10 performs non-force SourceCraft PR/gate/merge |
+| MP6-F07 | BLOCKER | Identity / Evidence | restoration reused closed EPIC-01 ID and would corrupt Beads semantics | `RESOLVED`: EPIC-10 is unique; closed nodes remain immutable |
+| MP6-F08 | MAJOR | Checkpoint recovery | TASK-05-01 commit is outside interim main and TASK-05-02 has uncommitted local state | `RESOLVED`: explicit preserved-branch merge strategy, no rebase/reset, no completion claim before required DB proof |
 
-Open `BLOCKER`: `0`. Open `MAJOR`: `0`. `NEEDS_OWNER`: `0`.
-
-# 15. MASTER PLAN AUDIT
+Four-pass result:
 
 ```text
-Logic / completeness
-  blockers: 0
-  major open: 0
-  outcomes mapped to epics: 9/9
-  scope creep: 0; production and live client infrastructure excluded
+Logic / Completeness: PASS
+  goal, non-goals, completed checkpoint and remaining outcomes map to EPIC-01…10;
+  production remains isolated; no orphan outcome or duplicate active epic.
 
-Architecture / data / security
-  blockers: 0
-  major open: 0
-  data/schema owner conflict: 0 after EPIC-02/03 sequence
-  security-sensitive contracts covered: env/secrets, lead PII, allowlists
-  competing runtime topology: 0; demo remains local, client blueprint static
+Architecture / Data / Security: PASS
+  Payload/PostgreSQL ownership unchanged; no second backend/ORM;
+  repository correction changes delivery governance only;
+  secrets/PII and production actions remain outside plan writes.
 
-Dependency / autonomy
-  cycles: 0
-  HARD dependency rows: 5 (12 directed edges including EPIC-09 final fan-in)
-  CONTRACT/SOFT relationships: 4
-  independent execution waves: 6
-  single blocking point: EPIC-01 GitHub cutover preflight
-  shared-file conflicts: explicitly serialized
+Dependencies / Autonomy: PASS WITH KNOWN LIMIT
+  cycles = 0;
+  closed EPIC-01…04 are not reopened;
+  EPIC-10 is the unavoidable serial repository foundation;
+  after EPIC-10, TASK-05-02, EPIC-06 and EPIC-07 are independent ready work.
 
-Executability / evidence
-  epics with deterministic entry/exit: 9/9
-  epics with acceptance: 9/9
-  epics with verification/evidence tier: 9/9
-  wired/live claims without reachable surface: 0
-  static-only claim: EPIC-07, explicitly NOT PROVEN live
-  production actions in implementation: 0
-
-Owner decisions
-  before approval open: 0
-  later open: 0
+Executability / Evidence / Delivery: PASS
+  every active epic has entry/exit, acceptance, verification, rollback and stop;
+  COMMERCIAL delivery uses one SourceCraft exact-head STANDARD/RISKY Gate;
+  GitHub mirror and freeze happen only after canonical SourceCraft merge;
+  actual gate PASS is execution evidence and cannot be claimed during planning.
 ```
 
-Final audit result for exact `v3`: `PASS`.
+# 15. MASTER PLAN AUDIT STATUS
+
+```text
+Previous exact v3 audit: superseded by repository-mode correction
+Current exact v4 audit: PASS
+Logic/completeness: blockers 0; major open 0
+Architecture/data/security: blockers 0; major open 0
+Dependency/autonomy: cycles 0; hard dependencies justified; independent post-foundation wave = 3 streams
+Executability/evidence: active epics with deterministic acceptance/verification = 9/9
+SourceCraft preflight:
+  API repository access = PASS
+  default branch main = PASS
+  push permission dry-run = PASS
+  SourceCraft baseline ancestor of interim GitHub main = PASS; distance = 10 commits
+  manual-only exact-head policy guard = PASS
+  actual exact-head workflow = EPIC-10 execution evidence, not pre-approval evidence
+Production actions in implementation: 0
+Owner decisions before approval: 0
+```
+
+Final audit result for exact `v4`: `PASS — READY_FOR_OWNER_APPROVAL`.
 
 # 16. NIGHT RUN READINESS
 
 ```text
 Independent ready waves:
-  A: EPIC-01
-  B: EPIC-02
-  C: EPIC-03 + EPIC-06
-  D: EPIC-04 + EPIC-05 + EPIC-08
-  E: EPIC-07
-  F: EPIC-09
+  preserved: EPIC-01…04 + TASK-05-01
+  A: EPIC-10
+  B: TASK-05-02 + EPIC-06 + EPIC-07
+  C: EPIC-08
+  D: EPIC-09
 
 Critical path:
-  EPIC-01 → EPIC-02 → EPIC-03 → EPIC-04 → EPIC-07 → EPIC-09
+  EPIC-10 → EPIC-07 → EPIC-09
 
 Single blocking points:
-  GitHub write/PR/Actions permission before approval checkpoint/import
-  EPIC-01 and EPIC-02 are intentionally sequential foundations
+  SourceCraft write/PR/CI permission before restoration PR
+  EPIC-10 is the intentionally sequential repository foundation
 
 Hard dependencies:
   justified at minimum whole-epic/path/final-proof scope in §5.1
 
 External prerequisites:
-  GitHub permissions: preflight + fail-closed stop, no SourceCraft fallback
+  SourceCraft permissions and exact-head Gate: preflight + fail-closed stop
+  GitHub mirror: only after SourceCraft merge, no reverse/force sync
   isolated test DB: preflight + STANDARD/docs bypass where DAG permits
   official docs: fresh check + finding return, no guessed API
   tag permission: freeze-only stop; no production action
 
-Owner decisions remaining: 0
+Owner decisions remaining: none inside plan; only formal exact v4 approval
 Production-only stops: all live rollout remains outside Plan №6
 
 Safe work if one epic blocks:
-  after EPIC-02, independent ready work is selected by waves C/D;
+  after EPIC-10, independent ready work is selected from wave B;
   a blocked task is released and another ready task is claimed;
-  EPIC-01 permission failure stops before Beads import because GitHub-only
-  delivery is an explicit owner invariant and has no authorized fallback.
+  EPIC-10 permission failure stops restoration; GitHub is not an authorized
+  reverse-delivery fallback.
 
 Expected stop conditions:
   changed baseline, changed proven SHA, skipped required suite, unsafe test DB,
-  unresolved P0/P1, GitHub permission failure, tag conflict, production request.
+  unresolved P0/P1, SourceCraft permission failure, divergence/force need,
+  tag conflict, production request.
 
 Result: READY_WITH_LIMITS
-Limit: the first GitHub permission preflight is an unavoidable external gate.
-It cannot be softened without violating the owner's GitHub-only decision.
+Limit: EPIC-10 is an unavoidable serial foundation because no remaining branch,
+PR or gate may use GitHub. Access/API/push dry-run already pass; a failed real
+SourceCraft exact-head run has no safe fallback and stops delivery without
+affecting preserved evidence or entering production.
 ```
 
 # 17. REVISION HISTORY
@@ -2621,10 +2556,10 @@ It cannot be softened without violating the owner's GitHub-only decision.
 | v0 | DRAFT | 2026-09-21 | owner-provided plan | исходная основа принята без readiness verdict |
 | v1 | REVIEW | 2026-09-21 | MP6-R1: owner plan + repository evidence + official docs | Plan №6, EPIC-01…08, corrected dependencies/waves, external fallbacks, no cycles |
 | v2 | REVIEW | 2026-09-21 | MP6-R2: explicit owner repository decision | GitHub primary, SourceCraft/production excluded, GitHub bootstrap EPIC-01 added, implementation renumbered EPIC-02…09 |
-| v3 | APPROVED | 2026-09-21 | MP6-R3 final audit + explicit owner approval | provider-neutral GitHub exact-head gate, approval checkpoint, complete stop/recovery controls, scorecard PASS, `READY_WITH_LIMITS`; approved by owner at `2026-09-21T13:48:30+03:00` |
+| v3 | SUPERSEDED | 2026-09-21 | MP6-R3 final audit + explicit owner approval | GitHub-primary execution began; EPIC-01…04 delivered before owner correction |
+| v4 | APPROVED | 2026-09-21 | MP6-R4 owner correction + final four-pass audit + explicit owner approval | SourceCraft primary restoration moved to unique EPIC-10; GitHub mirror-only; production excluded; audit PASS; Developer handoff authorized |
 
-Следующий переход: GitHub-only docs checkpoint, clean Task Manager import and
-automatic Developer handoff. Production remains forbidden.
+Следующий переход: revised inventory/reconcile, SourceCraft EPIC-10 restoration PR and Developer continuation. Production remains forbidden.
 
 ---
 

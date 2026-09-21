@@ -8,11 +8,11 @@
 AMS_PROFILE=REALTY_BASE
 DELIVERY_PROFILE=COMMERCIAL
 Mode=BUILD
-Git platform=GITHUB_PRIMARY
+Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в GitHub `main` нужен один ручной exact-head GitHub Actions Gate. APPROVED программа `AMS-REALTBASE-STARTER-FINAL-FREEZE` v3 использует `MERGE_AFTER_GATE` по эпикам. SourceCraft остаётся только historical baseline и не получает новых записей. Production в Plan №6 не входит.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №6 v4 APPROVED после отмены GitHub-primary; Developer execution разрешён после CLEAN reconciliation revised graph. Используется `MERGE_AFTER_GATE` в SourceCraft; GitHub получает только fast-forward mirror canonical `main`. Production в Plan №6 не входит.
 
 ## Stack и ownership
 
@@ -20,7 +20,7 @@ Secrets source=Secret Master / self-hosted Infisical
 - Payload CMS — единственный владелец application schema;
 - PostgreSQL через `@payloadcms/db-postgres`; второй ORM запрещён;
 - Zod, pnpm, Tailwind CSS 4, shadcn/ui, Lucide;
-- Payload Jobs, streaming SAX parser, **local persistent media** (S3 plugin not used by starter), Nginx, GitHub Actions manual gates.
+- Payload Jobs, streaming SAX parser, **local persistent media** (S3 plugin not used by starter), Nginx, SourceCraft.
 
 Текущий lock snapshot: Next.js `16.3.5`, React `19.2.8`, Payload `3.89.0`.
 Фактические версии всегда определяют `package.json`, lockfile и runtime files.

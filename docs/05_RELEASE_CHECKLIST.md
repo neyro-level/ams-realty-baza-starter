@@ -1,6 +1,6 @@
 # Release Checklist
 
-Статус: `Plan №6 ACTIVE / production OUT OF SCOPE`. Plan №5 pre-production proof остаётся historical evidence; owner-operated demo contour существует, но Plan №6 его не выпускает. PII retention days остаются `NEEDS_OWNER`; merge proof не заменяет отдельный release, rollout и live smoke.
+Статус: `Plan №5 pre-production alignment PASS on main@089b0fb7`. Owner-operated demo contour существует, но этот SHA не выпускался. PII retention days остаются `NEEDS_OWNER`; финальный proof не заменяет отдельный release, rollout и live smoke.
 
 ## Перед Pull Request
 
@@ -18,7 +18,7 @@
 - риск классифицирован как `STANDARD` или `RISKY`;
 - `STANDARD` запускает `pnpm verify:merge-standard`; `RISKY` запускает один
   `pnpm verify:merge-risky` с safe isolated test DB и zero skipped required suites;
-- один ручной GitHub Actions Merge Gate зелёный на exact head SHA;
+- один ручной SourceCraft Merge Gate зелёный на exact head SHA;
 - все блокеры исправлены, evidence сохранён.
 
 ## Перед production

@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Plan №6 / ACTIVE` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v3 APPROVED. GitHub `neyro-level/ams-realty-baza-starter` является единственным primary и delivery surface; SourceCraft сохраняется только как historical baseline без новых записей. Production в Plan №6 не входит. Plan №5 и его proof остаются закрытым historical evidence.
+Статус: `Plan №6 / APPROVED` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4 возвращает SourceCraft primary и GitHub mirror-only. v3 execution остановлен после EPIC-01…04 и TASK-05-01; дальнейшая работа разрешена после CLEAN reconciliation revised graph. Production не входит в Plan №6.
 
 ## Канонические документы
 
@@ -33,7 +33,7 @@
 
 ## Нормативные источники
 
-- `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — активный APPROVED план starter freeze и client clone readiness; GitHub-only delivery, без production.
+- `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — текущий v4 APPROVED: SourceCraft primary, GitHub one-way mirror, без production.
 - `docs/AMS_MASTER_PLAN №5.md` — закрытый APPROVED план остаточного выравнивания (`AMS-REALTBASE-RESIDUAL-ALIGN` v1), полностью доставленный на `main@089b0fb7`. Демо: local PostgreSQL + MEDIA_DIR; production не входил в граф.
 - `docs/AMS_MASTER_PLAN №4.md` — закрытый APPROVED Core Align (`AMS-REALTBASE-CORE-ALIGN` v1, `main@f8344de`).
 - `docs/AMS_MASTER_PLAN №3.md` — закрытый APPROVED corrections EPIC 11–21 (`AMS-REALTBASE-CORRECTIONS` v3, `main@14e9bf53`).
