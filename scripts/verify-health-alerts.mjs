@@ -216,6 +216,7 @@ assert.equal(
 const {
 	evaluateRuntimeEnv,
 	assertRuntimeEnvOrThrow,
+	parseProjectEnv,
 	importStaleThresholdMs,
 	queuedImportOrphanThresholdMs,
 	pendingDeliveryOrphanThresholdMs,
@@ -249,6 +250,36 @@ const productionLike = {
 	INTERNAL_REVALIDATE_BASE_URL: "http://127.0.0.1:3000",
 };
 assert.equal(evaluateRuntimeEnv(productionLike, "runtime").ok, true);
+assert.doesNotThrow(() => parseProjectEnv(productionLike, "runtime"));
+assert.equal(
+	evaluateRuntimeEnv(
+		{
+			...productionLike,
+			INTERNAL_REVALIDATE_BASE_URL: "http://localhost:3000",
+		},
+		"runtime",
+	).ok,
+	true,
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{
+			...productionLike,
+			INTERNAL_REVALIDATE_BASE_URL: "http://cache.example.test",
+		},
+		"runtime",
+	).missing.includes("INTERNAL_REVALIDATE_BASE_URL"),
+);
+for (const key of [
+	"REVALIDATE_RATE_LIMIT_PER_MINUTE",
+	"LEAD_RATE_LIMIT_PER_MINUTE",
+]) {
+	assert.ok(
+		evaluateRuntimeEnv({ ...productionLike, [key]: "0" }, "runtime").missing.includes(
+			key,
+		),
+	);
+}
 assert.ok(
 	evaluateRuntimeEnv(
 		{ ...productionLike, PAYLOAD_DB_PUSH: "true" },
@@ -331,6 +362,22 @@ assert.ok(
 		},
 		"runtime",
 	).missing.includes("CUSTOM_WEBHOOK_HMAC_SECRET"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{
+			...productionLike,
+			LEAD_CHANNELS: "custom-webhook",
+			LEAD_OUTBOUND_HOSTS: "hooks.example.test",
+			CUSTOM_WEBHOOK_URL: "http://hooks.example.test/leads",
+			CUSTOM_WEBHOOK_HMAC_SECRET: "fixture-hmac",
+		},
+		"runtime",
+	).missing.includes("CUSTOM_WEBHOOK_URL"),
+);
+assert.equal(
+	evaluateRuntimeEnv({ NODE_ENV: "test" }, "test").ok,
+	true,
 );
 assert.equal(
 	evaluateRuntimeEnv(

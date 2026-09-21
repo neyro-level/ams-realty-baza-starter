@@ -70,10 +70,7 @@ export const staticPublicUrlEntries: readonly PublicUrlEntry[] = [
 ];
 
 export function getSiteUrl(): string {
-	const configured =
-		process.env.NEXT_PUBLIC_SERVER_URL ||
-		process.env.SITE_URL ||
-		defaultSiteUrl;
+	const configured = runtimeEnv.NEXT_PUBLIC_SERVER_URL || defaultSiteUrl;
 	try {
 		const url = new URL(configured);
 		return url.origin;
@@ -85,3 +82,4 @@ export function getSiteUrl(): string {
 export function absoluteUrl(path: string): string {
 	return new URL(path, getSiteUrl()).toString();
 }
+import { runtimeEnv } from "../../project/env.ts";

@@ -50,6 +50,12 @@ public UI
 
 Reusable UI не импортирует Payload, DB clients или persistence types. Configurable outbound HTTP проходит через Safe Outbound Client; raw anonymous business REST закрывается на edge и Payload boundary. Public Gateway: `src/core/data-access/public`. System Gateway: `src/core/data-access/system`.
 
+## Env и runtime config
+
+`src/project/env.ts` — единственный владелец typed schema, определения режима и списка обязательных runtime-полей. `src/core/operations/runtime-env.ts` является только compatibility re-export и не содержит второй матрицы. Режимы: `build`, `development`, `migrate`, `runtime`, `test`; build не требует production secrets, а runtime fail-fast выполняется через instrumentation до обслуживания трафика.
+
+Прямое чтение `process.env` в runtime-коде допускается только для framework mode (`NODE_ENV`) и изолированных test-only переключателей (`AMS_ALLOW_TEST_DESTINATIONS`, `AMS_TEST_APPROVED_ORIGINS`). Остальные project runtime knobs читаются через `runtimeEnv`.
+
 ## Access modes
 
 | Режим | Контракт |

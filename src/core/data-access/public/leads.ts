@@ -19,11 +19,6 @@ export type PublicLeadSubmitResult =
 	| LeadIntakeRejected
 	| { accepted: false; status: 503; code: "lead.unavailable" };
 
-function rateLimitPerMinute(): number {
-	const value = Number(process.env.LEAD_RATE_LIMIT_PER_MINUTE ?? 30);
-	return Number.isInteger(value) && value > 0 ? value : 30;
-}
-
 async function enqueueLeadDelivery(
 	payload: Payload,
 	leadDeliveryId: string,
@@ -52,7 +47,7 @@ export async function submitPublicLead({
 }): Promise<PublicLeadSubmitResult> {
 	const limited = hitInProcessLeadRateLimit({
 		key: rateLimitKey,
-		limit: rateLimitPerMinute(),
+		limit: runtimeEnv.LEAD_RATE_LIMIT_PER_MINUTE,
 	});
 	if (limited) {
 		return limited;
