@@ -12,6 +12,7 @@ import type {
 } from "@ams/realtbase-contracts";
 import type { PublicCatalogProperty, PublicCatalogResult } from "./catalog";
 import type { PublicCatalogFacetsResult } from "./catalog";
+import { leadConsentContext } from "../../../project/legal.config.ts";
 import type { PublicPageRecord } from "./pages";
 import { siteConfig } from "../../../project/site.config.ts";
 
@@ -45,7 +46,9 @@ export type PublicPropertyDetailsDTO = PropertyDetailsDTO & {
 	lifecycle: PublicPropertyLifecycle;
 };
 
-export function toPropertyCardDTO(property: PublicCatalogProperty): PropertyCardDTO {
+export function toPropertyCardDTO(
+	property: PublicCatalogProperty,
+): PropertyCardDTO {
 	const address =
 		property.publicAddress ||
 		[property.locality, property.district].filter(Boolean).join(", ") ||
@@ -70,26 +73,36 @@ export function toPropertyCardDTO(property: PublicCatalogProperty): PropertyCard
 		address,
 		city: property.locality || "Город не указан",
 		district: property.district ?? undefined,
-		primaryMedia:
-			property.images?.find((image) => image.url)?.url
-				? {
-						kind: "external",
-						src: property.images.find((image) => image.url)?.url ?? "",
-						alt: property.images.find((image) => image.url)?.alt || property.title,
-					}
-				: null,
+		primaryMedia: property.images?.find((image) => image.url)?.url
+			? {
+					kind: "external",
+					src: property.images.find((image) => image.url)?.url ?? "",
+					alt:
+						property.images.find((image) => image.url)?.alt || property.title,
+				}
+			: null,
 		summary: compact([
 			property.rooms
-				? { key: "rooms" as const, label: "Комнаты", value: String(property.rooms) }
+				? {
+						key: "rooms" as const,
+						label: "Комнаты",
+						value: String(property.rooms),
+					}
 				: null,
 			property.totalArea
-				? { key: "area" as const, label: "Площадь", value: `${property.totalArea} м²` }
+				? {
+						key: "area" as const,
+						label: "Площадь",
+						value: `${property.totalArea} м²`,
+					}
 				: null,
 			property.floor
 				? {
 						key: "floor" as const,
 						label: "Этаж",
-						value: property.floors ? `${property.floor} из ${property.floors}` : String(property.floor),
+						value: property.floors
+							? `${property.floor} из ${property.floors}`
+							: String(property.floor),
 					}
 				: null,
 		]),
@@ -119,14 +132,24 @@ export function toPropertyDetailsDTO(
 					alt: image.alt || property.title,
 				})) ?? [],
 		characteristics: compact([
-			property.totalArea ? { label: "Общая площадь", value: `${property.totalArea} м²` } : null,
-			property.livingArea ? { label: "Жилая площадь", value: `${property.livingArea} м²` } : null,
-			property.kitchenArea ? { label: "Кухня", value: `${property.kitchenArea} м²` } : null,
-			property.rooms ? { label: "Комнаты", value: String(property.rooms) } : null,
+			property.totalArea
+				? { label: "Общая площадь", value: `${property.totalArea} м²` }
+				: null,
+			property.livingArea
+				? { label: "Жилая площадь", value: `${property.livingArea} м²` }
+				: null,
+			property.kitchenArea
+				? { label: "Кухня", value: `${property.kitchenArea} м²` }
+				: null,
+			property.rooms
+				? { label: "Комнаты", value: String(property.rooms) }
+				: null,
 			property.floor
 				? {
 						label: "Этаж",
-						value: property.floors ? `${property.floor} из ${property.floors}` : String(property.floor),
+						value: property.floors
+							? `${property.floor} из ${property.floors}`
+							: String(property.floor),
 					}
 				: null,
 		]),
@@ -138,7 +161,9 @@ export function toPropertyDetailsDTO(
 	};
 }
 
-export function toPropertyListDTO(result: PublicCatalogResult): PropertyListDTO {
+export function toPropertyListDTO(
+	result: PublicCatalogResult,
+): PropertyListDTO {
 	return {
 		items: result.items.map(toPropertyCardDTO),
 		total: result.total,
@@ -167,9 +192,13 @@ export function toPropertyFilterDTO(
 ): PropertyFilterDTO {
 	const rooms = facets
 		? [...facets.rooms.map((bucket) => bucket.value)].sort((a, b) => a - b)
-		: [...new Set(result.items.map((item) => item.rooms).filter((room): room is number => Boolean(room)))].sort(
-				(a, b) => a - b,
-			);
+		: [
+				...new Set(
+					result.items
+						.map((item) => item.rooms)
+						.filter((room): room is number => Boolean(room)),
+				),
+			].sort((a, b) => a - b);
 	const categories = facets
 		? facets.categories.map((bucket) => bucket.value)
 		: [...new Set(result.items.map((item) => item.category))];
@@ -178,7 +207,13 @@ export function toPropertyFilterDTO(
 		: [...new Set(result.items.map((item) => item.dealType))];
 	const cities = facets
 		? facets.cities.map((bucket) => bucket.value)
-		: [...new Set(result.items.map((item) => item.locality).filter((city): city is string => Boolean(city)))];
+		: [
+				...new Set(
+					result.items
+						.map((item) => item.locality)
+						.filter((city): city is string => Boolean(city)),
+				),
+			];
 	const districts = facets
 		? facets.districts.map((bucket) => bucket.value)
 		: [
@@ -208,14 +243,21 @@ export function toPropertyFilterDTO(
 	return {
 		categories: categories.flatMap((category) => {
 			const label = categoryLabels[category as keyof typeof categoryLabels];
-			return label ? [{ value: category as keyof typeof categoryLabels, label }] : [];
+			return label
+				? [{ value: category as keyof typeof categoryLabels, label }]
+				: [];
 		}),
 		dealTypes: dealTypes.flatMap((dealType) => {
 			const label = dealTypeLabels[dealType as keyof typeof dealTypeLabels];
-			return label ? [{ value: dealType as keyof typeof dealTypeLabels, label }] : [];
+			return label
+				? [{ value: dealType as keyof typeof dealTypeLabels, label }]
+				: [];
 		}),
 		cities: cities.map((city) => ({ value: city, label: city })),
-		districts: districts.map((district) => ({ value: district, label: district })),
+		districts: districts.map((district) => ({
+			value: district,
+			label: district,
+		})),
 		rooms,
 		priceMinor,
 		buildingTypes: [],
@@ -259,7 +301,10 @@ export function toShellDTO(pages: readonly PublicPageRecord[]) {
 		groups: [{ title: "Разделы", links }],
 		contacts: [{ label: "+7 (000) 000-00-00", href: "tel:+70000000000" }],
 		legalLinks: [
-			{ label: "Политика конфиденциальности", href: "/politika-konfidencialnosti" },
+			{
+				label: "Политика конфиденциальности",
+				href: "/politika-konfidencialnosti",
+			},
 			{
 				label: "Согласие на обработку данных",
 				href: "/soglasie-na-obrabotku-personalnyh-dannyh",
@@ -276,36 +321,55 @@ export function toHomePageDTO(page: PublicPageRecord | null): HomePageDTO {
 		slug: "home",
 		eyebrow: "Недвижимость без лишней неопределённости",
 		title: page?.title || "Проверенная недвижимость",
-		lead: page?.seo.description || "Подбираем объекты по вашим критериям и сопровождаем путь до сделки.",
-		seo:
-			page?.seo ?? {
-				title: `${brandName} — недвижимость`,
-				description: "Подбор недвижимости и сопровождение сделки.",
-				canonicalPath: "/",
-				indexing: "index",
-				following: "follow",
-			},
+		lead:
+			page?.seo.description ||
+			"Подбираем объекты по вашим критериям и сопровождаем путь до сделки.",
+		seo: page?.seo ?? {
+			title: `${brandName} — недвижимость`,
+			description: "Подбор недвижимости и сопровождение сделки.",
+			canonicalPath: "/",
+			indexing: "index",
+			following: "follow",
+		},
 		breadcrumbs: { items: [{ label: "Главная" }] },
 		sections: [
 			{
 				title: "Понятный процесс",
 				text: "Сначала фиксируем задачу, затем сравниваем подходящие предложения.",
-				items: ["Уточняем задачу и бюджет", "Проверяем документы", "Сопровождаем сделку"],
+				items: [
+					"Уточняем задачу и бюджет",
+					"Проверяем документы",
+					"Сопровождаем сделку",
+				],
 			},
 		],
 		leadContext: {
 			formKind: "general",
 			sourcePage: "/",
-			consentVersion: "pd-2026-01",
-			consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
-			consentRequired: true,
+			...leadConsentContext(),
 		},
 		featuredPropertyId: "",
 		serviceLinks: [
-			{ label: "Купить", href: "/nedvizhimost", description: "Квартиры и дома в каталоге" },
-			{ label: "Продать", href: "/prodat", description: "Оценка и сопровождение продажи" },
-			{ label: "Сдать", href: "/sdat", description: "Аренда без лишней неопределённости" },
-			{ label: "Ипотека", href: "/ipoteka", description: "Подбор программы и одобрение" },
+			{
+				label: "Купить",
+				href: "/nedvizhimost",
+				description: "Квартиры и дома в каталоге",
+			},
+			{
+				label: "Продать",
+				href: "/prodat",
+				description: "Оценка и сопровождение продажи",
+			},
+			{
+				label: "Сдать",
+				href: "/sdat",
+				description: "Аренда без лишней неопределённости",
+			},
+			{
+				label: "Ипотека",
+				href: "/ipoteka",
+				description: "Подбор программы и одобрение",
+			},
 		],
 	};
 }
@@ -317,14 +381,14 @@ export function toMarketingPageDTO(page: PublicPageRecord): MarketingPageDTO {
 		title: page.title,
 		lead: page.seo.description,
 		seo: page.seo,
-		breadcrumbs: { items: [{ label: "Главная", href: "/" }, { label: page.title }] },
+		breadcrumbs: {
+			items: [{ label: "Главная", href: "/" }, { label: page.title }],
+		},
 		sections: [],
 		leadContext: {
 			formKind: "general",
 			sourcePage: page.seo.canonicalPath,
-			consentVersion: "pd-2026-01",
-			consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
-			consentRequired: true,
+			...leadConsentContext(),
 		},
 	};
 }

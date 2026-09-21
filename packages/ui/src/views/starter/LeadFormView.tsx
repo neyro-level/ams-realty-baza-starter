@@ -22,7 +22,12 @@ import {
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 
-type FormStatus = "default" | "invalid" | "submitting" | "server_error" | "success";
+type FormStatus =
+	| "default"
+	| "invalid"
+	| "submitting"
+	| "server_error"
+	| "success";
 
 export type LeadFormViewProps = {
 	context: LeadFormContext;
@@ -64,6 +69,9 @@ export function LeadFormView({
 	const [consentError, setConsentError] = useState<string>();
 	const [formError, setFormError] = useState<string>();
 	const [renderedAt] = useState(() => new Date().toISOString());
+	const [requestAttemptId, setRequestAttemptId] = useState(() =>
+		crypto.randomUUID(),
+	);
 	const [consentAccepted, setConsentAccepted] = useState(false);
 
 	useEffect(() => {
@@ -112,24 +120,32 @@ export function LeadFormView({
 					property: context.property?.id,
 					consentAccepted: true,
 					consentVersion: context.consentVersion,
-					consentedAt: submittedAt,
 					honeypot: String(data.get("company") ?? ""),
 					renderedAt,
 					submittedAt,
+					requestAttemptId,
 				}),
 			});
-			const payload = (await response.json()) as { accepted?: boolean; code?: string };
+			const payload = (await response.json()) as {
+				accepted?: boolean;
+				code?: string;
+			};
 			if (!response.ok || payload.accepted !== true) {
 				setStatus("server_error");
-				setFormError("Не удалось отправить заявку. Позвоните нам или попробуйте ещё раз.");
+				setFormError(
+					"Не удалось отправить заявку. Позвоните нам или попробуйте ещё раз.",
+				);
 				return;
 			}
 			form.reset();
+			setRequestAttemptId(crypto.randomUUID());
 			setConsentAccepted(false);
 			setStatus("success");
 		} catch {
 			setStatus("server_error");
-			setFormError("Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.");
+			setFormError(
+				"Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.",
+			);
 		}
 	}
 
@@ -200,15 +216,21 @@ export function LeadFormView({
 									ref={consentRef}
 									id={ids.consent}
 									checked={consentAccepted}
-									onCheckedChange={(value) => setConsentAccepted(value === true)}
+									onCheckedChange={(value) =>
+										setConsentAccepted(value === true)
+									}
 									aria-invalid={Boolean(consentError)}
 									aria-describedby={`${ids.consent}-copy${consentError ? ` ${ids.consent}-error` : ""}`}
 									disabled={status === "submitting"}
 									required={context.consentRequired}
 								/>
-								<FieldLabel htmlFor={ids.consent} className="font-normal leading-step-copy">
+								<FieldLabel
+									htmlFor={ids.consent}
+									className="font-normal leading-step-copy"
+								>
 									<span id={`${ids.consent}-copy`}>
-										Даю согласие на обработку персональных данных в соответствии с{" "}
+										Даю согласие на обработку персональных данных в соответствии
+										с{" "}
 										<a
 											className="font-medium underline underline-offset-4"
 											href={context.consentHref}
@@ -219,10 +241,16 @@ export function LeadFormView({
 									</span>
 								</FieldLabel>
 							</div>
-							<FieldError id={`${ids.consent}-error`}>{consentError}</FieldError>
+							<FieldError id={`${ids.consent}-error`}>
+								{consentError}
+							</FieldError>
 						</Field>
 						{formError ? (
-							<p id={ids.formError} role="alert" className="text-label text-[var(--status-danger)]">
+							<p
+								id={ids.formError}
+								role="alert"
+								className="text-label text-[var(--status-danger)]"
+							>
 								{formError}
 							</p>
 						) : null}

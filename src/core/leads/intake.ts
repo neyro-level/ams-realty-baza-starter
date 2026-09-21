@@ -1,5 +1,6 @@
 import { createHash, createHmac } from "node:crypto";
 import { z } from "zod";
+import { legalConsentConfig } from "../../project/legal.config.ts";
 
 export type LeadFormKind =
 	| "property_request"
@@ -32,6 +33,7 @@ export type LeadIntakeAccepted = {
 			consentedAt: string;
 		};
 		idempotencyKey: string;
+		retentionUntil?: string;
 		fraudFingerprint?: string;
 	};
 	safeDiagnostics: LeadIntakeDiagnostics;
@@ -44,6 +46,8 @@ export type LeadIntakeRejected = {
 		| "lead.invalid_payload"
 		| "lead.invalid_phone"
 		| "lead.consent_required"
+		| "lead.consent_version_mismatch"
+		| "lead.source_page_invalid"
 		| "lead.honeypot"
 		| "lead.fill_time_invalid"
 		| "lead.rate_limited";
@@ -74,7 +78,7 @@ const leadIntakeSchema = z.object({
 	email: z.string().trim().email().max(160).optional().or(z.literal("")),
 	message: z.string().trim().max(2000).optional().or(z.literal("")),
 	formKind: z.enum(["property_request", "callback", "consultation", "generic"]),
-	sourcePage: z.string().trim().min(1).max(512).regex(/^\//),
+	sourcePage: z.string().trim().min(1).max(512),
 	referrer: z.string().trim().max(512).optional().or(z.literal("")),
 	property: z.string().trim().max(128).optional().or(z.literal("")),
 	utm: z
@@ -88,22 +92,20 @@ const leadIntakeSchema = z.object({
 		.optional(),
 	consentAccepted: z.literal(true),
 	consentVersion: z.string().trim().min(1).max(120),
-	consentedAt: z.string().datetime(),
 	honeypot: z.string().trim().max(200).optional().or(z.literal("")),
 	renderedAt: z.string().datetime(),
 	submittedAt: z.string().datetime(),
-	idempotencyKey: z
-		.string()
-		.trim()
-		.min(12)
-		.max(160)
-		.optional()
-		.or(z.literal("")),
+	requestAttemptId: z.string().uuid(),
 });
 
 export function prepareLeadIntake(
 	input: unknown,
-	options?: { fraudHmacKey?: string },
+	options?: {
+		fraudHmacKey?: string;
+		nowIso?: string;
+		currentConsentVersion?: string;
+		leadRetentionDays?: number | null;
+	},
 ): LeadIntakeResult {
 	const parsed = leadIntakeSchema.safeParse(input);
 	if (!parsed.success) {
@@ -111,6 +113,24 @@ export function prepareLeadIntake(
 	}
 
 	const payload = parsed.data;
+	const currentConsentVersion =
+		options?.currentConsentVersion ?? legalConsentConfig.currentConsentVersion;
+	if (payload.consentVersion !== currentConsentVersion) {
+		return reject(
+			"lead.consent_version_mismatch",
+			"Displayed consent version is not current.",
+			payload,
+		);
+	}
+
+	const sourcePage = normalizeCanonicalSourcePage(payload.sourcePage);
+	if (!sourcePage) {
+		return reject(
+			"lead.source_page_invalid",
+			"Source page is not an internal canonical pathname.",
+			payload,
+		);
+	}
 	if (payload.honeypot) {
 		return reject(
 			"lead.honeypot",
@@ -136,6 +156,7 @@ export function prepareLeadIntake(
 		);
 	}
 
+	const consentedAt = options?.nowIso ?? new Date().toISOString();
 	return {
 		accepted: true,
 		lead: {
@@ -145,27 +166,24 @@ export function prepareLeadIntake(
 			email: emptyToUndefined(payload.email),
 			message: emptyToUndefined(payload.message),
 			formKind: payload.formKind,
-			sourcePage: payload.sourcePage,
+			sourcePage,
 			referrer: emptyToUndefined(payload.referrer),
-			property: emptyToUndefined(payload.property),
+			property:
+				payload.formKind === "property_request"
+					? emptyToUndefined(payload.property)
+					: undefined,
 			utm: normalizeUtm(payload.utm),
 			consent: {
 				accepted: true,
-				version: payload.consentVersion,
-				consentedAt: payload.consentedAt,
+				version: currentConsentVersion,
+				consentedAt,
 			},
-			idempotencyKey:
-				emptyToUndefined(payload.idempotencyKey) ??
-				buildLeadIdempotencyKey({
-					phoneE164,
-					formKind: payload.formKind,
-					sourcePage: payload.sourcePage,
-					consentVersion: payload.consentVersion,
-				}),
+			idempotencyKey: buildLeadIdempotencyKey(payload.requestAttemptId),
+			retentionUntil: retentionUntil(consentedAt, options?.leadRetentionDays),
 			fraudFingerprint: buildFraudFingerprint(
 				{
 					phoneE164,
-					sourcePage: payload.sourcePage,
+					sourcePage,
 					submittedAt: payload.submittedAt,
 				},
 				options?.fraudHmacKey,
@@ -219,13 +237,42 @@ export function normalizePhoneToE164(value: string): string | undefined {
 	return /^\d{10,15}$/.test(digits) ? `+${digits}` : undefined;
 }
 
-export function buildLeadIdempotencyKey(input: {
-	phoneE164: string;
-	formKind: LeadFormKind;
-	sourcePage: string;
-	consentVersion: string;
-}): string {
-	return `lead:${hashSafe([input.phoneE164, input.formKind, input.sourcePage, input.consentVersion])}`;
+export function buildLeadIdempotencyKey(requestAttemptId: string): string {
+	return `lead:${requestAttemptId.toLowerCase()}`;
+}
+
+function retentionUntil(
+	nowIso: string,
+	days?: number | null,
+): string | undefined {
+	if (!Number.isInteger(days) || !days || days <= 0) return undefined;
+	return new Date(new Date(nowIso).getTime() + days * 86_400_000).toISOString();
+}
+
+export function normalizeCanonicalSourcePage(
+	value: string,
+): string | undefined {
+	if (
+		!value.startsWith("/") ||
+		value.startsWith("//") ||
+		value.includes("\\")
+	) {
+		return undefined;
+	}
+	try {
+		const url = new URL(value, "https://internal.invalid");
+		if (
+			url.origin !== "https://internal.invalid" ||
+			url.search ||
+			url.hash ||
+			url.pathname !== value
+		) {
+			return undefined;
+		}
+		return value !== "/" && value.endsWith("/") ? value.slice(0, -1) : value;
+	} catch {
+		return undefined;
+	}
 }
 
 export function buildFraudFingerprint(

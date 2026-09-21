@@ -11,6 +11,7 @@ import {
 	JsonLdScript,
 } from "@/core/seo/structured-data";
 import { siteConfig } from "@/project/site.config";
+import { leadConsentContext } from "@/project/legal.config";
 
 export const dynamic = "force-dynamic";
 
@@ -84,9 +85,7 @@ export default async function PropertyPage({
 			formKind: "property",
 			sourcePage: property.href,
 			property: { id: property.id, slug: property.slug, title: property.title },
-			consentVersion: "pd-2026-01",
-			consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
-			consentRequired: true,
+			...leadConsentContext(),
 		},
 	};
 	return (
@@ -105,7 +104,10 @@ export default async function PropertyPage({
 					{ name: property.title, path: property.href },
 				])}
 			/>
-			<PropertyPageView property={property} leadContext={leadPage.leadContext} />
+			<PropertyPageView
+				property={property}
+				leadContext={leadPage.leadContext}
+			/>
 		</>
 	);
 }

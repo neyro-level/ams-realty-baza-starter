@@ -1,9 +1,22 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { clientReadinessConfig } from "../src/project/client-readiness.config.ts";
 import { siteConfig } from "../src/project/site.config.ts";
 
 const starterBrand = "AMS Realty Baza Starter";
 const starterDomain = "start-baza.ams24.ru";
+
+assert.equal(
+	readFileSync(".env.example", "utf8").includes("LEAD_RETENTION_DAYS"),
+	false,
+	"lead retention must be a versioned client-readiness decision, not an unused env knob",
+);
+assert.ok(
+	readFileSync("src/project/project.config.ts", "utf8").includes(
+		"clientReadinessConfig.leadRetentionDays",
+	),
+	"runtime retention policy must project the client-readiness owner decision",
+);
 
 function domainOf(value) {
 	if (!value?.trim()) return null;
@@ -36,7 +49,10 @@ export function validateClientReadiness(input) {
 	) {
 		add("starter-demo-domain");
 	}
-	if (input.mediaStorage === "local-media-dir" || text.includes('"media_dir"')) {
+	if (
+		input.mediaStorage === "local-media-dir" ||
+		text.includes('"media_dir"')
+	) {
 		add("local-media-dir");
 	}
 	if (
@@ -46,10 +62,16 @@ export function validateClientReadiness(input) {
 	) {
 		add("starter-deploy-target");
 	}
-	if (!Number.isInteger(input.leadRetentionDays) || input.leadRetentionDays <= 0) {
+	if (
+		!Number.isInteger(input.leadRetentionDays) ||
+		input.leadRetentionDays <= 0
+	) {
 		add("lead-retention-unset");
 	}
-	if (!Number.isInteger(input.archiveRetentionDays) || input.archiveRetentionDays <= 0) {
+	if (
+		!Number.isInteger(input.archiveRetentionDays) ||
+		input.archiveRetentionDays <= 0
+	) {
 		add("archive-retention-unset");
 	}
 	if (input.legalContent !== "approved") add("legal-content-placeholder");
@@ -118,7 +140,11 @@ function verifyFixtures() {
 		archiveRetentionDays: null,
 		legalContent: "placeholder",
 		productionIndexing: null,
-		requiredHostAllowlists: { outbound: [], externalImages: [], leadOutbound: [] },
+		requiredHostAllowlists: {
+			outbound: [],
+			externalImages: [],
+			leadOutbound: [],
+		},
 		nginx: false,
 		automaticBackup: false,
 		externalMonitoring: false,
@@ -138,16 +164,24 @@ function verifyFixtures() {
 		"required-host-allowlists-missing",
 		"client-storage-deployment-contract-missing",
 	];
-	assert.deepEqual(validateClientReadiness(invalidStarterFixture), expectedErrors);
+	assert.deepEqual(
+		validateClientReadiness(invalidStarterFixture),
+		expectedErrors,
+	);
 	assert.deepEqual(validateClientReadiness(validClientFixture), []);
 	assert.deepEqual(
-		validateClientReadiness({ ...invalidStarterFixture, projectKind: "starter-demo" }),
+		validateClientReadiness({
+			...invalidStarterFixture,
+			projectKind: "starter-demo",
+		}),
 		[],
 		"starter demo and its approved deploy assets are outside the client gate",
 	);
 }
 
-const mode = process.argv.find((arg) => arg.startsWith("--mode="))?.split("=")[1];
+const mode = process.argv
+	.find((arg) => arg.startsWith("--mode="))
+	?.split("=")[1];
 if (mode === "fixture-client") {
 	verifyFixtures();
 	console.log("verify:client-readiness: fixture-client PASS");
@@ -160,11 +194,7 @@ const errors = validateClientReadiness({
 	brandName: siteConfig.brandName,
 	runtimeOrigin: process.env.NEXT_PUBLIC_SERVER_URL,
 });
-assert.deepEqual(
-	errors,
-	[],
-	`Client readiness failed: ${errors.join(", ")}`,
-);
+assert.deepEqual(errors, [], `Client readiness failed: ${errors.join(", ")}`);
 console.log(
 	`verify:client-readiness: ${siteConfig.projectKind === "client" ? "PASS" : "not applicable (starter-demo)"}`,
 );

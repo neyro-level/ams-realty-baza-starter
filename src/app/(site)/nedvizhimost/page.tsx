@@ -9,6 +9,7 @@ import {
 	buildCatalogItemListJsonLd,
 	JsonLdScript,
 } from "@/core/seo/structured-data";
+import { leadConsentContext } from "@/project/legal.config";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,15 @@ export default async function CatalogPage({
 	return (
 		<>
 			<JsonLdScript data={buildCatalogItemListJsonLd(catalog.list)} />
-			<CatalogPageView list={catalog.list} filters={catalog.filters} />
+			<CatalogPageView
+				list={catalog.list}
+				filters={catalog.filters}
+				leadContext={{
+					formKind: "general",
+					sourcePage: "/nedvizhimost",
+					...leadConsentContext(),
+				}}
+			/>
 		</>
 	);
 }

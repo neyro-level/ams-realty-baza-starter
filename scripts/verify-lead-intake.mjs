@@ -9,6 +9,7 @@ import {
 	resolveEnabledLeadChannels,
 } from "../src/core/leads/index.ts";
 import { getTrustedClientAddress } from "../src/core/security/trusted-client-address.ts";
+import { legalConsentConfig } from "../src/project/legal.config.ts";
 
 const validPayload = {
 	name: "Иван Петров",
@@ -19,38 +20,52 @@ const validPayload = {
 	sourcePage: "/kontakty",
 	referrer: "/",
 	consentAccepted: true,
-	consentVersion: "privacy-2026-09",
-	consentedAt: "2026-09-16T12:00:00.000Z",
+	consentVersion: "pd-2026-01",
 	honeypot: "",
 	renderedAt: "2026-09-16T11:59:50.000Z",
 	submittedAt: "2026-09-16T12:00:00.000Z",
+	requestAttemptId: "11111111-1111-4111-8111-111111111111",
 };
 
 assert.equal(normalizePhoneToE164("8 (916) 123-45-67"), "+79161234567");
 assert.equal(normalizePhoneToE164("+44 20 7946 0958"), "+442079460958");
 assert.equal(normalizePhoneToE164("12"), undefined);
 
-const accepted = prepareLeadIntake(validPayload);
+const accepted = prepareLeadIntake(validPayload, {
+	nowIso: "2026-09-16T12:00:01.000Z",
+});
 assert.equal(accepted.accepted, true);
 assert.equal(accepted.lead.phoneE164, "+79161234567");
-assert.equal(accepted.lead.consent.version, "privacy-2026-09");
+assert.equal(accepted.lead.consent.version, "pd-2026-01");
+assert.equal(accepted.lead.consent.consentedAt, "2026-09-16T12:00:01.000Z");
 assert.equal(accepted.lead.idempotencyKey.startsWith("lead:"), true);
 assert.equal(accepted.lead.fraudFingerprint.startsWith("lead-fraud:"), true);
 assert.equal(accepted.safeDiagnostics.rawPiiIncluded, false);
+assert.equal(
+	accepted.lead.consent.version,
+	legalConsentConfig.currentConsentVersion,
+);
 assertNoRawPii(accepted.safeDiagnostics);
 
-const sameIdentityLaterConsent = prepareLeadIntake({
+const exactRetry = prepareLeadIntake({
 	...validPayload,
-	consentedAt: "2026-09-16T12:30:00.000Z",
 	renderedAt: "2026-09-16T12:29:50.000Z",
 	submittedAt: "2026-09-16T12:30:00.000Z",
 });
-assert.equal(sameIdentityLaterConsent.accepted, true);
+assert.equal(exactRetry.accepted, true);
 assert.equal(
-	sameIdentityLaterConsent.lead.idempotencyKey,
+	exactRetry.lead.idempotencyKey,
 	accepted.lead.idempotencyKey,
-	"Idempotency must not depend on timestamp alone.",
+	"An exact HTTP retry must reuse the submission attempt identity.",
 );
+const newAttempt = prepareLeadIntake({
+	...validPayload,
+	requestAttemptId: "22222222-2222-4222-8222-222222222222",
+	renderedAt: "2026-09-16T12:29:50.000Z",
+	submittedAt: "2026-09-16T12:30:00.000Z",
+});
+assert.equal(newAttempt.accepted, true);
+assert.notEqual(newAttempt.lead.idempotencyKey, accepted.lead.idempotencyKey);
 
 const hmacFingerprint = buildFraudFingerprint(
 	{
@@ -116,12 +131,31 @@ assert.equal(
 	),
 	"untrusted",
 );
-const boundary = JSON.parse(readFileSync("config/raw-rest-boundary.json", "utf8"));
+const boundary = JSON.parse(
+	readFileSync("config/raw-rest-boundary.json", "utf8"),
+);
 assert.equal(
 	boundary.allowedRouteFiles.includes("src/app/api/public/leads/route.ts"),
 	true,
 );
 assert.equal(boundary.anonymousDenyCollections.includes("leads"), true);
+const formSource = readFileSync(
+	"packages/ui/src/views/starter/LeadFormView.tsx",
+	"utf8",
+);
+assert.equal(formSource.includes("requestAttemptId"), true);
+assert.equal(formSource.includes("consentedAt:"), false);
+for (const file of [
+	"src/core/data-access/public/dto.ts",
+	"src/app/(site)/obekty/[slug]/page.tsx",
+	"packages/ui/src/views/catalog/StarterCatalogPageView.tsx",
+]) {
+	assert.equal(
+		readFileSync(file, "utf8").includes('consentVersion: "pd-2026-01"'),
+		false,
+		`${file} must consume the project-owned legal consent config`,
+	);
+}
 
 const invalidPhone = prepareLeadIntake({ ...validPayload, phone: "abc123" });
 assert.equal(invalidPhone.accepted, false);
@@ -147,6 +181,23 @@ const consentMissing = prepareLeadIntake({
 });
 assert.equal(consentMissing.accepted, false);
 assert.equal(consentMissing.code, "lead.invalid_payload");
+
+const consentMismatch = prepareLeadIntake({
+	...validPayload,
+	consentVersion: "obsolete-consent",
+});
+assert.equal(consentMismatch.accepted, false);
+assert.equal(consentMismatch.code, "lead.consent_version_mismatch");
+
+for (const sourcePage of [
+	"https://evil.example/path",
+	"//evil.example/path",
+	"/kontakty?x=1",
+]) {
+	const invalidSource = prepareLeadIntake({ ...validPayload, sourcePage });
+	assert.equal(invalidSource.accepted, false);
+	assert.equal(invalidSource.code, "lead.source_page_invalid");
+}
 
 const limited = evaluateLeadRateLimit({ windowHits: 10, limit: 10 });
 assert.equal(limited?.accepted, false);

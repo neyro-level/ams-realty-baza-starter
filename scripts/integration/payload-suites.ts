@@ -14,6 +14,7 @@ import {
 	findPublicPropertyBySlug,
 } from "../../src/core/data-access/public/catalog.ts";
 import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
+import { submitPublicLead } from "../../src/core/data-access/public/leads.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
 import { defineLeadDeliveryPolicy } from "../../src/core/leads/delivery-policy.ts";
@@ -392,6 +393,71 @@ assert.equal(
 	null,
 	"unpublished property must remain unavailable through Public Gateway",
 );
+
+const propertyLeadBody = {
+	name: "Integration Property Lead",
+	phone: "+79990000009",
+	formKind: "property_request",
+	sourcePage: `/obekty/${publishedProperty.slug}`,
+	property: String(publishedProperty.id),
+	consentAccepted: true,
+	consentVersion: "pd-2026-01",
+	honeypot: "",
+	renderedAt: "2026-09-18T11:59:50.000Z",
+	submittedAt: "2026-09-18T12:00:00.000Z",
+	requestAttemptId: "33333333-3333-4333-8333-333333333333",
+};
+const propertyLeadA = await submitPublicLead({
+	body: propertyLeadBody,
+	rateLimitKey: `integration-property-a-${suffix}`,
+});
+assert.deepEqual(propertyLeadA, { accepted: true, reused: false });
+const propertyLeadRetry = await submitPublicLead({
+	body: propertyLeadBody,
+	rateLimitKey: `integration-property-retry-${suffix}`,
+});
+assert.deepEqual(propertyLeadRetry, { accepted: true, reused: true });
+const propertyLeadB = await submitPublicLead({
+	body: {
+		...propertyLeadBody,
+		requestAttemptId: "44444444-4444-4444-8444-444444444444",
+	},
+	rateLimitKey: `integration-property-b-${suffix}`,
+});
+assert.deepEqual(propertyLeadB, { accepted: true, reused: false });
+const persistedPropertyLeads = await payload.find({
+	collection: "leads",
+	where: { phoneE164: { equals: "+79990000009" } },
+	limit: 10,
+	depth: 0,
+	...access,
+});
+assert.equal(persistedPropertyLeads.totalDocs, 2);
+for (const persisted of persistedPropertyLeads.docs) {
+	assert.equal(
+		persisted.property && typeof persisted.property === "object"
+			? String(persisted.property.id)
+			: String(persisted.property),
+		String(publishedProperty.id),
+	);
+	assert.equal(persisted.sourcePage, `/obekty/${publishedProperty.slug}`);
+	assert.equal(persisted.consent?.version, "pd-2026-01");
+	assert.notEqual(
+		persisted.consent?.consentedAt,
+		propertyLeadBody.submittedAt,
+		"legal consent time must be assigned by the server",
+	);
+}
+const mismatchedPropertyLead = await submitPublicLead({
+	body: {
+		...propertyLeadBody,
+		sourcePage: "/obekty/client-forged-slug",
+		requestAttemptId: "55555555-5555-4555-8555-555555555555",
+	},
+	rateLimitKey: `integration-property-mismatch-${suffix}`,
+});
+assert.equal(mismatchedPropertyLead.accepted, false);
+assert.equal(mismatchedPropertyLead.code, "lead.invalid_payload");
 
 const lead = await payload.create({
 	collection: "leads",

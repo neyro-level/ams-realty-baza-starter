@@ -1,4 +1,5 @@
 import { defineLeadDeliveryPolicy } from "../core/leads/delivery-policy.ts";
+import { clientReadinessConfig } from "./client-readiness.config.ts";
 
 export const projectConfig = {
 	profile: "REALTY_BASE",
@@ -8,8 +9,8 @@ export const projectConfig = {
 	ingestBatchSize: 100,
 	importHeartbeatIntervalMs: 15_000,
 	approvalTtlMinutes: 240,
-	leadRetentionDays: null as number | null,
-	archiveRetentionDays: null as number | null,
+	leadRetentionDays: clientReadinessConfig.leadRetentionDays,
+	archiveRetentionDays: clientReadinessConfig.archiveRetentionDays,
 	staleDataSlaMinutes: 30,
 	cacheInvalidationMode: "http" as const,
 	cacheProofStatus: "http" as const,

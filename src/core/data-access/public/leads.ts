@@ -11,7 +11,12 @@ import {
 	type LeadIntakeRejected,
 } from "../../leads/index.ts";
 import { runtimeEnv } from "../../../project/env.ts";
+import { clientReadinessConfig } from "../../../project/client-readiness.config.ts";
+import { legalConsentConfig } from "../../../project/legal.config.ts";
+import { projectConfig } from "../../../project/project.config.ts";
+import { siteConfig } from "../../../project/site.config.ts";
 import { systemOverrideAccess } from "../system/overrides.ts";
+import { publicGatewayReadAccess } from "./access-mode.ts";
 import { getPublicGatewayPayload } from "./payload.ts";
 
 export type PublicLeadSubmitResult =
@@ -53,8 +58,30 @@ export async function submitPublicLead({
 		return limited;
 	}
 
+	const channels = resolveEnabledLeadChannels({
+		LEAD_CHANNELS: runtimeEnv.LEAD_CHANNELS,
+		LEAD_OUTBOUND_HOSTS: runtimeEnv.LEAD_OUTBOUND_HOSTS,
+		MAX_BOT_TOKEN: runtimeEnv.MAX_BOT_TOKEN,
+		MAX_CHAT_ID: runtimeEnv.MAX_CHAT_ID,
+		CUSTOM_WEBHOOK_URL: runtimeEnv.CUSTOM_WEBHOOK_URL,
+		CUSTOM_WEBHOOK_HMAC_SECRET: runtimeEnv.CUSTOM_WEBHOOK_HMAC_SECRET,
+	});
+	if (
+		(channels.length > 0 && !projectConfig.leadRetentionDays) ||
+		((siteConfig.projectKind as "starter-demo" | "client") === "client" &&
+			(!projectConfig.leadRetentionDays ||
+				(clientReadinessConfig.legalContent as "approved" | "placeholder") !==
+					"approved"))
+	) {
+		return { accepted: false, status: 503, code: "lead.unavailable" };
+	}
+
+	const nowIso = new Date().toISOString();
 	const intake = prepareLeadIntake(body, {
 		fraudHmacKey: runtimeEnv.PAYLOAD_SECRET,
+		nowIso,
+		currentConsentVersion: legalConsentConfig.currentConsentVersion,
+		leadRetentionDays: projectConfig.leadRetentionDays,
 	});
 	if (!intake.accepted) {
 		return intake;
@@ -69,18 +96,32 @@ export async function submitPublicLead({
 	}
 
 	const payload = await getPublicGatewayPayload();
+	if (intake.lead.formKind === "property_request") {
+		const propertyId = intake.lead.property;
+		if (!propertyId || !/^\d+$/.test(propertyId)) {
+			return propertyContextRejected(intake.lead.sourcePage);
+		}
+		const found = await payload.find({
+			collection: "properties",
+			where: { id: { equals: Number(propertyId) } },
+			limit: 1,
+			depth: 0,
+			...publicGatewayReadAccess(),
+		});
+		const property = found.docs[0];
+		const canonicalSourcePage = property
+			? `/obekty/${property.slug}`
+			: undefined;
+		if (!property || intake.lead.sourcePage !== canonicalSourcePage) {
+			return propertyContextRejected(intake.lead.sourcePage);
+		}
+		intake.lead.property = String(property.id);
+		intake.lead.sourcePage = canonicalSourcePage;
+	}
 	const repository = createPayloadLeadOutboxRepository(payload);
-	const nowIso = new Date().toISOString();
 	const committed = await commitLeadOutbox({
 		intake,
-		channels: resolveEnabledLeadChannels({
-			LEAD_CHANNELS: runtimeEnv.LEAD_CHANNELS,
-			LEAD_OUTBOUND_HOSTS: runtimeEnv.LEAD_OUTBOUND_HOSTS,
-			MAX_BOT_TOKEN: runtimeEnv.MAX_BOT_TOKEN,
-			MAX_CHAT_ID: runtimeEnv.MAX_CHAT_ID,
-			CUSTOM_WEBHOOK_URL: runtimeEnv.CUSTOM_WEBHOOK_URL,
-			CUSTOM_WEBHOOK_HMAC_SECRET: runtimeEnv.CUSTOM_WEBHOOK_HMAC_SECRET,
-		}),
+		channels,
 		repository,
 		nowIso,
 	});
@@ -96,5 +137,20 @@ export async function submitPublicLead({
 	return {
 		accepted: true,
 		reused: committed.reusedExistingLead,
+	};
+}
+
+function propertyContextRejected(sourcePage: string): LeadIntakeRejected {
+	return {
+		accepted: false,
+		status: 400,
+		code: "lead.invalid_payload",
+		safeDiagnostics: {
+			code: "lead.property_context_invalid",
+			formKind: "property_request",
+			sourcePage,
+			reason: "Property form context is not a published canonical property.",
+			rawPiiIncluded: false,
+		},
 	};
 }

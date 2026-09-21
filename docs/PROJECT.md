@@ -31,7 +31,7 @@
 | Approval TTL | `approvalTtlMinutes = 240` |
 | Safety threshold | `safetyThresholdPercent = 30` until first real feed onboarding |
 | Max deactivations | `maxDeactivationsPerRun = 50` until first real feed onboarding |
-| Lead/archive retention | `leadRetentionDays = NEEDS_OWNER` until project clone configuration; `archiveRetentionDays = NEEDS_OWNER` until production; starter keeps `null` placeholders and is not production-ready for PII |
+| Lead/archive retention | `client-readiness.config.ts` owns both versioned decisions: `leadRetentionDays = NEEDS_OWNER` until project clone configuration; `archiveRetentionDays = NEEDS_OWNER` until production; `projectConfig` only projects them into runtime; starter keeps `null` placeholders and is not production-ready for PII |
 | Stale-data SLA | `staleDataSlaMinutes = 30` |
 | Cache | mode `http`, proof status `http`, in-process not claimed |
 | Feed images | external HTTPS, exact hosts from `EXTERNAL_IMAGE_HOSTS` via `src/core/ingest/image-hosts.ts`; Variant B: feed `unoptimized` + `sizes` + aspect ratio; local CMS media may use Next optimizer |

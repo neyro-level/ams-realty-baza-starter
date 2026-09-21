@@ -275,9 +275,10 @@ for (const key of [
 	"LEAD_RATE_LIMIT_PER_MINUTE",
 ]) {
 	assert.ok(
-		evaluateRuntimeEnv({ ...productionLike, [key]: "0" }, "runtime").missing.includes(
-			key,
-		),
+		evaluateRuntimeEnv(
+			{ ...productionLike, [key]: "0" },
+			"runtime",
+		).missing.includes(key),
 	);
 }
 assert.ok(
@@ -320,6 +321,20 @@ assert.ok(
 		},
 		"runtime",
 	).missing.includes("LEAD_OUTBOUND_HOSTS"),
+);
+assert.ok(
+	evaluateRuntimeEnv(
+		{
+			...productionLike,
+			LEAD_CHANNELS: "max",
+			LEAD_OUTBOUND_HOSTS: "botapi.max.ru",
+			MAX_BOT_TOKEN: "fixture-token",
+			MAX_CHAT_ID: "fixture-chat",
+			MAX_API_URL: "https://botapi.max.ru",
+		},
+		"runtime",
+	).missing.includes("LEAD_RETENTION_POLICY"),
+	"live lead channels must fail closed without the versioned retention policy",
 );
 assert.ok(
 	evaluateRuntimeEnv(
@@ -375,10 +390,7 @@ assert.ok(
 		"runtime",
 	).missing.includes("CUSTOM_WEBHOOK_URL"),
 );
-assert.equal(
-	evaluateRuntimeEnv({ NODE_ENV: "test" }, "test").ok,
-	true,
-);
+assert.equal(evaluateRuntimeEnv({ NODE_ENV: "test" }, "test").ok, true);
 assert.equal(
 	evaluateRuntimeEnv(
 		{

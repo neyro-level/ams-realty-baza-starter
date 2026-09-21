@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { clientReadinessConfig } from "./client-readiness.config.ts";
+import { siteConfig } from "./site.config.ts";
 
 const booleanString = z
 	.enum(["true", "false"])
@@ -52,7 +54,6 @@ const runtimeEnvSchema = z.object({
 	LEAD_RATE_LIMIT_PER_MINUTE: optionalInteger.default(30),
 
 	ARCHIVE_RETENTION_DAYS: optionalInteger,
-	LEAD_RETENTION_DAYS: optionalInteger,
 	ALERT_WEBHOOK_URL: optionalUrl,
 	BACKUP_STATUS_PATH: optionalString,
 });
@@ -142,7 +143,10 @@ function parseChannelIds(raw?: string): string[] | null {
 			return null;
 		}
 	}
-	return trimmed.split(",").map((item) => item.trim()).filter(Boolean);
+	return trimmed
+		.split(",")
+		.map((item) => item.trim())
+		.filter(Boolean);
 }
 
 function addInvalid(invalid: string[], key: string) {
@@ -168,10 +172,12 @@ export function evaluateRuntimeEnv(
 			addInvalid(missing, "AMS_PROFILE");
 		}
 		const siteUrl = env.NEXT_PUBLIC_SERVER_URL?.trim();
-		if (siteUrl && !isHttpOrigin(siteUrl)) addInvalid(missing, "NEXT_PUBLIC_SERVER_URL");
+		if (siteUrl && !isHttpOrigin(siteUrl))
+			addInvalid(missing, "NEXT_PUBLIC_SERVER_URL");
 		if (env.PAYLOAD_DB_PUSH === "true") addInvalid(missing, "PAYLOAD_DB_PUSH");
 		if ((env.CACHE_INVALIDATION_MODE?.trim() || "http") === "http") {
-			if (!env.REVALIDATE_SECRET?.trim()) addInvalid(missing, "REVALIDATE_SECRET");
+			if (!env.REVALIDATE_SECRET?.trim())
+				addInvalid(missing, "REVALIDATE_SECRET");
 			const baseUrl = env.INTERNAL_REVALIDATE_BASE_URL?.trim();
 			if (!baseUrl || !isSafeInternalOrigin(baseUrl)) {
 				addInvalid(missing, "INTERNAL_REVALIDATE_BASE_URL");
@@ -189,6 +195,19 @@ export function evaluateRuntimeEnv(
 		}
 		if ((channels?.length ?? 0) > 0 && !env.LEAD_OUTBOUND_HOSTS?.trim()) {
 			addInvalid(missing, "LEAD_OUTBOUND_HOSTS");
+		}
+		if (
+			(channels?.length ?? 0) > 0 &&
+			!clientReadinessConfig.leadRetentionDays
+		) {
+			addInvalid(missing, "LEAD_RETENTION_POLICY");
+		}
+		if (
+			(siteConfig.projectKind as "starter-demo" | "client") === "client" &&
+			(clientReadinessConfig.legalContent as "approved" | "placeholder") !==
+				"approved"
+		) {
+			addInvalid(missing, "LEGAL_CONTENT_POLICY");
 		}
 		if (channels?.includes("custom-webhook")) {
 			const url = env.CUSTOM_WEBHOOK_URL?.trim();

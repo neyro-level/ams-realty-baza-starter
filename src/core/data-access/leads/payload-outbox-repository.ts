@@ -17,7 +17,9 @@ type TransactionalDb = {
 	rollbackTransaction?: (id: string | number) => Promise<void>;
 };
 
-function asRequest(transactionID?: string | number): PayloadRequest | undefined {
+function asRequest(
+	transactionID?: string | number,
+): PayloadRequest | undefined {
 	if (transactionID === undefined) {
 		return undefined;
 	}
@@ -66,8 +68,12 @@ function mapLead(doc: Record<string, unknown>): LeadRecord {
 			consentedAt: String(consent.consentedAt ?? ""),
 		},
 		idempotencyKey: String(doc.idempotencyKey),
+		retentionUntil:
+			typeof doc.retentionUntil === "string" ? doc.retentionUntil : undefined,
 		fraudFingerprint:
-			typeof doc.fraudFingerprint === "string" ? doc.fraudFingerprint : undefined,
+			typeof doc.fraudFingerprint === "string"
+				? doc.fraudFingerprint
+				: undefined,
 	};
 }
 
@@ -88,9 +94,7 @@ function mapDelivery(doc: Record<string, unknown>): LeadDeliveryRecord {
 export function createPayloadLeadOutboxRepository(
 	payload: Payload,
 ): LeadOutboxRepository {
-	const createTx = (
-		transactionID?: string | number,
-	): LeadOutboxTransaction => {
+	const createTx = (transactionID?: string | number): LeadOutboxTransaction => {
 		const req = asRequest(transactionID);
 		return {
 			async createLead(input) {
@@ -111,6 +115,7 @@ export function createPayloadLeadOutboxRepository(
 						status: "new",
 						idempotencyKey: input.idempotencyKey,
 						retentionMode: "delete",
+						retentionUntil: input.retentionUntil,
 						fraudFingerprint: input.fraudFingerprint,
 					},
 					depth: 0,
@@ -169,7 +174,9 @@ export function createPayloadLeadOutboxRepository(
 				depth: 0,
 				...access,
 			});
-			const doc = found.docs[0] as unknown as Record<string, unknown> | undefined;
+			const doc = found.docs[0] as unknown as
+				| Record<string, unknown>
+				| undefined;
 			return doc ? mapLead(doc) : undefined;
 		},
 		async findLeadDeliveries(leadId) {

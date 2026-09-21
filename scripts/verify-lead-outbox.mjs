@@ -6,19 +6,21 @@ import {
 	prepareLeadIntake,
 } from "../src/core/leads/index.ts";
 
-const intake = prepareLeadIntake({
-	name: "Иван Петров",
-	phone: "8 (916) 123-45-67",
-	formKind: "consultation",
-	sourcePage: "/kontakty",
-	consentAccepted: true,
-	consentVersion: "privacy-2026-09",
-	consentedAt: "2026-09-16T12:00:00.000Z",
-	honeypot: "",
-	renderedAt: "2026-09-16T11:59:50.000Z",
-	submittedAt: "2026-09-16T12:00:00.000Z",
-	idempotencyKey: "client-generated-idempotency-key",
-});
+const intake = prepareLeadIntake(
+	{
+		name: "Иван Петров",
+		phone: "8 (916) 123-45-67",
+		formKind: "consultation",
+		sourcePage: "/kontakty",
+		consentAccepted: true,
+		consentVersion: "pd-2026-01",
+		honeypot: "",
+		renderedAt: "2026-09-16T11:59:50.000Z",
+		submittedAt: "2026-09-16T12:00:00.000Z",
+		requestAttemptId: "11111111-1111-4111-8111-111111111111",
+	},
+	{ nowIso: "2026-09-16T12:00:00.000Z" },
+);
 assert.equal(intake.accepted, true);
 
 const repository = createRepository();
@@ -88,7 +90,37 @@ await accelerateLeadDeliveryJobs({
 	},
 });
 assert.equal(enqueueCalls, 1);
-assert.equal(repository.leads.length, 1, "Enqueue failure must not roll back the lead.");
+assert.equal(
+	repository.leads.length,
+	1,
+	"Enqueue failure must not roll back the lead.",
+);
+
+const secondAttempt = prepareLeadIntake(
+	{
+		name: "Иван Петров",
+		phone: "8 (916) 123-45-67",
+		formKind: "consultation",
+		sourcePage: "/kontakty",
+		consentAccepted: true,
+		consentVersion: "pd-2026-01",
+		honeypot: "",
+		renderedAt: "2026-09-16T12:09:50.000Z",
+		submittedAt: "2026-09-16T12:10:00.000Z",
+		requestAttemptId: "22222222-2222-4222-8222-222222222222",
+	},
+	{ nowIso: "2026-09-16T12:10:00.000Z" },
+);
+assert.equal(secondAttempt.accepted, true);
+const secondCommitted = await commitLeadOutbox({
+	intake: secondAttempt,
+	channels,
+	repository,
+	nowIso: "2026-09-16T12:10:00.000Z",
+});
+assert.equal(secondCommitted.reusedExistingLead, false);
+assert.equal(repository.leads.length, 2);
+assert.equal(repository.deliveries.length, 4);
 
 console.log("verify-lead-outbox: ok");
 

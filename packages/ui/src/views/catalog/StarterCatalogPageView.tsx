@@ -1,4 +1,5 @@
 import type {
+	LeadFormContext,
 	PropertyFilterDTO,
 	PropertyListDTO,
 } from "@ams/realtbase-contracts";
@@ -10,9 +11,11 @@ import { LeadFormView } from "../starter/LeadFormView";
 export function CatalogPageView({
 	list,
 	filters,
+	leadContext,
 }: {
 	list: PropertyListDTO;
 	filters: PropertyFilterDTO;
+	leadContext: LeadFormContext;
 }) {
 	return (
 		<>
@@ -81,13 +84,7 @@ export function CatalogPageView({
 				<Section className="bg-surface-subtle">
 					<Container size="narrow">
 						<LeadFormView
-							context={{
-								formKind: "general",
-								sourcePage: "/nedvizhimost",
-								consentVersion: "pd-2026-01",
-								consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
-								consentRequired: true,
-							}}
+							context={leadContext}
 							title="Нужна помощь с подбором?"
 						/>
 					</Container>

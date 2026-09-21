@@ -99,6 +99,15 @@ PostgreSQL constraints из migration `20260919_120900`.
   только затем вызывает Next in-process invalidator;
 - отсутствие HTTP cache config или rejected request возвращает warning и
   фиксируется для stale-data SLA; silent in-process claim запрещён.
+- consent UI и server authority используют `src/project/legal.config.ts`;
+  browser version является только consistency signal, accepted version и
+  timestamp принадлежат серверу;
+- retry identity лида — `lead:<requestAttemptId>` с browser UUID одной попытки:
+  exact retry переиспользует lead, новая осознанная отправка создаёт новый lead;
+- property relation и canonical `/obekty/<slug>` source Public Gateway получает
+  из published property, а не из client title/slug;
+- `clientReadinessConfig.leadRetentionDays` — versioned owner decision,
+  `projectConfig` только проецирует его в runtime; второго retention env knob нет.
 
 ## Verification surfaces
 
