@@ -10,8 +10,9 @@ import type {
 	SiteFooterDTO,
 	SiteHeaderDTO,
 } from "@ams/realtbase-contracts";
+import { siteConfig } from "../project/site.config.ts";
 
-const brandName = "AMS Realty Baza Starter";
+const brandName = siteConfig.brandName;
 const logo = {
 	kind: "managed" as const,
 	src: "/fixture/logo.svg",
@@ -117,9 +118,13 @@ export const fixtureProperties: readonly PropertyCardDTO[] = propertySeed.map(
 		dealType: "sale",
 		price: {
 			priceMinor: item.price,
-			currency: "RUB",
+			currency: siteConfig.currency,
 			period: "total",
-			label: `${new Intl.NumberFormat("ru-RU").format(item.price / 100)} ₽`,
+			label: new Intl.NumberFormat(siteConfig.locale, {
+				style: "currency",
+				currency: siteConfig.currency,
+				maximumFractionDigits: 0,
+			}).format(item.price / 100),
 		},
 		address: item.address,
 		city: "Демо-город",
