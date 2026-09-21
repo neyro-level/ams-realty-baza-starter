@@ -47,6 +47,19 @@
 | Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
 | Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
 
+## Optional modules
+
+`PROJECT.md` is the owner of module activation state. A manifest documents how a
+module may be activated; it does not activate runtime code or collections.
+
+<!-- MODULE_GOVERNANCE_BEGIN -->
+| Module | State | Manifest |
+|---|---|---|
+| `novostroyki` | `disabled` | `docs/modules/novostroyki.md` |
+| `journal` | `disabled` | `docs/modules/journal.md` |
+| `agents` | `disabled` | `docs/modules/agents.md` |
+<!-- MODULE_GOVERNANCE_END -->
+
 Next.js 16 edge: `src/proxy.ts` + `export function proxy` (not `middleware.ts`). Anonymous `/api/{collection}` for deny-list and system-only slugs returns JSON `{ error: "notFound" }` 404 unless a Payload session cookie is present. Public lead create remains `POST /api/public/leads`.
 
 Canonical URL map: `02_PRODUCT_STRUCTURE.md`. Knobs source: `src/project/project.config.ts`.
