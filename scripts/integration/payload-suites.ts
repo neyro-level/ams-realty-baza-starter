@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { existsSync, rmSync, writeFileSync } from "node:fs";
+import path from "node:path";
 import { getPayload } from "payload";
 import config from "../../payload.config.ts";
 import {
@@ -15,6 +17,12 @@ import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
 import { defineLeadDeliveryPolicy } from "../../src/core/leads/delivery-policy.ts";
+import {
+	getMediaDirectory,
+	isLocalMediaReady,
+	mediaOverwriteDisabled,
+	uniqueMediaFilename,
+} from "../../src/core/storage/local-fs.ts";
 import {
 	createControllableClock,
 	installRuntimeClock,
@@ -68,6 +76,161 @@ await assertPubliclyInaccessible("properties");
 await assertPubliclyInaccessible("pages");
 await assertPubliclyInaccessible("media");
 await assertPubliclyInaccessible("redirects");
+
+const usersCollection = payload.config.collections.find(
+	(collection) => collection.slug === "users",
+);
+assert.ok(
+	usersCollection?.auth,
+	"users must remain the Payload auth collection",
+);
+assert.equal(usersCollection.auth.maxLoginAttempts, 5);
+assert.equal(usersCollection.auth.cookies.sameSite, "Lax");
+
+const authSuffix = `${Date.now()}`;
+const authEmail = `payload-security-${authSuffix}@example.test`;
+const initialPassword = `Initial-${authSuffix}-A1!`;
+const resetPassword = `Reset-${authSuffix}-B2!`;
+const authUser = await payload.create({
+	collection: "users",
+	data: {
+		email: authEmail,
+		password: initialPassword,
+		roles: ["owner"],
+	},
+	...access,
+});
+
+const firstLogin = await payload.login({
+	collection: "users",
+	data: { email: authEmail, password: initialPassword },
+});
+const secondLogin = await payload.login({
+	collection: "users",
+	data: { email: authEmail, password: initialPassword },
+});
+assert.ok(firstLogin.token, "Payload Admin login must return a session token");
+assert.ok(secondLogin.token, "a second session must be issued before reset");
+
+const emailAdapter = payload.email;
+const originalSendEmail = emailAdapter.sendEmail;
+let resetEmailCount = 0;
+emailAdapter.sendEmail = async () => {
+	resetEmailCount += 1;
+	return undefined;
+};
+let resetToken: null | string;
+let throttledToken: null | string;
+try {
+	resetToken = await payload.forgotPassword({
+		collection: "users",
+		data: { email: authEmail },
+		disableEmail: false,
+	});
+	throttledToken = await payload.forgotPassword({
+		collection: "users",
+		data: { email: authEmail },
+		disableEmail: false,
+	});
+} finally {
+	emailAdapter.sendEmail = originalSendEmail;
+}
+assert.ok(resetToken, "forgot password must issue a reset token");
+assert.equal(
+	resetEmailCount,
+	1,
+	"forgot password must throttle repeated email",
+);
+assert.equal(
+	throttledToken,
+	null,
+	"throttled reset request must fail silently",
+);
+
+const resetResult = await payload.resetPassword({
+	collection: "users",
+	data: { password: resetPassword, token: resetToken },
+	...access,
+});
+assert.ok(resetResult.token, "reset password must create a fresh session");
+await assert.rejects(() =>
+	payload.login({
+		collection: "users",
+		data: { email: authEmail, password: initialPassword },
+	}),
+);
+assert.ok(
+	(
+		await payload.login({
+			collection: "users",
+			data: { email: authEmail, password: resetPassword },
+		})
+	).token,
+	"the reset password must authenticate",
+);
+const resetUser = await payload.findByID({
+	collection: "users",
+	id: authUser.id,
+	...access,
+	showHiddenFields: true,
+});
+assert.equal(
+	resetUser.sessions?.length,
+	2,
+	"reset must revoke prior sessions and retain only reset plus verification login",
+);
+
+const lockedEmail = `payload-lockout-${authSuffix}@example.test`;
+const lockedPassword = `Locked-${authSuffix}-C3!`;
+await payload.create({
+	collection: "users",
+	data: {
+		email: lockedEmail,
+		password: lockedPassword,
+		roles: ["owner"],
+	},
+	...access,
+});
+for (let attempt = 0; attempt < 5; attempt += 1) {
+	await assert.rejects(() =>
+		payload.login({
+			collection: "users",
+			data: { email: lockedEmail, password: `${lockedPassword}-wrong` },
+		}),
+	);
+}
+await assert.rejects(
+	() =>
+		payload.login({
+			collection: "users",
+			data: { email: lockedEmail, password: lockedPassword },
+		}),
+	/locked/i,
+	"correct credentials must not bypass account lockout",
+);
+
+const mediaCollection = payload.config.collections.find(
+	(collection) => collection.slug === "media",
+);
+assert.ok(
+	mediaCollection?.upload && typeof mediaCollection.upload === "object",
+);
+assert.deepEqual(mediaCollection.upload.mimeTypes, [
+	"image/jpeg",
+	"image/png",
+	"image/webp",
+	"image/gif",
+	"application/pdf",
+]);
+assert.ok(!mediaCollection.upload.mimeTypes?.includes("image/svg+xml"));
+assert.ok(!mediaCollection.upload.mimeTypes?.includes("application/xml"));
+assert.equal(mediaOverwriteDisabled, true);
+assert.equal(isLocalMediaReady(), true);
+const mediaProbeName = uniqueMediaFilename("payload-security-probe.txt");
+const mediaProbePath = path.join(getMediaDirectory(), mediaProbeName);
+writeFileSync(mediaProbePath, "payload-security-probe", { flag: "wx" });
+assert.equal(existsSync(mediaProbePath), true, "MEDIA_DIR must be writable");
+rmSync(mediaProbePath);
 
 const catalog = await findPublicCatalogProperties(payload, {
 	page: 1,

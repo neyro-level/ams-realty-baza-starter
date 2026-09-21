@@ -1,6 +1,10 @@
 import { execFileSync } from "node:child_process";
-import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { leadDeliveryRelationalContractUpSql } from "../../migrations/20260919_151000.ts";
+import {
+	payloadAuthSecurityDownSql,
+	payloadAuthSecurityUpSql,
+} from "../../migrations/20260921_185354_add_reset_password_requested_at.ts";
+import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
 function psql(uri, sql) {
@@ -51,9 +55,24 @@ export async function prepareIntegrationDatabase(preferredUri) {
 		psql(admin, `CREATE DATABASE ${database}`);
 	}
 
-	psql(preferredUri, "DROP SCHEMA IF EXISTS public CASCADE");
-	psql(preferredUri, "CREATE SCHEMA public");
-	psql(preferredUri, "GRANT ALL ON SCHEMA public TO PUBLIC");
+	const ownsPublicSchema = psql(
+		preferredUri,
+		"SELECT pg_get_userbyid(nspowner) = current_user FROM pg_namespace WHERE nspname = 'public'",
+	);
+	const isSuperuser = psql(
+		preferredUri,
+		"SELECT current_setting('is_superuser') = 'on'",
+	);
+	if (ownsPublicSchema === "t" || isSuperuser === "t") {
+		psql(preferredUri, "DROP SCHEMA IF EXISTS public CASCADE");
+		psql(preferredUri, "CREATE SCHEMA public");
+		psql(preferredUri, "GRANT ALL ON SCHEMA public TO PUBLIC");
+	} else {
+		// PostgreSQL 15+ databases can retain a public schema owned by the bootstrap
+		// administrator. The isolated test role still owns every Payload object, so
+		// remove only that role's disposable objects without requiring superuser.
+		psql(preferredUri, "DROP OWNED BY CURRENT_USER CASCADE");
+	}
 	return { uri: preferredUri, fromZero: true };
 }
 
@@ -183,6 +202,49 @@ export function proveLeadDeliveryRelationalMigration(testUri) {
 			"Lead delete did not cascade on the previous non-empty fixture.",
 		);
 	}
+}
+
+export function provePayloadAuthSecurityMigration(testUri) {
+	psql(
+		testUri,
+		`
+		CREATE TABLE users (
+			id serial PRIMARY KEY,
+			reset_password_token varchar,
+			reset_password_expiration timestamp(3) with time zone
+		);
+		CREATE TABLE media (id serial PRIMARY KEY);
+		CREATE TABLE properties_images (
+			id serial PRIMARY KEY,
+			media_id integer,
+			CONSTRAINT properties_images_media_id_media_id_fk
+				FOREIGN KEY (media_id) REFERENCES media(id) ON DELETE set null
+		);
+	`,
+	);
+	psql(testUri, payloadAuthSecurityUpSql);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='users' AND column_name='reset_password_requested_at'",
+		) !== "1"
+	) {
+		throw new Error(
+			"Payload auth migration did not add reset request timestamp.",
+		);
+	}
+	psql(testUri, payloadAuthSecurityDownSql);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='users' AND column_name='reset_password_requested_at'",
+		) !== "0"
+	) {
+		throw new Error(
+			"Payload auth migration down did not remove the new field.",
+		);
+	}
+	psql(testUri, payloadAuthSecurityUpSql);
 }
 
 export function psqlOnTest(testUri, sql) {

@@ -18,18 +18,19 @@ import {
 	safeOutboundFetch,
 } from "../src/core/security/safe-outbound-client.ts";
 import { parseTestApprovedOrigins } from "../src/core/security/test-destinations.ts";
-import { projectConfig } from "../src/project/project.config.ts";
 import {
 	createControllableClock,
 	installRuntimeClock,
 	resetRuntimeClock,
 } from "../src/core/time/clock.ts";
+import { projectConfig } from "../src/project/project.config.ts";
 import { deriveTestDatabaseUri, loadLocalEnv } from "./integration/env.mjs";
 import { startFixtureHttpServer } from "./integration/fixture-http-server.mjs";
 import { createMemoryFeedRepository } from "./integration/memory-feed-repository.mjs";
 import {
 	prepareIntegrationDatabase,
 	proveLeadDeliveryRelationalMigration,
+	provePayloadAuthSecurityMigration,
 	provePropertyNumericMigration,
 	psqlOnTest,
 	runPayloadMigrations,
@@ -257,6 +258,8 @@ if (!sourceUri) {
 
 const preferredUri =
 	process.env.DATABASE_URI_TEST || deriveTestDatabaseUri(sourceUri);
+await prepareIntegrationDatabase(preferredUri);
+provePayloadAuthSecurityMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
 provePropertyNumericMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
