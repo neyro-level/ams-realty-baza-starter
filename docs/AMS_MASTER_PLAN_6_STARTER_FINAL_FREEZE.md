@@ -16,6 +16,9 @@
 **Profile:** `AMS_PROFILE=REALTY_BASE`  
 **Delivery profile:** `COMMERCIAL`
 
+Version: v3
+Status: APPROVED
+
 > Этот документ является новым Plan №6 и продолжает уже закрытую программу Plan №5, в которой были выполнены EPIC-01…13. Эпики нового плана получают собственные номера **EPIC-01…09**. Полная идентичность задачи всегда задаётся парой `Plan ID + Epic ID`, поэтому исторические идентификаторы не конфликтуют.
 >
 > Перед стартом EPIC-01 обязательно повторно сверить canonical GitHub `main` с baseline. Если `main` изменился после `59ff2f8...`, зафиксировать новый exact SHA и повторно проверить только изменившийся scope до начала реализации. SourceCraft с этого owner decision не получает новых push, PR, Gate, merge или mirror updates.
