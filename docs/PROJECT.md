@@ -10,6 +10,7 @@
 | Product line | `AMS RealtBase` |
 | Profile | `AMS_PROFILE=REALTY_BASE` |
 | Delivery | `COMMERCIAL` |
+| Git platform | GitHub primary: `neyro-level/ams-realty-baza-starter`; SourceCraft historical read-only baseline |
 | Time zone | `Europe/Moscow` / timestamps UTC in system logic |
 | Currency | `RUB`, integer minor units |
 | Starter topology | AMS Server + Nginx + Next/Payload + local PostgreSQL + local `MEDIA_DIR` |
