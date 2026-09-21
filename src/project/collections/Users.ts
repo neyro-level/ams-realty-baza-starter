@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { adminsAndOwners, hasRole, ownersOnly, userRoles } from "../access/roles.ts";
+import { adminsAndOwners, hasRole, ownersOnly, userRoles } from "../../core/access/roles.ts";
 
 export const Users: CollectionConfig = {
 	slug: "users",

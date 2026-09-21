@@ -24,11 +24,11 @@ import {
 	isLocalMediaReady,
 	readDataVolumeFreeRatio,
 } from "../../../../core/storage/local-fs.ts";
-import { runtimeEnv } from "../../../../payload/env.ts";
+import { runtimeEnv } from "../../../../project/env.ts";
 import {
 	programmaticPayloadJobTasks,
 	staticPayloadJobTasks,
-} from "../../../../payload/jobs/registry.ts";
+} from "../../../../project/jobs/registry.ts";
 import { projectConfig } from "../../../../project/project.config.ts";
 
 export const runtime = "nodejs";

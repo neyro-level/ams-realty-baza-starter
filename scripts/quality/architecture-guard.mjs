@@ -68,7 +68,7 @@ for (const file of filesUnder("src")) {
 		content.includes("systemOverrideAccess") &&
 		!(
 			name.startsWith("src/core/data-access/system/") ||
-			name.startsWith("src/payload/jobs/") ||
+			name.startsWith("src/project/jobs/") ||
 			name.startsWith("src/core/data-access/leads/") ||
 			name.startsWith("src/core/data-access/public/") ||
 			name === "src/core/ingest/payload-feed-ingest-repository.ts" ||
@@ -312,7 +312,7 @@ for (const file of sourceFiles) {
 	if (
 		/collection:\s*["']payload-jobs["']/.test(content) &&
 		!name.startsWith("src/core/data-access/system/jobs/") &&
-		!name.startsWith("src/payload/payload-types.ts")
+		!name.startsWith("src/project/payload-types.ts")
 	) {
 		report(file, "payload-jobs access is only allowed in system/jobs");
 	}
@@ -381,16 +381,16 @@ if (boundary.classifiedCollections?.media !== "deny-anonymous") {
 }
 
 const denyAnonymousFiles = {
-	users: "src/payload/collections/Users.ts",
-	pages: "src/payload/collections/Pages.ts",
-	properties: "src/payload/collections/Properties.ts",
-	"feed-sources": "src/payload/collections/FeedSources.ts",
-	"import-runs": "src/payload/collections/ImportRuns.ts",
-	"import-issues": "src/payload/collections/ImportIssues.ts",
-	leads: "src/payload/collections/Leads.ts",
-	"lead-deliveries": "src/payload/collections/LeadDeliveries.ts",
-	media: "src/payload/collections/Media.ts",
-	redirects: "src/payload/collections/Redirects.ts",
+	users: "src/project/collections/Users.ts",
+	pages: "src/project/collections/Pages.ts",
+	properties: "src/project/collections/Properties.ts",
+	"feed-sources": "src/project/collections/FeedSources.ts",
+	"import-runs": "src/project/collections/ImportRuns.ts",
+	"import-issues": "src/project/collections/ImportIssues.ts",
+	leads: "src/project/collections/Leads.ts",
+	"lead-deliveries": "src/project/collections/LeadDeliveries.ts",
+	media: "src/project/collections/Media.ts",
+	redirects: "src/project/collections/Redirects.ts",
 };
 const classifiedPublicReadAccess = {
 	pages: "publicPageReadAccess",

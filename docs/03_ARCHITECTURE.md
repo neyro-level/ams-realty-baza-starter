@@ -35,7 +35,9 @@ Major upgrade требует отдельного решения и targeted pro
 | Public reads | `src/core/data-access/public` | только Public Gateway policy и DTO output |
 | Privileged operations | `src/core/data-access/system` | именованные system operations; `overrideAccess: true` только здесь |
 | Feed mutation | `src/core/data-access/ingest` | ingest gateway и утверждённые atomic SQL operations |
-| Schema/auth/migrations/jobs | `src/payload` | единственный backend/schema owner |
+| Project schema/config | `src/project/collections`, `src/project/env.ts`, `src/project/jobs` | Payload остаётся единственным backend/schema owner |
+| Generic access helpers | `src/core/access` | переиспользуемые роли без project-specific schema |
+| Payload migration history | `migrations` | канонический корневой каталог, заданный в `payload.config.ts` |
 | Cache invalidation | `src/core/cache` | internal HTTP revalidation contract; in-process executor только внутри Next runtime |
 
 ```text

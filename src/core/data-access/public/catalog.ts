@@ -8,7 +8,7 @@ import type {
 } from "@ams/realtbase-contracts";
 import type { Payload, Where } from "payload";
 import { z } from "zod";
-import type { PropertiesSelect, Property } from "@/payload/payload-types";
+import type { PropertiesSelect, Property } from "@/project/payload-types";
 import { sanitizeExplicitRedirectPath } from "@/core/seo/redirect-path";
 import { publicGatewayPolicy } from "./policy";
 import {

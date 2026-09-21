@@ -21,7 +21,7 @@ async function sha256(path) {
 }
 
 const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
-const migrationDir = join(root, "src", "payload", "migrations");
+const migrationDir = join(root, "migrations");
 const migrations = (await readdir(migrationDir))
 	.filter((file) => file.endsWith(".ts") || file.endsWith(".json"))
 	.sort();

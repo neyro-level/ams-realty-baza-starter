@@ -19,12 +19,12 @@ import {
 	installRuntimeClock,
 	resetRuntimeClock,
 } from "../../src/core/time/clock.ts";
-import { requirePayloadRuntime } from "../../src/payload/env.ts";
+import { requirePayloadRuntime } from "../../src/project/env.ts";
 import {
 	payloadJobQueues,
 	payloadJobTaskSlugs,
-} from "../../src/payload/jobs/registry.ts";
-import { payloadJobTasks } from "../../src/payload/jobs/tasks.ts";
+} from "../../src/project/jobs/registry.ts";
+import { payloadJobTasks } from "../../src/project/jobs/tasks.ts";
 import { projectConfig } from "../../src/project/project.config.ts";
 
 requirePayloadRuntime();

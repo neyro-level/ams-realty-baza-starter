@@ -2,7 +2,7 @@ import "server-only";
 
 import configPromise from "@payload-config";
 import { getPayload } from "payload";
-import { isPayloadRuntimeConfigured } from "@/payload/env";
+import { isPayloadRuntimeConfigured } from "@/project/env";
 
 export async function getOptionalPublicGatewayPayload() {
 	if (!isPayloadRuntimeConfigured) {

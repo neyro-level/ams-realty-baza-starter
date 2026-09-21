@@ -2,7 +2,7 @@ import type { CollectionConfig, PayloadRequest } from "payload";
 import { queueManualFeedImport, approveSuspiciousDeactivation } from "../../core/ingest/owner-feed-operations.ts";
 import { normalizeEnabledFeedNextDueAt } from "../../core/ingest/feed-schedule.ts";
 import { getRuntimeClock } from "../../core/time/clock.ts";
-import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
+import { adminsAndOwners, hasRole, ownersOnly } from "../../core/access/roles.ts";
 
 export const FeedSources: CollectionConfig = {
 	slug: "feed-sources",
