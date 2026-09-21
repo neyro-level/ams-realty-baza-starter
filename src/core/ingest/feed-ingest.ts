@@ -260,7 +260,7 @@ export function buildFeedPropertyWriteData({
 		category: normalizePropertyCategory(offer.category, offer.propertyType),
 		dealType: normalizeDealType(offer.dealType),
 		priceMinor: offer.priceMinor,
-		currency: "RUB",
+		currency: offer.currency,
 		publicAddress: offer.publicAddress,
 		locality: offer.locality,
 		district: offer.district,

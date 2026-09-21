@@ -46,6 +46,7 @@ type ActiveOffer = {
 	raw: RawYrlOffer;
 	stack: string[];
 	bytes: number;
+	documentDepth: number;
 };
 
 export async function parseYrlFeed({
@@ -76,6 +77,7 @@ export async function parseYrlFeed({
 	const documentStack: string[] = [];
 	let currentText = "";
 	let active: ActiveOffer | undefined;
+	let discardingOfferDepth: number | undefined;
 	let stopError: Error | undefined;
 	type PendingDelivery =
 		| { type: "offer"; value: NormalizedFeedOffer }
@@ -122,20 +124,29 @@ export async function parseYrlFeed({
 		stopError = new Error(message);
 	};
 
+	const dropActiveOffer = (
+		messageRedacted: string,
+		externalId = active?.raw.externalId || undefined,
+	) => {
+		if (!active) return;
+		recordIssue({
+			severity: "error",
+			code: "feed.offer_invalid",
+			externalId,
+			messageRedacted,
+		});
+		discardingOfferDepth = active.documentDepth;
+		active = undefined;
+		currentText = "";
+	};
+
 	parser.on("doctype", () => {
 		failCritical("DTD and DOCTYPE are not allowed in feed XML.");
 	});
 
 	parser.on("error", (error) => {
 		if (active) {
-			recordIssue({
-				severity: "error",
-				code: "feed.offer_invalid",
-				externalId: active.raw.externalId || undefined,
-				messageRedacted: "Malformed offer XML was isolated and skipped.",
-			});
-			active = undefined;
-			currentText = "";
+			dropActiveOffer("Malformed offer XML was isolated and skipped.");
 			return;
 		}
 		failCritical(error.message || "Malformed feed XML.");
@@ -157,12 +168,14 @@ export async function parseYrlFeed({
 		}
 
 		currentText = "";
+		if (discardingOfferDepth !== undefined) return;
 
 		if (name === "offer") {
 			active = {
 				raw: emptyRawOffer(tag.attributes),
 				stack: ["offer"],
 				bytes: 0,
+				documentDepth: documentStack.length,
 			};
 			return;
 		}
@@ -171,39 +184,22 @@ export async function parseYrlFeed({
 			active.stack.push(name);
 			active.bytes += name.length + attributeCount * 8;
 			if (active.bytes > maxOfferBytes) {
-				recordIssue({
-					severity: "error",
-					code: "feed.offer_invalid",
-					externalId: active.raw.externalId || undefined,
-					messageRedacted: "Offer exceeded max size and was skipped.",
-				});
-				active = undefined;
+				dropActiveOffer("Offer exceeded max size and was skipped.");
 			}
 		}
 	});
 
 	const appendText = (value: string) => {
-		if (stopError || !value) return;
-		if (value.length > maxTextNodeChars) {
+		if (stopError || !value || discardingOfferDepth !== undefined) return;
+		if (currentText.length + value.length > maxTextNodeChars) {
 			if (active) {
-				recordIssue({
-					severity: "error",
-					code: "feed.offer_invalid",
-					externalId: active.raw.externalId || undefined,
-					messageRedacted: "Offer text node exceeded max size.",
-				});
-				active = undefined;
-				currentText = "";
+				dropActiveOffer("Offer text node exceeded max size.");
 				return;
 			}
 			failCritical("Feed XML text node exceeded max size.");
 			return;
 		}
 		currentText += value;
-		if (currentText.length > maxTextNodeChars) {
-			appendText("");
-			return;
-		}
 		if (active) {
 			active.bytes += value.length;
 			stats.maxRetainedCharsObserved = Math.max(
@@ -211,13 +207,7 @@ export async function parseYrlFeed({
 				active.bytes,
 			);
 			if (active.bytes > maxOfferBytes) {
-				recordIssue({
-					severity: "error",
-					code: "feed.offer_invalid",
-					externalId: active.raw.externalId || undefined,
-					messageRedacted: "Offer exceeded max size and was skipped.",
-				});
-				active = undefined;
+				dropActiveOffer("Offer exceeded max size and was skipped.");
 			}
 		}
 	};
@@ -228,7 +218,15 @@ export async function parseYrlFeed({
 	parser.on("closetag", (tag) => {
 		if (stopError) return;
 		const name = tag.name.toLowerCase();
+		const closingDepth = documentStack.length;
 		documentStack.pop();
+		if (discardingOfferDepth !== undefined) {
+			currentText = "";
+			if (name === "offer" && closingDepth === discardingOfferDepth) {
+				discardingOfferDepth = undefined;
+			}
+			return;
+		}
 		const text = currentText.trim();
 		currentText = "";
 

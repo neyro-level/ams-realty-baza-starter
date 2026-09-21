@@ -18,7 +18,7 @@ export const normalizedFeedOfferSchema = z.object({
 	dealType: z.string().optional(),
 	propertyType: z.string().optional(),
 	priceMinor: z.number().int().nonnegative().optional(),
-	currency: z.string().min(3).max(3).default("RUB"),
+	currency: z.literal("RUB"),
 	rooms: z.number().finite().optional(),
 	totalArea: z.number().finite().optional(),
 	livingArea: z.number().finite().optional(),
@@ -101,6 +101,7 @@ export function normalizeYrlOffer(
 ): NormalizeFeedOfferResult {
 	const issues: FeedNormalizationIssue[] = [];
 	const images = [];
+	const currency = normalizeCurrency(rawOffer.currency);
 
 	for (const picture of rawOffer.pictures) {
 		const validation = validateExternalImageUrl(picture, allowedImageHosts);
@@ -119,6 +120,22 @@ export function normalizeYrlOffer(
 		});
 	}
 
+	if (!currency.ok) {
+		return {
+			ok: false,
+			issues: [
+				...issues,
+				{
+					severity: "error",
+					code: "feed.offer_invalid",
+					externalId: rawOffer.externalId,
+					field: "currency",
+					messageRedacted: "Feed offer used an unsupported currency.",
+				},
+			],
+		};
+	}
+
 	const parsed = normalizedFeedOfferSchema.safeParse({
 		externalId: rawOffer.externalId,
 		title:
@@ -131,7 +148,7 @@ export function normalizeYrlOffer(
 		dealType: rawOffer.type,
 		propertyType: rawOffer.propertyType,
 		priceMinor: parseMoneyToMinor(rawOffer.price),
-		currency: normalizeCurrency(rawOffer.currency),
+		currency: currency.value,
 		rooms: parseOptionalNumber(rawOffer.rooms),
 		totalArea: parseAreaToSquareMeters(
 			rawOffer.totalArea,
@@ -180,12 +197,17 @@ export function normalizeYrlOffer(
 	return { ok: true, offer: parsed.data, issues };
 }
 
-function normalizeCurrency(value: string | undefined): string {
-	const currency = value?.trim().toUpperCase();
-	if (!currency || currency === "RUR") {
-		return "RUB";
+function normalizeCurrency(
+	value: string | undefined,
+): { ok: true; value: "RUB" } | { ok: false } {
+	if (value === undefined) {
+		return { ok: true, value: "RUB" };
 	}
-	return currency;
+	const currency = value.trim().toUpperCase();
+	if (currency === "RUB" || currency === "RUR") {
+		return { ok: true, value: "RUB" };
+	}
+	return { ok: false };
 }
 
 function parseMoneyToMinor(value: string | undefined): number | undefined {

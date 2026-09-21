@@ -5,6 +5,7 @@ import {
 	buildConditionalFeedHeaders,
 	calculatePropertyDerivedFields,
 	fetchConditionalFeed,
+	normalizeYrlOffer,
 	parseAllowedImageHosts,
 	parseYrlFeed,
 } from "../src/core/ingest/index.ts";
@@ -146,7 +147,152 @@ assert.deepEqual(
 	{ pricePerMeterMinor: 20_000_000 },
 );
 
+for (const [sourceCurrency, expectedCurrency] of [
+	["RUB", "RUB"],
+	["RUR", "RUB"],
+	[undefined, "RUB"],
+]) {
+	const currencyResult = await parseYrlFeed({
+		stream: chunkUtf8(buildCurrencyFeed(sourceCurrency), 11),
+		allowedImageHosts,
+		collectOffers: true,
+		collectIssues: true,
+	});
+	assert.equal(currencyResult.offers.length, 1);
+	assert.equal(currencyResult.offers[0].currency, expectedCurrency);
+}
+
+for (const sourceCurrency of ["USD", "EUR", "ABC", "US"]) {
+	const currencyResult = await parseYrlFeed({
+		stream: chunkUtf8(buildCurrencyFeed(sourceCurrency), 9),
+		allowedImageHosts,
+		collectOffers: true,
+		collectIssues: true,
+	});
+	assert.equal(currencyResult.offers.length, 0);
+	assert.equal(currencyResult.stats.parserCompleted, true);
+	assert.ok(
+		currencyResult.issues.some(
+			(issue) =>
+				issue.code === "feed.offer_invalid" && issue.field === "currency",
+		),
+		`${sourceCurrency} must produce a redacted currency import issue`,
+	);
+}
+
+const emptyCurrency = normalizeYrlOffer(
+	{
+		externalId: "empty-currency",
+		title: "Empty currency",
+		currency: " ",
+		pictures: [],
+	},
+	allowedImageHosts,
+);
+assert.equal(emptyCurrency.ok, false);
+assert.ok(
+	emptyCurrency.issues.some(
+		(issue) => issue.code === "feed.offer_invalid" && issue.field === "currency",
+	),
+);
+
+const maxTextNodeChars = 1024;
+const exactTextLimit = await parseYrlFeed({
+	stream: chunkUtf8(buildDescriptionFeed("x".repeat(maxTextNodeChars)), 13),
+	allowedImageHosts,
+	collectOffers: true,
+	maxTextNodeChars,
+});
+assert.equal(exactTextLimit.stats.parserCompleted, true);
+assert.equal(exactTextLimit.offers.length, 2);
+
+for (const chunkSize of [64 * 1024, 8 * 1024, 16 * 1024]) {
+	const oversizedOffer = await parseYrlFeed({
+		stream: chunkUtf8(
+			buildDescriptionFeed("x".repeat(maxTextNodeChars + 1)),
+			chunkSize,
+		),
+		allowedImageHosts,
+		collectOffers: true,
+		collectIssues: true,
+		maxTextNodeChars,
+	});
+	assert.equal(oversizedOffer.stats.parserCompleted, true);
+	assert.equal(oversizedOffer.stats.criticalStructuralAnomaly, false);
+	assert.deepEqual(
+		oversizedOffer.offers.map((offer) => offer.externalId),
+		["good-after-bad"],
+	);
+	assert.ok(
+		oversizedOffer.issues.some(
+			(issue) =>
+				issue.code === "feed.offer_invalid" &&
+				issue.externalId === "oversized-description",
+		),
+	);
+}
+
+const structuralOversizedText = await parseYrlFeed({
+	stream: chunkUtf8(
+		`<realty-feed><generation-date>${"x".repeat(maxTextNodeChars + 1)}</generation-date></realty-feed>`,
+		8 * 1024,
+	),
+	allowedImageHosts,
+	collectIssues: true,
+	maxTextNodeChars,
+});
+assert.equal(structuralOversizedText.stats.parserCompleted, false);
+assert.equal(structuralOversizedText.stats.criticalStructuralAnomaly, true);
+
+const oversizedOfferBytes = await parseYrlFeed({
+	stream: chunkUtf8(buildDescriptionFeed("x".repeat(512)), 37),
+	allowedImageHosts,
+	collectOffers: true,
+	collectIssues: true,
+	maxTextNodeChars: 1024,
+	maxOfferBytes: 256,
+});
+assert.equal(oversizedOfferBytes.stats.parserCompleted, true);
+assert.deepEqual(
+	oversizedOfferBytes.offers.map((offer) => offer.externalId),
+	["good-after-bad"],
+);
+
+const excessiveNesting = await parseYrlFeed({
+	stream: chunkUtf8("<realty-feed><wrapper /></realty-feed>", 8),
+	allowedImageHosts,
+	maxNestingDepth: 1,
+});
+assert.equal(excessiveNesting.stats.criticalStructuralAnomaly, true);
+
+const excessiveAttributes = await parseYrlFeed({
+	stream: chunkUtf8('<realty-feed generated="now"></realty-feed>', 8),
+	allowedImageHosts,
+	maxAttributes: 0,
+});
+assert.equal(excessiveAttributes.stats.criticalStructuralAnomaly, true);
+
+const abortController = new AbortController();
+abortController.abort();
+const cancelled = await parseYrlFeed({
+	stream: chunkUtf8(buildMinimalFeed(1), 8),
+	allowedImageHosts,
+	signal: abortController.signal,
+});
+assert.equal(cancelled.stats.parserCompleted, false);
+assert.equal(cancelled.stats.criticalStructuralAnomaly, true);
+
 console.log("verify-feed-parser: ok");
+
+function buildCurrencyFeed(currency) {
+	const currencyNode =
+		currency == null ? "" : `<currency>${currency}</currency>`;
+	return `<realty-feed><offer id="currency-${currency ?? "missing"}"><title>Currency probe</title><price><value>1000000</value>${currencyNode}</price></offer></realty-feed>`;
+}
+
+function buildDescriptionFeed(description) {
+	return `<realty-feed><offer id="oversized-description"><title>Oversized</title><description>${description}</description></offer><offer id="good-after-bad"><title>Good</title><price><value>1000000</value><currency>RUB</currency></price></offer></realty-feed>`;
+}
 
 function buildLargeFeed(count) {
 	const offers = [];

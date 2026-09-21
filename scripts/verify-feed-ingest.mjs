@@ -4,6 +4,7 @@ import {
 	dispatchDueFeeds,
 	ingestNormalizedFeed,
 	isEnabledFeedDue,
+	parseYrlFeed,
 	runImportFeed,
 	startImportHeartbeat,
 } from "../src/core/ingest/index.ts";
@@ -29,6 +30,27 @@ const offer = {
 		{ url: "https://img.allowed.example/1.jpg", host: "img.allowed.example" },
 	],
 };
+
+const unsupportedCurrency = await parseYrlFeed({
+	stream: [
+		new TextEncoder().encode(
+			'<realty-feed><offer id="foreign-currency"><title>Foreign</title><price><value>1000000</value><currency>USD</currency></price></offer></realty-feed>',
+		),
+	],
+	allowedImageHosts: new Set(),
+	collectOffers: true,
+	collectIssues: true,
+});
+const currencyRepository = createRepository();
+await ingestNormalizedFeed({
+	context: { ...baseContext, importRunId: "run-unsupported-currency" },
+	offers: unsupportedCurrency.offers,
+	issues: unsupportedCurrency.issues,
+	repository: currencyRepository,
+});
+assert.equal(currencyRepository.byId.size, 0);
+assert.equal(currencyRepository.issues.length, 1);
+assert.equal(currencyRepository.issues[0].field, "currency");
 
 const firstRun = await ingestNormalizedFeed({
 	context: baseContext,
