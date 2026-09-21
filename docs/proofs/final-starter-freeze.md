@@ -1,6 +1,6 @@
-# Final starter freeze proof
+# Final starter validation proof
 
-Status: `READY_FOR_SOURCECRAFT_RISKY_GATE`  
+Status: `ADDITIONAL_VALIDATION / NOT_FROZEN`
 Plan: `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4  
 Checked: 2026-09-21  
 Production action: `NONE`
@@ -12,13 +12,13 @@ Production action: `NONE`
   `2fb19d104bf30ce024c91acd6fcf1ffe695ee606`;
 - interim GitHub restoration boundary:
   `f645993d67c64abc200beeef47fbf3ad742ee8b2`;
-- final implementation head: exact SHA is bound by the EPIC-09 SourceCraft PR
-  and its manual RISKY run;
-- final immutable reference: SourceCraft tag `starter-freeze-v1` resolves the
-  merged canonical `main` SHA. The tag target is authoritative because a Git
-  commit cannot contain its own SHA without changing it;
-- GitHub receives the final SourceCraft `main` fast-forward only. GitHub tag is
-  intentionally not created.
+- final implementation head: `2f09592343e681a97f43745530d6bae012865ddf`,
+  verified by SourceCraft RISKY Gate №126 and merged through PR №109;
+- resulting canonical SourceCraft merge:
+  `a2a03d50b6a4db2cfff537d2d476ad14e82f198a`;
+- GitHub receives canonical SourceCraft `main` by one-way fast-forward only;
+- tag `starter-freeze-v1` is currently absent from SourceCraft and GitHub. It
+  was removed after the owner explicitly deferred freeze for more validation.
 
 ## Versions
 
@@ -66,7 +66,8 @@ Additional non-duplicate proof commands:
 - `pnpm verify:client-readiness --mode=fixture-client`;
 - `pnpm verify:integration:required`.
 
-The manual SourceCraft `merge-risky` workflow is run once on the final PR head.
+The manual SourceCraft `merge-risky` workflow ran once on the final PR head:
+run №126, result `PASS`.
 
 ## Evidence summary
 
@@ -105,7 +106,8 @@ PASS and no production action was performed.
 
 ## Freeze decision
 
-`READY FOR FREEZE` only after the final SourceCraft RISKY run is PASS on the
-exact PR head and the PR is merged without head drift. Then create
-`starter-freeze-v1` on canonical SourceCraft `main`. This is clone readiness,
-not client production readiness.
+The implementation and its exact-head RISKY proof are complete, but the owner
+subsequently deferred freeze for additional validation. Current decision:
+`NOT_FROZEN`; do not create `starter-freeze-v1` until a new explicit owner
+approval. A future freeze confirms starter clone readiness only and does not
+authorize or prove client production readiness.

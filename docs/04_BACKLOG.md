@@ -1,20 +1,23 @@
 # Backlog
 
-Статус: `Plan №6 / EPIC-09 FINAL FREEZE` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4.
+Статус: `Plan №6 implementation complete / ADDITIONAL VALIDATION / NOT FROZEN` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4.
 SourceCraft — primary, GitHub — one-way mirror. Production исключён.
 
 Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md`.
 
 ## NOW
 
-- Завершить EPIC-09: final proof, SourceCraft RISKY gate, merge и immutable tag `starter-freeze-v1`.
+- Провести дополнительную проверку starter до отдельного решения владельца о freeze.
+- Не создавать `starter-freeze-v1` без новой явной команды владельца.
 - Production release остаётся отдельным lifecycle и этим планом запрещён.
 
 ## PRESERVED EXECUTION EVIDENCE
 
-- EPIC-01…08 и EPIC-10 доставлены; точные execution ledgers хранятся в локальном Task Manager.
-- SourceCraft `main@2fb19d104bf30ce024c91acd6fcf1ffe695ee606` — входной SHA EPIC-09.
-- GitHub `main` синхронизирован с этим SHA как зеркало.
+- EPIC-01…10 доставлены; implementation graph Task Manager закрыт, точные execution ledgers сохранены как историческое evidence.
+- EPIC-09 прошёл SourceCraft RISKY Gate №126 на exact head `2f09592343e681a97f43745530d6bae012865ddf` и был слит PR №109.
+- SourceCraft `main@a2a03d50b6a4db2cfff537d2d476ad14e82f198a` — итоговый merge Plan №6 до текущего статусного уточнения.
+- GitHub `main` синхронизирован с SourceCraft как зеркало.
+- Созданный после исполнения tag `starter-freeze-v1` удалён по последующему явному решению владельца; текущее состояние не является freeze.
 
 ## DONE IN PLAN №5
 

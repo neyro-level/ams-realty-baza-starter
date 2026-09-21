@@ -7,8 +7,8 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Активный master plan: `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` (`Plan ID: AMS-REALTBASE-STARTER-FINAL-FREEZE`, `Version: v4`, `Status: APPROVED`). Исторические планы и inventories находятся в `docs/legacy/` и читаются только для evidence.
-- Operational graph: локальный stealth Beads после approved import; `.beads` не коммитится.
+- Последний выполненный master plan: `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` (`Plan ID: AMS-REALTBASE-STARTER-FINAL-FREEZE`, `Version: v4`). Implementation graph закрыт; freeze отложен владельцем до завершения дополнительной проверки. Исторические планы и inventories находятся в `docs/legacy/` и читаются только для evidence.
+- Operational graph: локальный stealth Beads закрыт после approved import и исполнения; `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
@@ -26,8 +26,8 @@
 ## Invariants
 
 - Один независимый stream = одна branch/worktree = один Pull Request.
-- Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
-- Plan №6 v4 APPROVED: закрытые evidence EPIC-01…04 и TASK-05-01 сохраняются; новые задачи/PR начинаются только после CLEAN reconciliation revised graph. Production в план не входит.
+- Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
+- Plan №6 v4 выполнен: implementation graph и delivery evidence закрыты. Текущее состояние — `ADDITIONAL_VALIDATION / NOT_FROZEN`; tag `starter-freeze-v1` отсутствует и создаётся только после отдельного явного решения владельца. Production в план не входит.
 - Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.
 - Автономность не отменяет COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.
 - Production выполняется только по отдельной явной команде владельца.

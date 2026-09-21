@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Plan №6 / EPIC-09 FINAL FREEZE` — SourceCraft primary, GitHub mirror-only. Production не входит в Plan №6.
+Статус: `Plan №6 implementation complete / ADDITIONAL VALIDATION / NOT FROZEN`. SourceCraft — primary, GitHub — mirror-only. Production не входит в Plan №6.
 
 ## Канонические документы
 
@@ -36,7 +36,7 @@
 
 ## Нормативные источники
 
-- `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — текущий v4 APPROVED execution record; SourceCraft primary, GitHub one-way mirror, без production.
+- `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — выполненный v4 execution record; дополнительная проверка продолжается, freeze отложен владельцем, production исключён.
 - `legacy/` — закрытые планы №2–5, их inventories и архитектура v1.0; не нормативный источник.
 - `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` — платформенные инварианты Core 5.5.
 - `research/ATLAS_BASELINE.md` — reference provenance точного Atlas donor; не нормативный источник и не clone onboarding.
