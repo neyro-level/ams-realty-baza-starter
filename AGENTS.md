@@ -7,7 +7,7 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Активный master plan: `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` (`Plan ID: AMS-REALTBASE-STARTER-FINAL-FREEZE`, `Version: v4`, `Status: APPROVED`). v3 superseded после смены repository mode; revised graph разрешён к reconciliation и Developer execution. Последний полностью закрытый план: `docs/AMS_MASTER_PLAN №5.md`.
+- Активный master plan: `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` (`Plan ID: AMS-REALTBASE-STARTER-FINAL-FREEZE`, `Version: v4`, `Status: APPROVED`). Исторические планы и inventories находятся в `docs/legacy/` и читаются только для evidence.
 - Operational graph: локальный stealth Beads после approved import; `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
@@ -15,10 +15,13 @@
 ## Reading order
 
 1. `docs/README.md`.
-2. Профильный канонический документ из карты.
-3. `docs/04_BACKLOG.md` — текущий статус и следующий разрешённый scope.
-4. Exact v4 `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md`; закрытый Plan №5 — только historical acceptance/evidence.
-5. `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` только в пределах текущего scope.
+2. Релевантный раздел `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md`.
+3. `docs/PROJECT.md`.
+4. `docs/03_ARCHITECTURE.md`.
+5. `docs/DESIGN.md` или `docs/OPERATIONS.md` по scope.
+6. `docs/04_BACKLOG.md`.
+7. Профильный `docs/modules/*/manifest.md`, только когда модуль входит в scope.
+8. `docs/legacy/` — только для исторического evidence.
 
 ## Invariants
 

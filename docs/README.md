@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Plan №6 / APPROVED` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4 возвращает SourceCraft primary и GitHub mirror-only. v3 execution остановлен после EPIC-01…04 и TASK-05-01; дальнейшая работа разрешена после CLEAN reconciliation revised graph. Production не входит в Plan №6.
+Статус: `Plan №6 / EPIC-09 FINAL FREEZE` — SourceCraft primary, GitHub mirror-only. Production не входит в Plan №6.
 
 ## Канонические документы
 
@@ -23,9 +23,12 @@
 
 1. `../AGENTS.md` — project router и invariants.
 2. Этот файл — карта Source of Truth.
-3. Один профильный документ из таблицы выше.
-4. Релевантный раздел закрытого `AMS_MASTER_PLAN №5.md` только для acceptance/evidence завершённой программы.
-5. ADR/module/research только когда на них ссылается текущий scope.
+3. Релевантный раздел `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md`.
+4. `PROJECT.md` и `03_ARCHITECTURE.md`.
+5. `DESIGN.md` или `OPERATIONS.md` по scope.
+6. `04_BACKLOG.md`.
+7. ADR/module/research только когда на них ссылается текущий scope.
+8. `legacy/` только для исторического evidence.
 
 Исторические планы и proofs не являются инструкцией к повторному исполнению.
 Команды проверки берутся из `package.json`; их смысл и risk split описаны в
@@ -33,14 +36,10 @@
 
 ## Нормативные источники
 
-- `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — текущий v4 APPROVED: SourceCraft primary, GitHub one-way mirror, без production.
-- `docs/AMS_MASTER_PLAN №5.md` — закрытый APPROVED план остаточного выравнивания (`AMS-REALTBASE-RESIDUAL-ALIGN` v1), полностью доставленный на `main@089b0fb7`. Демо: local PostgreSQL + MEDIA_DIR; production не входил в граф.
-- `docs/AMS_MASTER_PLAN №4.md` — закрытый APPROVED Core Align (`AMS-REALTBASE-CORE-ALIGN` v1, `main@f8344de`).
-- `docs/AMS_MASTER_PLAN №3.md` — закрытый APPROVED corrections EPIC 11–21 (`AMS-REALTBASE-CORRECTIONS` v3, `main@14e9bf53`).
-- `docs/AMS_MASTER_PLAN №2.md` — закрытый утверждённый hardening (`AMS-REALTBASE-HARDENING` v2, `main@f39826c`).
-- `../AMS_PROJECT_ARCHITECTURE_v1.0.md` — историческая спецификация demo/template контура v1.0.
+- `docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — текущий v4 APPROVED execution record; SourceCraft primary, GitHub one-way mirror, без production.
+- `legacy/` — закрытые планы №2–5, их inventories и архитектура v1.0; не нормативный источник.
 - `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` — платформенные инварианты Core 5.5.
-- `research/ATLAS_BASELINE.md` — evidence точного Atlas donor, UI inventory и обязательных visual scenarios.
+- `research/ATLAS_BASELINE.md` — reference provenance точного Atlas donor; не нормативный источник и не clone onboarding.
 - локальный stealth Beads после import — производный dependency graph; Beads не заменяет `04_BACKLOG.md`.
 
 При расхождении конкретное решение ищется в профильном документе из таблицы, а общий инвариант — в Core 5.5.

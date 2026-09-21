@@ -1,22 +1,20 @@
 # Backlog
 
-Статус: `Plan №6 / APPROVED` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4.
-SourceCraft возвращён как primary, GitHub остаётся one-way mirror. v3 execution
-приостановлен; production исключён.
+Статус: `Plan №6 / EPIC-09 FINAL FREEZE` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4.
+SourceCraft — primary, GitHub — one-way mirror. Production исключён.
 
-Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md`. Exact v4 утверждён; revised inventory должен пройти Validate → Import → Reconcile до Developer execution.
+Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md`.
 
 ## NOW
 
-- Reconcile revised v4 graph и выполнить уникальный SourceCraft restoration EPIC-10.
-- После SourceCraft recovery продолжить незакрытую часть EPIC-05 и независимые ready epics.
+- Завершить EPIC-09: final proof, SourceCraft RISKY gate, merge и immutable tag `starter-freeze-v1`.
 - Production release остаётся отдельным lifecycle и этим планом запрещён.
 
 ## PRESERVED EXECUTION EVIDENCE
 
-- EPIC-01…04 v3 доставлены в interim GitHub history и не переоткрываются.
-- TASK-05-01 имеет отдельный commit/checkpoint; TASK-05-02 не claimed и не доставлен.
-- Локальные незакоммиченные изменения TASK-05-02 сохраняются как checkpoint, но не считаются выполнением.
+- EPIC-01…08 и EPIC-10 доставлены; точные execution ledgers хранятся в локальном Task Manager.
+- SourceCraft `main@2fb19d104bf30ce024c91acd6fcf1ffe695ee606` — входной SHA EPIC-09.
+- GitHub `main` синхронизирован с этим SHA как зеркало.
 
 ## DONE IN PLAN №5
 

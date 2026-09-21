@@ -20,12 +20,17 @@ domain: start-baza.ams24.ru, noindex
 
 ## B. Client development
 
-1. Изменить identity в `src/project/site.config.ts` и установить
+1. Создать client repository из immutable starter tag `starter-freeze-v1`.
+2. Переименовать package/project identity.
+3. Изменить identity в `src/project/site.config.ts` и установить
    `projectKind: "client"`.
-2. Заполнить `src/project/client-readiness.config.ts` решениями клиента.
-3. Использовать отдельные локальные PostgreSQL, секреты и media-каталог.
-4. Заменить fixture-контент, контакты и правовые тексты.
-5. Выполнить `pnpm verify:clone-readiness` и обычные локальные проверки.
+4. Заполнить `docs/PROJECT.md` и `src/project/client-readiness.config.ts`:
+   client domain, retention, allowlists и enabled lead channels.
+5. Использовать отдельные локальные PostgreSQL, секреты и media-каталог;
+   секреты хранить только в Secret Master.
+6. Заменить fixture-контент, контакты и правовые тексты.
+7. Выполнить `pnpm install --frozen-lockfile`, `pnpm verify:daily` и
+   `pnpm verify:client-readiness --mode=fixture-client`.
 
 После Design Intake нового клиента UI cleanup выполняется отдельно:
 
@@ -61,6 +66,11 @@ starter и не доказывают доступ к реальному Timeweb.
 Перед staging: заполнить runtime env и выполнить
 `pnpm verify:client-readiness`.
 
+До первого реального feed отдельно выбрать parser и host, зафиксировать
+`EXTERNAL_IMAGE_HOSTS`, refresh interval, safety threshold и maximum
+deactivations. Первый полный staging import создаёт baseline и не должен
+массово деактивировать записи.
+
 ## D. Client Timeweb production
 
 Client production default follows Core 5.5:
@@ -75,6 +85,11 @@ production target/source of truth.
 
 Перед release обязателен `pnpm verify:client-readiness`. Сам release и любая
 закупка инфраструктуры выполняются только отдельной командой владельца.
+
+До client production дополнительно доказать: real S3 upload, Managed PostgreSQL
+migrations, restore drill, PII retention, выбранные lead channels, одного jobs
+owner, frozen URL schema, осознанное indexing decision, performance baseline,
+immutable artifact exact SHA и rollback point.
 
 Канон starter demo: `docs/adr/ADR-LOCAL-STARTER-STORAGE.md`,
 `docs/PROJECT.md`, `docs/OPERATIONS.md`.
