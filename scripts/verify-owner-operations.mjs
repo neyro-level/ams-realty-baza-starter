@@ -193,12 +193,9 @@ assert.ok(
 	"NEXT_PUBLIC_SERVER_URL must not use optionalUrl at Zod parse",
 );
 
-const runtimeEnvSource = readFileSync(
-	join(root, "src", "core", "operations", "runtime-env.ts"),
-	"utf8",
-);
+const runtimeEnvSource = envSource;
 assert.ok(
-	runtimeEnvSource.includes('missing.push("LEAD_CHANNELS")'),
+	runtimeEnvSource.includes('addInvalid(missing, "LEAD_CHANNELS")'),
 	"unknown LEAD_CHANNELS must fail-fast at runtime",
 );
 

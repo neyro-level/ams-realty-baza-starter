@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, statfsSync } from "node:fs";
 import path from "node:path";
+import { runtimeEnv } from "../../project/env.ts";
 
 const SAFE_NAME = /[^a-zA-Z0-9._-]+/g;
 
 export function getMediaDirectory(): string {
-	const configured = process.env.MEDIA_DIR?.trim();
+	const configured = runtimeEnv.MEDIA_DIR?.trim();
 	return configured && configured.length > 0
 		? configured
 		: path.resolve(process.cwd(), "media");

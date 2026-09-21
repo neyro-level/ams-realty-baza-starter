@@ -16,4 +16,5 @@ export {
 	assertRuntimeEnvOrThrow,
 	detectRuntimeEnvMode,
 	evaluateRuntimeEnv,
+	parseProjectEnv,
 } from "./runtime-env.ts";

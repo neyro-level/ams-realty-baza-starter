@@ -2,16 +2,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { executeInternalRevalidation } from "../../../../core/cache/internal-route-executor.ts";
 import { invalidateCacheTargets } from "../../../../core/cache/invalidator.ts";
 import { redactRecord } from "../../../../core/security/redaction.ts";
+import { runtimeEnv } from "../../../../project/env.ts";
 
 export const runtime = "nodejs";
 
 const rateWindowMs = 60_000;
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
-
-function rateLimitPerMinute(): number {
-	const value = Number(process.env.REVALIDATE_RATE_LIMIT_PER_MINUTE ?? 30);
-	return Number.isInteger(value) && value > 0 ? value : 30;
-}
 
 function clientKey(request: NextRequest): string {
 	return (
@@ -30,7 +26,7 @@ function rateLimited(request: NextRequest): boolean {
 		return false;
 	}
 	current.count += 1;
-	return current.count > rateLimitPerMinute();
+	return current.count > runtimeEnv.REVALIDATE_RATE_LIMIT_PER_MINUTE;
 }
 
 export async function POST(request: NextRequest) {
@@ -39,7 +35,7 @@ export async function POST(request: NextRequest) {
 	}
 
 	const result = await executeInternalRevalidation({
-		expectedSecret: process.env.REVALIDATE_SECRET,
+		expectedSecret: runtimeEnv.REVALIDATE_SECRET,
 		providedSecret: request.headers.get("x-ams-revalidate-secret"),
 		body: await request.json().catch(() => undefined),
 		invalidate: invalidateCacheTargets,
