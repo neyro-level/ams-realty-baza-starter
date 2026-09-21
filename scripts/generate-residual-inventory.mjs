@@ -4,12 +4,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const sourcePath = "docs/AMS_MASTER_PLAN №5.md";
+const sourcePath = "docs/legacy/plans/AMS_MASTER_PLAN №5.md";
 const sourceText = readFileSync(join(root, sourcePath));
 const sha256 = createHash("sha256").update(sourceText).digest("hex");
 
 const context = [
-	"docs/AMS_MASTER_PLAN №5.md",
+	"docs/legacy/plans/AMS_MASTER_PLAN №5.md",
 	"docs/03_ARCHITECTURE.md",
 	"docs/PROJECT.md",
 ];
@@ -316,6 +316,6 @@ const inventory = {
 	nodes,
 };
 
-const outputPath = join(root, "docs", "orchestration", "master-plan-5.inventory.json");
+const outputPath = join(root, "docs", "legacy", "orchestration", "master-plan-5.inventory.json");
 writeFileSync(outputPath, `${JSON.stringify(inventory, null, "\t")}\n`);
 console.log(`wrote ${outputPath} sha256=${sha256} epics=${definitions.length} nodes=${nodes.length}`);

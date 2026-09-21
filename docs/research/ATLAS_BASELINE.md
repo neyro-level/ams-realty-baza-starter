@@ -1,5 +1,9 @@
 # Atlas visual baseline evidence
 
+> **REFERENCE / NOT NORMATIVE / NOT CLONE ONBOARDING.** Этот файл хранит
+> provenance и историческое visual evidence. Активные решения находятся в
+> `docs/DESIGN.md`, а порядок клонирования — в `docs/CLONE_ONBOARDING.md`.
+
 Статус: `SOURCE FIXED / INVENTORY COMPLETE / CAPTURE COMPLETE`.
 
 ## Donor identity

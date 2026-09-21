@@ -23,7 +23,7 @@ const stop = [
 const implActions = ["read", "edit", "test", "commit", "push"];
 const deliveryActions = ["read", "commit", "push", "create_pr", "merge"];
 const ctx = [
-	"docs/AMS_MASTER_PLAN №2.md",
+	"docs/legacy/plans/AMS_MASTER_PLAN №2.md",
 	"docs/03_ARCHITECTURE.md",
 	"docs/PROJECT.md",
 ];
@@ -405,6 +405,6 @@ const inventory = {
 	nodes,
 };
 
-const out = join(root, "docs/orchestration/master-plan-2.inventory.json");
+const out = join(root, "docs/legacy/orchestration/master-plan-2.inventory.json");
 writeFileSync(out, `${JSON.stringify(inventory, null, "\t")}\n`);
 console.log(`wrote ${out} sha256=${sha256} nodes=${nodes.length}`);

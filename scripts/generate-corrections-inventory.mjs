@@ -16,7 +16,7 @@ const sha256 = createHash("sha256").update(sourceText).digest("hex");
 const stop = ["scope expansion", "destructive migration", "new secret", "paid external action"];
 const implActions = ["read", "edit", "test", "commit", "push"];
 const deliveryActions = ["read", "commit", "push", "create_pr", "merge"];
-const ctx = ["docs/AMS_MASTER_PLAN №3.md", "docs/03_ARCHITECTURE.md", "docs/PROJECT.md"];
+const ctx = ["docs/legacy/plans/AMS_MASTER_PLAN №3.md", "docs/03_ARCHITECTURE.md", "docs/PROJECT.md"];
 
 function epic(key, title, goal, scope, acceptance, dependsOn, wave, priority, extraStop = ["production"]) {
 	return {
@@ -596,6 +596,6 @@ const inventory = {
 	nodes,
 };
 
-const out = join(root, "docs/orchestration/master-plan-3.inventory.json");
+const out = join(root, "docs/legacy/orchestration/master-plan-3.inventory.json");
 writeFileSync(out, `${JSON.stringify(inventory, null, "\t")}\n`);
 console.log(`${out} sha256=${sha256} nodes=${nodes.length}`);

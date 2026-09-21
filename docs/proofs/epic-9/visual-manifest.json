@@ -10,7 +10,11 @@
     { "name": "desktop", "width": 1280, "height": 900 },
     { "name": "wide", "width": 1440, "height": 1000 }
   ],
-  "routes": ["/", "/nedvizhimost", "/uslugi"],
+  "routes": ["/", "/nedvizhimost", "/o-kompanii"],
+  "propertyDetail": "NOT PROVEN: no representative published record in clean starter fallback",
+  "checkedAt": "2026-09-21",
+  "starterBaseSha": "2fb19d104bf30ce024c91acd6fcf1ffe695ee606",
+  "result": "PASS_WITH_DOCUMENTED_NOT_PROVEN",
   "capturesInClone": false,
   "captureDirectory": "docs/proofs/epic-9/captures/",
   "notes": "Bulk PNG stay outside the starter clone. Run capture-starter-visual-proof.mjs against a local BASE_URL to fill hashes."

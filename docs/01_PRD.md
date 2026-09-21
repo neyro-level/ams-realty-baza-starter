@@ -29,4 +29,5 @@ AMS Realty Baza Starter — коммерческая базовая платфо
 
 Личный кабинет, Redis, broker, PostGIS, поисковый движок, второй backend/ORM, отдельный jobs runner, multi-currency, feed-image mirror и расширенные модули недвижимости.
 
-Полный scope, порядок эпиков и acceptance: `../AMS_PROJECT_ARCHITECTURE_v1.0.md`.
+Продуктовые границы определяет `02_PRODUCT_STRUCTURE.md`, технические —
+`03_ARCHITECTURE.md`, текущую работу — `04_BACKLOG.md`.

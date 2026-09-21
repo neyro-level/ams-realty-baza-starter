@@ -131,6 +131,6 @@ ADR: `docs/adr/ADR-LOCAL-STARTER-STORAGE.md`.
 
 Production starter release использует immutable artifact из clean `main`. Процедуры — `OPERATIONS.md`.
 
-Историческая спецификация: `../AMS_PROJECT_ARCHITECTURE_v1.0.md`. Текущее
+Историческая спецификация: `legacy/architecture/AMS_PROJECT_ARCHITECTURE_v1.0.md`. Текущее
 project-specific состояние определяют этот документ, `PROJECT.md`, ADR и код;
 исторический файл не переписывается и не заменяет runtime truth.
