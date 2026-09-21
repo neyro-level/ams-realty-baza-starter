@@ -4,17 +4,71 @@ import {
 	buildCatalogSeoDecision,
 	catalogSeoParamPolicy,
 } from "../src/core/seo/catalog.ts";
+import { serializeJsonLdSafely } from "../src/core/seo/json-ld.ts";
 import {
 	getPropertyRobots,
 	resolvePropertyPageLifecycle,
 	sanitizeExplicitRedirectPath,
 } from "../src/core/seo/property.ts";
-import { serializeJsonLdSafely } from "../src/core/seo/json-ld.ts";
 import { staticPublicUrlEntries } from "../src/core/seo/site.ts";
+import {
+	buildRobots,
+	getProjectIndexingPolicy,
+	metadataRobotsForPolicy,
+	resolveIndexingPolicy,
+} from "../src/project/indexing-policy.ts";
+
+const fixtureOrigin = "https://realty-client.example";
+assert.equal(getProjectIndexingPolicy(), "noindex");
+assert.equal(
+	resolveIndexingPolicy({
+		projectKind: "starter-demo",
+		productionIndexing: "public",
+	}),
+	"noindex",
+);
+assert.deepEqual(metadataRobotsForPolicy("noindex"), {
+	index: false,
+	follow: false,
+});
+assert.deepEqual(buildRobots("noindex", fixtureOrigin), {
+	rules: [{ userAgent: "*", disallow: "/" }],
+});
+assert.deepEqual(buildRobots("public", fixtureOrigin), {
+	rules: [
+		{
+			userAgent: "*",
+			allow: "/",
+			disallow: ["/admin", "/api"],
+		},
+	],
+	sitemap: `${fixtureOrigin}/sitemap.xml`,
+	host: fixtureOrigin,
+});
+assert.deepEqual(
+	buildRobots(
+		resolveIndexingPolicy({
+			projectKind: "client",
+			productionIndexing: "noindex",
+		}),
+		fixtureOrigin,
+	),
+	{ rules: [{ userAgent: "*", disallow: "/" }] },
+);
+assert.ok(
+	readFileSync("src/app/robots.ts", "utf8").includes(
+		"buildRobots(getProjectIndexingPolicy(), getSiteUrl())",
+	),
+);
+assert.ok(
+	readFileSync("src/app/layout.tsx", "utf8").includes(
+		"metadataRobotsForPolicy(getProjectIndexingPolicy())",
+	),
+);
 
 const adversarialJsonLd = {
 	name: '</script><script>alert("json-ld")</script>',
-	description: "<&>\u2028\u2029quotes\"backslash\\",
+	description: '<&>\u2028\u2029quotes"backslash\\',
 };
 const serializedJsonLd = serializeJsonLdSafely(adversarialJsonLd);
 assert.equal(serializedJsonLd.includes("</script"), false);
@@ -155,19 +209,22 @@ const sitemapSource = readFileSync("src/app/sitemap.ts", "utf8");
 assert.ok(sitemapSource.includes("generateSitemaps"));
 assert.match(sitemapSource, /export const revalidate = 3600;/);
 assert.equal(sitemapSource.includes("limit: 1000"), false);
-const catalogSource = readFileSync("src/core/data-access/public/catalog.ts", "utf8");
+const catalogSource = readFileSync(
+	"src/core/data-access/public/catalog.ts",
+	"utf8",
+);
 assert.equal(catalogSource.includes("limit: 1000"), false);
 assert.ok(catalogSource.includes("aggregatePublicCatalogFacets"));
 assert.ok(catalogSource.includes("payload-aggregate"));
 assert.equal(catalogSource.includes("sql-aggregate"), false);
 assert.ok(
-	readFileSync("src/app/http/property-lifecycle/[slug]/route.ts", "utf8").includes(
-		"status: 410",
-	) ||
-		readFileSync(
-			"src/core/http/property-gone-response.ts",
-			"utf8",
-		).includes("status: 410"),
+	readFileSync(
+		"src/app/http/property-lifecycle/[slug]/route.ts",
+		"utf8",
+	).includes("status: 410") ||
+		readFileSync("src/core/http/property-gone-response.ts", "utf8").includes(
+			"status: 410",
+		),
 );
 assert.ok(
 	readFileSync("src/project/collections/Pages.ts", "utf8").includes(
@@ -187,7 +244,11 @@ const marketingPages = [
 ];
 for (const file of marketingPages) {
 	const source = readFileSync(file, "utf8");
-	assert.equal(source.includes("force-dynamic"), false, `${file} must not be force-dynamic`);
+	assert.equal(
+		source.includes("force-dynamic"),
+		false,
+		`${file} must not be force-dynamic`,
+	);
 	assert.ok(
 		source.includes("export const revalidate = 3600;"),
 		`${file} must export literal ISR revalidate`,

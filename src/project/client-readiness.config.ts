@@ -8,7 +8,7 @@ export type ClientReadinessConfig = {
 	leadRetentionDays: number | null;
 	archiveRetentionDays: number | null;
 	legalContent: "approved" | "placeholder";
-	productionIndexing: "index" | "noindex-owner-approved" | null;
+	productionIndexing: "public" | "noindex" | null;
 	requiredHostAllowlists: {
 		outbound: readonly string[];
 		externalImages: readonly string[];

@@ -80,6 +80,10 @@ Deviation requires explicit owner decision + ADR where Core requires it.
 Production требует клиентский домен, утверждённые правовые тексты, явное
 решение об индексации, retention для лидов/архива, точные host allowlists,
 один jobs-active runtime, Nginx, automatic backup и external monitoring.
+Решение записывается как `productionIndexing = public | noindex`; для `public`
+domain обязан совпадать с canonical runtime origin, а legal content иметь статус
+`approved`. Client Nginx placeholder `__INDEXING_X_ROBOTS_TAG__` заменяется на
+noindex header либо удаляется для public-контура.
 Starter `start-baza` Compose/Nginx и `MEDIA_DIR` не являются клиентским
 production target/source of truth.
 

@@ -1,17 +1,10 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/core/seo/site";
+import {
+	buildRobots,
+	getProjectIndexingPolicy,
+} from "@/project/indexing-policy";
 
 export default function robots(): MetadataRoute.Robots {
-	const host = getSiteUrl();
-	return {
-		rules: [
-			{
-				userAgent: "*",
-				allow: "/",
-				disallow: ["/admin", "/api", "/api/internal"],
-			},
-		],
-		sitemap: `${host}/sitemap.xml`,
-		host,
-	};
+	return buildRobots(getProjectIndexingPolicy(), getSiteUrl());
 }

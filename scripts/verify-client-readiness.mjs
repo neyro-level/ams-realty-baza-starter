@@ -75,8 +75,19 @@ export function validateClientReadiness(input) {
 		add("archive-retention-unset");
 	}
 	if (input.legalContent !== "approved") add("legal-content-placeholder");
-	if (!input.productionIndexing) add("production-indexing-decision-missing");
+	if (!["public", "noindex"].includes(input.productionIndexing)) {
+		add("production-indexing-decision-missing");
+	}
 	if (!configuredDomain) add("client-domain-missing");
+	if (
+		input.productionIndexing === "public" &&
+		(!configuredDomain ||
+			!runtimeDomain ||
+			configuredDomain !== runtimeDomain ||
+			input.legalContent !== "approved")
+	) {
+		add("public-indexing-prerequisites-missing");
+	}
 	const allowlists = input.requiredHostAllowlists ?? {};
 	if (
 		!allowlists.outbound?.length ||
@@ -114,7 +125,7 @@ const validClientFixture = {
 	leadRetentionDays: 180,
 	archiveRetentionDays: 90,
 	legalContent: "approved",
-	productionIndexing: "index",
+	productionIndexing: "public",
 	requiredHostAllowlists: {
 		outbound: ["api.realty-client.ru"],
 		externalImages: ["feed-cdn.example.org"],
@@ -169,6 +180,20 @@ function verifyFixtures() {
 		expectedErrors,
 	);
 	assert.deepEqual(validateClientReadiness(validClientFixture), []);
+	assert.deepEqual(
+		validateClientReadiness({
+			...validClientFixture,
+			productionIndexing: "noindex",
+		}),
+		[],
+	);
+	assert.deepEqual(
+		validateClientReadiness({
+			...validClientFixture,
+			legalContent: "placeholder",
+		}),
+		["legal-content-placeholder", "public-indexing-prerequisites-missing"],
+	);
 	assert.deepEqual(
 		validateClientReadiness({
 			...invalidStarterFixture,

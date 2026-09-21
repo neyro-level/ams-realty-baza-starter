@@ -50,6 +50,13 @@ public UI
 
 Reusable UI не импортирует Payload, DB clients или persistence types. Configurable outbound HTTP проходит через Safe Outbound Client; raw anonymous business REST закрывается на edge и Payload boundary. Public Gateway: `src/core/data-access/public`. System Gateway: `src/core/data-access/system`.
 
+Indexing имеет один semantic source `src/project/indexing-policy.ts`. Starter
+fail-closed возвращает `noindex`; client использует явное owner decision
+`public | noindex` из client-readiness config. Эта политика определяет root
+metadata robots и `/robots.txt`; starter Nginx фиксирует matching
+`X-Robots-Tag: noindex, nofollow`, а client blueprint требует явной подстановки
+соответствующего header/его отсутствия.
+
 ## Env и runtime config
 
 `src/project/env.ts` — единственный владелец typed schema, определения режима и списка обязательных runtime-полей. `src/core/operations/runtime-env.ts` является только compatibility re-export и не содержит второй матрицы. Режимы: `build`, `development`, `migrate`, `runtime`, `test`; build не требует production secrets, а runtime fail-fast выполняется через instrumentation до обслуживания трафика.

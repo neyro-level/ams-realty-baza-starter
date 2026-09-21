@@ -72,13 +72,21 @@ assert.ok(
 );
 
 const nginx = read("deploy/nginx/start-baza.ams24.ru.conf");
-assert.ok(
-	nginx.includes("location /media/"),
-	"nginx must alias local media",
-);
+assert.ok(nginx.includes("location /media/"), "nginx must alias local media");
 assert.ok(
 	nginx.includes("limit_req zone=ams_login"),
 	"nginx must rate-limit login",
+);
+assert.ok(
+	nginx.includes("INDEXING_POLICY=noindex") &&
+		nginx.includes('X-Robots-Tag "noindex, nofollow"'),
+	"starter Nginx indexing header must match the semantic noindex policy",
+);
+assert.ok(
+	read("deploy/clients/timeweb/nginx/site.conf.example").includes(
+		"__INDEXING_X_ROBOTS_TAG__",
+	),
+	"client Nginx blueprint must require an explicit indexing-policy rendering",
 );
 
 for (const requiredEnv of [
@@ -122,15 +130,24 @@ assert.equal(
 );
 
 const adr = read("docs/adr/ADR-LOCAL-STARTER-STORAGE.md");
-assert.ok(adr.includes("Accepted"), "ADR-LOCAL-STARTER-STORAGE must remain Accepted");
+assert.ok(
+	adr.includes("Accepted"),
+	"ADR-LOCAL-STARTER-STORAGE must remain Accepted",
+);
 assert.ok(
 	adr.includes("не копирует эту topology автоматически"),
 	"ADR must state commercial clone does not copy starter topology automatically",
 );
 
 const agents = read("AGENTS.md");
-assert.ok(agents.includes("local PostgreSQL"), "AGENTS.md must pin local PostgreSQL starter runtime");
-assert.ok(agents.includes("MEDIA_DIR"), "AGENTS.md must pin MEDIA_DIR starter runtime");
+assert.ok(
+	agents.includes("local PostgreSQL"),
+	"AGENTS.md must pin local PostgreSQL starter runtime",
+);
+assert.ok(
+	agents.includes("MEDIA_DIR"),
+	"AGENTS.md must pin MEDIA_DIR starter runtime",
+);
 
 const composeForbidden = [
 	"storage-s3",
@@ -152,7 +169,8 @@ for (const [name, body] of [
 	["docs/OPERATIONS.md", operations],
 ]) {
 	assert.equal(
-		/S3 is required for starter/i.test(body) || body.includes("starter requires S3"),
+		/S3 is required for starter/i.test(body) ||
+			body.includes("starter requires S3"),
 		false,
 		`${name} must not require S3 as this starter runtime`,
 	);
@@ -168,7 +186,8 @@ assert.ok(
 	"Operations backup canon must remain local PostgreSQL dump",
 );
 assert.ok(
-	operations.includes("archive `MEDIA_DIR`") || operations.includes("archive MEDIA_DIR"),
+	operations.includes("archive `MEDIA_DIR`") ||
+		operations.includes("archive MEDIA_DIR"),
 	"Operations backup canon must remain MEDIA_DIR snapshot",
 );
 

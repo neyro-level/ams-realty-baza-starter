@@ -22,6 +22,7 @@
 | Secrets | Secret Master `https://infisical.ams24.ru` |
 | Env mapping | Canonical knobs → starter env (no CRM / telegram keys): `DATABASE` → `DATABASE_URI`; public origin → `NEXT_PUBLIC_SERVER_URL`; media → `MEDIA_DIR`; Payload secret → `PAYLOAD_SECRET`; ISR secret → `REVALIDATE_SECRET`; lead channels → `LEAD_CHANNELS` (`max`, `custom-webhook` only) |
 | Demo domain | `start-baza.ams24.ru`, `noindex` |
+| Indexing policy | `src/project/indexing-policy.ts`: `starter-demo` всегда `noindex`; client обязан выбрать `productionIndexing = public | noindex`, причём `public` разрешён только при production `projectKind`, совпадающих domain/canonical origin и approved legal content |
 | Jobs owner | exactly one runtime with `JOBS_AUTORUN=true` |
 | Dispatcher interval | `project.config.ts` → `dispatcherIntervalMinutes = 5` |
 | Maintenance interval | `maintenanceIntervalMinutes = 15` |
