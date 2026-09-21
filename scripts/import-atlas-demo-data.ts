@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getPayload } from "payload";
 import config from "../payload.config.ts";
-import { requirePayloadRuntime } from "../src/payload/env.ts";
+import { requirePayloadRuntime } from "../src/project/env.ts";
 import { calculatePropertyDerivedFields } from "../src/core/ingest/derived-fields.ts";
 import { systemOverrideAccess } from "../src/core/data-access/system/overrides.ts";
 

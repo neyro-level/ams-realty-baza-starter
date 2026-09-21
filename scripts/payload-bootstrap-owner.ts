@@ -1,6 +1,6 @@
 import { getPayload } from "payload";
 import config from "../payload.config.ts";
-import { requirePayloadRuntime } from "../src/payload/env.ts";
+import { requirePayloadRuntime } from "../src/project/env.ts";
 import { systemOverrideAccess } from "../src/core/data-access/system/payload-access.ts";
 
 requirePayloadRuntime();

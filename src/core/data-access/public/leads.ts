@@ -10,7 +10,7 @@ import {
 	prepareLeadIntake,
 	type LeadIntakeRejected,
 } from "../../leads/index.ts";
-import { runtimeEnv } from "../../../payload/env.ts";
+import { runtimeEnv } from "../../../project/env.ts";
 import { systemOverrideAccess } from "../system/overrides.ts";
 import { getPublicGatewayPayload } from "./payload.ts";
 

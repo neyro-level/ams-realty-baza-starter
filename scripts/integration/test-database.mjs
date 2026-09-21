@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
-import { leadDeliveryRelationalContractUpSql } from "../../src/payload/migrations/20260919_151000.ts";
+import { leadDeliveryRelationalContractUpSql } from "../../migrations/20260919_151000.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
 function psql(uri, sql) {

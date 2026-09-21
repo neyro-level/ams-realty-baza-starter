@@ -41,7 +41,7 @@ import {
 } from "../../core/security/safe-outbound-client.ts";
 import { parseTestApprovedOrigins } from "../../core/security/test-destinations.ts";
 import { getRuntimeClock } from "../../core/time/clock.ts";
-import { projectConfig } from "../../project/project.config.ts";
+import { projectConfig } from "../project.config.ts";
 import { runtimeEnv } from "../env.ts";
 import {
 	type PayloadJobTaskSlug,

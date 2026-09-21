@@ -4,16 +4,16 @@ import { pathToFileURL } from "node:url";
 
 const root = process.cwd();
 const queueModule = await import(
-	pathToFileURL(join(root, "src/payload/jobs/queues.ts")).href
+	pathToFileURL(join(root, "src/project/jobs/queues.ts")).href
 );
 const registryModule = await import(
-	pathToFileURL(join(root, "src/payload/jobs/registry.ts")).href
+	pathToFileURL(join(root, "src/project/jobs/registry.ts")).href
 );
 const packageJson = JSON.parse(
 	readFileSync(join(root, "package.json"), "utf8"),
 );
 const tasksSource = readFileSync(
-	join(root, "src/payload/jobs/tasks.ts"),
+	join(root, "src/project/jobs/tasks.ts"),
 	"utf8",
 );
 

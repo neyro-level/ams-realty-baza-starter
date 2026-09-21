@@ -5,7 +5,7 @@ const runtimeAllowlist = new Set([
 	"src/core/data-access/system/sql/index.ts",
 ]);
 
-const migrationPrefix = "src/payload/migrations/";
+const migrationPrefix = "migrations/";
 const rawSqlPattern =
 	/db\.execute\s*\(|drizzle\.execute\s*\(|\bsql`|from\s+["']pg["']/;
 

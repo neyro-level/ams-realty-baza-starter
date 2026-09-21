@@ -152,7 +152,7 @@ assert.ok(
 		).includes("status: 410"),
 );
 assert.ok(
-	readFileSync("src/payload/collections/Pages.ts", "utf8").includes(
+	readFileSync("src/project/collections/Pages.ts", "utf8").includes(
 		"reservedNamespaces",
 	),
 );

@@ -1,31 +1,33 @@
 # ADR-CANONICAL-BOUNDARIES
 
-Статус: Accepted  
-Дата: 2026-09-18  
-Контекст: EPIC 1 / Core 5.5 canonical structure
+Статус: Superseded by AMS Master Plan 6 v3, EPIC-02
 
-## Решение
+Исходная дата: 2026-09-18
 
-Оставляем существующие Payload-owned пути и не делаем косметический rename:
+Дата пересмотра: 2026-09-21
 
-- collections/access/jobs/env остаются в `src/payload/**` (Payload CMS owns Admin, Local API, schema, migrations);
-- public/system/ingest/security/seo/http live in `src/core/**` (Public Gateway: `src/core/data-access/public`, System Gateway: `src/core/data-access/system`);
-- presentation DTO freeze: `packages/contracts` (`contractState=frozen` 1.0.0);
-- UI package: `packages/ui`.
+## Актуальное решение
 
-View-only модели карточек/каталога/shell, которых нет в frozen DTO, живут в `packages/ui/src/view-models/**`, не в `packages/ui/src/contracts/**`.
+- project-owned collections, env и jobs живут в `src/project/**`;
+- общие role/access helpers живут в `src/core/access/**`;
+- история Payload migrations живёт в корневом `migrations/**`;
+- сгенерированные Payload types живут в `src/project/payload-types.ts`;
+- Public/System Gateway и остальные platform services остаются в `src/core/**`;
+- presentation DTO freeze остаётся в `packages/contracts`, UI — в `packages/ui`.
 
-## Почему
+`payload.config.ts` задаёт абсолютные пути, вычисленные относительно самого config-файла, поэтому генерация типов и поиск миграций не зависят от текущего рабочего каталога.
 
-Массовый перенос `src/payload` → `src/project/collections` сломает Payload generate/importMap и не меняет dependency boundaries. Расширение frozen `packages/contracts` требует отдельного owner `CONTRACT_CHANGE_APPROVED` + version bump; presentation view models не являются public Gateway DTO.
+## Почему прежнее решение отменено
+
+Ранее `src/payload/**` сохранялся как минимально рискованный layout. Утверждённый `AMS-REALTBASE-STARTER-FINAL-FREEZE v3` зафиксировал единый clone-friendly folder contract и потребовал переноса с регенерацией артефактов и проверкой неизменности схемы.
 
 ## Next.js 16 edge file
 
-Anonymous Payload REST is cut in `src/proxy.ts` (`export function proxy`). Official Next 16 convention: `middleware.ts` is deprecated; do not rename this file back. Proof lives in `pnpm verify:security-boundaries` (source + helper + proxy invocation).
+Anonymous Payload REST ограничивается в `src/proxy.ts` (`export function proxy`). В Next.js 16 `middleware.ts` устарел; файл не переименовывать обратно.
 
 ## Guards
 
-- `packages/ui` не импортирует Payload/DB/`src/payload`/`src/project`.
-- `packages/contracts` не импортирует Next/Payload/DB.
-- `src/core` не импортирует `packages/ui`.
-- Каталог `packages/ui/src/contracts` запрещён.
+- `packages/ui` не импортирует Payload, DB или `src/project`;
+- `packages/contracts` не импортирует Next.js, Payload или DB;
+- `src/core` не импортирует `packages/ui`;
+- каталог `packages/ui/src/contracts` запрещён.

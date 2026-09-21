@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { publicRedirectReadAccess } from "../../core/data-access/public/access-mode.ts";
 import { sanitizeExplicitRedirectPath } from "../../core/seo/redirect-path.ts";
-import { ownersOnly } from "../access/roles.ts";
+import { ownersOnly } from "../../core/access/roles.ts";
 
 export const Redirects: CollectionConfig = {
 	slug: "redirects",

@@ -9,7 +9,7 @@ import {
 	shouldRecordManualOwnership,
 } from "../../core/ingest/manual-ownership.ts";
 import { normalizePropertyNumericWrite } from "../../core/ingest/numeric-invariants.ts";
-import { adminsAndOwners, hasRole, ownersOnly } from "../access/roles.ts";
+import { adminsAndOwners, hasRole, ownersOnly } from "../../core/access/roles.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) =>
 	hasRole(req.user, ["owner", "admin"]);
