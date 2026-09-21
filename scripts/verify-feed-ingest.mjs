@@ -417,6 +417,67 @@ assert.ok(
 	"runtime must never buffer more offers than the configured batch bound",
 );
 
+let cacheWarningFinish;
+const cacheWarningRuntime = await runImportFeed(
+	{
+		now: () => new Date("2026-09-18T06:00:00.000Z"),
+		claimQueuedImportRun: async () => "cache-warning-run",
+		touchHeartbeat: async () => undefined,
+		loadFeedSource: async () => ({
+			id: "cache-warning-source",
+			code: "cache-warning",
+			enabled: true,
+			market: "secondary",
+			feedUrlRef: "CACHE_WARNING_FEED_URL",
+			lastOfferCount: null,
+			safetyThresholdPercent: 30,
+			maxDeactivationsPerRun: 50,
+		}),
+		resolveFeedUrl: () => "https://feeds.example.test/cache-warning.xml",
+		fetchFeed: async () => ({
+			status: "fetched",
+			body: [],
+			sha256: Promise.resolve("cache-warning-hash"),
+		}),
+		parseFeed: async ({ onOffer }) => {
+			await onOffer?.(offer);
+			return {
+				offers: [],
+				issues: [],
+				stats: {
+					offersSeen: 1,
+					maxRetainedCharsObserved: 0,
+					maxBufferedOffersObserved: 1,
+					parserCompleted: true,
+					criticalStructuralAnomaly: false,
+				},
+			};
+		},
+		createRepository: () => createRepository(),
+		ingest: async () => ({
+			offeredCount: 1,
+			createdCount: 1,
+			updatedCount: 0,
+			skippedCount: 0,
+			warningCount: 0,
+			errorCount: 0,
+			invalidatedTargets: [{ type: "tag", tag: "properties" }],
+		}),
+		invalidatePublicCache: async () => ({ ok: false }),
+		finishRun: async (finish) => {
+			cacheWarningFinish = finish;
+		},
+		recordSourceContact: async () => undefined,
+		allowedImageHosts: new Set(),
+	},
+	{ feedSourceId: "cache-warning-source", importRunId: "cache-warning-run" },
+);
+assert.equal(cacheWarningRuntime.status, "success");
+assert.equal(cacheWarningRuntime.cacheInvalidated, false);
+assert.equal(cacheWarningRuntime.ingest?.warningCount, 1);
+assert.equal(cacheWarningFinish?.status, "success");
+assert.equal(cacheWarningFinish?.warningCount, 1);
+
 let approvalDeactivationCalls = 0;
 let approvalFinishStatus;
 const approvalRepository = {

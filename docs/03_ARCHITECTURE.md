@@ -38,7 +38,7 @@ Major upgrade требует отдельного решения и targeted pro
 | Project schema/config | `src/project/collections`, `src/project/env.ts`, `src/project/jobs` | Payload остаётся единственным backend/schema owner |
 | Generic access helpers | `src/core/access` | переиспользуемые роли без project-specific schema |
 | Payload migration history | `migrations` | канонический корневой каталог, заданный в `payload.config.ts` |
-| Cache invalidation | `src/core/cache` | internal HTTP revalidation contract; in-process executor только внутри Next runtime |
+| Cache invalidation | `src/core/cache` | `invalidatePublicCache` — единственный live facade и всегда выполняет authenticated HTTP self-call; `invalidateInProcessCacheTargets` вызывается только Route Handler после auth, rate limit и allowlist |
 
 ```text
 public UI

@@ -249,22 +249,37 @@ if (!tasksSource.includes("retries: 0")) {
 	throw new Error("deliverLead platform retries must be 0.");
 }
 
-if (!tasksSource.includes("postBatchedHttpRevalidate")) {
-	throw new Error("import-feed must invalidate public cache via HTTP adapter.");
+if (!tasksSource.includes("invalidatePublicCache")) {
+	throw new Error("import-feed must use the canonical public cache facade.");
+}
+if (tasksSource.includes("postBatchedHttpRevalidate")) {
+	throw new Error("import-feed must not bypass the canonical public cache facade.");
 }
 
 const revalidateRoute = readFileSync(
 	join(root, "src", "app", "api", "internal", "revalidate", "route.ts"),
 	"utf8",
 );
-if (!revalidateRoute.includes("invalidateCacheTargets")) {
+if (!revalidateRoute.includes("invalidateInProcessCacheTargets")) {
 	throw new Error(
-		"HTTP revalidate route must call the in-process invalidator.",
+		"HTTP revalidate route must call the explicitly named in-process executor.",
 	);
+}
+if (revalidateRoute.includes("invalidatePublicCache")) {
+	throw new Error("HTTP revalidate route must not recursively call the public HTTP facade.");
 }
 if (!revalidateRoute.includes("executeInternalRevalidation")) {
 	throw new Error(
 		"HTTP revalidate route must delegate auth and validation to its canonical executor.",
+	);
+}
+if (
+	!revalidateRoute.includes(
+		'request.headers.get("x-ams-revalidate-secret") ===',
+	)
+) {
+	throw new Error(
+		"authenticated internal self-calls must bypass the application bucket before Route Handler validation.",
 	);
 }
 if (/from\s+["']next\/cache["']/.test(revalidateRoute)) {
@@ -279,6 +294,20 @@ const httpAdapter = readFileSync(
 );
 if (httpAdapter.includes("next/cache")) {
 	throw new Error("HTTP cache adapter must not import next/cache.");
+}
+
+const publicInvalidator = readFileSync(
+	join(root, "src", "core", "cache", "invalidator.ts"),
+	"utf8",
+);
+if (!publicInvalidator.includes("invalidatePublicCache")) {
+	throw new Error("cache invalidator must expose the canonical public facade.");
+}
+if (!publicInvalidator.includes("postBatchedHttpRevalidate")) {
+	throw new Error("canonical public cache facade must use the HTTP adapter.");
+}
+if (publicInvalidator.includes("invalidateInProcessCacheTargets")) {
+	throw new Error("canonical public cache facade must not silently fall back in-process.");
 }
 
 const routeExecutor = readFileSync(

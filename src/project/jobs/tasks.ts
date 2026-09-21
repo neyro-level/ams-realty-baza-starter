@@ -1,5 +1,5 @@
 import type { PayloadRequest, TaskConfig } from "payload";
-import { postBatchedHttpRevalidate } from "../../core/cache/http-revalidate.ts";
+import { invalidatePublicCache } from "../../core/cache/invalidator.ts";
 import {
 	claimDueFeedSources,
 	claimQueuedImportRun,
@@ -276,7 +276,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 					consumeDeactivationApproval: (input) =>
 						consumeDeactivationApproval(payload, input),
 					invalidatePublicCache: async (targets) => {
-						const result = await postBatchedHttpRevalidate({
+						const result = await invalidatePublicCache({
 							baseUrl: runtimeEnv.INTERNAL_REVALIDATE_BASE_URL,
 							secret: runtimeEnv.REVALIDATE_SECRET,
 							targets,

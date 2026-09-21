@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { invalidateInProcessCacheTargets } from "../../../../core/cache/in-process.ts";
 import { executeInternalRevalidation } from "../../../../core/cache/internal-route-executor.ts";
-import { invalidateCacheTargets } from "../../../../core/cache/invalidator.ts";
 import { redactRecord } from "../../../../core/security/redaction.ts";
 import { getTrustedClientAddress } from "../../../../core/security/trusted-client-address.ts";
 import { runtimeEnv } from "../../../../project/env.ts";
@@ -11,6 +11,14 @@ const rateWindowMs = 60_000;
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
 
 function rateLimited(request: NextRequest): boolean {
+	if (
+		runtimeEnv.REVALIDATE_SECRET &&
+		request.headers.get("x-ams-revalidate-secret") ===
+			runtimeEnv.REVALIDATE_SECRET
+	) {
+		return false;
+	}
+
 	const key = getTrustedClientAddress(request);
 	const now = Date.now();
 	const current = rateBuckets.get(key);
@@ -31,7 +39,7 @@ export async function POST(request: NextRequest) {
 		expectedSecret: runtimeEnv.REVALIDATE_SECRET,
 		providedSecret: request.headers.get("x-ams-revalidate-secret"),
 		body: await request.json().catch(() => undefined),
-		invalidate: invalidateCacheTargets,
+		invalidate: invalidateInProcessCacheTargets,
 	});
 
 	if (result.deniedTargets) {
