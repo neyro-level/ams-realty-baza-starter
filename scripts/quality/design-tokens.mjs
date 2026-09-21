@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../..");
@@ -96,7 +96,9 @@ const forbiddenStyles = primitiveStyleFiles.flatMap((path) => {
 	});
 });
 
-const uiSource = uiCodeFiles.map((path) => readFileSync(path, "utf8")).join("\n");
+const uiSource = uiCodeFiles
+	.map((path) => readFileSync(path, "utf8"))
+	.join("\n");
 const allowedExternalHooks = new Set([
 	"home-page",
 	"request-modal__link",
@@ -138,15 +140,67 @@ const pageStyleFailures = componentCssFiles.flatMap((path) => {
 	return failures;
 });
 
-const reservedPrefixes = [];
+const projectDoc = readFileSync(join(root, "docs/PROJECT.md"), "utf8");
+const designDoc = readFileSync(join(root, "docs/DESIGN.md"), "utf8");
+
+export function resolveModuleTokenReservations({
+	designText,
+	projectText,
+	manifestExists,
+}) {
+	const projectModuleBlock =
+		projectText.match(
+			/<!-- MODULE_GOVERNANCE_BEGIN -->([\s\S]*?)<!-- MODULE_GOVERNANCE_END -->/,
+		)?.[1] ?? "";
+	const projectModules = new Set(
+		[...projectModuleBlock.matchAll(/\|\s*`([a-z0-9-]+)`\s*\|/gi)].map(
+			(match) => match[1].toLowerCase(),
+		),
+	);
+	const reservationBlock =
+		designText.match(
+			/<!-- MODULE_TOKEN_RESERVATIONS_BEGIN -->([\s\S]*?)<!-- MODULE_TOKEN_RESERVATIONS_END -->/,
+		)?.[1] ?? "";
+	const rows = [
+		...reservationBlock.matchAll(
+			/\|\s*`([a-z0-9-]+)`\s*\|\s*`(--[a-z0-9_-]+-)`\s*\|/gi,
+		),
+	].map((match) => ({ module: match[1].toLowerCase(), prefix: match[2] }));
+	const failures = rows.flatMap(({ module }) => {
+		const rowFailures = [];
+		if (!projectModules.has(module))
+			rowFailures.push(
+				`reserved token module is not documented in PROJECT.md: ${module}`,
+			);
+		if (!manifestExists(module))
+			rowFailures.push(`reserved token module manifest is missing: ${module}`);
+		return rowFailures;
+	});
+	return {
+		prefixes: failures.length === 0 ? rows.map(({ prefix }) => prefix) : [],
+		failures,
+	};
+}
+
+const reservationContract = resolveModuleTokenReservations({
+	designText: designDoc,
+	projectText: projectDoc,
+	manifestExists: (module) =>
+		existsSync(join(root, "docs/modules", `${module}.md`)),
+});
+const reservationFailures = reservationContract.failures;
+const reservedPrefixes = reservationContract.prefixes;
 
 function isReservedToken(token) {
 	return reservedPrefixes.some((prefix) => token.startsWith(prefix));
 }
 
-const themeBlock = tokenCss.match(/@theme inline[\s\S]*?\{([\s\S]*?)\}/)?.[1] ?? "";
+const themeBlock =
+	tokenCss.match(/@theme inline[\s\S]*?\{([\s\S]*?)\}/)?.[1] ?? "";
 const themeKeys = new Set(
-	[...themeBlock.matchAll(/^\s*(--[a-z0-9_-]+)\s*:/gim)].map((match) => match[1]),
+	[...themeBlock.matchAll(/^\s*(--[a-z0-9_-]+)\s*:/gim)].map(
+		(match) => match[1],
+	),
 );
 const codeCorpus = [
 	...walk(join(root, "src"), new Set([".css", ".ts", ".tsx"])),
@@ -159,8 +213,10 @@ const codeCorpus = [
 const deadTokens = [...definitions].filter((token) => {
 	if (themeKeys.has(token) || isReservedToken(token)) return false;
 	const needle = `var(${token}`;
-	return !codeCorpus.some((file) => file.text.includes(needle)) &&
-		!tokenCss.includes(needle);
+	return (
+		!codeCorpus.some((file) => file.text.includes(needle)) &&
+		!tokenCss.includes(needle)
+	);
 });
 
 const moduleDrift = codeCorpus.flatMap((file) => {
@@ -172,9 +228,9 @@ const moduleDrift = codeCorpus.flatMap((file) => {
 	) {
 		return [];
 	}
-	const hits = [
-		...file.text.matchAll(/var\((--journal-[a-z0-9_-]+)/gi),
-	].map((match) => match[1]);
+	const hits = [...file.text.matchAll(/var\((--journal-[a-z0-9_-]+)/gi)].map(
+		(match) => match[1],
+	);
 	return hits.map(
 		(token) => `${relativePath}:${token}: journal token outside journal module`,
 	);
@@ -220,6 +276,105 @@ const required = [
 	"--font-sans",
 ];
 
+export function classifyTokenState({
+	requiredToken,
+	themeToken,
+	reservedToken,
+	used,
+}) {
+	if (requiredToken) return "CORE";
+	if (themeToken) return "SHADCN";
+	if (reservedToken) return "MODULE-RESERVED";
+	if (used) return "PROJECT ACTIVE";
+	return "DEAD";
+}
+
+const requiredSet = new Set(required);
+const deadTokenSet = new Set(deadTokens);
+const usageLocations = new Map(
+	[...definitions].map((token) => {
+		const needle = `var(${token}`;
+		const locations = codeCorpus.flatMap((file) =>
+			file.text
+				.split(/\r?\n/)
+				.flatMap((line, index) =>
+					line.includes(needle)
+						? [
+								`${relative(root, file.path).replaceAll("\\", "/")}:${index + 1}`,
+							]
+						: [],
+				),
+		);
+		for (const [index, line] of tokenCss.split(/\r?\n/).entries()) {
+			if (line.includes(needle))
+				locations.push(`src/app/globals.css:${index + 1}`);
+		}
+		return [token, [...new Set(locations)]];
+	}),
+);
+const inventory = [...definitions]
+	.map((token) => ({
+		token,
+		state: classifyTokenState({
+			requiredToken: requiredSet.has(token),
+			themeToken: themeKeys.has(token),
+			reservedToken: isReservedToken(token),
+			used: !deadTokenSet.has(token),
+		}),
+		usages: usageLocations.get(token) ?? [],
+	}))
+	.sort((left, right) => left.token.localeCompare(right.token));
+
+const fixtureFailures = [];
+const reservationFixture = resolveModuleTokenReservations({
+	designText:
+		"<!-- MODULE_TOKEN_RESERVATIONS_BEGIN -->\n| `journal` | `--journal-` |\n<!-- MODULE_TOKEN_RESERVATIONS_END -->",
+	projectText:
+		"<!-- MODULE_GOVERNANCE_BEGIN -->\n| `journal` | `disabled` | `docs/modules/journal.md` |\n<!-- MODULE_GOVERNANCE_END -->",
+	manifestExists: (module) => module === "journal",
+});
+if (
+	reservationFixture.failures.length > 0 ||
+	!reservationFixture.prefixes.includes("--journal-")
+) {
+	fixtureFailures.push(
+		"positive module reservation fixture did not satisfy the three-source contract",
+	);
+}
+const brokenReservationFixture = resolveModuleTokenReservations({
+	designText:
+		"<!-- MODULE_TOKEN_RESERVATIONS_BEGIN -->\n| `journal` | `--journal-` |\n<!-- MODULE_TOKEN_RESERVATIONS_END -->",
+	projectText: "<!-- MODULE_GOVERNANCE_BEGIN --><!-- MODULE_GOVERNANCE_END -->",
+	manifestExists: () => false,
+});
+if (brokenReservationFixture.failures.length === 0) {
+	fixtureFailures.push(
+		"negative module reservation fixture accepted a missing project/manifest contract",
+	);
+}
+if (
+	classifyTokenState({
+		requiredToken: false,
+		themeToken: false,
+		reservedToken: false,
+		used: false,
+	}) !== "DEAD"
+) {
+	fixtureFailures.push("negative token fixture was not classified DEAD");
+}
+if (
+	classifyTokenState({
+		requiredToken: false,
+		themeToken: false,
+		reservedToken: true,
+		used: false,
+	}) !== "MODULE-RESERVED"
+) {
+	fixtureFailures.push(
+		"documented module token fixture was not classified MODULE-RESERVED",
+	);
+}
+
 const missingRequired = required.filter((token) => !definitions.has(token));
 const failures = [
 	...missingRequired.map((token) => `missing required token ${token}`),
@@ -230,6 +385,8 @@ const failures = [
 	...forbiddenStyles.map((item) => `forbidden primitive style literal ${item}`),
 	...pageStyleFailures.map((item) => `page CSS violation ${item}`),
 	...deadTokens.map((token) => `dead token ${token}`),
+	...reservationFailures,
+	...fixtureFailures,
 	...moduleDrift,
 	...secondControl,
 ];
@@ -237,11 +394,23 @@ const failures = [
 if (!tokenCss.includes("@theme inline"))
 	failures.push("missing Tailwind @theme mapping");
 
-if (failures.length > 0) {
-	console.error(failures.join("\n"));
-	process.exit(1);
+export function analyzeDesignTokens() {
+	return {
+		tokenSource: "src/app/globals.css",
+		definitions: definitions.size,
+		uiSourceFiles: uiFiles.length,
+		inventory,
+		failures: [...failures],
+	};
 }
 
-console.log(
-	`Design tokens OK: ${definitions.size} definitions, ${uiFiles.length} UI source files, one token source.`,
-);
+if (resolve(process.argv[1] ?? "") === import.meta.filename) {
+	if (failures.length > 0) {
+		console.error(failures.join("\n"));
+		process.exit(1);
+	}
+
+	console.log(
+		`Design tokens OK: ${definitions.size} definitions, ${uiFiles.length} UI source files, one token source.`,
+	);
+}

@@ -27,6 +27,21 @@ domain: start-baza.ams24.ru, noindex
 4. Заменить fixture-контент, контакты и правовые тексты.
 5. Выполнить `pnpm verify:clone-readiness` и обычные локальные проверки.
 
+После Design Intake нового клиента UI cleanup выполняется отдельно:
+
+```text
+удалить неиспользуемые starter views
+→ pnpm tokens:report --dead-only
+→ вручную проверить и удалить только доказанный DEAD-набор
+→ pnpm quality:design-tokens
+→ pnpm verify:drift
+→ проверить representative pages
+→ pnpm verify:ui-core
+```
+
+Команда отчёта ничего не удаляет. Atlas-derived vocabulary не вычищается
+механически до появления утверждённой Design System клиента.
+
 ## C. Client Timeweb staging
 
 Статический reference package: `deploy/clients/timeweb/README.md`. Его файлы
