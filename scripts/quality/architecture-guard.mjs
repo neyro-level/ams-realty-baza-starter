@@ -178,6 +178,7 @@ if (
 	);
 }
 const proxyPath = path.join(root, "src", "proxy.ts");
+const middlewarePath = path.join(root, "src", "middleware.ts");
 const anonymousRestHelperPath = path.join(
 	root,
 	"src",
@@ -194,11 +195,78 @@ if (!existsSync(proxyPath)) {
 			"src/proxy.ts: raw REST edge boundary must use anonymousRawRestEdgeDecision",
 		);
 	}
+	if (!/export function proxy\s*\(/.test(proxy)) {
+		violations.push(
+			"src/proxy.ts: Next 16 request boundary must keep the named proxy export",
+		);
+	}
 	if (!proxy.includes("notFound")) {
 		violations.push(
 			"src/proxy.ts: anonymous raw REST denial must return notFound",
 		);
 	}
+}
+if (existsSync(middlewarePath)) {
+	violations.push(
+		"src/middleware.ts: Next 16 canonical request boundary must remain src/proxy.ts",
+	);
+}
+
+const lifecycleRoutePath = path.join(
+	root,
+	"src",
+	"app",
+	"http",
+	"property-lifecycle",
+	"[slug]",
+	"route.ts",
+);
+const propertyPagePath = path.join(
+	root,
+	"src",
+	"app",
+	"(site)",
+	"obekty",
+	"[slug]",
+	"page.tsx",
+);
+const goneResponsePath = path.join(
+	root,
+	"src",
+	"core",
+	"http",
+	"property-gone-response.ts",
+);
+if (!existsSync(lifecycleRoutePath)) {
+	violations.push(
+		"src/app/http/property-lifecycle/[slug]/route.ts: public HTTP lifecycle boundary is missing",
+	);
+} else {
+	const lifecycleRoute = readFileSync(lifecycleRoutePath, "utf8");
+	if (
+		!lifecycleRoute.includes("createPropertyGoneResponse") ||
+		!lifecycleRoute.includes("NextResponse.redirect")
+	) {
+		violations.push(
+			"src/app/http/property-lifecycle/[slug]/route.ts: 410 and redirect semantics must remain explicit",
+		);
+	}
+}
+if (
+	!existsSync(goneResponsePath) ||
+	!readFileSync(goneResponsePath, "utf8").includes("status: 410")
+) {
+	violations.push(
+		"src/core/http/property-gone-response.ts: public gone response must keep HTTP 410",
+	);
+}
+if (
+	!existsSync(propertyPagePath) ||
+	!readFileSync(propertyPagePath, "utf8").includes("GonePropertyPage")
+) {
+	violations.push(
+		"src/app/(site)/obekty/[slug]/page.tsx: visual gone-property page is missing",
+	);
 }
 if (!existsSync(anonymousRestHelperPath)) {
 	violations.push(

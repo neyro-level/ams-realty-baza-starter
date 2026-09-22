@@ -61,7 +61,15 @@ module may be activated; it does not activate runtime code or collections.
 | `agents` | `disabled` | `docs/modules/agents.md` |
 <!-- MODULE_GOVERNANCE_END -->
 
-Next.js 16 edge: `src/proxy.ts` + `export function proxy` (not `middleware.ts`). Anonymous `/api/{collection}` for deny-list and system-only slugs returns JSON `{ error: "notFound" }` 404 unless a Payload session cookie is present. Public lead create remains `POST /api/public/leads`.
+Next.js `16.3.5` edge: intentional canonical
+[`src/proxy.ts`](https://nextjs.org/docs/16/app/api-reference/file-conventions/proxy)
+with `export function proxy`; `src/middleware.ts` is forbidden. Anonymous
+`/api/{collection}` for deny-list and system-only slugs returns JSON
+`{ error: "notFound" }` 404 unless a Payload session cookie is present. Public
+lead create remains `POST /api/public/leads`. The visual property page stays in
+`src/app/(site)/obekty/[slug]/page.tsx`; the intentional public status boundary
+`src/app/http/property-lifecycle/[slug]/route.ts` owns actual 410/redirect HTTP
+semantics and is not an internal API.
 
 Canonical URL map: `02_PRODUCT_STRUCTURE.md`. Knobs source: `src/project/project.config.ts`.
 Identity source: `src/project/site.config.ts`. Client staging/release decisions:

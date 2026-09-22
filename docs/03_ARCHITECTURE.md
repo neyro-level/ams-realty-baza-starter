@@ -26,6 +26,25 @@ Secrets source=Secret Master / self-hosted Infisical
 Фактические версии всегда определяют `package.json`, lockfile и runtime files.
 Major upgrade требует отдельного решения и targeted proof.
 
+## Version-sensitive framework boundaries
+
+- Next.js `16.3.5` intentionally uses `src/proxy.ts` with the named
+  `export function proxy`. The former `src/middleware.ts` convention is
+  deprecated in this Next line and is forbidden in this project. Pinned
+  reference: [Next.js 16 Proxy](https://nextjs.org/docs/16/app/api-reference/file-conventions/proxy).
+- `src/app/(site)/obekty/[slug]/page.tsx` owns the visual public property page.
+  `src/app/http/property-lifecycle/[slug]/route.ts` is a separate public HTTP
+  status boundary: it returns the real `410`, `404`, `204` or permanent redirect
+  semantics required by crawlers and integrations. It is intentionally not an
+  internal API. Reference: [Next.js 16 Route Handlers](https://nextjs.org/docs/16/app/api-reference/file-conventions/route).
+- Payload `jobs.autoRun` cron `* * * * *` is only the queue polling/execution
+  ticker. It is not a business schedule. Business cadence is owned by the task
+  registry: `dispatchDueFeeds` = `*/5 * * * *`; `jobsJanitor`,
+  `leadRetentionCleanup`, `catalogLifecycle` and `recoverLeadDeliveries` =
+  `*/15 * * * *`. Static queues keep `disableScheduling=false`; programmatic
+  queues keep `disableScheduling=true`. `enableConcurrencyControl=true` remains
+  mandatory. Changing the ticker requires exact Payload-version evidence.
+
 ## Модули, ownership и dependency direction
 
 | Область | Владелец / путь | Разрешённая граница |
@@ -108,6 +127,8 @@ PostgreSQL constraints из migration `20260919_120900`.
   `importFeed`, `deliverLead`;
 - imports queue имеет `limit: 1`; один application runtime является jobs owner;
 - `REALTY_BASE`: один application runtime с `JOBS_AUTORUN=true`;
+- jobs `autoRun` every-minute cron is an execution ticker; task registry cron is
+  the business schedule described in the version-sensitive boundary above;
 - cache mode — `http`: jobs отправляют bounded authenticated requests на
   `/api/internal/revalidate`; маршрут валидирует secret, allowlisted paths/tags и
   только затем вызывает Next in-process invalidator;

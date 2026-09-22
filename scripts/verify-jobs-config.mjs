@@ -50,6 +50,7 @@ const expectedTaskSlugs = new Set(
 		...(queue.programmaticTasks ?? []),
 	]),
 );
+const expectedAutoRunTicker = "* * * * *";
 
 const autoRun = queueModule.payloadJobsAutoRun;
 const registry = registryModule.payloadJobRegistry;
@@ -74,7 +75,7 @@ for (const [queue, expected] of expectedQueues) {
 		throw new Error(`Queue "${queue}" must not use allQueues.`);
 	}
 
-	if (entry.cron !== "* * * * *") {
+	if (entry.cron !== expectedAutoRunTicker) {
 		throw new Error(`Queue "${queue}" must run every minute.`);
 	}
 
@@ -87,6 +88,17 @@ for (const [queue, expected] of expectedQueues) {
 	if (entry.disableScheduling !== expected.disableScheduling) {
 		throw new Error(
 			`Queue "${queue}" disableScheduling must be ${expected.disableScheduling}.`,
+		);
+	}
+
+	const triggers = new Set(registryEntries.map((item) => item.trigger));
+	if (triggers.size !== 1) {
+		throw new Error(`Queue "${queue}" must not mix static and programmatic tasks.`);
+	}
+	const expectedDisableScheduling = triggers.has("programmatic");
+	if (entry.disableScheduling !== expectedDisableScheduling) {
+		throw new Error(
+			`Queue "${queue}" scheduling mode contradicts its ${[...triggers][0]} registry tasks.`,
 		);
 	}
 
@@ -181,6 +193,13 @@ const { projectConfig } = await import(
 	pathToFileURL(join(root, "src/project/project.config.ts")).href
 );
 const expectedMaintenanceCron = `*/${projectConfig.maintenanceIntervalMinutes} * * * *`;
+const expectedDispatcherCron = `*/${projectConfig.dispatcherIntervalMinutes} * * * *`;
+const dispatcher = registry.find((item) => item.slug === "dispatchDueFeeds");
+if (dispatcher?.cron !== expectedDispatcherCron) {
+	throw new Error(
+		`dispatchDueFeeds cron must be ${expectedDispatcherCron}, got ${dispatcher?.cron ?? "missing"}.`,
+	);
+}
 for (const slug of [
 	"jobsJanitor",
 	"leadRetentionCleanup",
@@ -203,6 +222,21 @@ const payloadConfig = readFileSync(join(root, "payload.config.ts"), "utf8");
 
 if (!payloadConfig.includes("enableConcurrencyControl: true")) {
 	throw new Error("Payload jobs must enable concurrency control.");
+}
+
+const architecture = readFileSync(join(root, "docs/03_ARCHITECTURE.md"), "utf8");
+for (const marker of [
+	"queue polling/execution",
+	`autoRun\` cron \`${expectedAutoRunTicker}`,
+	`dispatchDueFeeds\` = \`${expectedDispatcherCron}`,
+	`recoverLeadDeliveries\` =\n  \`${expectedMaintenanceCron}`,
+	"Static queues keep `disableScheduling=false`",
+	"programmatic\n  queues keep `disableScheduling=true`",
+	"`enableConcurrencyControl=true` remains",
+]) {
+	if (!architecture.includes(marker)) {
+		throw new Error(`Architecture jobs contract marker is missing: ${marker}`);
+	}
 }
 
 if (
