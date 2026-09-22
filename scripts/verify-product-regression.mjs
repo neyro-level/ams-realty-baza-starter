@@ -7,11 +7,13 @@ function read(path) {
 
 const packageJson = JSON.parse(read("package.json"));
 const scripts = packageJson.scripts ?? {};
+const isClientClone = /projectKind:\s*["']client["']/.test(
+	read("src/project/site.config.ts"),
+);
 
 for (const requiredScript of [
 	"verify:schema",
 	"verify:public-gateway",
-	"visual:atlas-css-parity",
 	"verify:feed-parser",
 	"verify:feed-ingest",
 	"verify:feed-lifecycle",
@@ -27,6 +29,13 @@ for (const requiredScript of [
 		typeof scripts[requiredScript],
 		"string",
 		`package.json missing product regression script: ${requiredScript}`,
+	);
+}
+if (!isClientClone) {
+	assert.equal(
+		typeof scripts["visual:atlas-css-parity"],
+		"string",
+		"starter package must retain Atlas parity proof command",
 	);
 }
 
@@ -68,37 +77,38 @@ for (const requiredSchemaProof of [
 		`verify:schema missing proof for ${requiredSchemaProof}`,
 	);
 }
-
-const atlasParity = JSON.parse(read("docs/research/atlas-css-parity.json"));
-assert.equal(
-	atlasParity.result,
-	"PASS",
-	"Atlas CSS parity evidence must be PASS",
-);
-assert.equal(
-	atlasParity.comparisonCount,
-	24,
-	"Atlas CSS parity must cover 6 scenarios × 4 viewports",
-);
-assert.equal(
-	atlasParity.comparisons.every((item) => item.identical),
-	true,
-	"Atlas CSS parity comparisons must be pixel-identical",
-);
-
-const atlasBaseline = read("docs/research/ATLAS_BASELINE.md");
-for (const required of [
-	"24 / 24",
-	"mobile",
-	"tablet",
-	"desktop",
-	"wide desktop",
-	"semantic API, responsive/a11y",
-]) {
-	assert.ok(
-		atlasBaseline.includes(required),
-		`Atlas baseline missing ${required}`,
+if (!isClientClone) {
+	const atlasParity = JSON.parse(read("docs/research/atlas-css-parity.json"));
+	assert.equal(
+		atlasParity.result,
+		"PASS",
+		"Atlas CSS parity evidence must be PASS",
 	);
+	assert.equal(
+		atlasParity.comparisonCount,
+		24,
+		"Atlas CSS parity must cover 6 scenarios × 4 viewports",
+	);
+	assert.equal(
+		atlasParity.comparisons.every((item) => item.identical),
+		true,
+		"Atlas CSS parity comparisons must be pixel-identical",
+	);
+
+	const atlasBaseline = read("docs/research/ATLAS_BASELINE.md");
+	for (const required of [
+		"24 / 24",
+		"mobile",
+		"tablet",
+		"desktop",
+		"wide desktop",
+		"semantic API, responsive/a11y",
+	]) {
+		assert.ok(
+			atlasBaseline.includes(required),
+			`Atlas baseline missing ${required}`,
+		);
+	}
 }
 
 const contractFeasibility = read("docs/CONTRACT_FEASIBILITY.md");

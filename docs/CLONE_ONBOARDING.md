@@ -36,6 +36,11 @@ domain: start-baza.ams24.ru, noindex
 7. Заменить fixture-контент, контакты и правовые тексты.
 8. Выполнить `pnpm install --frozen-lockfile`, `pnpm verify:daily` и
    `pnpm verify:client-readiness --mode=fixture-client`.
+9. После фиксации client identity выполнить `pnpm clone:prepare`. Команда
+   разрешена только при `projectKind: "client"` (либо с явным `--client`),
+   удаляет starter-only history/proofs/demo assets, сохраняет Core 5.5 и общие
+   security/data проверки, создаёт `docs/CLONE_PROVENANCE.md`. Повторный запуск
+   безопасен и ничего не меняет.
 
 После Design Intake нового клиента UI cleanup выполняется отдельно:
 
