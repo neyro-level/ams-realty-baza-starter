@@ -35,6 +35,7 @@ export * from "./views/legal/LegalHubView";
 export * from "./views/marketing/StarterMarketingPageView";
 export * from "./views/property/MediaGallery";
 export * from "./views/property/MediaLightbox";
+export * from "./views/property/GonePropertyPageView";
 export * from "./views/property/PropertyCardGridLayout";
 export * from "./views/property/PropertyCardListLayout";
 export * from "./views/property/PropertyCardView";

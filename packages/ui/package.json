@@ -7,10 +7,7 @@
 		".": "./src/index.ts",
 		"./primitives": "./src/primitives.ts",
 		"./views": "./src/views.ts",
-		"./styles.css": "./src/styles.css",
-		"./styles/home-articles.css": "./src/styles/home-articles.css",
-		"./components/*": "./src/components/*.tsx",
-		"./lib/*": "./src/lib/*.ts"
+		"./styles.css": "./src/styles.css"
 	},
 	"dependencies": {
 		"@ams/realtbase-contracts": "workspace:*",

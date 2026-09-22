@@ -113,19 +113,21 @@ export function PropertyCardGridLayout({
 					{images.length > 1 ? (
 						<>
 							<Button
-								variant="plain"
+								variant="cardMedia"
+								size="content"
 								type="button"
 								onClick={showPrevious}
-								className="absolute left-2.5 top-1/2 z-20 flex -translate-y-1/2 items-center justify-center rounded-lg bg-[var(--surface-dark)]/28 text-white opacity-60 backdrop-blur-sm transition active:opacity-90 lg:left-3 lg:bg-[var(--surface-dark)]/62 lg:opacity-0 lg:group-hover:opacity-100"
+								className="left-2.5 size-9 lg:left-3"
 								aria-label="Предыдущее фото"
 							>
 								<ChevronLeft className="" aria-hidden />
 							</Button>
 							<Button
-								variant="plain"
+								variant="cardMedia"
+								size="content"
 								type="button"
 								onClick={showNext}
-								className="absolute right-2.5 top-1/2 z-20 flex -translate-y-1/2 items-center justify-center rounded-lg bg-[var(--surface-dark)]/28 text-white opacity-60 backdrop-blur-sm transition active:opacity-90 lg:right-3 lg:bg-[var(--surface-dark)]/62 lg:opacity-0 lg:group-hover:opacity-100"
+								className="right-2.5 size-9 lg:right-3"
 								aria-label="Следующее фото"
 							>
 								<ChevronRight className="" aria-hidden />

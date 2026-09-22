@@ -1,7 +1,7 @@
 import type { MarketingPageDTO } from "@ams/realtbase-contracts";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import { PropertyPageView } from "@ams/realtbase-ui";
+import { GonePropertyPageView, PropertyPageView } from "@ams/realtbase-ui";
 import { toMetadata } from "@/core/seo/page-metadata";
 import { getPublicProperty } from "@/core/data-access/public";
 import { getPropertyRobots } from "@/core/seo/property";
@@ -63,7 +63,7 @@ export default async function PropertyPage({
 			permanentRedirect(state.lifecycle.destination);
 		}
 
-		return <GonePropertyPage slug={slug} />;
+		return <GonePropertyPageView slug={slug} />;
 	}
 
 	const { property } = state;
@@ -109,29 +109,5 @@ export default async function PropertyPage({
 				leadContext={leadPage.leadContext}
 			/>
 		</>
-	);
-}
-
-function GonePropertyPage({ slug }: { slug: string }) {
-	return (
-		<main className="mx-auto flex min-h-[60vh] max-w-3xl flex-col items-center justify-center px-6 py-20 text-center">
-			<p className="mb-3 font-medium text-content-muted text-sm uppercase tracking-[0.2em]">
-				410
-			</p>
-			<h1 className="text-balance font-semibold text-4xl text-content-default">
-				Объект снят с публикации
-			</h1>
-			<p className="mt-4 text-balance text-body-lg text-content-muted">
-				Страница объекта {slug} больше не содержит публичные данные после
-				окончания retention-периода. Автоматический редирект на главную не
-				выполняется.
-			</p>
-			<a
-				className="mt-8 rounded-full bg-content-default px-6 py-3 font-medium text-surface text-sm"
-				href="/nedvizhimost"
-			>
-				Смотреть актуальные объекты
-			</a>
-		</main>
 	);
 }

@@ -5,6 +5,7 @@ import type {
 	JournalCategoryLinkDTO,
 } from "../../view-models/content";
 import type { SiteImageRenderer, SiteLinkRenderer } from "../../lib/adapters";
+import "../../styles/home-articles.css";
 
 export function HomeArticlesPreviewView({
 	articles,

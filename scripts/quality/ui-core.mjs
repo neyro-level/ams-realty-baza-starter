@@ -13,6 +13,7 @@ const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 const failures = [];
 const rules = readJson(join(import.meta.dirname, "ui-core.rules.json"));
 const baseline = readJson(join(import.meta.dirname, "ui-core-baseline.json"));
+const clonePolicy = readJson(join(import.meta.dirname, "ui-clone-policy.json"));
 
 assert.equal(rules.schema_version, 1);
 assert.equal(baseline.schema_version, 1);
@@ -80,6 +81,19 @@ const expectedAliases = {
 for (const [key, value] of Object.entries(expectedAliases)) {
 	if (components.aliases?.[key] !== value)
 		failures.push(`components.json alias ${key} must equal ${value}`);
+}
+
+const uiPackage = readJson(join(root, "packages", "ui", "package.json"));
+assert.deepEqual(
+	Object.keys(uiPackage.exports).sort(),
+	[".", "./primitives", "./styles.css", "./views"].sort(),
+	"UI package exports must stay intentional and closed",
+);
+const plainUsageCount = walk(join(root, "packages", "ui", "src"))
+	.filter((path) => /\.tsx$/.test(path))
+	.reduce((count, path) => count + (readFileSync(path, "utf8").match(/variant=["']plain["']/g)?.length ?? 0), 0);
+if (plainUsageCount > clonePolicy.plain_usage_limit) {
+	failures.push(`plain primitive usage ${plainUsageCount} exceeds policy limit ${clonePolicy.plain_usage_limit}`);
 }
 
 const primitiveRoot = join(root, "packages", "ui", "src", "components", "ui");

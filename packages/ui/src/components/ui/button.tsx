@@ -20,6 +20,8 @@ const buttonVariants = cva(
 					"text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]",
 				link: "text-[var(--primary)] underline-offset-4 hover:underline",
 				plain: "bg-transparent text-inherit",
+				cardMedia:
+					"absolute top-1/2 z-20 -translate-y-1/2 rounded-lg bg-[var(--surface-dark)]/28 text-[var(--content-inverse)] opacity-60 backdrop-blur-sm active:opacity-90 lg:bg-[var(--surface-dark)]/62 lg:opacity-0 lg:group-hover:opacity-100",
 				hero:
 					"min-h-12 border-0 bg-[var(--accent)] px-6 py-3.5 text-[var(--surface)] shadow-[var(--home-shadow-action)] hover:-translate-y-px hover:bg-[var(--accent-hover)] hover:shadow-[var(--home-shadow-action-hover)]",
 			},
@@ -28,6 +30,7 @@ const buttonVariants = cva(
 				default: "h-[var(--control-height-md)] px-[var(--control-padding-md)]",
 				lg: "h-[var(--control-height-lg)] px-[var(--control-padding-lg)]",
 				icon: "size-[var(--control-height-md)]",
+				content: "",
 			},
 		},
 		defaultVariants: { variant: "default", size: "default" },

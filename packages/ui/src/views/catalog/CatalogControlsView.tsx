@@ -376,23 +376,21 @@ export function CatalogRangePairView({
 			<label className="border-r border-[var(--border)] px-3 py-1 text-caption font-bold uppercase tracking-overline-compact text-[var(--text-muted)]">
 				{label} от
 				<Input
-					variant="plain"
+					variant="catalogRange"
 					name={from}
 					type="number"
 					min="0"
 					defaultValue={fromValue ?? ""}
-					className="block w-full bg-transparent pt-0.5 text-body font-semibold normal-case tracking-body text-[var(--text-primary)] outline-none"
 				/>
 			</label>
 			<label className="px-3 py-1 text-caption font-bold uppercase tracking-overline-compact text-[var(--text-muted)]">
 				до
 				<Input
-					variant="plain"
+					variant="catalogRange"
 					name={to}
 					type="number"
 					min="0"
 					defaultValue={toValue ?? ""}
-					className="block w-full bg-transparent pt-0.5 text-body font-semibold normal-case tracking-body text-[var(--text-primary)] outline-none"
 				/>
 			</label>
 		</div>

@@ -92,6 +92,22 @@ Icon ecosystem: only `lucide-react`; do not add a second icon pack. The exact
 installed version is owned by `pnpm-lock.yaml`, not by a long-lived Design
 System family claim.
 
+### Clone portability guard
+
+- Public UI package API is closed to `.`, `./primitives`, `./views` and
+  `./styles.css`; internal component and utility paths are not public contracts.
+- `plain` is an explicit escape hatch only: A = behavior primitive, B = proven
+  repeated visual pending a semantic variant, C = justified one-off. The
+  checked ceiling may only decrease unless an owner-approved design-system
+  decision documents a new exception.
+- Repeated visual groups move to named semantic variants. Current proven groups
+  are `cardMedia` buttons and `catalogRange` inputs.
+- `pnpm ui:clone-audit` is report-only and inventories donor views, project
+  token families, dead tokens, `plain` uses, package exports and page CSS.
+- Token deletion is allowed only for entries reported as `DEAD`; the current
+  audit has no dead token to delete. Page-owned CSS remains co-located with its
+  owning view and is not exposed as a package subpath.
+
 ## Компоненты и композиция
 
 - порядок: `REUSE -> VARIANT -> CREATE`;
