@@ -229,14 +229,22 @@ for (const marker of [
 	"queue polling/execution",
 	`autoRun\` cron \`${expectedAutoRunTicker}`,
 	`dispatchDueFeeds\` = \`${expectedDispatcherCron}`,
-	`recoverLeadDeliveries\` =\n  \`${expectedMaintenanceCron}`,
 	"Static queues keep `disableScheduling=false`",
-	"programmatic\n  queues keep `disableScheduling=true`",
+	"queues keep `disableScheduling=true`",
 	"`enableConcurrencyControl=true` remains",
 ]) {
 	if (!architecture.includes(marker)) {
 		throw new Error(`Architecture jobs contract marker is missing: ${marker}`);
 	}
+}
+if (
+	!new RegExp(
+		"recoverLeadDeliveries`\\s*=\\s*`" +
+			expectedMaintenanceCron.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") +
+			"`",
+	).test(architecture)
+) {
+	throw new Error("Architecture maintenance schedule contract marker is missing.");
 }
 
 if (

@@ -81,6 +81,27 @@ if (
 }
 
 if (
+	!accessSource.includes('propertyLifecycleOperation = "property-lifecycle-read"') ||
+	!accessSource.includes("propertyLifecycleReadAccess") ||
+	!accessSource.includes("isPropertyLifecycleRead") ||
+	!accessSource.includes('{ publishedAt: { exists: true } }')
+) {
+	throw new Error(
+		"Published purged properties need a classified lifecycle-only read for 410 resolution",
+	);
+}
+
+if (
+	!readFileSync("src/core/data-access/public/payload-reads.ts", "utf8").includes(
+		"...propertyLifecycleReadAccess()",
+	)
+) {
+	throw new Error(
+		"Property lifecycle lookup must use its narrow classified read mode",
+	);
+}
+
+if (
 	!accessSource.includes("overrideAccess:") ||
 	!accessSource.includes("false")
 ) {
@@ -114,7 +135,10 @@ if (!gatewaySource.includes("export { publicGatewayPolicy }")) {
 	throw new Error("Public Gateway policy is not exported from index");
 }
 
-if (!gatewaySource.includes("export { publicGatewayReadAccess }")) {
+if (
+	!gatewaySource.includes("publicGatewayReadAccess") ||
+	!gatewaySource.includes('from "./access-mode"')
+) {
 	throw new Error(
 		"publicGatewayReadAccess must be exported from Public Gateway",
 	);

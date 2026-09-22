@@ -12,10 +12,12 @@ import {
 import {
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
+	findPublicPropertyLifecycleBySlug,
 } from "../../src/core/data-access/public/catalog.ts";
 import { submitPublicLead } from "../../src/core/data-access/public/leads.ts";
 import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
+import { resolvePropertyPageLifecycle } from "../../src/core/seo/property.ts";
 import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
 import { defineLeadDeliveryPolicy } from "../../src/core/leads/delivery-policy.ts";
 import {
@@ -394,6 +396,31 @@ assert.equal(
 	null,
 	"unpublished property must remain unavailable through Public Gateway",
 );
+
+await payload.update({
+	collection: "properties",
+	id: publishedProperty.id,
+	data: { contentPurgedAt: clock.nowIso() },
+	...access,
+});
+assert.deepEqual(
+	resolvePropertyPageLifecycle(
+		await findPublicPropertyLifecycleBySlug(payload, publishedProperty.slug),
+	),
+	{ kind: "gone", statusCode: 410, robots: "noindex" },
+	"published purged property must resolve through the narrow lifecycle read",
+);
+assert.equal(
+	await findPublicPropertyBySlug(payload, publishedProperty.slug),
+	null,
+	"purged property content must remain unavailable through the normal Public Gateway",
+);
+await payload.update({
+	collection: "properties",
+	id: publishedProperty.id,
+	data: { contentPurgedAt: null },
+	...access,
+});
 
 const propertyLeadBody = {
 	name: "Integration Property Lead",

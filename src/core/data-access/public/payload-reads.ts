@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Payload, Where } from "payload";
+import { propertyLifecycleReadAccess } from "./access-mode.ts";
 import { publicGatewayPolicy } from "./policy";
 
 const access = {
@@ -242,7 +243,8 @@ export async function findPublicPropertyLifecycleRow(
 			publishedAt: true,
 			contentPurgedAt: true,
 		},
-		...access,
+		...propertyLifecycleReadAccess(),
+		depth: 0,
 	});
 	const row = result.docs[0];
 	if (!row) return null;

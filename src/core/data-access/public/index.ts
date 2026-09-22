@@ -15,7 +15,10 @@ export function parsePublicGatewayQuery(
 	return publicGatewayRequestSchema.parse(input);
 }
 
-export { publicGatewayReadAccess } from "./access-mode";
+export {
+	propertyLifecycleReadAccess,
+	publicGatewayReadAccess,
+} from "./access-mode";
 export type {
 	CatalogQuery,
 	CatalogQueryInput,

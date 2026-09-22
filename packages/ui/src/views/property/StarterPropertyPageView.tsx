@@ -10,11 +10,9 @@ import {
 	CardHeader,
 } from "../../components/ui/card";
 import { Container, Section, SectionHeader } from "../../components/ui/layout";
-import { StarterFeedImage } from "../../lib/starter-image";
 import { LeadFormView } from "../starter/LeadFormView";
-import { MediaFallback } from "../starter/MediaFallback";
-import { MediaGallery } from "./MediaGallery";
 import { StarterPropertyCard } from "./StarterPropertyCardView";
+import { StarterPropertyMediaGallery } from "./StarterPropertyMediaGallery";
 
 export function PropertyPageView({
 	property,
@@ -35,25 +33,14 @@ export function PropertyPageView({
 						<div className="grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">
 							<div>
 								<div className="relative aspect-[16/9] overflow-hidden rounded-[var(--radius-lg)] bg-surface-subtle">
-									<MediaGallery
-										images={(property.gallery.length
+									<StarterPropertyMediaGallery
+										images={property.gallery.length
 											? property.gallery
 											: property.primaryMedia
 												? [property.primaryMedia]
 												: []
-										).map((image) => ({
-											src: image.src,
-											alt: image.alt || property.title,
-										}))}
-										imageRenderer={StarterFeedImage}
-										imageSizes="(min-width: 1024px) 62vw, 100vw"
-										priority
-										shouldOptimizeImage={(src) =>
-											src.startsWith("/") && !src.startsWith("//")
 										}
-										emptyContent={
-											<MediaFallback className="absolute inset-0 min-h-full" />
-										}
+										title={property.title}
 									/>
 								</div>
 								<section id="section-property-summary">
