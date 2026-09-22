@@ -50,3 +50,11 @@ workflows:
               - su postgres -c "createdb -h 127.0.0.1 ams_realtbase_ci_test"
               - pnpm install --frozen-lockfile
               - pnpm verify:merge-risky
+
+# Explicit no-automatic-run sentinel. Both workflows remain reachable only by
+# an operator/AI exact-SHA manual start; push and PR events spend zero CI time.
+on:
+  push:
+    - workflows: [merge-standard, merge-risky]
+      filter:
+        paths: []
