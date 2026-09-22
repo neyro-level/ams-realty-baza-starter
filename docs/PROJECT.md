@@ -28,6 +28,8 @@
 | Maintenance interval | `maintenanceIntervalMinutes = 15` |
 | Dispatch batch | `dispatchBatchSize = 3` (не env) |
 | Ingest batch | `ingestBatchSize = 100` (не env); parser awaits every full batch before reading more input |
+| Currency | только `RUR/RUB` → canonical `RUB`; unsupported currency создаёт import issue и пропускает offer; конвертации нет |
+| Price per m² | `pricePerMeterMinor` вычисляется на ingest/manual write boundary из `priceMinor / totalArea` с banker rounding; invalid input → `null` |
 | Import heartbeat | `importHeartbeatIntervalMs = 15000`, вне ingest transaction |
 | Approval TTL | `approvalTtlMinutes = 240` |
 | Safety threshold | `safetyThresholdPercent = 30` until first real feed onboarding |
@@ -37,6 +39,7 @@
 | Cache | mode `http`, proof status `http`, in-process not claimed |
 | Feed images | external HTTPS, exact hosts from `EXTERNAL_IMAGE_HOSTS` via `src/core/ingest/image-hosts.ts`; Variant B: feed `unoptimized` + `sizes` + aspect ratio; local CMS media may use Next optimizer |
 | Lead routing/access | public intake `POST /api/public/leads` only; generic `leads` create and `lead-deliveries` create/update are system-only; lead/PII read-update-delete and delivery read/delete/manual retry are owner-only; `admin` has no lead capability; see `docs/adr/ADR-LEAD-ACCESS-MODEL.md` |
+| Consent authority | server selects current `consentVersion` and writes `consentedAt`; submitted browser values are consistency/UX signals only |
 | Lead delivery policy | `project.config.ts` → one validated `leadDelivery` policy; routing is `all-enabled`, max attempts derive from retry ladder length |
 | Channel capability risk | MAX sends an idempotency header but native provider idempotency and external lookup are unproven; custom webhook uses required HMAC + idempotency header with receiver registry; both may return unknown delivery certainty after transport failure |
 | Indexed catalog filters | `category`, `dealType`, `city`, `district`, `rooms` in `project.config.ts`; other query params are `noindex` |

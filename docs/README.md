@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Plan №6 implementation complete / ADDITIONAL VALIDATION / NOT FROZEN`. SourceCraft — primary, GitHub — mirror-only. Production не входит в Plan №6.
+Статус: `Plan №7 v2 APPROVED / EXECUTION IN PROGRESS / NOT FROZEN`. SourceCraft — primary, GitHub — mirror-only. Production и freeze tag в Plan №7 не входят.
 
 ## Канонические документы
 
@@ -24,11 +24,13 @@
 1. `../AGENTS.md` — project router и invariants.
 2. Этот файл — карта Source of Truth.
 3. Релевантный раздел `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md`.
-4. `PROJECT.md` и `03_ARCHITECTURE.md`.
-5. `DESIGN.md` или `OPERATIONS.md` по scope.
-6. `04_BACKLOG.md`.
-7. ADR/module/research только когда на них ссылается текущий scope.
-8. `legacy/` только для исторического evidence.
+4. `PROJECT.md`.
+5. `03_ARCHITECTURE.md`.
+6. `DESIGN.md` или `OPERATIONS.md` по scope.
+7. `AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md` — текущий approved plan.
+8. `04_BACKLOG.md`.
+9. ADR/module/research только когда на них ссылается текущий scope.
+10. `legacy/` только для исторического evidence.
 
 Исторические планы и proofs не являются инструкцией к повторному исполнению.
 Команды проверки берутся из `package.json`; их смысл и risk split описаны в
@@ -36,7 +38,8 @@
 
 ## Нормативные источники
 
-- `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — выполненный v4 execution record; дополнительная проверка продолжается, freeze отложен владельцем, production исключён.
+- `AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md` — текущий APPROVED v2 execution source; production и freeze исключены.
+- `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — исторический выполненный v4 execution record; не является текущей инструкцией.
 - `legacy/` — закрытые планы №2–5, их inventories и архитектура v1.0; не нормативный источник.
 - `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` — платформенные инварианты Core 5.5.
 - `research/ATLAS_BASELINE.md` — reference provenance точного Atlas donor; не нормативный источник и не clone onboarding.

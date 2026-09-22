@@ -1,18 +1,19 @@
 # Backlog
 
-Статус: `Plan №6 implementation complete / ADDITIONAL VALIDATION / NOT FROZEN` — `AMS-REALTBASE-STARTER-FINAL-FREEZE` v4.
+Статус: `Plan №7 v2 APPROVED / EXECUTION IN PROGRESS / NOT FROZEN` — `AMS-REALTY-BAZA-STARTER-AUDIT-CORRECTIONS-7`.
 SourceCraft — primary, GitHub — one-way mirror. Production исключён.
 
-Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md`.
+Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md`.
 
 ## NOW
 
-- Провести дополнительную проверку starter до отдельного решения владельца о freeze.
+- Выполнить approved Plan №7 по Task Manager graph и закрыть финальный proof.
 - Не создавать `starter-freeze-v1` без новой явной команды владельца.
 - Production release остаётся отдельным lifecycle и этим планом запрещён.
 
 ## PRESERVED EXECUTION EVIDENCE
 
+- Plan №6 ниже — историческое evidence, не текущая инструкция.
 - EPIC-01…10 доставлены; implementation graph Task Manager закрыт, точные execution ledgers сохранены как историческое evidence.
 - EPIC-09 прошёл SourceCraft RISKY Gate №126 на exact head `2f09592343e681a97f43745530d6bae012865ddf` и был слит PR №109.
 - SourceCraft `main@a2a03d50b6a4db2cfff537d2d476ad14e82f198a` — итоговый merge Plan №6 до текущего статусного уточнения.

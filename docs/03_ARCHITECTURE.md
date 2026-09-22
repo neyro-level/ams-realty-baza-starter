@@ -12,7 +12,10 @@ Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №6 v4 APPROVED после отмены GitHub-primary; Developer execution разрешён после CLEAN reconciliation revised graph. Используется `MERGE_AFTER_GATE` в SourceCraft; GitHub получает только fast-forward mirror canonical `main`. Production в Plan №6 не входит.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №7 v2
+APPROVED выполняется после CLEAN reconciliation через `MERGE_AFTER_GATE` в
+SourceCraft; GitHub получает только fast-forward mirror canonical `main`.
+Production и freeze tag в Plan №7 не входят.
 
 ## Stack и ownership
 

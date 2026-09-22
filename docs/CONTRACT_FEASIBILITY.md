@@ -18,7 +18,9 @@ Payload — через Public Gateway. UI не читает XML/YRL и Payload d
 - допускаются только технические преобразования: parse XML, проверка enum/unit,
   приведение рублей к integer minor units, безопасная нормализация строки/URL и
   форматирование уже полученного значения для показа;
-- арифметически производные бизнес-значения, включая цену за м², не вычисляются;
+- `pricePerMeterMinor` — canonical derived exception: ingest вычисляет его из
+  `priceMinor / totalArea` с banker rounding; при отсутствующих/невалидных
+  входах сохраняется `null`; другие optional business values не выдумываются;
 - проект работает в одной валюте `RUB`; Atlas-compatible aliases `RUR/RUB`
   нормализуются в `RUB`, другая валюта получает import issue и не конвертируется;
 - изображения из фида остаются `external` по умолчанию; зеркалирование в S3 —
@@ -58,8 +60,8 @@ Atlas implementation evidence:
 | `MediaDTO.width` | metadata managed media; feed обычно не передаёт | отсутствует для external, если неизвестно | `O(1)` | optional | VERIFIED |
 | `MediaDTO.height` | metadata managed media; feed обычно не передаёт | отсутствует для external, если неизвестно | `O(1)` | optional | VERIFIED |
 | `PropertyPriceDTO.priceMinor` | YRL `<price><value>` | decimal RUB → integer kopecks; без конвертации валют | `O(1)` | `properties.priceMinor` | VERIFIED |
-| `PropertyPriceDTO.pricePerMeterMinor` | Atlas YRL `<price-per-meter>` | rubles → integer kopecks; не вычисляется из цены/площади | `O(1)` | nullable field approved | VERIFIED FROM ATLAS |
-| `PropertyPriceDTO.currency` | Atlas YRL `<price><currency>` | `RUR/RUB` → canonical `RUB`; other currency rejected | `O(1)` | `properties.currency` | VERIFIED FROM ATLAS + STRICTER VALIDATION |
+| `PropertyPriceDTO.pricePerMeterMinor` | canonical `priceMinor` + `totalArea` | ingest derives minor units per m² with banker rounding; invalid inputs → `null` | `O(1)` | nullable derived field | VERIFIED CORE 5.5 + RUNTIME |
+| `PropertyPriceDTO.currency` | YRL `<price><currency>` | `RUR/RUB` → canonical `RUB`; unsupported currency → import issue + offer skip; conversion forbidden | `O(1)` | `properties.currency` | VERIFIED RUNTIME |
 | `PropertyPriceDTO.period` | YRL `<price><period>` + deal type | `month` для аренды; `total` для продажи | `O(1)` | derived from stored fields | VERIFIED |
 | `PropertyPriceDTO.label` | остальные поля `price` | locale formatting only | `O(1)` | derived | VERIFIED |
 | `PropertySummaryItemDTO.key` | whitelist доступных характеристик | выбрать только присутствующие поля | `O(1)` | derived | VERIFIED |
@@ -197,9 +199,10 @@ latency/capacity trigger.
 ## Lead presentation context
 
 `LeadConsentField` из `@ams/realtbase-ui` рендерит checkbox, ссылку на
-версионированный текст и presentation metadata из `LeadFormContext`. Fixture
-страница использует `baseContractFixture.lead`; отправка и Payload намеренно не
-подключены до соответствующих эпиков.
+версионированный текст и presentation metadata из `LeadFormContext`. Public
+intake уже работает через `POST /api/public/leads`; generic Payload create для
+лидов закрыт. Сервер выбирает authoritative consent version и timestamp, а
+client values используются только для consistency/UX validation.
 
 | Field | Source | Computation | Query cost | Base schema | Decision |
 |---|---|---|---|---|---|
@@ -225,8 +228,8 @@ latency/capacity trigger.
 | `property.id` | existing public property lookup; optional outside property forms | `leads.property` relation | `slug/title` are display context, not duplicate persisted truth |
 | `consentHref` | must resolve to the published legal route for `consentVersion` | versioned consent content source, not lead row | legal text is not duplicated per lead |
 
-`LeadConsentField` exposes context as presentation metadata for inspection, but
-future intake receives authoritative context from trusted server configuration
+`LeadConsentField` exposes context as presentation metadata for inspection, while
+current intake receives authoritative context from trusted server configuration
 and validates any submitted form value. This prevents a modified browser request
 from choosing an obsolete consent version or arbitrary source page.
 
