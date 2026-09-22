@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта проекта
 
-Статус: `Plan №7 v2 APPROVED / EXECUTION IN PROGRESS / NOT FROZEN`. SourceCraft — primary, GitHub — mirror-only. Production и freeze tag в Plan №7 не входят.
+Статус: `Plan №7 v2 EXECUTION COMPLETE / READY FOR OWNER FREEZE DECISION / NOT FROZEN`. SourceCraft — primary, GitHub — mirror-only. Production в Plan №7 не входил. Канонический `starter-freeze-v2` отсутствует; отдельный SourceCraft tag `starter-freeze` требует owner reconciliation и сам по себе не меняет статус.
 
 ## Канонические документы
 
@@ -38,7 +38,7 @@
 
 ## Нормативные источники
 
-- `AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md` — текущий APPROVED v2 execution source; production и freeze исключены.
+- `AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md` — APPROVED v2 и завершённый execution source; теперь используется как evidence. Production и создание канонического freeze tag были исключены из Developer execution.
 - `AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md` — исторический выполненный v4 execution record; не является текущей инструкцией.
 - `legacy/` — закрытые планы №2–5, их inventories и архитектура v1.0; не нормативный источник.
 - `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` — платформенные инварианты Core 5.5.
