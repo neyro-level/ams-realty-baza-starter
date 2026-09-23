@@ -94,8 +94,10 @@ pnpm verify:client-readiness
 ```
 
 `verify:merge-standard` не запускает PostgreSQL suite. `verify:merge-risky`
-требует явный `DATABASE_URI_TEST` на loopback (`127.0.0.1`/`localhost`) с именем
-базы `*_test`, выполняет миграции и Payload integration suites, затем build.
+требует явный `RISK_SCOPE` и добавляет только proof выбранного риска. Scope
+`schema-data`, `auth-pii-leads` и `ingest-jobs` требуют `DATABASE_URI_TEST` на
+loopback (`127.0.0.1`/`localhost`) с именем базы `*_test`; build выполняется
+только для `dependency-runtime`. `ci-governance` не поднимает DB и не делает build.
 `verify:integration:required` использует тот же fail-closed DB prerequisite и не
 допускает `SKIPPED`. `verify:ui-core` агрегирует UI ownership, design-token,
 accessibility и SEO contracts; visual matrix остаётся отдельным evidence при UI

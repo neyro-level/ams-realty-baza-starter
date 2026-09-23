@@ -1,13 +1,27 @@
 import { readFileSync } from "node:fs";
 
 const config = readFileSync(".sourcecraft/ci.yaml", "utf8");
+const riskyAdapter = readFileSync("scripts/verify-merge-risky.mjs", "utf8");
+const riskyEntrypoint = readFileSync(
+	"scripts/ci/sourcecraft-merge-risky.sh",
+	"utf8",
+);
+const riskScopes = [
+	"schema-data",
+	"auth-pii-leads",
+	"ingest-jobs",
+	"dependency-runtime",
+	"ci-governance",
+];
 const required = [
 	"merge-standard:",
 	"merge-risky:",
 	"expected_commit_sha",
+	"risk_scope",
+	"RISK_SCOPE",
 	"assert-exact-head.mjs",
 	"pnpm verify:merge-standard",
-	"pnpm verify:merge-risky",
+	"sourcecraft-merge-risky.sh",
 	"DATABASE_URI_TEST",
 ];
 const forbidden = [/^\s*pull_request\s*:/m, /^\s*schedule\s*:/m];
@@ -15,15 +29,24 @@ const neverTriggerSentinel = /on:\s*\r?\n\s*push:\s*\r?\n\s*-\s*workflows:\s*\[m
 const missing = required.filter((value) => !config.includes(value));
 const automatic = forbidden.filter((pattern) => pattern.test(config));
 const pushKeys = config.match(/^\s*push\s*:/gm) ?? [];
+const missingScopes = riskScopes.filter(
+	(scope) => !config.includes(scope) || !riskyAdapter.includes(`"${scope}"`),
+);
+const targetedContract =
+	riskyAdapter.includes('["verify:merge-standard", ...selected.commands]') &&
+	!riskyAdapter.includes('["verify"]') &&
+	riskyEntrypoint.includes('if [[ "$requires_database" == "true" ]]');
 
 if (
 	missing.length ||
+	missingScopes.length ||
 	automatic.length ||
 	pushKeys.length !== 1 ||
-	!neverTriggerSentinel.test(config)
+	!neverTriggerSentinel.test(config) ||
+	!targetedContract
 ) {
 	console.error(
-		`SourceCraft policy FAIL; missing=${missing.join(",") || "none"}; automatic=${automatic.length}; pushKeys=${pushKeys.length}; sentinel=${neverTriggerSentinel.test(config)}`,
+		`SourceCraft policy FAIL; missing=${missing.join(",") || "none"}; missingScopes=${missingScopes.join(",") || "none"}; automatic=${automatic.length}; pushKeys=${pushKeys.length}; sentinel=${neverTriggerSentinel.test(config)}; targeted=${targetedContract}`,
 	);
 	process.exit(1);
 }

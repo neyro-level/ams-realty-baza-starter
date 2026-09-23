@@ -26,17 +26,18 @@ Production и freeze tag в Plan №7 не входят.
 - Portfolio `PROJECT_CLASS=STANDARD` не меняет project
   `DELIVERY_PROFILE=COMMERCIAL`: template/demo требует review и один ручной
   exact-head SourceCraft Gate перед merge.
-- `.sourcecraft/ci.yaml` содержит только `merge-standard` и `merge-risky`, но
-  пока не имеет explicit never-trigger sentinel. За период с 2026-08-23
+- `.sourcecraft/ci.yaml` содержит только manual exact-SHA `merge-standard` и
+  `merge-risky`; explicit `paths: []` sentinel блокирует auto push/PR CI. За период с 2026-08-23
   зафиксировано 145 runs, все `manual`: 48 STANDARD / 107.16 мин (avg 2.23) и
   94 RISKY / 270.04 мин (avg 2.87). Поэтому задача оптимизации — убрать
   неоднозначность trigger contract и сделать RISKY targeted; общий CI image и
   cache transport без benchmark не добавляются.
 - STANDARD сохраняет template-specific contracts/architecture/clone-readiness
-  baseline. RISKY сейчас всегда поднимает PostgreSQL, устанавливает Node и
-  запускает общий DB/build proof; targeted adapters должны разделить
-  schema/data, auth/PII/leads, ingest/jobs и dependency/runtime risk без
-  ослабления required suites.
+  baseline. RISKY принимает ровно один `risk_scope`: `schema-data`,
+  `auth-pii-leads`, `ingest-jobs`, `dependency-runtime` или `ci-governance`.
+  PostgreSQL запускается только для первых трёх scope, build — только для
+  `dependency-runtime`; каждый RISKY сначала выполняет STANDARD и затем только
+  доказательство выбранного риска.
 - Demo release contract уже требует clean exact `main`, immutable Docker image,
   migrations из того же image, один jobs owner, live health/smoke и сохранённый
   previous image/env rollback point. Текущий Dockerfile копирует весь `/app` и
@@ -180,8 +181,9 @@ PostgreSQL constraints из migration `20260919_120900`.
 ## Verification surfaces
 
 - `pnpm verify:merge-standard` — docs/UI/обычная логика без PostgreSQL suite;
-- `pnpm verify:merge-risky` — safe isolated `DATABASE_URI_TEST`, migrations,
-  required integration with zero skipped suites и build;
+- `RISK_SCOPE=<scope> pnpm verify:merge-risky` — STANDARD плюс один targeted
+  proof; safe isolated `DATABASE_URI_TEST` обязателен только для DB-bound scope,
+  а build выполняется только для `dependency-runtime`;
 - `pnpm verify:integration:required` — fail-closed DB prerequisite и обязательные
   Payload/PostgreSQL suites;
 - `pnpm verify:ui-core` — design literals, token integrity, primitive/font/client
