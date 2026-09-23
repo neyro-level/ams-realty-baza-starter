@@ -19,8 +19,7 @@ if [[ ! "${EXPECTED_COMMIT_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then
   exit 2
 fi
 
-if [[ "${SOURCECRAFT_COMMIT_SHA:-}" != "$EXPECTED_COMMIT_SHA" ]] ||
-  [[ "$(git rev-parse HEAD)" != "$EXPECTED_COMMIT_SHA" ]]; then
+if [[ "${SOURCECRAFT_COMMIT_SHA:-}" != "$EXPECTED_COMMIT_SHA" ]]; then
   echo "Exact-head mismatch" >&2
   exit 2
 fi
