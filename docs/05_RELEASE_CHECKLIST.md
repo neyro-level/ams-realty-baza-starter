@@ -16,8 +16,11 @@
 - независимый review exact head SHA выполнен только если владелец явно запросил review/audit или scope заранее помечен как high-risk/high-complexity;
 - PR основан на актуальном `main` и не содержит чужого scope;
 - риск классифицирован как `STANDARD` или `RISKY`;
-- `STANDARD` запускает `pnpm verify:merge-standard`; `RISKY` запускает один
-  `pnpm verify:merge-risky` с safe isolated test DB и zero skipped required suites;
+- `STANDARD` запускает `pnpm verify:merge-standard`; `RISKY` выбирает ровно один
+  `risk_scope` и запускает STANDARD плюс соответствующий targeted proof;
+- safe isolated test DB и zero skipped required suites обязательны только для
+  `schema-data`, `auth-pii-leads` и `ingest-jobs`; build — только для
+  `dependency-runtime`;
 - один ручной SourceCraft Merge Gate зелёный на exact head SHA;
 - все блокеры исправлены, evidence сохранён.
 

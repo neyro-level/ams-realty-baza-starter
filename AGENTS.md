@@ -7,7 +7,7 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Текущий master plan: `docs/AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md` (`Plan ID: AMS-REALTY-BAZA-STARTER-AUDIT-CORRECTIONS-7`, `Version: v2`, `APPROVED`). Plan №6 — выполненный historical execution record. Исторические планы и inventories читаются только для evidence.
+- Последний исполненный master plan: `docs/AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md` (`Plan ID: AMS-REALTY-BAZA-STARTER-AUDIT-CORRECTIONS-7`, `Version: v2`, `APPROVED`). Execution завершён на SourceCraft `main@ca1b884d43e808d17e1eb18b05bad70ea358dd1c`; Plan №6 и Plan №7 после исполнения читаются как evidence, а не как очередь READY-задач.
 - Operational graph: локальный stealth Beads закрыт после approved import и исполнения; `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
@@ -28,7 +28,7 @@
 
 - Один независимый stream = одна branch/worktree = один Pull Request.
 - Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
-- Plan №7 v2 выполняется через approved Task Manager graph. Текущее состояние — `EXECUTION_IN_PROGRESS / NOT_FROZEN`; tag `starter-freeze-v1` отсутствует и создаётся только после отдельного явного решения владельца. Production в план не входит.
+- Plan №7 v2 исполнен. Текущее каноническое состояние — `EXECUTION_COMPLETE / READY_FOR_OWNER_FREEZE_DECISION / NOT_FROZEN`: предусмотренный планом tag `starter-freeze-v2` отсутствует. В SourceCraft существует отдельный tag `starter-freeze` на `ca1b884d...`; он не совпадает с утверждённым именем и не меняет статус без отдельного owner reconciliation. Production в Plan №7 не входил.
 - Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.
 - Автономность не отменяет COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.
 - Production выполняется только по отдельной явной команде владельца.

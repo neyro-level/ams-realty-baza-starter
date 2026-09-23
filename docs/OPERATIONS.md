@@ -171,7 +171,10 @@ pnpm verify:merge-standard
 pnpm verify:merge-risky
 ```
 
-`merge-standard` не требует DB. `merge-risky` требует safe isolated
-`DATABASE_URI_TEST`, выполняет required integration без skipped suites и build.
+`merge-standard` не требует DB. `merge-risky` принимает ровно один `risk_scope`,
+сначала выполняет STANDARD и затем только targeted proof. Safe isolated
+`DATABASE_URI_TEST` поднимается для DB-bound scope; build выполняется только для
+`dependency-runtime`. `ci-governance` проверяет CI/template/release contracts без
+DB, build, публикации или deploy.
 Команда `pnpm verify` остаётся полной локальной suite, но не является вторым
 SourceCraft gate. Production proof выполняется только отдельной release-командой.

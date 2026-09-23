@@ -17,6 +17,37 @@ APPROVED выполняется после CLEAN reconciliation через `MERG
 SourceCraft; GitHub получает только fast-forward mirror canonical `main`.
 Production и freeze tag в Plan №7 не входят.
 
+## CI, mirror и release inventory — 2026-09-22
+
+- Canonical SourceCraft `main`: `ca1b884d43e808d17e1eb18b05bad70ea358dd1c`.
+  GitHub mirror `main` равен этому SHA; active `.github/workflows` отсутствуют,
+  но repository Actions setting остаётся включённым и выключается отдельной
+  mirror-governance задачей.
+- Portfolio `PROJECT_CLASS=STANDARD` не меняет project
+  `DELIVERY_PROFILE=COMMERCIAL`: template/demo требует review и один ручной
+  exact-head SourceCraft Gate перед merge.
+- `.sourcecraft/ci.yaml` содержит только manual exact-SHA `merge-standard` и
+  `merge-risky`; explicit `paths: []` sentinel блокирует auto push/PR CI. За период с 2026-08-23
+  зафиксировано 145 runs, все `manual`: 48 STANDARD / 107.16 мин (avg 2.23) и
+  94 RISKY / 270.04 мин (avg 2.87). Поэтому задача оптимизации — убрать
+  неоднозначность trigger contract и сделать RISKY targeted; общий CI image и
+  cache transport без benchmark не добавляются.
+- STANDARD сохраняет template-specific contracts/architecture/clone-readiness
+  baseline. RISKY принимает ровно один `risk_scope`: `schema-data`,
+  `auth-pii-leads`, `ingest-jobs`, `dependency-runtime` или `ci-governance`.
+  PostgreSQL запускается только для первых трёх scope, build — только для
+  `dependency-runtime`; каждый RISKY сначала выполняет STANDARD и затем только
+  доказательство выбранного риска.
+- Demo release contract уже требует clean exact `main`, immutable Docker image,
+  migrations из того же image, один jobs owner, live health/smoke и сохранённый
+  previous image/env rollback point. Текущий Dockerfile копирует весь `/app` и
+  не использует standalone allowlist; release hardening остаётся отдельной
+  RISKY-задачей до первого client production и не выполняется этим inventory.
+- Canonical freeze contract ожидает tag `starter-freeze-v2`, которого нет.
+  Наблюдаемый SourceCraft tag `starter-freeze` указывает на тот же `ca1b884d...`,
+  но имеет другое имя; до отдельного owner reconciliation состояние остаётся
+  `READY_FOR_OWNER_FREEZE_DECISION / NOT_FROZEN`.
+
 ## Stack и ownership
 
 - Next.js App Router, React, TypeScript strict;
@@ -25,7 +56,7 @@ Production и freeze tag в Plan №7 не входят.
 - Zod, pnpm, Tailwind CSS 4, shadcn/ui, Lucide;
 - Payload Jobs, streaming SAX parser, **local persistent media** (S3 plugin not used by starter), Nginx, SourceCraft.
 
-Текущий lock snapshot: Next.js `16.3.5`, React `19.2.8`, Payload `3.89.0`.
+Текущий lock snapshot: Next.js `16.3.5`, React `19.2.8`, Payload `3.90.1`.
 Фактические версии всегда определяют `package.json`, lockfile и runtime files.
 Major upgrade требует отдельного решения и targeted proof.
 
@@ -150,8 +181,9 @@ PostgreSQL constraints из migration `20260919_120900`.
 ## Verification surfaces
 
 - `pnpm verify:merge-standard` — docs/UI/обычная логика без PostgreSQL suite;
-- `pnpm verify:merge-risky` — safe isolated `DATABASE_URI_TEST`, migrations,
-  required integration with zero skipped suites и build;
+- `RISK_SCOPE=<scope> pnpm verify:merge-risky` — STANDARD плюс один targeted
+  proof; safe isolated `DATABASE_URI_TEST` обязателен только для DB-bound scope,
+  а build выполняется только для `dependency-runtime`;
 - `pnpm verify:integration:required` — fail-closed DB prerequisite и обязательные
   Payload/PostgreSQL suites;
 - `pnpm verify:ui-core` — design literals, token integrity, primitive/font/client
