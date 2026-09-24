@@ -192,7 +192,8 @@ const emptyCurrency = normalizeYrlOffer(
 assert.equal(emptyCurrency.ok, false);
 assert.ok(
 	emptyCurrency.issues.some(
-		(issue) => issue.code === "feed.offer_invalid" && issue.field === "currency",
+		(issue) =>
+			issue.code === "feed.offer_invalid" && issue.field === "currency",
 	),
 );
 
@@ -287,11 +288,11 @@ console.log("verify-feed-parser: ok");
 function buildCurrencyFeed(currency) {
 	const currencyNode =
 		currency == null ? "" : `<currency>${currency}</currency>`;
-	return `<realty-feed><offer id="currency-${currency ?? "missing"}"><title>Currency probe</title><price><value>1000000</value>${currencyNode}</price></offer></realty-feed>`;
+	return `<realty-feed><offer id="currency-${currency ?? "missing"}"><title>Currency probe</title><type>продажа</type><category>квартира</category><price><value>1000000</value>${currencyNode}</price></offer></realty-feed>`;
 }
 
 function buildDescriptionFeed(description) {
-	return `<realty-feed><offer id="oversized-description"><title>Oversized</title><description>${description}</description></offer><offer id="good-after-bad"><title>Good</title><price><value>1000000</value><currency>RUB</currency></price></offer></realty-feed>`;
+	return `<realty-feed><offer id="oversized-description"><title>Oversized</title><type>продажа</type><category>квартира</category><description>${description}</description></offer><offer id="good-after-bad"><title>Good</title><type>продажа</type><category>квартира</category><price><value>1000000</value><currency>RUB</currency></price></offer></realty-feed>`;
 }
 
 function buildLargeFeed(count) {

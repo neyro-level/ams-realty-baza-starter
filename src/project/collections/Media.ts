@@ -50,5 +50,17 @@ export const Media: CollectionConfig = {
 			type: "text",
 			required: true,
 		},
+		{ name: "ownership", type: "text", required: true, defaultValue: "manual" },
+		{ name: "sourceUrl", type: "text" },
+		{ name: "sourceHost", type: "text" },
+		{ name: "sourceRights", type: "textarea" },
+		{ name: "sourceSha256", type: "text", unique: true },
+		{
+			name: "sourceFeed",
+			type: "relationship",
+			relationTo: "feed-sources",
+			index: true,
+		},
+		{ name: "mirroredAt", type: "date" },
 	],
 };

@@ -1,6 +1,12 @@
 import type { Payload } from "payload";
 import { systemOverrideAccess } from "../data-access/system/overrides.ts";
 import {
+	resolvePropertyGeoBackfill,
+	type BackfillCity,
+	type BackfillDistrict,
+	type BackfillRegion,
+} from "../geo/property-backfill.ts";
+import {
 	countMissingActiveFeedProperties,
 	deactivateMissingFeedProperties,
 	touchFeedPropertiesLastSeenAt,
@@ -49,12 +55,19 @@ function toPropertyData(data: FeedPropertyWriteData) {
 		market: data.market,
 		category: data.category,
 		dealType: data.dealType,
+		houseType: data.houseType,
+		commercialType: data.commercialType,
 		priceMinor: data.priceMinor,
 		currency: data.currency,
 		publicAddress: data.publicAddress,
 		locality: data.locality,
 		district: data.district,
 		region: data.region,
+		regionRef: data.regionRef == null ? data.regionRef : Number(data.regionRef),
+		cityRef: data.cityRef == null ? data.cityRef : Number(data.cityRef),
+		districtRef:
+			data.districtRef == null ? data.districtRef : Number(data.districtRef),
+		needsReview: data.needsReview,
 		street: data.street,
 		house: data.house,
 		lat: data.lat,
@@ -72,7 +85,11 @@ function toPropertyData(data: FeedPropertyWriteData) {
 		externalLayoutId: data.externalLayoutId,
 		title: data.title,
 		description: data.description,
-		images: data.images,
+		images: data.images.map((image) =>
+			image.kind === "managed"
+				? { ...image, media: Number(image.media) }
+				: image,
+		),
 		slug: data.slug ?? "",
 	};
 }
@@ -81,7 +98,69 @@ export function createPayloadFeedIngestRepository(
 	payload: Payload,
 	feedSourceId: string,
 ): FeedIngestRepository {
+	let geoCatalogPromise:
+		| Promise<{
+				regions: BackfillRegion[];
+				cities: BackfillCity[];
+				districts: BackfillDistrict[];
+		  }>
+		| undefined;
+	const loadGeoCatalog = () => {
+		geoCatalogPromise ??= Promise.all([
+			payload.find({
+				collection: "regions",
+				pagination: false,
+				depth: 0,
+				...importAccess,
+			}),
+			payload.find({
+				collection: "cities",
+				pagination: false,
+				depth: 0,
+				...importAccess,
+			}),
+			payload.find({
+				collection: "districts",
+				pagination: false,
+				depth: 0,
+				...importAccess,
+			}),
+		]).then(([regions, cities, districts]) => ({
+			regions: regions.docs.map((doc) => ({
+				id: String(doc.id),
+				slug: doc.slug,
+				title: doc.title,
+				shortName: doc.shortName,
+				morphology: doc.morphology,
+				status: doc.status,
+			})),
+			cities: cities.docs.map((doc) => ({
+				id: String(doc.id),
+				slug: doc.slug,
+				title: doc.title,
+				regionId: String(doc.region),
+				morphology: doc.morphology,
+				morphologyApproved: doc.morphologyApproved,
+				status: doc.status,
+			})),
+			districts: districts.docs.map((doc) => ({
+				id: String(doc.id),
+				slug: doc.slug,
+				title: doc.title,
+				cityId: String(doc.city),
+				morphology: doc.morphology,
+				morphologyApproved: doc.morphologyApproved,
+				status: doc.status,
+				synonyms: doc.synonyms?.map((item) => item.value),
+			})),
+		}));
+		return geoCatalogPromise;
+	};
 	return {
+		async resolveGeoReferences(property) {
+			const catalog = await loadGeoCatalog();
+			return resolvePropertyGeoBackfill({ property, ...catalog });
+		},
 		async findFeedProperty({ feedSourceId: sourceId, externalId }) {
 			if (sourceId !== feedSourceId) {
 				throw new Error("Feed ingest repository is source-scoped.");
@@ -132,7 +211,9 @@ export function createPayloadFeedIngestRepository(
 				throw new Error("Feed ingest repository is source-scoped.");
 			}
 			if (data.market && data.market !== found.docs[0].market) {
-				throw new Error("Feed ingest cannot write a property outside source market.");
+				throw new Error(
+					"Feed ingest cannot write a property outside source market.",
+				);
 			}
 			const patch: Record<string, unknown> = { ...data };
 			delete patch.feedSource;
@@ -168,7 +249,12 @@ export function createPayloadFeedIngestRepository(
 				...importAccess,
 			});
 		},
-		async touchLastSeenAt({ feedSourceId: sourceId, importRunId, externalIds, nowIso }) {
+		async touchLastSeenAt({
+			feedSourceId: sourceId,
+			importRunId,
+			externalIds,
+			nowIso,
+		}) {
 			if (sourceId !== feedSourceId) {
 				throw new Error("Feed ingest repository is source-scoped.");
 			}

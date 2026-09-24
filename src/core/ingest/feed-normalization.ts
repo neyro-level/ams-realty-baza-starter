@@ -4,6 +4,12 @@ import {
 	validateExternalImageUrl,
 } from "./image-hosts.ts";
 import { normalizeAreaM2 } from "./numeric-invariants.ts";
+import {
+	mapFeedCategory,
+	mapFeedDealType,
+	mapFeedMarket,
+	mapFeedSubtype,
+} from "./feed-taxonomy.ts";
 
 export const normalizedFeedImageSchema = z.object({
 	url: z.string().url(),
@@ -14,9 +20,17 @@ export const normalizedFeedOfferSchema = z.object({
 	externalId: z.string().min(1),
 	title: z.string().min(1),
 	description: z.string().optional(),
-	category: z.string().optional(),
-	dealType: z.string().optional(),
-	propertyType: z.string().optional(),
+	category: z.enum([
+		"apartment",
+		"house",
+		"land",
+		"commercial",
+		"room",
+		"garage",
+	]),
+	dealType: z.enum(["sale", "rent"]),
+	marketHint: z.enum(["secondary", "newbuild"]).optional(),
+	subtype: z.string().optional(),
 	priceMinor: z.number().int().nonnegative().optional(),
 	currency: z.literal("RUB"),
 	rooms: z.number().finite().optional(),
@@ -102,6 +116,10 @@ export function normalizeYrlOffer(
 	const issues: FeedNormalizationIssue[] = [];
 	const images = [];
 	const currency = normalizeCurrency(rawOffer.currency);
+	const category = mapFeedCategory(rawOffer.category, rawOffer.propertyType);
+	const dealType = mapFeedDealType(rawOffer.type);
+	const marketHint = mapFeedMarket(rawOffer.marketFromXml);
+	const subtype = mapFeedSubtype(rawOffer.propertyType);
 
 	for (const picture of rawOffer.pictures) {
 		const validation = validateExternalImageUrl(picture, allowedImageHosts);
@@ -135,6 +153,30 @@ export function normalizeYrlOffer(
 			],
 		};
 	}
+	const unknownTaxonomy = [
+		!category ? "category" : undefined,
+		!dealType ? "dealType" : undefined,
+		rawOffer.marketFromXml && !marketHint ? "market" : undefined,
+		rawOffer.propertyType && !subtype && !mapFeedCategory(rawOffer.propertyType)
+			? "subtype"
+			: undefined,
+	].filter((value): value is string => Boolean(value));
+	if (unknownTaxonomy.length > 0) {
+		return {
+			ok: false,
+			issues: [
+				...issues,
+				...unknownTaxonomy.map((field) => ({
+					severity: "error" as const,
+					code: "feed.offer_invalid" as const,
+					externalId: rawOffer.externalId,
+					field,
+					messageRedacted:
+						"Feed offer used an unmapped taxonomy value and was not published.",
+				})),
+			],
+		};
+	}
 
 	const parsed = normalizedFeedOfferSchema.safeParse({
 		externalId: rawOffer.externalId,
@@ -144,9 +186,10 @@ export function normalizeYrlOffer(
 			rawOffer.locality ??
 			rawOffer.externalId,
 		description: rawOffer.description,
-		category: rawOffer.category,
-		dealType: rawOffer.type,
-		propertyType: rawOffer.propertyType,
+		category,
+		dealType,
+		marketHint,
+		subtype,
 		priceMinor: parseMoneyToMinor(rawOffer.price),
 		currency: currency.value,
 		rooms: parseOptionalNumber(rawOffer.rooms),

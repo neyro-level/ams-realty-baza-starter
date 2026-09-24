@@ -345,6 +345,13 @@ export interface Developer {
 export interface Media {
   id: number;
   alt: string;
+  ownership: string;
+  sourceUrl?: string | null;
+  sourceHost?: string | null;
+  sourceRights?: string | null;
+  sourceSha256?: string | null;
+  sourceFeed?: (number | null) | FeedSource;
+  mirroredAt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -356,6 +363,101 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * Owner operations: feed health, schedule, deactivation safety and suspicious-run approval. Store only secret references, never credential URLs.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "feed-sources".
+ */
+export interface FeedSource {
+  id: number;
+  /**
+   * Stable source identity used by import jobs and diagnostics.
+   */
+  code: string;
+  title: string;
+  parser: 'yrl';
+  /**
+   * Authoritative market for imported properties from this feed source.
+   */
+  market: 'secondary' | 'newbuild';
+  /**
+   * Reference to deployment secret/config value. Do not store credential URLs here.
+   */
+  feedUrlRef: string;
+  enabled?: boolean | null;
+  refreshIntervalMinutes: number;
+  /**
+   * Required when the source is enabled. Create/enable without a value sets now; dispatcher does not skip null rows.
+   */
+  nextDueAt?: string | null;
+  /**
+   * Last dispatch attempt time for feed health diagnostics.
+   */
+  lastAttemptAt?: string | null;
+  /**
+   * Last successful import completion time.
+   */
+  lastSuccessfulRunAt?: string | null;
+  /**
+   * Last import run that was not skipped as unchanged.
+   */
+  lastFullRunAt?: string | null;
+  /**
+   * Suspicious-run guard: deactivation above this percent requires explicit owner/admin approval.
+   */
+  safetyThresholdPercent: number;
+  /**
+   * Hard safety cap for automatic deactivation during one import run.
+   */
+  maxDeactivationsPerRun: number;
+  lastOfferCount?: number | null;
+  lastEtag?: string | null;
+  lastModified?: string | null;
+  lastFeedHash?: string | null;
+  /**
+   * Audit-safe approval window for a suspicious import run. Only store run/user/time metadata.
+   */
+  deactivationApproval?: {
+    runId?: (number | null) | ImportRun;
+    approvedBy?: (number | null) | User;
+    approvedAt?: string | null;
+    expiresAt?: string | null;
+    consumedAt?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Owner operations: import history, suspicious/interrupted status, heartbeat, safe counters and redacted diagnostics.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "import-runs".
+ */
+export interface ImportRun {
+  id: number;
+  feedSource: number | FeedSource;
+  status: 'queued' | 'running' | 'success' | 'unchanged' | 'suspicious' | 'interrupted' | 'failed';
+  queuedAt: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  heartbeatAt?: string | null;
+  jobId?: string | null;
+  offeredCount?: number | null;
+  createdCount?: number | null;
+  updatedCount?: number | null;
+  archivedCount?: number | null;
+  skippedCount?: number | null;
+  warningCount?: number | null;
+  errorCount?: number | null;
+  feedHash?: string | null;
+  /**
+   * Redacted operational diagnostic only. Do not store feed payload, raw response, PII, credentials or tokens.
+   */
+  lastErrorRedacted?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -581,101 +683,6 @@ export interface Property {
   cadastralNumber?: string | null;
   internalComment?: string | null;
   ownerContact?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Owner operations: feed health, schedule, deactivation safety and suspicious-run approval. Store only secret references, never credential URLs.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "feed-sources".
- */
-export interface FeedSource {
-  id: number;
-  /**
-   * Stable source identity used by import jobs and diagnostics.
-   */
-  code: string;
-  title: string;
-  parser: 'yrl';
-  /**
-   * Authoritative market for imported properties from this feed source.
-   */
-  market: 'secondary' | 'newbuild';
-  /**
-   * Reference to deployment secret/config value. Do not store credential URLs here.
-   */
-  feedUrlRef: string;
-  enabled?: boolean | null;
-  refreshIntervalMinutes: number;
-  /**
-   * Required when the source is enabled. Create/enable without a value sets now; dispatcher does not skip null rows.
-   */
-  nextDueAt?: string | null;
-  /**
-   * Last dispatch attempt time for feed health diagnostics.
-   */
-  lastAttemptAt?: string | null;
-  /**
-   * Last successful import completion time.
-   */
-  lastSuccessfulRunAt?: string | null;
-  /**
-   * Last import run that was not skipped as unchanged.
-   */
-  lastFullRunAt?: string | null;
-  /**
-   * Suspicious-run guard: deactivation above this percent requires explicit owner/admin approval.
-   */
-  safetyThresholdPercent: number;
-  /**
-   * Hard safety cap for automatic deactivation during one import run.
-   */
-  maxDeactivationsPerRun: number;
-  lastOfferCount?: number | null;
-  lastEtag?: string | null;
-  lastModified?: string | null;
-  lastFeedHash?: string | null;
-  /**
-   * Audit-safe approval window for a suspicious import run. Only store run/user/time metadata.
-   */
-  deactivationApproval?: {
-    runId?: (number | null) | ImportRun;
-    approvedBy?: (number | null) | User;
-    approvedAt?: string | null;
-    expiresAt?: string | null;
-    consumedAt?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Owner operations: import history, suspicious/interrupted status, heartbeat, safe counters and redacted diagnostics.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "import-runs".
- */
-export interface ImportRun {
-  id: number;
-  feedSource: number | FeedSource;
-  status: 'queued' | 'running' | 'success' | 'unchanged' | 'suspicious' | 'interrupted' | 'failed';
-  queuedAt: string;
-  startedAt?: string | null;
-  finishedAt?: string | null;
-  heartbeatAt?: string | null;
-  jobId?: string | null;
-  offeredCount?: number | null;
-  createdCount?: number | null;
-  updatedCount?: number | null;
-  archivedCount?: number | null;
-  skippedCount?: number | null;
-  warningCount?: number | null;
-  errorCount?: number | null;
-  feedHash?: string | null;
-  /**
-   * Redacted operational diagnostic only. Do not store feed payload, raw response, PII, credentials or tokens.
-   */
-  lastErrorRedacted?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1630,6 +1637,13 @@ export interface LifecycleEventsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  ownership?: T;
+  sourceUrl?: T;
+  sourceHost?: T;
+  sourceRights?: T;
+  sourceSha256?: T;
+  sourceFeed?: T;
+  mirroredAt?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

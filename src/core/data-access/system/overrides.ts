@@ -8,7 +8,8 @@ type SystemOperation =
 	| "payload-jobs-inspect"
 	| "payload-jobs-unstuck"
 	| "record-lifecycle-event"
-	| "redirect-graph-guard";
+	| "redirect-graph-guard"
+	| "media-mirror";
 
 export function systemOverrideAccess(operation: SystemOperation) {
 	return {

@@ -15,6 +15,7 @@ import type {
 } from "./feed-normalization.ts";
 import { parseYrlFeed } from "./yrl-parser.ts";
 import { startImportHeartbeat } from "./dispatch-due-feeds.ts";
+import type { FeedPropertyImageDraft } from "./feed-ingest.ts";
 
 const defaultHeartbeatIntervalMs = 15_000;
 const defaultIngestBatchSize = 100;
@@ -79,6 +80,10 @@ export type ImportFeedRuntimeDeps = {
 		targets: FeedIngestResult["invalidatedTargets"],
 	) => Promise<{ ok: boolean }>;
 	allowedImageHosts: ReadonlySet<string>;
+	mirrorImages?: (offer: NormalizedFeedOffer) => Promise<{
+		images: FeedPropertyImageDraft[];
+		issues: Array<{ field: string; messageRedacted: string }>;
+	}>;
 };
 
 export type ImportFeedRuntimeResult =
@@ -142,8 +147,7 @@ export async function runImportFeed(
 	}
 
 	const heartbeat = startImportHeartbeat({
-		intervalMs:
-			deps.heartbeatIntervalMs ?? defaultHeartbeatIntervalMs,
+		intervalMs: deps.heartbeatIntervalMs ?? defaultHeartbeatIntervalMs,
 		tick: () =>
 			deps.touchHeartbeat({ importRunId: input.importRunId, now: deps.now() }),
 	});
@@ -208,6 +212,7 @@ export async function runImportFeed(
 					offers: currentOffers,
 					issues: currentIssues,
 					repository,
+					mirrorImages: deps.mirrorImages,
 				}),
 			);
 		};

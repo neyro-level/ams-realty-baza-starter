@@ -23,12 +23,9 @@ export type FeedIngestContext = {
 	nowIso: string;
 };
 
-export type FeedPropertyImageDraft = {
-	kind: "external";
-	url: string;
-	alt?: string;
-	order: number;
-};
+export type FeedPropertyImageDraft =
+	| { kind: "external"; url: string; alt?: string; order: number }
+	| { kind: "managed"; media: string; alt?: string; order: number };
 
 export type FeedPropertyWriteData = {
 	feedSource: string;
@@ -42,12 +39,18 @@ export type FeedPropertyWriteData = {
 	market: FeedIngestMarket;
 	category: FeedPropertyCategory;
 	dealType: FeedPropertyDealType;
+	houseType?: string;
+	commercialType?: string;
 	priceMinor?: number;
 	currency: "RUB";
 	publicAddress?: string;
 	locality?: string;
 	district?: string;
 	region?: string;
+	regionRef?: string | null;
+	cityRef?: string | null;
+	districtRef?: string | null;
+	needsReview?: boolean;
 	street?: string;
 	house?: string;
 	lat?: number;
@@ -82,6 +85,16 @@ export type FeedImportIssueDraft = FeedNormalizationIssue & {
 };
 
 export type FeedIngestRepository = {
+	resolveGeoReferences?(input: {
+		region?: string;
+		locality?: string;
+		district?: string;
+	}): Promise<{
+		regionRef?: string | null;
+		cityRef?: string | null;
+		districtRef?: string | null;
+		issues: Array<{ field: string; messageRedacted: string }>;
+	}>;
 	findFeedProperty(input: {
 		feedSourceId: string;
 		externalId: string;
@@ -130,6 +143,10 @@ export type FeedIngestInput = {
 	issues?: FeedNormalizationIssue[];
 	repository: FeedIngestRepository;
 	invalidateCache?: (targets: CacheInvalidationTarget[]) => Promise<void>;
+	mirrorImages?: (offer: NormalizedFeedOffer) => Promise<{
+		images: FeedPropertyImageDraft[];
+		issues: Array<{ field: string; messageRedacted: string }>;
+	}>;
 };
 
 const manuallyOwnedFields = new Set<keyof FeedPropertyWriteData>(["slug"]);
@@ -140,6 +157,7 @@ export async function ingestNormalizedFeed({
 	issues = [],
 	repository,
 	invalidateCache,
+	mirrorImages,
 }: FeedIngestInput): Promise<FeedIngestResult> {
 	const result: FeedIngestResult = {
 		offeredCount: offers.length,
@@ -170,34 +188,108 @@ export async function ingestNormalizedFeed({
 			feedSourceId: context.feedSourceId,
 			externalId: offer.externalId,
 		});
-		const nextData = buildFeedPropertyWriteData({ context, offer, existing });
+		if (offer.marketHint && offer.marketHint !== context.market) {
+			await repository.createImportIssue({
+				severity: "error",
+				code: "feed.offer_invalid",
+				externalId: offer.externalId,
+				field: "market",
+				messageRedacted:
+					"Feed offer market does not match the source and was not published.",
+				feedSource: context.feedSourceId,
+				importRun: context.importRunId,
+			});
+			result.errorCount += 1;
+			result.skippedCount += 1;
+			continue;
+		}
+		const geo = await repository.resolveGeoReferences?.({
+			region: offer.region,
+			locality: offer.locality,
+			district: offer.district,
+		});
+		for (const geoIssue of geo?.issues ?? []) {
+			await repository.createImportIssue({
+				severity: "warning",
+				code: "feed.offer_invalid",
+				externalId: offer.externalId,
+				field: geoIssue.field,
+				messageRedacted: geoIssue.messageRedacted,
+				feedSource: context.feedSourceId,
+				importRun: context.importRunId,
+			});
+			result.warningCount += 1;
+		}
+		const nextData: FeedPropertyWriteData = {
+			...buildFeedPropertyWriteData({ context, offer, existing }),
+			regionRef: geo?.regionRef,
+			cityRef: geo?.cityRef,
+			districtRef: geo?.districtRef,
+			needsReview: Boolean(geo?.issues.length),
+		};
+		nextData.importHash = createOfferHash({
+			offer,
+			regionRef: nextData.regionRef,
+			cityRef: nextData.cityRef,
+			districtRef: nextData.districtRef,
+			needsReview: nextData.needsReview,
+		});
 		if (nextData.market !== context.market) {
-			throw new Error("Feed ingest cannot write a property outside source market.");
+			throw new Error(
+				"Feed ingest cannot write a property outside source market.",
+			);
+		}
+		if (existing) {
+			if (existing.feedSource !== context.feedSourceId) {
+				throw new Error(
+					"Feed ingest cannot write a property outside source scope.",
+				);
+			}
+			if (existing.market !== context.market) {
+				await repository.createImportIssue({
+					severity: "error",
+					code: "feed.offer_invalid",
+					externalId: offer.externalId,
+					field: "market",
+					messageRedacted:
+						"Existing feed property market does not match the source.",
+					feedSource: context.feedSourceId,
+					importRun: context.importRunId,
+				});
+				result.errorCount += 1;
+				result.skippedCount += 1;
+				continue;
+			}
+			if (
+				existing.importHash === nextData.importHash &&
+				existing.status === "active"
+			) {
+				seenExternalIds.push(offer.externalId);
+				result.skippedCount += 1;
+				continue;
+			}
+		}
+		if (mirrorImages) {
+			const mirrored = await mirrorImages(offer);
+			nextData.images = mirrored.images;
+			for (const mediaIssue of mirrored.issues) {
+				await repository.createImportIssue({
+					severity: "warning",
+					code: "feed.offer_invalid",
+					externalId: offer.externalId,
+					field: mediaIssue.field,
+					messageRedacted: mediaIssue.messageRedacted,
+					feedSource: context.feedSourceId,
+					importRun: context.importRunId,
+				});
+				result.warningCount += 1;
+			}
 		}
 
 		if (!existing) {
 			seenExternalIds.push(offer.externalId);
 			await repository.createFeedProperty(nextData);
 			result.createdCount += 1;
-			continue;
-		}
-
-		if (existing.feedSource !== context.feedSourceId) {
-			throw new Error("Feed ingest cannot write a property outside source scope.");
-		}
-
-		if (existing.market !== context.market) {
-			await repository.createImportIssue({
-				severity: "error",
-				code: "feed.offer_invalid",
-				externalId: offer.externalId,
-				field: "market",
-				messageRedacted: "Existing feed property market does not match the source.",
-				feedSource: context.feedSourceId,
-				importRun: context.importRunId,
-			});
-			result.errorCount += 1;
-			result.skippedCount += 1;
 			continue;
 		}
 
@@ -260,8 +352,10 @@ export function buildFeedPropertyWriteData({
 		lastImportRun: context.importRunId,
 		status: "active",
 		market: context.market,
-		category: normalizePropertyCategory(offer.category, offer.propertyType),
-		dealType: normalizeDealType(offer.dealType),
+		category: offer.category,
+		dealType: offer.dealType,
+		houseType: offer.category === "house" ? offer.subtype : undefined,
+		commercialType: offer.category === "commercial" ? offer.subtype : undefined,
 		priceMinor: offer.priceMinor,
 		currency: offer.currency,
 		publicAddress: offer.publicAddress,
@@ -344,33 +438,8 @@ export function buildStableFeedSlug(
 	return `feed-${source}-${external}`.slice(0, 96);
 }
 
-function normalizePropertyCategory(
-	category: string | undefined,
-	propertyType: string | undefined,
-): FeedPropertyCategory {
-	const value = `${category ?? ""} ${propertyType ?? ""}`.toLowerCase();
-	if (/(дом|коттедж|house)/i.test(value)) {
-		return "house";
-	}
-	if (/(участ|зем|land)/i.test(value)) {
-		return "land";
-	}
-	if (/(коммер|commercial|office|офис)/i.test(value)) {
-		return "commercial";
-	}
-	return "apartment";
-}
-
-function normalizeDealType(value: string | undefined): FeedPropertyDealType {
-	const normalized = value?.toLowerCase() ?? "";
-	if (/(rent|аренд|сдам|снять)/i.test(normalized)) {
-		return "rent";
-	}
-	return "sale";
-}
-
-function createOfferHash(offer: NormalizedFeedOffer): string {
-	return createHash("sha256").update(stableStringify(offer)).digest("hex");
+function createOfferHash(value: unknown): string {
+	return createHash("sha256").update(stableStringify(value)).digest("hex");
 }
 
 function stableEqual(left: unknown, right: unknown): boolean {

@@ -37,6 +37,12 @@ export {
 	type RawYrlOffer,
 } from "./feed-normalization.ts";
 export {
+	mapFeedCategory,
+	mapFeedDealType,
+	mapFeedMarket,
+	mapFeedSubtype,
+} from "./feed-taxonomy.ts";
+export {
 	computeScheduleAfterClaim,
 	isEnabledFeedDue,
 	normalizeEnabledFeedNextDueAt,
@@ -60,6 +66,7 @@ export {
 	returnFieldToFeed,
 	shouldRecordManualOwnership,
 } from "./manual-ownership.ts";
+export { mirrorFeedImages } from "./media-mirror.ts";
 export {
 	normalizeAreaM2,
 	normalizePropertyNumericWrite,

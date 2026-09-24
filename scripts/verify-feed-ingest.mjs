@@ -20,8 +20,8 @@ const baseContext = {
 const offer = {
 	externalId: "external-1",
 	title: "Квартира на Тестовой",
-	category: "квартира",
-	dealType: "продажа",
+	category: "apartment",
+	dealType: "sale",
 	priceMinor: 12_000_000_00,
 	currency: "RUB",
 	publicAddress: "Москва, Тестовая, 1",
@@ -51,6 +51,30 @@ await ingestNormalizedFeed({
 assert.equal(currencyRepository.byId.size, 0);
 assert.equal(currencyRepository.issues.length, 1);
 assert.equal(currencyRepository.issues[0].field, "currency");
+
+const marketRepository = createRepository();
+const rejectedMarket = await ingestNormalizedFeed({
+	context: { ...baseContext, importRunId: "run-market-hint" },
+	offers: [{ ...offer, marketHint: "newbuild" }],
+	repository: marketRepository,
+});
+assert.equal(rejectedMarket.createdCount, 0);
+assert.equal(rejectedMarket.errorCount, 1);
+assert.equal(marketRepository.byId.size, 0);
+
+const mirrorRepository = createRepository();
+await ingestNormalizedFeed({
+	context: { ...baseContext, importRunId: "run-mirror" },
+	offers: [offer],
+	repository: mirrorRepository,
+	mirrorImages: async () => ({
+		images: [{ kind: "managed", media: "77", alt: offer.title, order: 0 }],
+		issues: [],
+	}),
+});
+assert.deepEqual(mirrorRepository.byId.get("property-1").images, [
+	{ kind: "managed", media: "77", alt: offer.title, order: 0 },
+]);
 
 const firstRun = await ingestNormalizedFeed({
 	context: baseContext,

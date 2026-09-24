@@ -21,6 +21,7 @@ import {
 	runImportFeed,
 } from "../../core/ingest/import-feed-runtime.ts";
 import { createPayloadFeedIngestRepository } from "../../core/ingest/payload-feed-ingest-repository.ts";
+import { createPayloadFeedMediaMirror } from "../ingest/payload-media-mirror.ts";
 import { runDeliverLeadTask } from "../../core/leads/deliver-lead.ts";
 import {
 	recoverStaleSendingDelivery,
@@ -198,6 +199,7 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 			const testHosts = [
 				...new Set(testOrigins.map((origin) => new URL(origin).hostname)),
 			];
+			const imageHosts = parseImageHostEnv(runtimeEnv.EXTERNAL_IMAGE_HOSTS);
 			const result = await runImportFeed(
 				{
 					now: () => nowDate(),
@@ -286,7 +288,13 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 						});
 						return { ok: result.ok };
 					},
-					allowedImageHosts: parseImageHostEnv(runtimeEnv.EXTERNAL_IMAGE_HOSTS),
+					allowedImageHosts: imageHosts,
+					mirrorImages: createPayloadFeedMediaMirror({
+						payload,
+						allowedHosts: imageHosts,
+						feedSourceId: String(input.feedSourceId),
+						nowIso,
+					}),
 				},
 				{
 					feedSourceId: String(input.feedSourceId),
