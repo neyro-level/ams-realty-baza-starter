@@ -41,6 +41,7 @@ import {
 } from "../../src/project/jobs/registry.ts";
 import { payloadJobTasks } from "../../src/project/jobs/tasks.ts";
 import { projectConfig } from "../../src/project/project.config.ts";
+import { createPayloadFeedIngestRepository } from "../../src/core/ingest/payload-feed-ingest-repository.ts";
 
 requirePayloadRuntime();
 
@@ -52,6 +53,109 @@ const access = systemOverrideAccess("system-job");
 const owner = { id: 10_001, collection: "users", roles: ["owner"] } as never;
 const admin = { id: 10_002, collection: "users", roles: ["admin"] } as never;
 const editor = { id: 10_003, collection: "users", roles: ["editor"] } as never;
+
+const identitySuffix = `${Date.now()}`;
+const parallelProperties = await Promise.all(
+	Array.from({ length: 8 }, (_, index) =>
+		payload.create({
+			collection: "properties",
+			data: {
+				origin: "manual",
+				status: "active",
+				slug: `identity-parallel-${identitySuffix}-${index}`,
+				market: "secondary",
+				category: "apartment",
+				dealType: "sale",
+				title: `Identity parallel ${index}`,
+			},
+			...access,
+		}),
+	),
+);
+const allocatedIds = parallelProperties.map((property) => property.publicUrlId);
+assert.equal(new Set(allocatedIds).size, parallelProperties.length);
+assert.ok(
+	allocatedIds.every(
+		(value): value is number => typeof value === "number" && Number.isSafeInteger(value) && value > 0,
+	),
+);
+const retainedId = parallelProperties[0].publicUrlId;
+if (typeof retainedId !== "number") throw new Error("publicUrlId default was not applied");
+const republished = await payload.update({
+	collection: "properties",
+	id: parallelProperties[0].id,
+	data: { publishedAt: clock.nowIso() },
+	...access,
+});
+assert.equal(republished.publicUrlId, retainedId, "republication must retain publicUrlId");
+await assert.rejects(
+	() =>
+		payload.update({
+			collection: "properties",
+			id: parallelProperties[0].id,
+			data: { publicUrlId: retainedId + 10_000 },
+			...access,
+		}),
+	/immutable|publicUrlId/i,
+);
+
+const identityFeedSource = await payload.create({
+	collection: "feed-sources",
+	data: {
+		code: `identity-${identitySuffix}`,
+		title: "Identity integration feed",
+		parser: "yrl",
+		market: "secondary",
+		feedUrlRef: "INTEGRATION_FEED_URL",
+		enabled: false,
+		refreshIntervalMinutes: 1440,
+		safetyThresholdPercent: 30,
+		maxDeactivationsPerRun: 50,
+	},
+	...access,
+});
+const identityImportRun = await payload.create({
+	collection: "import-runs",
+	data: {
+		feedSource: identityFeedSource.id,
+		status: "running",
+		queuedAt: clock.nowIso(),
+		startedAt: clock.nowIso(),
+	},
+	...access,
+});
+const identityRepository = createPayloadFeedIngestRepository(
+	payload,
+	String(identityFeedSource.id),
+);
+const feedIdentityData = {
+	feedSource: String(identityFeedSource.id),
+	externalId: "stable-offer-1",
+	origin: "feed" as const,
+	importHash: "hash-v1",
+	firstSeenAt: clock.nowIso(),
+	lastSeenAt: clock.nowIso(),
+	lastImportRun: String(identityImportRun.id),
+	status: "active" as const,
+	market: "secondary" as const,
+	category: "apartment" as const,
+	dealType: "sale" as const,
+	currency: "RUB" as const,
+	title: "Stable feed property",
+	images: [],
+	slug: `feed-identity-${identitySuffix}`,
+};
+const firstFeedWrite = await identityRepository.createFeedProperty(feedIdentityData);
+const repeatedFeedIdentity = await identityRepository.findFeedProperty({
+	feedSourceId: String(identityFeedSource.id),
+	externalId: feedIdentityData.externalId,
+});
+assert.equal(repeatedFeedIdentity?.id, firstFeedWrite.id);
+const secondFeedWrite = await identityRepository.updateFeedProperty(firstFeedWrite.id, {
+	importHash: "hash-v2",
+	title: "Stable feed property updated",
+});
+assert.equal(secondFeedWrite.publicUrlId, firstFeedWrite.publicUrlId);
 
 async function assertPubliclyInaccessible(
 	collection:

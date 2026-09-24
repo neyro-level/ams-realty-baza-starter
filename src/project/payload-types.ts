@@ -342,8 +342,27 @@ export interface Property {
    * Public immutable page identity. Feed imports must not rotate it after first publish.
    */
   slug: string;
+  /**
+   * Stable public identity allocated atomically; never reused or changed.
+   */
+  publicUrlId?: number | null;
   market: 'secondary' | 'newbuild';
-  category: 'apartment' | 'house' | 'land' | 'commercial';
+  category: 'apartment' | 'house' | 'land' | 'commercial' | 'room' | 'garage';
+  houseType?: string | null;
+  /**
+   * Canonical land area in sotka (100 m²).
+   */
+  plotAreaSotka?: number | null;
+  landCategory?: string | null;
+  permittedUse?: string | null;
+  communications?: {
+    gas?: boolean | null;
+    electricity?: boolean | null;
+    water?: boolean | null;
+    sewer?: boolean | null;
+  };
+  commercialType?: string | null;
+  documentCheckSummary?: string | null;
   dealType: 'sale' | 'rent';
   priceMinor?: number | null;
   currency?: 'RUB' | null;
@@ -1070,8 +1089,23 @@ export interface PropertiesSelect<T extends boolean = true> {
   publishedAt?: T;
   contentPurgedAt?: T;
   slug?: T;
+  publicUrlId?: T;
   market?: T;
   category?: T;
+  houseType?: T;
+  plotAreaSotka?: T;
+  landCategory?: T;
+  permittedUse?: T;
+  communications?:
+    | T
+    | {
+        gas?: T;
+        electricity?: T;
+        water?: T;
+        sewer?: T;
+      };
+  commercialType?: T;
+  documentCheckSummary?: T;
   dealType?: T;
   priceMinor?: T;
   currency?: T;

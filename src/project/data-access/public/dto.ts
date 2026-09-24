@@ -179,6 +179,8 @@ const categoryLabels = {
 	house: "Дома",
 	land: "Участки",
 	commercial: "Коммерческая",
+	room: "Комнаты",
+	garage: "Гаражи",
 } as const;
 
 const dealTypeLabels = {

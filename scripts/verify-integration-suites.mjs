@@ -33,6 +33,7 @@ import {
 	proveLeadDeliveryRelationalMigration,
 	provePayloadAuthSecurityMigration,
 	provePropertyGeoRefsMigration,
+	provePropertyIdentityMigration,
 	provePropertyNumericMigration,
 	proveSiteSettingsMigration,
 	psqlOnTest,
@@ -273,6 +274,8 @@ await prepareIntegrationDatabase(preferredUri);
 proveGeoHierarchyMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
 provePropertyGeoRefsMigration(preferredUri);
+await prepareIntegrationDatabase(preferredUri);
+provePropertyIdentityMigration(preferredUri);
 const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {

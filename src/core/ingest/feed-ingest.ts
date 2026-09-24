@@ -10,7 +10,9 @@ export type FeedPropertyCategory =
 	| "apartment"
 	| "house"
 	| "land"
-	| "commercial";
+	| "commercial"
+	| "room"
+	| "garage";
 export type FeedPropertyDealType = "sale" | "rent";
 
 export type FeedIngestContext = {
@@ -69,6 +71,7 @@ export type FeedPropertyWriteData = {
 
 export type FeedPropertyRecord = FeedPropertyWriteData & {
 	id: string;
+	publicUrlId: number;
 	manualOverrides?: { field: string }[];
 	slug: string;
 };

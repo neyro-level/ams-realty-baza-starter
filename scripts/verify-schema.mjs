@@ -59,6 +59,7 @@ DECLARE
 		,'properties_region_ref_idx'
 		,'properties_city_ref_idx'
 		,'properties_district_ref_idx'
+		,'properties_public_url_id_idx'
 	];
 	required_index text;
 	required_constraints text[] := ARRAY[
@@ -129,6 +130,25 @@ BEGIN
 		)
 	) <> 3 THEN
 		RAISE EXCEPTION 'Missing property geo reference foreign keys';
+	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM information_schema.columns
+		WHERE table_schema = 'public'
+			AND table_name = 'properties'
+			AND column_name = 'public_url_id'
+			AND is_nullable = 'NO'
+			AND column_default LIKE 'nextval(%'
+	) THEN
+		RAISE EXCEPTION 'Missing non-null sequence-backed property public URL identity';
+	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM pg_trigger
+		WHERE tgname = 'properties_public_url_id_immutable'
+			AND NOT tgisinternal
+	) THEN
+		RAISE EXCEPTION 'Missing immutable property public URL identity trigger';
 	END IF;
 
 	IF (

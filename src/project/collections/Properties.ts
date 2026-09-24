@@ -14,6 +14,8 @@ import {
 } from "../../core/ingest/manual-ownership.ts";
 import { normalizePropertyNumericWrite } from "../../core/ingest/numeric-invariants.ts";
 import { publicPropertyReadAccess } from "../data-access/public/access-mode.ts";
+import { allocatePropertyPublicUrlId } from "../../core/data-access/system/property-public-url-id.ts";
+import { assertCategoryFieldOwnership } from "../../core/property/taxonomy.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) =>
 	hasRole(req.user, ["owner", "admin"]);
@@ -90,8 +92,18 @@ export const Properties: CollectionConfig = {
 		},
 	],
 	hooks: {
+		beforeValidate: [
+			({ data, originalDoc }) => {
+				if (!data) return data;
+				assertCategoryFieldOwnership({ ...originalDoc, ...data });
+				return data;
+			},
+		],
 		beforeChange: [
 			({ data, originalDoc, req }) => {
+				if (originalDoc?.publicUrlId != null && data.publicUrlId !== undefined && data.publicUrlId !== originalDoc.publicUrlId) {
+					throw new Error("publicUrlId is immutable.");
+				}
 				normalizePropertyNumericWrite(data);
 				const priceMinor =
 					data.priceMinor === undefined
@@ -281,6 +293,18 @@ export const Properties: CollectionConfig = {
 			},
 		},
 		{
+			name: "publicUrlId",
+			type: "number",
+			unique: true,
+			index: true,
+			defaultValue: ({ req }) => allocatePropertyPublicUrlId(req),
+			access: { update: () => false },
+			admin: {
+				readOnly: true,
+				description: "Stable public identity allocated atomically; never reused or changed.",
+			},
+		},
+		{
 			name: "market",
 			type: "select",
 			required: true,
@@ -301,7 +325,37 @@ export const Properties: CollectionConfig = {
 				{ label: "House", value: "house" },
 				{ label: "Land", value: "land" },
 				{ label: "Commercial", value: "commercial" },
+				{ label: "Room", value: "room" },
+				{ label: "Garage", value: "garage" },
 			],
+		},
+		{
+			name: "houseType",
+			type: "text",
+		},
+		{
+			name: "plotAreaSotka",
+			type: "number",
+			min: 0,
+			admin: { step: 0.01, description: "Canonical land area in sotka (100 m²)." },
+		},
+		{ name: "landCategory", type: "text" },
+		{ name: "permittedUse", type: "text" },
+		{
+			name: "communications",
+			type: "group",
+			fields: [
+				{ name: "gas", type: "checkbox" },
+				{ name: "electricity", type: "checkbox" },
+				{ name: "water", type: "checkbox" },
+				{ name: "sewer", type: "checkbox" },
+			],
+		},
+		{ name: "commercialType", type: "text" },
+		{
+			name: "documentCheckSummary",
+			type: "textarea",
+			access: privateFieldAccess,
 		},
 		{
 			name: "dealType",

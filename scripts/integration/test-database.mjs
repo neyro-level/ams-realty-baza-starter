@@ -16,6 +16,7 @@ import {
 	propertyGeoRefsDownSql,
 	propertyGeoRefsUpSql,
 } from "../../migrations/20260924_151000_property_geo_refs.ts";
+import { propertyIdentityUpSql } from "../../migrations/20260924_170000_property_taxonomy_identity.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -414,6 +415,39 @@ export function provePropertyGeoRefsMigration(testUri) {
 		throw new Error("Property geo refs down migration changed unrelated data.");
 	}
 	psql(testUri, propertyGeoRefsUpSql);
+}
+
+export function provePropertyIdentityMigration(testUri) {
+	psql(
+		testUri,
+		`CREATE TYPE enum_properties_category AS ENUM ('apartment', 'house', 'land', 'commercial');
+		 CREATE TABLE properties (id serial PRIMARY KEY, slug varchar NOT NULL);
+		 INSERT INTO properties (slug) VALUES ('existing-a'), ('existing-b');`,
+	);
+	psql(testUri, propertyIdentityUpSql);
+	const existingIds = psql(
+		testUri,
+		"SELECT string_agg(public_url_id::text, ',' ORDER BY id) FROM properties",
+	);
+	if (existingIds !== "1,2") {
+		throw new Error(`Identity migration did not deterministically retain assigned IDs: ${existingIds}`);
+	}
+	psql(testUri, "INSERT INTO properties (slug) VALUES ('new-c'), ('new-d')");
+	if (
+		psql(testUri, "SELECT count(DISTINCT public_url_id) FROM properties") !== "4"
+	) {
+		throw new Error("Identity sequence reused a public URL ID.");
+	}
+	expectPsqlFailure(
+		testUri,
+		"UPDATE properties SET public_url_id = 999 WHERE slug = 'existing-a'",
+		/immutable/i,
+	);
+	if (
+		psql(testUri, "SELECT public_url_id FROM properties WHERE slug='existing-a'") !== "1"
+	) {
+		throw new Error("Rejected identity update changed an assigned ID.");
+	}
 }
 
 export function psqlOnTest(testUri, sql) {

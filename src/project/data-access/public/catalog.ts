@@ -57,6 +57,8 @@ const propertyCategorySchema = z.enum([
 	"house",
 	"land",
 	"commercial",
+	"room",
+	"garage",
 ]);
 const propertyDealTypeSchema = z.enum(["sale", "rent"]);
 const propertySortSchema = z.enum([
