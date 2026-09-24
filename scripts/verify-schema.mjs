@@ -65,6 +65,11 @@ DECLARE
 		,'developments_kind_idx'
 		,'developments_city_idx'
 		,'properties_development_idx'
+		,'developers_content_purged_at_idx'
+		,'developments_content_purged_at_idx'
+		,'redirects_entity_id_idx'
+		,'lifecycle_events_entity_id_idx'
+		,'lifecycle_events_occurred_at_idx'
 	];
 	required_index text;
 	required_constraints text[] := ARRAY[
@@ -180,6 +185,26 @@ BEGIN
 			AND contype = 'c'
 	) THEN
 		RAISE EXCEPTION 'Missing development kind field guard';
+	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM information_schema.tables
+		WHERE table_schema = 'public' AND table_name = 'lifecycle_events'
+	) OR (
+		SELECT count(*) FROM information_schema.columns
+		WHERE table_schema = 'public'
+			AND table_name IN ('developers', 'developments')
+			AND column_name = 'content_purged_at'
+	) <> 2 THEN
+		RAISE EXCEPTION 'Missing generalized lifecycle storage';
+	END IF;
+
+	IF (
+		SELECT count(*) FROM pg_trigger
+		WHERE tgname IN ('lifecycle_events_append_only', 'redirects_direct_only')
+			AND NOT tgisinternal
+	) <> 2 THEN
+		RAISE EXCEPTION 'Missing lifecycle history or redirect graph guard';
 	END IF;
 
 	IF (

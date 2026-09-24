@@ -1,6 +1,8 @@
 import type { CollectionConfig } from "payload";
 import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
 import { validateDevelopmentWrite } from "../developments/collection-guards.ts";
+import { publicPreparedEntityLifecycleReadAccess } from "../data-access/public/access-mode.ts";
+import { recordEntityLifecycleTransition } from "../lifecycle/record-transition.ts";
 
 const sourceFields = [
 	{ name: "source", type: "text" as const, required: true },
@@ -16,7 +18,7 @@ export const Developments: CollectionConfig = {
 	},
 	access: {
 		create: adminsAndOwners,
-		read: adminsAndOwners,
+		read: publicPreparedEntityLifecycleReadAccess,
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},
@@ -24,6 +26,15 @@ export const Developments: CollectionConfig = {
 		beforeValidate: [
 			async ({ data, originalDoc, req }) =>
 				data ? validateDevelopmentWrite({ data, originalDoc, req }) : data,
+		],
+		afterChange: [
+			({ doc, previousDoc, req }) =>
+				recordEntityLifecycleTransition({
+					entityType: "development",
+					doc,
+					previousDoc,
+					req,
+				}),
 		],
 	},
 	fields: [
@@ -145,5 +156,6 @@ export const Developments: CollectionConfig = {
 			options: ["draft", "published", "archived"],
 		},
 		{ name: "publishedAt", type: "date", index: true },
+		{ name: "contentPurgedAt", type: "date", index: true },
 	],
 };

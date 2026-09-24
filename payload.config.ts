@@ -12,6 +12,7 @@ import { ImportIssues } from "./src/project/collections/ImportIssues.ts";
 import { ImportRuns } from "./src/project/collections/ImportRuns.ts";
 import { LeadDeliveries } from "./src/project/collections/LeadDeliveries.ts";
 import { Leads } from "./src/project/collections/Leads.ts";
+import { LifecycleEvents } from "./src/project/collections/LifecycleEvents.ts";
 import { Media } from "./src/project/collections/Media.ts";
 import { Pages } from "./src/project/collections/Pages.ts";
 import { Properties } from "./src/project/collections/Properties.ts";
@@ -50,6 +51,7 @@ export default buildConfig({
 		ImportIssues,
 		Leads,
 		LeadDeliveries,
+		LifecycleEvents,
 		Media,
 		Redirects,
 	],

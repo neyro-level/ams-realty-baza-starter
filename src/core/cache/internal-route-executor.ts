@@ -14,7 +14,9 @@ const allowedPathPrefixes = [
 	"/sdat",
 	"/kontakty",
 ] as const;
-const allowedTags = new Set(["site", "properties", "property", "media"]);
+const allowedTags = new Set(["site", "properties", "property", "media", "registry"]);
+const allowedEntityTag = /^(geo|district|development|developer|property):[a-z0-9_-]+$/;
+const allowedGeoSurfaceTag = /^geo-surface:[a-z0-9_-]+:[a-z0-9_-]+$/;
 
 export type InternalRevalidationResult = {
 	status: 200 | 400 | 403 | 404;
@@ -25,7 +27,13 @@ export type InternalRevalidationResult = {
 };
 
 function allowedTarget(target: CacheTarget): boolean {
-	if (target.type === "tag") return allowedTags.has(target.tag);
+	if (target.type === "tag") {
+		return (
+			allowedTags.has(target.tag) ||
+			allowedEntityTag.test(target.tag) ||
+			allowedGeoSurfaceTag.test(target.tag)
+		);
+	}
 	return allowedPathPrefixes.some(
 		(prefix) => target.path === prefix || target.path.startsWith(`${prefix}/`),
 	);

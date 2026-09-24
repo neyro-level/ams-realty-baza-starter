@@ -6,7 +6,9 @@ type SystemOperation =
 	| "migration-helper"
 	| "trusted-inspection"
 	| "payload-jobs-inspect"
-	| "payload-jobs-unstuck";
+	| "payload-jobs-unstuck"
+	| "record-lifecycle-event"
+	| "redirect-graph-guard";
 
 export function systemOverrideAccess(operation: SystemOperation) {
 	return {

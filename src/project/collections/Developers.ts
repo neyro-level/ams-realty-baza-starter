@@ -1,6 +1,8 @@
 import type { CollectionConfig } from "payload";
 import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
 import { validateDeveloperWrite } from "../developments/collection-guards.ts";
+import { publicPreparedEntityLifecycleReadAccess } from "../data-access/public/access-mode.ts";
+import { recordEntityLifecycleTransition } from "../lifecycle/record-transition.ts";
 
 export const Developers: CollectionConfig = {
 	slug: "developers",
@@ -11,7 +13,7 @@ export const Developers: CollectionConfig = {
 	},
 	access: {
 		create: adminsAndOwners,
-		read: adminsAndOwners,
+		read: publicPreparedEntityLifecycleReadAccess,
 		update: adminsAndOwners,
 		delete: ownersOnly,
 	},
@@ -19,6 +21,15 @@ export const Developers: CollectionConfig = {
 		beforeValidate: [
 			({ data, originalDoc }) =>
 				data ? validateDeveloperWrite(data, originalDoc) : data,
+		],
+		afterChange: [
+			({ doc, previousDoc, req }) =>
+				recordEntityLifecycleTransition({
+					entityType: "developer",
+					doc,
+					previousDoc,
+					req,
+				}),
 		],
 	},
 	fields: [
@@ -44,5 +55,6 @@ export const Developers: CollectionConfig = {
 			options: ["draft", "published", "archived"],
 		},
 		{ name: "publishedAt", type: "date", index: true },
+		{ name: "contentPurgedAt", type: "date", index: true },
 	],
 };

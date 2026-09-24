@@ -13,6 +13,7 @@ import * as migration_20260924_134500_geo_hierarchy from "./20260924_134500_geo_
 import * as migration_20260924_151000_property_geo_refs from "./20260924_151000_property_geo_refs";
 import * as migration_20260924_170000_property_taxonomy_identity from "./20260924_170000_property_taxonomy_identity";
 import * as migration_20260924_180000_developments from "./20260924_180000_developments";
+import * as migration_20260924_203000_lifecycle_cache from "./20260924_203000_lifecycle_cache";
 
 export const migrations = [
 	{
@@ -89,5 +90,10 @@ export const migrations = [
 		up: migration_20260924_180000_developments.up,
 		down: migration_20260924_180000_developments.down,
 		name: "20260924_180000_developments",
+	},
+	{
+		up: migration_20260924_203000_lifecycle_cache.up,
+		down: migration_20260924_203000_lifecycle_cache.down,
+		name: "20260924_203000_lifecycle_cache",
 	},
 ];

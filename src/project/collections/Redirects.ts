@@ -2,6 +2,9 @@ import type { CollectionConfig } from "payload";
 import { publicRedirectReadAccess } from "../data-access/public/access-mode.ts";
 import { sanitizeExplicitRedirectPath } from "../../core/seo/redirect-path.ts";
 import { ownersOnly } from "../../core/access/roles.ts";
+import { assertDirectRedirect } from "../../core/lifecycle/redirect-graph.ts";
+import { appendLifecycleEvent } from "../../core/data-access/system/lifecycle-store.ts";
+import { findRedirectGraphNeighbors } from "../../core/data-access/system/redirect-graph.ts";
 
 export const Redirects: CollectionConfig = {
 	slug: "redirects",
@@ -17,10 +20,10 @@ export const Redirects: CollectionConfig = {
 	},
 	hooks: {
 		beforeValidate: [
-			({ data }) => {
+			async ({ data, originalDoc, req }) => {
 				if (!data) return data;
 				const to = sanitizeExplicitRedirectPath(
-					typeof data.to === "string" ? data.to : null,
+					typeof data.to === "string" ? data.to : originalDoc?.to,
 				);
 				if (!to) {
 					throw new Error(
@@ -28,13 +31,44 @@ export const Redirects: CollectionConfig = {
 					);
 				}
 				data.to = to;
-				if (typeof data.from === "string") {
-					const from = data.from.trim();
-					if (from === to) {
-						throw new Error("Redirect must not form a self-chain.");
-					}
-				}
+				const from = sanitizeExplicitRedirectPath(
+					typeof data.from === "string" ? data.from : originalDoc?.from,
+				);
+				if (!from)
+					throw new Error("Redirect source must be an explicit public path.");
+				data.from = from;
+				const related = await findRedirectGraphNeighbors({
+					payload: req.payload,
+					req,
+					from,
+					to,
+				});
+				assertDirectRedirect(
+					{ from, to },
+					related
+						.filter((row) => String(row.id) !== String(originalDoc?.id ?? ""))
+						.map((row) => ({ from: row.from, to: row.to })),
+				);
 				return data;
+			},
+		],
+		afterChange: [
+			async ({ doc, previousDoc, operation, req }) => {
+				if (!doc.entityType || !doc.entityId) return;
+				if (
+					operation === "update" &&
+					previousDoc?.from === doc.from &&
+					previousDoc?.to === doc.to
+				)
+					return;
+				await appendLifecycleEvent(req.payload, {
+					entityType: doc.entityType,
+					entityId: doc.entityId,
+					action: "canonical_move",
+					fromPath: doc.from,
+					toPath: doc.to,
+					reason: doc.reason,
+				});
 			},
 		],
 	},
@@ -74,5 +108,11 @@ export const Redirects: CollectionConfig = {
 			type: "relationship",
 			relationTo: "users",
 		},
+		{
+			name: "entityType",
+			type: "select",
+			options: ["property", "development", "developer"],
+		},
+		{ name: "entityId", type: "text", index: true },
 	],
 };

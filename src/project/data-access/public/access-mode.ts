@@ -2,6 +2,7 @@ import type { Access, PayloadRequest, Where } from "payload";
 
 export const publicGatewayOperation = "public-read" as const;
 export const propertyLifecycleOperation = "property-lifecycle-read" as const;
+export const entityLifecycleOperation = "entity-lifecycle-read" as const;
 
 function isOperator(user: unknown): boolean {
 	const roles = (user as { roles?: unknown } | null | undefined)?.roles;
@@ -29,6 +30,13 @@ function isPropertyLifecycleRead(
 	);
 }
 
+function isEntityLifecycleRead(req: Pick<PayloadRequest, "context">): boolean {
+	const operation = (
+		req.context as { publicGatewayOperation?: string } | undefined
+	)?.publicGatewayOperation;
+	return operation === entityLifecycleOperation;
+}
+
 export function publicGatewayReadAccess() {
 	return {
 		overrideAccess: false as const,
@@ -42,6 +50,14 @@ export function propertyLifecycleReadAccess() {
 		overrideAccess: false as const,
 		user: null,
 		context: { publicGatewayOperation: propertyLifecycleOperation },
+	};
+}
+
+export function entityLifecycleReadAccess() {
+	return {
+		overrideAccess: false as const,
+		user: null,
+		context: { publicGatewayOperation: entityLifecycleOperation },
 	};
 }
 
@@ -70,9 +86,21 @@ const publicPropertyWhere: Where = {
 
 export const publicPropertyReadAccess: Access = ({ req }) => {
 	if (isOperator(req.user)) return true;
-	if (isPropertyLifecycleRead(req)) return propertyLifecycleWhere;
+	if (isPropertyLifecycleRead(req) || isEntityLifecycleRead(req)) return propertyLifecycleWhere;
 	if (!isPublicGatewayRead(req)) return false;
 	return publicPropertyWhere;
+};
+
+const preparedEntityLifecycleWhere: Where = {
+	and: [
+		{ publishedAt: { exists: true } },
+		{ status: { in: ["published", "archived"] } },
+	],
+};
+
+export const publicPreparedEntityLifecycleReadAccess: Access = ({ req }) => {
+	if (isOperator(req.user)) return true;
+	return isEntityLifecycleRead(req) ? preparedEntityLifecycleWhere : false;
 };
 
 export const publicPageReadAccess: Access = ({ req }) =>

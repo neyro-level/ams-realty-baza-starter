@@ -80,6 +80,7 @@ export interface Config {
     'import-issues': ImportIssue;
     leads: Lead;
     'lead-deliveries': LeadDelivery;
+    'lifecycle-events': LifecycleEvent;
     media: Media;
     redirects: Redirect;
     'payload-kv': PayloadKv;
@@ -103,6 +104,7 @@ export interface Config {
     'import-issues': ImportIssuesSelect<false> | ImportIssuesSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     'lead-deliveries': LeadDeliveriesSelect<false> | LeadDeliveriesSelect<true>;
+    'lifecycle-events': LifecycleEventsSelect<false> | LifecycleEventsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -332,6 +334,7 @@ export interface Developer {
   checkedAt: string;
   status: 'draft' | 'published' | 'archived';
   publishedAt?: string | null;
+  contentPurgedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -456,6 +459,7 @@ export interface Development {
     | null;
   status: 'draft' | 'published' | 'archived';
   publishedAt?: string | null;
+  contentPurgedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -821,6 +825,23 @@ export interface LeadDelivery {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lifecycle-events".
+ */
+export interface LifecycleEvent {
+  id: number;
+  entityType: 'property' | 'development' | 'developer';
+  entityId: string;
+  action: 'published' | 'archived' | 'purged' | 'canonical_move';
+  canonicalPath?: string | null;
+  fromPath?: string | null;
+  toPath?: string | null;
+  reason?: string | null;
+  occurredAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -833,6 +854,8 @@ export interface Redirect {
   statusCode: '301' | '302';
   reason?: string | null;
   createdBy?: (number | null) | User;
+  entityType?: ('property' | 'development' | 'developer') | null;
+  entityId?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1037,6 +1060,10 @@ export interface PayloadLockedDocument {
         value: number | LeadDelivery;
       } | null)
     | ({
+        relationTo: 'lifecycle-events';
+        value: number | LifecycleEvent;
+      } | null)
+    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
@@ -1233,6 +1260,7 @@ export interface DevelopersSelect<T extends boolean = true> {
   checkedAt?: T;
   status?: T;
   publishedAt?: T;
+  contentPurgedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1341,6 +1369,7 @@ export interface DevelopmentsSelect<T extends boolean = true> {
       };
   status?: T;
   publishedAt?: T;
+  contentPurgedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1581,6 +1610,22 @@ export interface LeadDeliveriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lifecycle-events_select".
+ */
+export interface LifecycleEventsSelect<T extends boolean = true> {
+  entityType?: T;
+  entityId?: T;
+  action?: T;
+  canonicalPath?: T;
+  fromPath?: T;
+  toPath?: T;
+  reason?: T;
+  occurredAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1607,6 +1652,8 @@ export interface RedirectsSelect<T extends boolean = true> {
   statusCode?: T;
   reason?: T;
   createdBy?: T;
+  entityType?: T;
+  entityId?: T;
   updatedAt?: T;
   createdAt?: T;
 }

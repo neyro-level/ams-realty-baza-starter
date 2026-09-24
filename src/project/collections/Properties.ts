@@ -16,6 +16,7 @@ import { normalizePropertyNumericWrite } from "../../core/ingest/numeric-invaria
 import { publicPropertyReadAccess } from "../data-access/public/access-mode.ts";
 import { allocatePropertyPublicUrlId } from "../../core/data-access/system/property-public-url-id.ts";
 import { assertCategoryFieldOwnership } from "../../core/property/taxonomy.ts";
+import { recordEntityLifecycleTransition } from "../lifecycle/record-transition.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) =>
 	hasRole(req.user, ["owner", "admin"]);
@@ -172,6 +173,15 @@ export const Properties: CollectionConfig = {
 				if (lockedSlug) data.slug = lockedSlug;
 				return data;
 			},
+		],
+		afterChange: [
+			({ doc, previousDoc, req }) =>
+				recordEntityLifecycleTransition({
+					entityType: "property",
+					doc,
+					previousDoc,
+					req,
+				}),
 		],
 	},
 	fields: [
