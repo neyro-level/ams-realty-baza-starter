@@ -1,0 +1,4834 @@
+{
+  "schema_version": 2,
+  "beads_prefix": "ams8",
+  "source": {
+    "plan_id": "AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8",
+    "path": "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+    "version": "v6",
+    "status": "APPROVED",
+    "approved_by": "owner",
+    "approved_at": "2026-09-24T12:35:41+03:00",
+    "sha256": "89ca079fdda21f02decdc1cc96fdccf9e80f0489a8badca01202e12e018272ff",
+    "epic_anchors": [
+      "P8-00",
+      "P8-01",
+      "P8-02",
+      "P8-03",
+      "P8-04",
+      "P8-05",
+      "P8-06",
+      "P8-07",
+      "P8-08",
+      "P8-09",
+      "P8-10",
+      "P8-11",
+      "P8-12",
+      "P8-13",
+      "P8-14",
+      "P8-15",
+      "P8-16",
+      "P8-17",
+      "P8-18",
+      "P8-19",
+      "P8-20",
+      "P8-21A",
+      "P8-21B",
+      "P8-22",
+      "P8-23A",
+      "P8-23B",
+      "P8-24",
+      "P8-25"
+    ]
+  },
+  "repositories": [
+    {
+      "key": "starter",
+      "remote": "https://git.sourcecraft.dev/integrator-p/ams-realty-baza-starter.git",
+      "default_branch": "main"
+    }
+  ],
+  "nodes": [
+    {
+      "key": "P8-00",
+      "title": "Baseline and impact inventory",
+      "type": "epic",
+      "source_anchor": "P8-00",
+      "goal": "Exact impact inventory",
+      "scope": [
+        "Exact P8-00 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: `docs/plan8/S8_00_INVENTORY.md`"
+      ],
+      "acceptance_criteria": [
+        "complete owner map / STANDARD",
+        "All exact P8-00 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert docs PR"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "unknown legacy owner or base drift"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-00-IMPLEMENTATION",
+      "title": "Implement P8-00 — Baseline and impact inventory",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-00",
+      "source_anchor": "P8-00",
+      "goal": "Exact impact inventory",
+      "scope": [
+        "Implement only P8-00",
+        "Entry condition: approved imported plan, clean worktree",
+        "Source of Truth: `docs/plan8/S8_00_INVENTORY.md`"
+      ],
+      "acceptance_criteria": [
+        "complete owner map / STANDARD",
+        "Every P8-00 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert docs PR"
+      ],
+      "required_checks": [
+        "Prove epic exit: complete owner map / STANDARD",
+        "Reconcile every acceptance item for P8-00 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "unknown legacy owner or base drift"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-00-DELIVERY",
+      "title": "Deliver P8-00 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-00",
+      "source_anchor": "P8-00",
+      "goal": "Review and merge P8-00 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-00-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-01",
+      "title": "Canon adoption and platform contract",
+      "type": "epic",
+      "source_anchor": "P8-01",
+      "goal": "Adopted target canon",
+      "scope": [
+        "Exact P8-01 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: docs map + Product Structure + Architecture"
+      ],
+      "acceptance_criteria": [
+        "current/target truth and links agree / STANDARD",
+        "All exact P8-01 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert docs PR"
+      ],
+      "depends_on": [
+        "P8-00"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "docs claim unimplemented runtime as live"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-01-IMPLEMENTATION",
+      "title": "Implement P8-01 — Canon adoption and platform contract",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-01",
+      "source_anchor": "P8-01",
+      "goal": "Adopted target canon",
+      "scope": [
+        "Implement only P8-01",
+        "Entry condition: P8-00",
+        "Source of Truth: docs map + Product Structure + Architecture"
+      ],
+      "acceptance_criteria": [
+        "current/target truth and links agree / STANDARD",
+        "Every P8-01 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert docs PR"
+      ],
+      "required_checks": [
+        "Prove epic exit: current/target truth and links agree / STANDARD",
+        "Reconcile every acceptance item for P8-01 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-00-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "docs claim unimplemented runtime as live"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-01-DELIVERY",
+      "title": "Deliver P8-01 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-01",
+      "source_anchor": "P8-01",
+      "goal": "Review and merge P8-01 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-01-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-02",
+      "title": "Platform/project boundary and guards",
+      "type": "epic",
+      "source_anchor": "P8-02",
+      "goal": "Enforced dependency/profile boundary",
+      "scope": [
+        "Exact P8-02 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: guards config and tests"
+      ],
+      "acceptance_criteria": [
+        "positive and negative guard fixtures / STANDARD",
+        "All exact P8-02 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert guard additions"
+      ],
+      "depends_on": [
+        "P8-01"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "required exception weakens core boundary"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-02-IMPLEMENTATION",
+      "title": "Implement P8-02 — Platform/project boundary and guards",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-02",
+      "source_anchor": "P8-02",
+      "goal": "Enforced dependency/profile boundary",
+      "scope": [
+        "Implement only P8-02",
+        "Entry condition: P8-01",
+        "Source of Truth: guards config and tests"
+      ],
+      "acceptance_criteria": [
+        "positive and negative guard fixtures / STANDARD",
+        "Every P8-02 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert guard additions"
+      ],
+      "required_checks": [
+        "Prove epic exit: positive and negative guard fixtures / STANDARD",
+        "Reconcile every acceptance item for P8-02 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-01-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "required exception weakens core boundary"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-02-DELIVERY",
+      "title": "Deliver P8-02 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-02",
+      "source_anchor": "P8-02",
+      "goal": "Review and merge P8-02 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-02-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:a",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-03",
+      "title": "SiteProfile, presets and fixtures",
+      "type": "epic",
+      "source_anchor": "P8-03",
+      "goal": "Validated profiles/presets",
+      "scope": [
+        "Exact P8-03 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: project profile schema and fixtures"
+      ],
+      "acceptance_criteria": [
+        "four fixtures and invalid matrices pass / STANDARD",
+        "All exact P8-03 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert profile API and fixtures"
+      ],
+      "depends_on": [
+        "P8-02"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "ambiguous status precedence"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-03-IMPLEMENTATION",
+      "title": "Implement P8-03 — SiteProfile, presets and fixtures",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-03",
+      "source_anchor": "P8-03",
+      "goal": "Validated profiles/presets",
+      "scope": [
+        "Implement only P8-03",
+        "Entry condition: P8-02",
+        "Source of Truth: project profile schema and fixtures"
+      ],
+      "acceptance_criteria": [
+        "four fixtures and invalid matrices pass / STANDARD",
+        "Every P8-03 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert profile API and fixtures"
+      ],
+      "required_checks": [
+        "Prove epic exit: four fixtures and invalid matrices pass / STANDARD",
+        "Reconcile every acceptance item for P8-03 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-02-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "ambiguous status precedence"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-03-DELIVERY",
+      "title": "Deliver P8-03 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-03",
+      "source_anchor": "P8-03",
+      "goal": "Review and merge P8-03 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-03-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-04",
+      "title": "URL grammar",
+      "type": "epic",
+      "source_anchor": "P8-04",
+      "goal": "Reversible URL grammar",
+      "scope": [
+        "Exact P8-04 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: PageKey parser-builder tests"
+      ],
+      "acceptance_criteria": [
+        "complete round-trip and collision matrix / STANDARD",
+        "All exact P8-04 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert pure module"
+      ],
+      "depends_on": [
+        "P8-03"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "grammar cannot map one path to one PageKey"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-04-IMPLEMENTATION",
+      "title": "Implement P8-04 — URL grammar",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-04",
+      "source_anchor": "P8-04",
+      "goal": "Reversible URL grammar",
+      "scope": [
+        "Implement only P8-04",
+        "Entry condition: P8-03",
+        "Source of Truth: PageKey parser-builder tests"
+      ],
+      "acceptance_criteria": [
+        "complete round-trip and collision matrix / STANDARD",
+        "Every P8-04 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert pure module"
+      ],
+      "required_checks": [
+        "Prove epic exit: complete round-trip and collision matrix / STANDARD",
+        "Reconcile every acceptance item for P8-04 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-03-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "grammar cannot map one path to one PageKey"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-04-DELIVERY",
+      "title": "Deliver P8-04 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-04",
+      "source_anchor": "P8-04",
+      "goal": "Review and merge P8-04 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-04-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:b",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-05",
+      "title": "Site settings / NAP",
+      "type": "epic",
+      "source_anchor": "P8-05",
+      "goal": "Canonical public NAP",
+      "scope": [
+        "Exact P8-05 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: Payload Global, migration, NapDTO"
+      ],
+      "acceptance_criteria": [
+        "clean/non-empty migration, access and DTO proof / RISKY schema-data",
+        "All exact P8-05 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: tested down migration; old component source retained"
+      ],
+      "depends_on": [
+        "P8-02"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "anonymous raw Global access or lossy down"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-05-IMPLEMENTATION",
+      "title": "Implement P8-05 — Site settings / NAP",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-05",
+      "source_anchor": "P8-05",
+      "goal": "Canonical public NAP",
+      "scope": [
+        "Implement only P8-05",
+        "Entry condition: P8-02",
+        "Source of Truth: Payload Global, migration, NapDTO"
+      ],
+      "acceptance_criteria": [
+        "clean/non-empty migration, access and DTO proof / RISKY schema-data",
+        "Every P8-05 requirement in section 5A is mapped to evidence",
+        "Recovery contract: tested down migration; old component source retained"
+      ],
+      "required_checks": [
+        "Prove epic exit: clean/non-empty migration, access and DTO proof / RISKY schema-data",
+        "Reconcile every acceptance item for P8-05 in master-plan section 5A",
+        "clean and non-empty PostgreSQL migration proof",
+        "pnpm verify:schema",
+        "relevant DB integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-02-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "anonymous raw Global access or lossy down"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:implementation",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-05-DELIVERY",
+      "title": "Deliver P8-05 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-05",
+      "source_anchor": "P8-05",
+      "goal": "Review and merge P8-05 through one exact-head RISKY schema-data Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=schema-data",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-05-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "P8-06",
+      "title": "Regions, cities, districts",
+      "type": "epic",
+      "source_anchor": "P8-06",
+      "goal": "Canonical geo hierarchy",
+      "scope": [
+        "Exact P8-06 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: Payload geo collections"
+      ],
+      "acceptance_criteria": [
+        "hierarchy, uniqueness, cycle and mutation tests / RISKY schema-data",
+        "All exact P8-06 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: tested down before dependent data; otherwise forward fix"
+      ],
+      "depends_on": [
+        "P8-04"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "collision namespace unresolved"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-06-IMPLEMENTATION",
+      "title": "Implement P8-06 — Regions, cities, districts",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-06",
+      "source_anchor": "P8-06",
+      "goal": "Canonical geo hierarchy",
+      "scope": [
+        "Implement only P8-06",
+        "Entry condition: P8-04",
+        "Source of Truth: Payload geo collections"
+      ],
+      "acceptance_criteria": [
+        "hierarchy, uniqueness, cycle and mutation tests / RISKY schema-data",
+        "Every P8-06 requirement in section 5A is mapped to evidence",
+        "Recovery contract: tested down before dependent data; otherwise forward fix"
+      ],
+      "required_checks": [
+        "Prove epic exit: hierarchy, uniqueness, cycle and mutation tests / RISKY schema-data",
+        "Reconcile every acceptance item for P8-06 in master-plan section 5A",
+        "clean and non-empty PostgreSQL migration proof",
+        "pnpm verify:schema",
+        "relevant DB integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-04-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "collision namespace unresolved"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:implementation",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-06-DELIVERY",
+      "title": "Deliver P8-06 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-06",
+      "source_anchor": "P8-06",
+      "goal": "Review and merge P8-06 through one exact-head RISKY schema-data Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=schema-data",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-06-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "P8-07",
+      "title": "Property geo relations and backfill",
+      "type": "epic",
+      "source_anchor": "P8-07",
+      "goal": "Additive property geo refs",
+      "scope": [
+        "Exact P8-07 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: property schema + backfill report"
+      ],
+      "acceptance_criteria": [
+        "idempotent clean/non-empty migration and ambiguity report / RISKY schema-data",
+        "All exact P8-07 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: down removes refs only after backup/proof; raw text retained"
+      ],
+      "depends_on": [
+        "P8-06"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "guessed geo identity or raw data loss"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-07-IMPLEMENTATION",
+      "title": "Implement P8-07 — Property geo relations and backfill",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-07",
+      "source_anchor": "P8-07",
+      "goal": "Additive property geo refs",
+      "scope": [
+        "Implement only P8-07",
+        "Entry condition: P8-06",
+        "Source of Truth: property schema + backfill report"
+      ],
+      "acceptance_criteria": [
+        "idempotent clean/non-empty migration and ambiguity report / RISKY schema-data",
+        "Every P8-07 requirement in section 5A is mapped to evidence",
+        "Recovery contract: down removes refs only after backup/proof; raw text retained"
+      ],
+      "required_checks": [
+        "Prove epic exit: idempotent clean/non-empty migration and ambiguity report / RISKY schema-data",
+        "Reconcile every acceptance item for P8-07 in master-plan section 5A",
+        "clean and non-empty PostgreSQL migration proof",
+        "pnpm verify:schema",
+        "relevant DB integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-06-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "guessed geo identity or raw data loss"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:implementation",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-07-DELIVERY",
+      "title": "Deliver P8-07 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-07",
+      "source_anchor": "P8-07",
+      "goal": "Review and merge P8-07 through one exact-head RISKY schema-data Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=schema-data",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-07-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "P8-08",
+      "title": "Taxonomy and publicUrlId",
+      "type": "epic",
+      "source_anchor": "P8-08",
+      "goal": "Stable public property identity",
+      "scope": [
+        "Exact P8-08 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: schema migration + identity tests"
+      ],
+      "acceptance_criteria": [
+        "atomic sequence/default integration, immutability and concurrency proof / RISKY schema-data",
+        "All exact P8-08 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: keep assigned IDs; disable new URL wiring and forward-fix sequence"
+      ],
+      "depends_on": [
+        "P8-07"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "Payload insert/default spike fails or ID can be reused"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-08-IMPLEMENTATION",
+      "title": "Implement P8-08 — Taxonomy and publicUrlId",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-08",
+      "source_anchor": "P8-08",
+      "goal": "Stable public property identity",
+      "scope": [
+        "Implement only P8-08",
+        "Entry condition: P8-07",
+        "Source of Truth: schema migration + identity tests"
+      ],
+      "acceptance_criteria": [
+        "atomic sequence/default integration, immutability and concurrency proof / RISKY schema-data",
+        "Every P8-08 requirement in section 5A is mapped to evidence",
+        "Recovery contract: keep assigned IDs; disable new URL wiring and forward-fix sequence"
+      ],
+      "required_checks": [
+        "Prove epic exit: atomic sequence/default integration, immutability and concurrency proof / RISKY schema-data",
+        "Reconcile every acceptance item for P8-08 in master-plan section 5A",
+        "clean and non-empty PostgreSQL migration proof",
+        "pnpm verify:schema",
+        "relevant DB integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-07-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "Payload insert/default spike fails or ID can be reused"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:implementation",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-08-DELIVERY",
+      "title": "Deliver P8-08 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-08",
+      "source_anchor": "P8-08",
+      "goal": "Review and merge P8-08 through one exact-head RISKY schema-data Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=schema-data",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-08-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "P8-09",
+      "title": "Developments and developers",
+      "type": "epic",
+      "source_anchor": "P8-09",
+      "goal": "Unified development domain",
+      "scope": [
+        "Exact P8-09 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: Payload collections + module manifest"
+      ],
+      "acceptance_criteria": [
+        "kind validation, prepared isolation and access proof / RISKY schema-data",
+        "All exact P8-09 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: tested additive down before dependent imports"
+      ],
+      "depends_on": [
+        "P8-06"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "cross-kind pollution or prepared surface leaks public"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-09-IMPLEMENTATION",
+      "title": "Implement P8-09 — Developments and developers",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-09",
+      "source_anchor": "P8-09",
+      "goal": "Unified development domain",
+      "scope": [
+        "Implement only P8-09",
+        "Entry condition: P8-06",
+        "Source of Truth: Payload collections + module manifest"
+      ],
+      "acceptance_criteria": [
+        "kind validation, prepared isolation and access proof / RISKY schema-data",
+        "Every P8-09 requirement in section 5A is mapped to evidence",
+        "Recovery contract: tested additive down before dependent imports"
+      ],
+      "required_checks": [
+        "Prove epic exit: kind validation, prepared isolation and access proof / RISKY schema-data",
+        "Reconcile every acceptance item for P8-09 in master-plan section 5A",
+        "clean and non-empty PostgreSQL migration proof",
+        "pnpm verify:schema",
+        "relevant DB integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-06-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "cross-kind pollution or prepared surface leaks public"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:implementation",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-09-DELIVERY",
+      "title": "Deliver P8-09 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-09",
+      "source_anchor": "P8-09",
+      "goal": "Review and merge P8-09 through one exact-head RISKY schema-data Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=schema-data",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-09-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:b",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "P8-10",
+      "title": "Feed mapping, geo normalization and media mirror",
+      "type": "epic",
+      "source_anchor": "P8-10",
+      "goal": "Safe normalized feed/media ingest",
+      "scope": [
+        "Exact P8-10 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: ingest mapping and job evidence"
+      ],
+      "acceptance_criteria": [
+        "adversarial feed, owned-media and deactivation proof / RISKY ingest-jobs",
+        "All exact P8-10 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: disable new mapping/mirror; retain source evidence and owned files"
+      ],
+      "depends_on": [
+        "P8-06",
+        "P8-07",
+        "P8-08"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "unsafe host, unknown type publishes, ownership regression"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "TASK-10-IMPLEMENTATION",
+      "title": "Implement P8-10 — Feed mapping, geo normalization and media mirror",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-10",
+      "source_anchor": "P8-10",
+      "goal": "Safe normalized feed/media ingest",
+      "scope": [
+        "Implement only P8-10",
+        "Entry condition: P8-06/07/08",
+        "Source of Truth: ingest mapping and job evidence"
+      ],
+      "acceptance_criteria": [
+        "adversarial feed, owned-media and deactivation proof / RISKY ingest-jobs",
+        "Every P8-10 requirement in section 5A is mapped to evidence",
+        "Recovery contract: disable new mapping/mirror; retain source evidence and owned files"
+      ],
+      "required_checks": [
+        "Prove epic exit: adversarial feed, owned-media and deactivation proof / RISKY ingest-jobs",
+        "Reconcile every acceptance item for P8-10 in master-plan section 5A",
+        "relevant importer/job integration proof",
+        "pnpm verify:jobs-config",
+        "pnpm verify:security-boundaries",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-06-DELIVERY",
+        "TASK-07-DELIVERY",
+        "TASK-08-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "unsafe host, unknown type publishes, ownership regression"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "work:implementation",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "TASK-10-DELIVERY",
+      "title": "Deliver P8-10 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-10",
+      "source_anchor": "P8-10",
+      "goal": "Review and merge P8-10 through one exact-head RISKY ingest-jobs Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=ingest-jobs",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-10-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "P8-11",
+      "title": "Development Excel import",
+      "type": "epic",
+      "source_anchor": "P8-11",
+      "goal": "Idempotent development Excel ingest",
+      "scope": [
+        "Exact P8-11 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: importer, template, import runs"
+      ],
+      "acceptance_criteria": [
+        "dependency preflight, dry-run/apply/repeat-zero-diff / RISKY ingest-jobs",
+        "All exact P8-11 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: importer disabled; applied rows recover from import-run evidence"
+      ],
+      "depends_on": [
+        "P8-09"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "library/license unresolved or existing YRL provenance breaks"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "TASK-11-IMPLEMENTATION",
+      "title": "Implement P8-11 — Development Excel import",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-11",
+      "source_anchor": "P8-11",
+      "goal": "Idempotent development Excel ingest",
+      "scope": [
+        "Implement only P8-11",
+        "Entry condition: P8-09",
+        "Source of Truth: importer, template, import runs"
+      ],
+      "acceptance_criteria": [
+        "dependency preflight, dry-run/apply/repeat-zero-diff / RISKY ingest-jobs",
+        "Every P8-11 requirement in section 5A is mapped to evidence",
+        "Recovery contract: importer disabled; applied rows recover from import-run evidence"
+      ],
+      "required_checks": [
+        "Prove epic exit: dependency preflight, dry-run/apply/repeat-zero-diff / RISKY ingest-jobs",
+        "Reconcile every acceptance item for P8-11 in master-plan section 5A",
+        "relevant importer/job integration proof",
+        "pnpm verify:jobs-config",
+        "pnpm verify:security-boundaries",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-09-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "library/license unresolved or existing YRL provenance breaks"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "work:implementation",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "TASK-11-DELIVERY",
+      "title": "Deliver P8-11 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-11",
+      "source_anchor": "P8-11",
+      "goal": "Review and merge P8-11 through one exact-head RISKY ingest-jobs Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=ingest-jobs",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-11-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "P8-12",
+      "title": "Frozen DTO/contracts",
+      "type": "epic",
+      "source_anchor": "P8-12",
+      "goal": "Frozen contract major 2.0.0",
+      "scope": [
+        "Exact P8-12 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: contracts package lock + ADR + feasibility"
+      ],
+      "acceptance_criteria": [
+        "all consumers/fixtures pass and guarded lock/freeze succeeds / RISKY dependency-runtime",
+        "All exact P8-12 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: do not freeze until consumers pass; revert whole contract wave before merge"
+      ],
+      "depends_on": [
+        "P8-05",
+        "P8-06",
+        "P8-08",
+        "P8-09"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "partial consumer migration or approval/ADR mismatch"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-12-IMPLEMENTATION",
+      "title": "Implement P8-12 — Frozen DTO/contracts",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-12",
+      "source_anchor": "P8-12",
+      "goal": "Frozen contract major 2.0.0",
+      "scope": [
+        "Implement only P8-12",
+        "Entry condition: P8-05/06/08/09",
+        "Source of Truth: contracts package lock + ADR + feasibility"
+      ],
+      "acceptance_criteria": [
+        "all consumers/fixtures pass and guarded lock/freeze succeeds / RISKY dependency-runtime",
+        "Every P8-12 requirement in section 5A is mapped to evidence",
+        "Recovery contract: do not freeze until consumers pass; revert whole contract wave before merge"
+      ],
+      "required_checks": [
+        "Prove epic exit: all consumers/fixtures pass and guarded lock/freeze succeeds / RISKY dependency-runtime",
+        "Reconcile every acceptance item for P8-12 in master-plan section 5A",
+        "pnpm quality:architecture",
+        "relevant runtime/integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-05-DELIVERY",
+        "TASK-06-DELIVERY",
+        "TASK-08-DELIVERY",
+        "TASK-09-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "partial consumer migration or approval/ADR mismatch"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "work:implementation",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-12-DELIVERY",
+      "title": "Deliver P8-12 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-12",
+      "source_anchor": "P8-12",
+      "goal": "Review and merge P8-12 through one exact-head RISKY dependency-runtime Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=dependency-runtime",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-12-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "P8-13",
+      "title": "Public Gateway methods",
+      "type": "epic",
+      "source_anchor": "P8-13",
+      "goal": "Bounded anonymous read boundary",
+      "scope": [
+        "Exact P8-13 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: Public Gateway"
+      ],
+      "acceptance_criteria": [
+        "access/select/depth/query-budget/cross-city proof / RISKY auth-pii-leads",
+        "All exact P8-13 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert methods; DTO contract stays"
+      ],
+      "depends_on": [
+        "P8-12"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "Local API access bypass, N+1 or unbounded aggregate"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:auth-pii-leads"
+      ]
+    },
+    {
+      "key": "TASK-13-IMPLEMENTATION",
+      "title": "Implement P8-13 — Public Gateway methods",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-13",
+      "source_anchor": "P8-13",
+      "goal": "Bounded anonymous read boundary",
+      "scope": [
+        "Implement only P8-13",
+        "Entry condition: P8-12 + schemas",
+        "Source of Truth: Public Gateway"
+      ],
+      "acceptance_criteria": [
+        "access/select/depth/query-budget/cross-city proof / RISKY auth-pii-leads",
+        "Every P8-13 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert methods; DTO contract stays"
+      ],
+      "required_checks": [
+        "Prove epic exit: access/select/depth/query-budget/cross-city proof / RISKY auth-pii-leads",
+        "Reconcile every acceptance item for P8-13 in master-plan section 5A",
+        "access and PII negative matrix",
+        "pnpm verify:security-boundaries",
+        "relevant lead/public-gateway integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-12-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "Local API access bypass, N+1 or unbounded aggregate"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "work:implementation",
+        "risk:auth-pii-leads"
+      ]
+    },
+    {
+      "key": "TASK-13-DELIVERY",
+      "title": "Deliver P8-13 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-13",
+      "source_anchor": "P8-13",
+      "goal": "Review and merge P8-13 through one exact-head RISKY auth-pii-leads Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=auth-pii-leads",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-13-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:c",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:auth-pii-leads"
+      ]
+    },
+    {
+      "key": "P8-14",
+      "title": "SEO Registry and metadata templates",
+      "type": "epic",
+      "source_anchor": "P8-14",
+      "goal": "Evidence-driven SEO metadata",
+      "scope": [
+        "Exact P8-14 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: registry seed, schema and templates"
+      ],
+      "acceptance_criteria": [
+        "source/date/duplicate/morphology fixtures pass / STANDARD",
+        "All exact P8-14 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert seed/template changes"
+      ],
+      "depends_on": [
+        "P8-03",
+        "P8-04"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "synthetic metric presented as real evidence"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-14-IMPLEMENTATION",
+      "title": "Implement P8-14 — SEO Registry and metadata templates",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-14",
+      "source_anchor": "P8-14",
+      "goal": "Evidence-driven SEO metadata",
+      "scope": [
+        "Implement only P8-14",
+        "Entry condition: P8-03/04",
+        "Source of Truth: registry seed, schema and templates"
+      ],
+      "acceptance_criteria": [
+        "source/date/duplicate/morphology fixtures pass / STANDARD",
+        "Every P8-14 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert seed/template changes"
+      ],
+      "required_checks": [
+        "Prove epic exit: source/date/duplicate/morphology fixtures pass / STANDARD",
+        "Reconcile every acceptance item for P8-14 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-03-DELIVERY",
+        "TASK-04-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "synthetic metric presented as real evidence"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-14-DELIVERY",
+      "title": "Deliver P8-14 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-14",
+      "source_anchor": "P8-14",
+      "goal": "Review and merge P8-14 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-14-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-15",
+      "title": "Content Gate",
+      "type": "epic",
+      "source_anchor": "P8-15",
+      "goal": "One indexability decision",
+      "scope": [
+        "Exact P8-15 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: pure Content Gate"
+      ],
+      "acceptance_criteria": [
+        "complete four-profile acceptance matrix / STANDARD",
+        "All exact P8-15 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert pure module"
+      ],
+      "depends_on": [
+        "P8-12",
+        "P8-14"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "override can bypass lifecycle or platform status"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-15-IMPLEMENTATION",
+      "title": "Implement P8-15 — Content Gate",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-15",
+      "source_anchor": "P8-15",
+      "goal": "One indexability decision",
+      "scope": [
+        "Implement only P8-15",
+        "Entry condition: P8-12/14",
+        "Source of Truth: pure Content Gate"
+      ],
+      "acceptance_criteria": [
+        "complete four-profile acceptance matrix / STANDARD",
+        "Every P8-15 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert pure module"
+      ],
+      "required_checks": [
+        "Prove epic exit: complete four-profile acceptance matrix / STANDARD",
+        "Reconcile every acceptance item for P8-15 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-12-DELIVERY",
+        "TASK-14-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "override can bypass lifecycle or platform status"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-15-DELIVERY",
+      "title": "Deliver P8-15 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-15",
+      "source_anchor": "P8-15",
+      "goal": "Review and merge P8-15 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-15-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-16",
+      "title": "Pure resolver",
+      "type": "epic",
+      "source_anchor": "P8-16",
+      "goal": "Framework-free route resolution",
+      "scope": [
+        "Exact P8-16 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: resolver and fixture adapter"
+      ],
+      "acceptance_criteria": [
+        "full page/redirect/404/410 matrix and no chains / STANDARD",
+        "All exact P8-16 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert pure module"
+      ],
+      "depends_on": [
+        "P8-03",
+        "P8-04"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "Next/Payload dependency enters resolver"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-16-IMPLEMENTATION",
+      "title": "Implement P8-16 — Pure resolver",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-16",
+      "source_anchor": "P8-16",
+      "goal": "Framework-free route resolution",
+      "scope": [
+        "Implement only P8-16",
+        "Entry condition: P8-03/04",
+        "Source of Truth: resolver and fixture adapter"
+      ],
+      "acceptance_criteria": [
+        "full page/redirect/404/410 matrix and no chains / STANDARD",
+        "Every P8-16 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert pure module"
+      ],
+      "required_checks": [
+        "Prove epic exit: full page/redirect/404/410 matrix and no chains / STANDARD",
+        "Reconcile every acceptance item for P8-16 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-03-DELIVERY",
+        "TASK-04-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "Next/Payload dependency enters resolver"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-16-DELIVERY",
+      "title": "Deliver P8-16 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-16",
+      "source_anchor": "P8-16",
+      "goal": "Review and merge P8-16 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-16-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:d",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-17",
+      "title": "UI extension",
+      "type": "epic",
+      "source_anchor": "P8-17",
+      "goal": "Contract-driven views",
+      "scope": [
+        "Exact P8-17 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: UI library and view fixtures"
+      ],
+      "acceptance_criteria": [
+        "UI/a11y/visual evidence at four viewports / STANDARD",
+        "All exact P8-17 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: remove unwired views"
+      ],
+      "depends_on": [
+        "P8-12"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "view requires new route or unsupported legal claim"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:e",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-17-IMPLEMENTATION",
+      "title": "Implement P8-17 — UI extension",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-17",
+      "source_anchor": "P8-17",
+      "goal": "Contract-driven views",
+      "scope": [
+        "Implement only P8-17",
+        "Entry condition: P8-12",
+        "Source of Truth: UI library and view fixtures"
+      ],
+      "acceptance_criteria": [
+        "UI/a11y/visual evidence at four viewports / STANDARD",
+        "Every P8-17 requirement in section 5A is mapped to evidence",
+        "Recovery contract: remove unwired views"
+      ],
+      "required_checks": [
+        "Prove epic exit: UI/a11y/visual evidence at four viewports / STANDARD",
+        "Reconcile every acceptance item for P8-17 in master-plan section 5A",
+        "pnpm verify:ui-core",
+        "representative visual and accessibility evidence",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-12-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "view requires new route or unsupported legal claim"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:e",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-17-DELIVERY",
+      "title": "Deliver P8-17 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-17",
+      "source_anchor": "P8-17",
+      "goal": "Review and merge P8-17 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-17-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:e",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-18",
+      "title": "Navigation, breadcrumbs and interlinks",
+      "type": "epic",
+      "source_anchor": "P8-18",
+      "goal": "Safe navigation graph",
+      "scope": [
+        "Exact P8-18 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: pure builders and crawl test"
+      ],
+      "acceptance_criteria": [
+        "zero fixture links to 404/redirect / STANDARD",
+        "All exact P8-18 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert builders; old nav remains"
+      ],
+      "depends_on": [
+        "P8-15",
+        "P8-16",
+        "P8-17"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "builder invents URL outside PageKey"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:e",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-18-IMPLEMENTATION",
+      "title": "Implement P8-18 — Navigation, breadcrumbs and interlinks",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-18",
+      "source_anchor": "P8-18",
+      "goal": "Safe navigation graph",
+      "scope": [
+        "Implement only P8-18",
+        "Entry condition: P8-15/16/17",
+        "Source of Truth: pure builders and crawl test"
+      ],
+      "acceptance_criteria": [
+        "zero fixture links to 404/redirect / STANDARD",
+        "Every P8-18 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert builders; old nav remains"
+      ],
+      "required_checks": [
+        "Prove epic exit: zero fixture links to 404/redirect / STANDARD",
+        "Reconcile every acceptance item for P8-18 in master-plan section 5A",
+        "pnpm verify:ui-core",
+        "representative visual and accessibility evidence",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-15-DELIVERY",
+        "TASK-16-DELIVERY",
+        "TASK-17-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "builder invents URL outside PageKey"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:e",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-18-DELIVERY",
+      "title": "Deliver P8-18 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-18",
+      "source_anchor": "P8-18",
+      "goal": "Review and merge P8-18 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-18-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:e",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-19",
+      "title": "Leads and analytics",
+      "type": "epic",
+      "source_anchor": "P8-19",
+      "goal": "Extended leads plus PII-free analytics",
+      "scope": [
+        "Exact P8-19 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: lead contract, migration, no-op adapter"
+      ],
+      "acceptance_criteria": [
+        "lead/outbox/idempotency and PII rejection proof / RISKY auth-pii-leads",
+        "All exact P8-19 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: feature-off analytics; tested additive down for lead fields"
+      ],
+      "depends_on": [
+        "P8-12"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "second backend/outbox or PII reaches event payload"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:e",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:auth-pii-leads"
+      ]
+    },
+    {
+      "key": "TASK-19-IMPLEMENTATION",
+      "title": "Implement P8-19 — Leads and analytics",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-19",
+      "source_anchor": "P8-19",
+      "goal": "Extended leads plus PII-free analytics",
+      "scope": [
+        "Implement only P8-19",
+        "Entry condition: P8-12",
+        "Source of Truth: lead contract, migration, no-op adapter"
+      ],
+      "acceptance_criteria": [
+        "lead/outbox/idempotency and PII rejection proof / RISKY auth-pii-leads",
+        "Every P8-19 requirement in section 5A is mapped to evidence",
+        "Recovery contract: feature-off analytics; tested additive down for lead fields"
+      ],
+      "required_checks": [
+        "Prove epic exit: lead/outbox/idempotency and PII rejection proof / RISKY auth-pii-leads",
+        "Reconcile every acceptance item for P8-19 in master-plan section 5A",
+        "access and PII negative matrix",
+        "pnpm verify:security-boundaries",
+        "relevant lead/public-gateway integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-12-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "second backend/outbox or PII reaches event payload"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:e",
+        "work:implementation",
+        "risk:auth-pii-leads"
+      ]
+    },
+    {
+      "key": "TASK-19-DELIVERY",
+      "title": "Deliver P8-19 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-19",
+      "source_anchor": "P8-19",
+      "goal": "Review and merge P8-19 through one exact-head RISKY auth-pii-leads Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=auth-pii-leads",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-19-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:e",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:auth-pii-leads"
+      ]
+    },
+    {
+      "key": "P8-20",
+      "title": "Sitemap, robots and IndexNow generators",
+      "type": "epic",
+      "source_anchor": "P8-20",
+      "goal": "Canonical discovery feeds",
+      "scope": [
+        "Exact P8-20 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: sitemap, robots, IndexNow job and key verification"
+      ],
+      "acceptance_criteria": [
+        "shard/lastmod snapshots, host/key, retry and secret tests / RISKY ingest-jobs",
+        "All exact P8-20 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: keep generators unwired; disable job queue"
+      ],
+      "depends_on": [
+        "P8-14",
+        "P8-15"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "key leaks, foreign-host URL, deploy-wide submission"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "TASK-20-IMPLEMENTATION",
+      "title": "Implement P8-20 — Sitemap, robots and IndexNow generators",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-20",
+      "source_anchor": "P8-20",
+      "goal": "Canonical discovery feeds",
+      "scope": [
+        "Implement only P8-20",
+        "Entry condition: P8-14/15",
+        "Source of Truth: sitemap, robots, IndexNow job and key verification"
+      ],
+      "acceptance_criteria": [
+        "shard/lastmod snapshots, host/key, retry and secret tests / RISKY ingest-jobs",
+        "Every P8-20 requirement in section 5A is mapped to evidence",
+        "Recovery contract: keep generators unwired; disable job queue"
+      ],
+      "required_checks": [
+        "Prove epic exit: shard/lastmod snapshots, host/key, retry and secret tests / RISKY ingest-jobs",
+        "Reconcile every acceptance item for P8-20 in master-plan section 5A",
+        "relevant importer/job integration proof",
+        "pnpm verify:jobs-config",
+        "pnpm verify:security-boundaries",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-14-DELIVERY",
+        "TASK-15-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "key leaks, foreign-host URL, deploy-wide submission"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "work:implementation",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "TASK-20-DELIVERY",
+      "title": "Deliver P8-20 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-20",
+      "source_anchor": "P8-20",
+      "goal": "Review and merge P8-20 through one exact-head RISKY ingest-jobs Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=ingest-jobs",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-20-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "P8-21A",
+      "title": "Canonical HTTP status transport proof",
+      "type": "epic",
+      "source_anchor": "P8-21A",
+      "goal": "Proven canonical 301/410 transport",
+      "scope": [
+        "Exact P8-21A requirements in master-plan sections 5 and 5A",
+        "Source of Truth: transport decision + live HTTP proof"
+      ],
+      "acceptance_criteria": [
+        "bounded current-model 301/410, RSC and p95 evidence / RISKY dependency-runtime",
+        "All exact P8-21A requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: retain old lifecycle boundary and remove preflight"
+      ],
+      "depends_on": [
+        "P8-04"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "global/slow Proxy query, asset/API interception or client-nav break"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-21A-IMPLEMENTATION",
+      "title": "Implement P8-21A — Canonical HTTP status transport proof",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-21A",
+      "source_anchor": "P8-21A",
+      "goal": "Proven canonical 301/410 transport",
+      "scope": [
+        "Implement only P8-21A",
+        "Entry condition: P8-04",
+        "Source of Truth: transport decision + live HTTP proof"
+      ],
+      "acceptance_criteria": [
+        "bounded current-model 301/410, RSC and p95 evidence / RISKY dependency-runtime",
+        "Every P8-21A requirement in section 5A is mapped to evidence",
+        "Recovery contract: retain old lifecycle boundary and remove preflight"
+      ],
+      "required_checks": [
+        "Prove epic exit: bounded current-model 301/410, RSC and p95 evidence / RISKY dependency-runtime",
+        "Reconcile every acceptance item for P8-21A in master-plan section 5A",
+        "pnpm quality:architecture",
+        "relevant runtime/integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-04-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "global/slow Proxy query, asset/API interception or client-nav break"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "work:implementation",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-21A-DELIVERY",
+      "title": "Deliver P8-21A to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-21A",
+      "source_anchor": "P8-21A",
+      "goal": "Review and merge P8-21A through one exact-head RISKY dependency-runtime Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=dependency-runtime",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-21A-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "P8-21B",
+      "title": "Generalized lifecycle, redirects and cache",
+      "type": "epic",
+      "source_anchor": "P8-21B",
+      "goal": "Entity lifecycle and bounded invalidation",
+      "scope": [
+        "Exact P8-21B requirements in master-plan sections 5 and 5A",
+        "Source of Truth: lifecycle store + cache facade"
+      ],
+      "acceptance_criteria": [
+        "full state/loop/chain/invalidation matrix / RISKY schema-data",
+        "All exact P8-21B requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: old boundary retained until canonical proof; forward-fix persisted history"
+      ],
+      "depends_on": [
+        "P8-21A",
+        "P8-08",
+        "P8-09"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "redirect chain/loop or lifecycle history loss"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-21B-IMPLEMENTATION",
+      "title": "Implement P8-21B — Generalized lifecycle, redirects and cache",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-21B",
+      "source_anchor": "P8-21B",
+      "goal": "Entity lifecycle and bounded invalidation",
+      "scope": [
+        "Implement only P8-21B",
+        "Entry condition: P8-21A/08/09",
+        "Source of Truth: lifecycle store + cache facade"
+      ],
+      "acceptance_criteria": [
+        "full state/loop/chain/invalidation matrix / RISKY schema-data",
+        "Every P8-21B requirement in section 5A is mapped to evidence",
+        "Recovery contract: old boundary retained until canonical proof; forward-fix persisted history"
+      ],
+      "required_checks": [
+        "Prove epic exit: full state/loop/chain/invalidation matrix / RISKY schema-data",
+        "Reconcile every acceptance item for P8-21B in master-plan section 5A",
+        "clean and non-empty PostgreSQL migration proof",
+        "pnpm verify:schema",
+        "relevant DB integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-21A-DELIVERY",
+        "TASK-08-DELIVERY",
+        "TASK-09-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "redirect chain/loop or lifecycle history loss"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "work:implementation",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-21B-DELIVERY",
+      "title": "Deliver P8-21B to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-21B",
+      "source_anchor": "P8-21B",
+      "goal": "Review and merge P8-21B through one exact-head RISKY schema-data Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=schema-data",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-21B-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:f",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "P8-22",
+      "title": "Starter fixture data",
+      "type": "epic",
+      "source_anchor": "P8-22",
+      "goal": "One canonical synthetic dataset",
+      "scope": [
+        "Exact P8-22 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: seed + sample Excel"
+      ],
+      "acceptance_criteria": [
+        "idempotent seed and all integration consumers agree / STANDARD",
+        "All exact P8-22 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: scoped fixture reset only"
+      ],
+      "depends_on": [
+        "P8-05",
+        "P8-06",
+        "P8-08",
+        "P8-09",
+        "P8-11",
+        "P8-14"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "fixture touches non-fixture records or enables indexing"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:f",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-22-IMPLEMENTATION",
+      "title": "Implement P8-22 — Starter fixture data",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-22",
+      "source_anchor": "P8-22",
+      "goal": "One canonical synthetic dataset",
+      "scope": [
+        "Implement only P8-22",
+        "Entry condition: P8-05/06/08/09/11/14",
+        "Source of Truth: seed + sample Excel"
+      ],
+      "acceptance_criteria": [
+        "idempotent seed and all integration consumers agree / STANDARD",
+        "Every P8-22 requirement in section 5A is mapped to evidence",
+        "Recovery contract: scoped fixture reset only"
+      ],
+      "required_checks": [
+        "Prove epic exit: idempotent seed and all integration consumers agree / STANDARD",
+        "Reconcile every acceptance item for P8-22 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-05-DELIVERY",
+        "TASK-06-DELIVERY",
+        "TASK-08-DELIVERY",
+        "TASK-09-DELIVERY",
+        "TASK-11-DELIVERY",
+        "TASK-14-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "fixture touches non-fixture records or enables indexing"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:f",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-22-DELIVERY",
+      "title": "Deliver P8-22 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-22",
+      "source_anchor": "P8-22",
+      "goal": "Review and merge P8-22 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-22-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:f",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "P8-23A",
+      "title": "Runtime route cutover",
+      "type": "epic",
+      "source_anchor": "P8-23A",
+      "goal": "Atomic public route cutover",
+      "scope": [
+        "Exact P8-23A requirements in master-plan sections 5 and 5A",
+        "Source of Truth: App Router adapters and same resolver contract"
+      ],
+      "acceptance_criteria": [
+        "HTTP/SEO/admin/API/performance/UI matrix / RISKY dependency-runtime",
+        "All exact P8-23A requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: one switchback commit restores old wiring; new additive data retained"
+      ],
+      "depends_on": [
+        "P8-10",
+        "P8-13",
+        "P8-16",
+        "P8-18",
+        "P8-19",
+        "P8-20",
+        "P8-21B",
+        "P8-22"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "any canonical status, admin/API or p95 regression"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-23A-IMPLEMENTATION",
+      "title": "Implement P8-23A — Runtime route cutover",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-23A",
+      "source_anchor": "P8-23A",
+      "goal": "Atomic public route cutover",
+      "scope": [
+        "Implement only P8-23A",
+        "Entry condition: all listed runtime predecessors",
+        "Source of Truth: App Router adapters and same resolver contract"
+      ],
+      "acceptance_criteria": [
+        "HTTP/SEO/admin/API/performance/UI matrix / RISKY dependency-runtime",
+        "Every P8-23A requirement in section 5A is mapped to evidence",
+        "Recovery contract: one switchback commit restores old wiring; new additive data retained"
+      ],
+      "required_checks": [
+        "Prove epic exit: HTTP/SEO/admin/API/performance/UI matrix / RISKY dependency-runtime",
+        "Reconcile every acceptance item for P8-23A in master-plan section 5A",
+        "pnpm verify:ui-core",
+        "representative visual and accessibility evidence",
+        "pnpm quality:architecture",
+        "relevant runtime/integration proof",
+        "pnpm typecheck",
+        "pnpm lint",
+        "pnpm build"
+      ],
+      "depends_on": [
+        "TASK-10-DELIVERY",
+        "TASK-13-DELIVERY",
+        "TASK-16-DELIVERY",
+        "TASK-18-DELIVERY",
+        "TASK-19-DELIVERY",
+        "TASK-20-DELIVERY",
+        "TASK-21B-DELIVERY",
+        "TASK-22-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "any canonical status, admin/API or p95 regression"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "work:implementation",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-23A-DELIVERY",
+      "title": "Deliver P8-23A to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-23A",
+      "source_anchor": "P8-23A",
+      "goal": "Review and merge P8-23A through one exact-head RISKY dependency-runtime Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=dependency-runtime",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-23A-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "P8-23B",
+      "title": "Post-cutover contract cleanup",
+      "type": "epic",
+      "source_anchor": "P8-23B",
+      "goal": "Dead runtime removed after proof",
+      "scope": [
+        "Exact P8-23B requirements in master-plan sections 5 and 5A",
+        "Source of Truth: inventory disposition + guards"
+      ],
+      "acceptance_criteria": [
+        "every removal mapped, no legacy-data drop, guards enforce / RISKY dependency-runtime",
+        "All exact P8-23B requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert cleanup PR"
+      ],
+      "depends_on": [
+        "P8-23A"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "removal lacks replacement/evidence or touches retained raw data"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-23B-IMPLEMENTATION",
+      "title": "Implement P8-23B — Post-cutover contract cleanup",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-23B",
+      "source_anchor": "P8-23B",
+      "goal": "Dead runtime removed after proof",
+      "scope": [
+        "Implement only P8-23B",
+        "Entry condition: accepted P8-23A",
+        "Source of Truth: inventory disposition + guards"
+      ],
+      "acceptance_criteria": [
+        "every removal mapped, no legacy-data drop, guards enforce / RISKY dependency-runtime",
+        "Every P8-23B requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert cleanup PR"
+      ],
+      "required_checks": [
+        "Prove epic exit: every removal mapped, no legacy-data drop, guards enforce / RISKY dependency-runtime",
+        "Reconcile every acceptance item for P8-23B in master-plan section 5A",
+        "pnpm quality:architecture",
+        "relevant runtime/integration proof",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "TASK-23A-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "removal lacks replacement/evidence or touches retained raw data"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "work:implementation",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-23B-DELIVERY",
+      "title": "Deliver P8-23B to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-23B",
+      "source_anchor": "P8-23B",
+      "goal": "Review and merge P8-23B through one exact-head RISKY dependency-runtime Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=dependency-runtime",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-23B-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "P8-24",
+      "title": "Clone tooling and client readiness",
+      "type": "epic",
+      "source_anchor": "P8-24",
+      "goal": "Repeatable client clone",
+      "scope": [
+        "Exact P8-24 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: existing clone commands + onboarding/readiness"
+      ],
+      "acceptance_criteria": [
+        "three clean temporary clone proofs / RISKY dependency-runtime",
+        "All exact P8-24 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: discard temporary clones; revert tooling PR"
+      ],
+      "depends_on": [
+        "P8-03",
+        "P8-05",
+        "P8-14",
+        "P8-23B"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "core/packages mutation, non-idempotence or hidden topology choice"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-24-IMPLEMENTATION",
+      "title": "Implement P8-24 — Clone tooling and client readiness",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-24",
+      "source_anchor": "P8-24",
+      "goal": "Repeatable client clone",
+      "scope": [
+        "Implement only P8-24",
+        "Entry condition: partial foundations; final P8-23B",
+        "Source of Truth: existing clone commands + onboarding/readiness"
+      ],
+      "acceptance_criteria": [
+        "three clean temporary clone proofs / RISKY dependency-runtime",
+        "Every P8-24 requirement in section 5A is mapped to evidence",
+        "Recovery contract: discard temporary clones; revert tooling PR"
+      ],
+      "required_checks": [
+        "Prove epic exit: three clean temporary clone proofs / RISKY dependency-runtime",
+        "Reconcile every acceptance item for P8-24 in master-plan section 5A",
+        "pnpm quality:architecture",
+        "relevant runtime/integration proof",
+        "pnpm typecheck",
+        "pnpm lint",
+        "pnpm build"
+      ],
+      "depends_on": [
+        "TASK-03-DELIVERY",
+        "TASK-05-DELIVERY",
+        "TASK-14-DELIVERY",
+        "TASK-23B-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "core/packages mutation, non-idempotence or hidden topology choice"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "work:implementation",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-24-DELIVERY",
+      "title": "Deliver P8-24 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-24",
+      "source_anchor": "P8-24",
+      "goal": "Review and merge P8-24 through one exact-head RISKY dependency-runtime Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft RISKY Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft RISKY risk_scope=dependency-runtime",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-24-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:g",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "P8-25",
+      "title": "Final acceptance and freeze decision",
+      "type": "epic",
+      "source_anchor": "P8-25",
+      "goal": "Reconciled execution evidence",
+      "scope": [
+        "Exact P8-25 requirements in master-plan sections 5 and 5A",
+        "Source of Truth: plan execution report and final main SHA"
+      ],
+      "acceptance_criteria": [
+        "one implementation-main relevant-suite proof, STANDARD evidence PR, docs-only SHA reconciliation; no tag",
+        "All exact P8-25 requirements in section 5A are reconciled with evidence",
+        "Rollback/recovery remains available: revert report PR only; implementation remains at accepted main"
+      ],
+      "depends_on": [
+        "P8-23B",
+        "P8-24"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "any epic/evidence/SHA unresolved, non-doc final delta or implicit tag request"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:g",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-25-IMPLEMENTATION",
+      "title": "Implement P8-25 — Final acceptance and freeze decision",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "P8-25",
+      "source_anchor": "P8-25",
+      "goal": "Reconciled execution evidence",
+      "scope": [
+        "Implement only P8-25",
+        "Entry condition: P8-23B/24",
+        "Source of Truth: plan execution report and final main SHA"
+      ],
+      "acceptance_criteria": [
+        "one implementation-main relevant-suite proof, STANDARD evidence PR, docs-only SHA reconciliation; no tag",
+        "Every P8-25 requirement in section 5A is mapped to evidence",
+        "Recovery contract: revert report PR only; implementation remains at accepted main"
+      ],
+      "required_checks": [
+        "Prove epic exit: one implementation-main relevant-suite proof, STANDARD evidence PR, docs-only SHA reconciliation; no tag",
+        "Reconcile every acceptance item for P8-25 in master-plan section 5A",
+        "pnpm typecheck",
+        "pnpm lint",
+        "pnpm build"
+      ],
+      "depends_on": [
+        "TASK-23B-DELIVERY",
+        "TASK-24-DELIVERY"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source drift",
+        "scope expansion",
+        "production or release",
+        "new secret",
+        "destructive or irreversible external action",
+        "GitHub mirror or tag",
+        "any epic/evidence/SHA unresolved, non-doc final delta or implicit tag request"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:g",
+        "work:implementation",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-25-DELIVERY",
+      "title": "Deliver P8-25 to SourceCraft main",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "P8-25",
+      "source_anchor": "P8-25",
+      "goal": "Review and merge P8-25 through one exact-head STANDARD Gate without production.",
+      "scope": [
+        "SourceCraft Pull Request",
+        "full diff review",
+        "one exact-head Gate",
+        "merge and safe worktree cleanup"
+      ],
+      "acceptance_criteria": [
+        "PR source, target and exact head SHA are verified",
+        "SourceCraft STANDARD Gate passes for the unchanged exact head",
+        "merge to canonical main succeeds",
+        "production, tag and GitHub mirror remain unchanged"
+      ],
+      "required_checks": [
+        "full diff and scope review",
+        "PR source/target/head SHA",
+        "SourceCraft STANDARD",
+        "post-merge main ancestry and safe cleanup"
+      ],
+      "depends_on": [
+        "TASK-25-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/PROJECT.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "merge"
+      ],
+      "stop_conditions": [
+        "PR head changed",
+        "review blocker",
+        "Gate not proven",
+        "production or release",
+        "tag",
+        "GitHub mirror"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:g",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    }
+  ]
+}
