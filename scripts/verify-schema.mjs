@@ -70,6 +70,10 @@ DECLARE
 		,'redirects_entity_id_idx'
 		,'lifecycle_events_entity_id_idx'
 		,'lifecycle_events_occurred_at_idx'
+		,'import_runs_source_kind_idx'
+		,'import_runs_excel_source_key_idx'
+		,'developers_last_import_run_idx'
+		,'developments_last_import_run_idx'
 	];
 	required_index text;
 	required_constraints text[] := ARRAY[
@@ -185,6 +189,20 @@ BEGIN
 			AND contype = 'c'
 	) THEN
 		RAISE EXCEPTION 'Missing development kind field guard';
+	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM pg_constraint
+		WHERE conrelid = 'import_runs'::regclass
+			AND conname = 'import_runs_source_identity_guard'
+			AND contype = 'c'
+	) OR (
+		SELECT count(*) FROM information_schema.columns
+		WHERE table_schema = 'public'
+			AND table_name = 'import_runs'
+			AND column_name IN ('source_kind', 'excel_source_key', 'source_file_name', 'evidence')
+	) <> 4 THEN
+		RAISE EXCEPTION 'Missing Excel import provenance contract';
 	END IF;
 
 	IF NOT EXISTS (

@@ -6,7 +6,7 @@ export const ImportIssues: CollectionConfig = {
 	admin: {
 		group: "Operations",
 		useAsTitle: "code",
-		defaultColumns: ["severity", "code", "property", "importRun", "createdAt"],
+		defaultColumns: ["severity", "code", "sourceSheet", "sourceRow", "importRun", "createdAt"],
 		description:
 			"Owner operations: import warnings/errors with redacted messages and source links.",
 	},
@@ -36,6 +36,10 @@ export const ImportIssues: CollectionConfig = {
 			relationTo: "properties",
 			index: true,
 		},
+		{ name: "developer", type: "relationship", relationTo: "developers", index: true },
+		{ name: "development", type: "relationship", relationTo: "developments", index: true },
+		{ name: "sourceSheet", type: "text" },
+		{ name: "sourceRow", type: "number", min: 1 },
 		{
 			name: "externalId",
 			type: "text",

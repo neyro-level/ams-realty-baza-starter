@@ -44,6 +44,7 @@ export const Developers: CollectionConfig = {
 		{ name: "logo", type: "relationship", relationTo: "media" },
 		{ name: "siteUrl", type: "text" },
 		{ name: "description", type: "textarea" },
+		{ name: "lastImportRun", type: "relationship", relationTo: "import-runs", index: true },
 		{ name: "source", type: "text", required: true },
 		{ name: "checkedAt", type: "date", required: true, index: true },
 		{

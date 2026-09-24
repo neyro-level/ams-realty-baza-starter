@@ -25,6 +25,7 @@ const scopes = {
 	"ingest-jobs": {
 		requiresDatabase: true,
 		commands: [
+			"verify:development-excel:integration",
 			"verify:jobs-config",
 			"verify:feed-parser",
 			"verify:feed-ingest",

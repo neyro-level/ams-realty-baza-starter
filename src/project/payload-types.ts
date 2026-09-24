@@ -330,6 +330,7 @@ export interface Developer {
   logo?: (number | null) | Media;
   siteUrl?: string | null;
   description?: string | null;
+  lastImportRun?: (number | null) | ImportRun;
   source: string;
   checkedAt: string;
   status: 'draft' | 'published' | 'archived';
@@ -437,7 +438,22 @@ export interface FeedSource {
  */
 export interface ImportRun {
   id: number;
-  feedSource: number | FeedSource;
+  sourceKind?: ('yrl-feed' | 'excel-developments') | null;
+  feedSource?: (number | null) | FeedSource;
+  /**
+   * Stable non-secret identity of an Excel source.
+   */
+  excelSourceKey?: string | null;
+  sourceFileName?: string | null;
+  evidence?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   status: 'queued' | 'running' | 'success' | 'unchanged' | 'suspicious' | 'interrupted' | 'failed';
   queuedAt: string;
   startedAt?: string | null;
@@ -483,6 +499,7 @@ export interface Development {
   salesStatus?: ('available' | 'limited' | 'sold_out' | 'paused') | null;
   availability?: string | null;
   dataTier: 'A' | 'B' | 'C';
+  lastImportRun?: (number | null) | ImportRun;
   source: string;
   checkedAt: string;
   prices?:
@@ -697,6 +714,10 @@ export interface ImportIssue {
   importRun: number | ImportRun;
   feedSource?: (number | null) | FeedSource;
   property?: (number | null) | Property;
+  developer?: (number | null) | Developer;
+  development?: (number | null) | Development;
+  sourceSheet?: string | null;
+  sourceRow?: number | null;
   externalId?: string | null;
   severity: 'info' | 'warning' | 'error';
   code: string;
@@ -1263,6 +1284,7 @@ export interface DevelopersSelect<T extends boolean = true> {
   logo?: T;
   siteUrl?: T;
   description?: T;
+  lastImportRun?: T;
   source?: T;
   checkedAt?: T;
   status?: T;
@@ -1296,6 +1318,7 @@ export interface DevelopmentsSelect<T extends boolean = true> {
   salesStatus?: T;
   availability?: T;
   dataTier?: T;
+  lastImportRun?: T;
   source?: T;
   checkedAt?: T;
   prices?:
@@ -1508,7 +1531,11 @@ export interface FeedSourcesSelect<T extends boolean = true> {
  * via the `definition` "import-runs_select".
  */
 export interface ImportRunsSelect<T extends boolean = true> {
+  sourceKind?: T;
   feedSource?: T;
+  excelSourceKey?: T;
+  sourceFileName?: T;
+  evidence?: T;
   status?: T;
   queuedAt?: T;
   startedAt?: T;
@@ -1535,6 +1562,10 @@ export interface ImportIssuesSelect<T extends boolean = true> {
   importRun?: T;
   feedSource?: T;
   property?: T;
+  developer?: T;
+  development?: T;
+  sourceSheet?: T;
+  sourceRow?: T;
   externalId?: T;
   severity?: T;
   code?: T;

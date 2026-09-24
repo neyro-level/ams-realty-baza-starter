@@ -66,6 +66,7 @@ export const Developments: CollectionConfig = {
 		{ name: "salesStatus", type: "select", options: ["available", "limited", "sold_out", "paused"] },
 		{ name: "availability", type: "text" },
 		{ name: "dataTier", type: "select", required: true, defaultValue: "C", options: ["A", "B", "C"] },
+		{ name: "lastImportRun", type: "relationship", relationTo: "import-runs", index: true },
 		...sourceFields,
 		{
 			name: "prices",
