@@ -12,9 +12,9 @@ import type {
 } from "@ams/realtbase-contracts";
 import type { PublicCatalogProperty, PublicCatalogResult } from "./catalog";
 import type { PublicCatalogFacetsResult } from "./catalog";
-import { leadConsentContext } from "../../../project/legal.config.ts";
+import { leadConsentContext } from "@/project/legal.config";
 import type { PublicPageRecord } from "./pages";
-import { siteConfig } from "../../../project/site.config.ts";
+import { siteConfig } from "@/project/site.config";
 
 const brandName = siteConfig.brandName;
 const logo = {

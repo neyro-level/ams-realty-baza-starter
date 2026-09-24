@@ -11,7 +11,7 @@ import { resolvePropertyPageLifecycle } from "@/core/seo/property";
 import {
 	type PublicUrlEntry,
 	staticPublicUrlEntries,
-} from "@/core/seo/site";
+} from "@/project/seo/site";
 import {
 	type CatalogQueryInput,
 	catalogQuerySchema,

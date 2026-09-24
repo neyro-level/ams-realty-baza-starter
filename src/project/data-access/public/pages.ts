@@ -2,7 +2,7 @@ import "server-only";
 
 import type { PageSEOContract } from "@ams/realtbase-contracts";
 import type { Payload } from "payload";
-import { siteConfig } from "../../../project/site.config.ts";
+import { siteConfig } from "@/project/site.config";
 import { publicGatewayPolicy } from "./policy";
 
 export type PublicPageRecord = {

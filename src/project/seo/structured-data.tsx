@@ -3,7 +3,7 @@ import type {
 	PropertyDetailsDTO,
 	PropertyListDTO,
 } from "@ams/realtbase-contracts";
-import { serializeJsonLdSafely } from "./json-ld.ts";
+import { serializeJsonLdSafely } from "../../core/seo/json-ld.ts";
 import { absoluteUrl, siteBrandName } from "./site.ts";
 
 type JsonLd = Record<string, unknown>;

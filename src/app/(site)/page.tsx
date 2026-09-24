@@ -7,12 +7,12 @@ import {
 	HomeTrustSection,
 } from "@ams/realtbase-ui";
 import { toMetadata } from "@/core/seo/page-metadata";
-import { getPublicHomePage } from "@/core/data-access/public";
+import { getPublicHomePage } from "@/project/data-access/public";
 import {
 	buildOrganizationJsonLd,
 	buildWebsiteJsonLd,
 	JsonLdScript,
-} from "@/core/seo/structured-data";
+} from "@/project/seo/structured-data";
 
 export const revalidate = 3600;
 

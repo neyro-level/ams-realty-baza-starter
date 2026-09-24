@@ -1,19 +1,19 @@
 import { readFileSync } from "node:fs";
 
 const catalogSource = readFileSync(
-	"src/core/data-access/public/catalog.ts",
+	"src/project/data-access/public/catalog.ts",
 	"utf8",
 );
 const gatewaySource = readFileSync(
-	"src/core/data-access/public/index.ts",
+	"src/project/data-access/public/index.ts",
 	"utf8",
 );
 const policySource = readFileSync(
-	"src/core/data-access/public/policy.ts",
+	"src/project/data-access/public/policy.ts",
 	"utf8",
 );
 const accessSource = readFileSync(
-	"src/core/data-access/public/access-mode.ts",
+	"src/project/data-access/public/access-mode.ts",
 	"utf8",
 );
 const propertiesSource = readFileSync(
@@ -92,7 +92,7 @@ if (
 }
 
 if (
-	!readFileSync("src/core/data-access/public/payload-reads.ts", "utf8").includes(
+	!readFileSync("src/project/data-access/public/payload-reads.ts", "utf8").includes(
 		"...propertyLifecycleReadAccess()",
 	)
 ) {
@@ -189,7 +189,7 @@ for (const collection of requiredRawRestDeniedCollections) {
 }
 
 const payloadAdapter = readFileSync(
-	"src/core/data-access/public/payload.ts",
+	"src/project/data-access/public/payload.ts",
 	"utf8",
 );
 if (!payloadAdapter.includes("isPayloadRuntimeConfigured")) {

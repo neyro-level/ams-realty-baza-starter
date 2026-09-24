@@ -12,9 +12,3 @@ export {
 	pendingDeliveryOrphanThresholdMs,
 	queuedImportOrphanThresholdMs,
 } from "./recovery-thresholds.ts";
-export {
-	assertRuntimeEnvOrThrow,
-	detectRuntimeEnvMode,
-	evaluateRuntimeEnv,
-	parseProjectEnv,
-} from "./runtime-env.ts";

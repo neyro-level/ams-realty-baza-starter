@@ -18,12 +18,12 @@ import {
 	importStaleThresholdMs,
 	pendingDeliveryOrphanThresholdMs,
 } from "../../../../core/operations/recovery-thresholds.ts";
-import { detectRuntimeEnvMode } from "../../../../core/operations/runtime-env.ts";
+import { detectRuntimeEnvMode } from "../../../../project/env.ts";
 import { redactRecord } from "../../../../core/security/redaction.ts";
 import {
 	isLocalMediaReady,
 	readDataVolumeFreeRatio,
-} from "../../../../core/storage/local-fs.ts";
+} from "../../../../project/storage/local-fs.ts";
 import { runtimeEnv } from "../../../../project/env.ts";
 import {
 	programmaticPayloadJobTasks,

@@ -212,7 +212,7 @@ assert.ok(
 );
 
 const ownerFeed = readFileSync(
-	join(root, "src", "core", "ingest", "owner-feed-operations.ts"),
+	join(root, "src", "project", "ingest", "owner-feed-operations.ts"),
 	"utf8",
 );
 assert.equal(

@@ -78,17 +78,13 @@ export function findPackageBoundaryViolations(entries) {
 		if (!isUi && !isContracts && !isCore) continue;
 		for (const reference of moduleReferences(file, content)) {
 			const target = projectTarget(file, reference.value);
+			if (target.startsWith("src/project/")) {
+				violations.push(`${file}: reusable layer imports project ${target}`);
+				continue;
+			}
 			if ((isUi || isContracts) && isFrameworkOrPersistence(reference.value)) {
 				violations.push(
 					`${file}: ${isUi ? "UI" : "contracts"} imports framework/persistence runtime ${reference.value}`,
-				);
-			}
-			if (
-				isUi &&
-				target.startsWith("src/project/")
-			) {
-				violations.push(
-					`${file}: UI imports application persistence ${target}`,
 				);
 			}
 			if (isCore && target.startsWith("packages/ui")) {
@@ -97,6 +93,59 @@ export function findPackageBoundaryViolations(entries) {
 		}
 	}
 	return violations;
+}
+
+function stringLiterals(name, content) {
+	const values = [];
+	const visit = (node) => {
+		if (ts.isStringLiteralLike(node)) values.push(node.text);
+		ts.forEachChild(node, visit);
+	};
+	visit(sourceFile(name, content));
+	return values;
+}
+
+export function findForbiddenProjectLiteralViolations(entries, denylist) {
+	const forbidden = denylist.filter((value) => typeof value === "string" && value.length > 0);
+	return entries.flatMap(({ name, content }) => {
+		const file = normalize(name);
+		return stringLiterals(file, content).flatMap((value) =>
+			forbidden.some((literal) => value.includes(literal))
+				? [`${file}: reusable layer contains project city/brand/domain literal`]
+				: [],
+		);
+	});
+}
+
+export function findHrefLiteralReports(entries) {
+	const reports = [];
+	for (const { name, content } of entries) {
+		const file = normalize(name);
+		const visit = (node) => {
+			if (
+				ts.isJsxAttribute(node) &&
+				node.name.text === "href" &&
+				(node.initializer &&
+					(ts.isStringLiteral(node.initializer) ||
+						(ts.isJsxExpression(node.initializer) &&
+							node.initializer.expression &&
+							ts.isStringLiteralLike(node.initializer.expression))))
+			) {
+				reports.push(`${file}: JSX href literal`);
+			}
+			if (
+				ts.isPropertyAssignment(node) &&
+				((ts.isIdentifier(node.name) && node.name.text === "href") ||
+					(ts.isStringLiteral(node.name) && node.name.text === "href")) &&
+				ts.isStringLiteralLike(node.initializer)
+			) {
+				reports.push(`${file}: object href literal`);
+			}
+			ts.forEachChild(node, visit);
+		};
+		visit(sourceFile(file, content));
+	}
+	return reports;
 }
 
 function isCacheGraph(file) {

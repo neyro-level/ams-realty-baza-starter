@@ -3,8 +3,15 @@ import {
 	accelerateLeadDeliveryJobs,
 	commitLeadOutbox,
 	planRecoverableLeadDeliveryJobs,
-	prepareLeadIntake,
+	prepareLeadIntake as prepareLeadIntakeCore,
 } from "../src/core/leads/index.ts";
+import { legalConsentConfig } from "../src/project/legal.config.ts";
+
+const prepareLeadIntake = (input, options = {}) =>
+	prepareLeadIntakeCore(input, {
+		currentConsentVersion: legalConsentConfig.currentConsentVersion,
+		...options,
+	});
 
 const intake = prepareLeadIntake(
 	{

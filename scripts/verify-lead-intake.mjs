@@ -5,11 +5,17 @@ import {
 	evaluateLeadRateLimit,
 	hitInProcessLeadRateLimit,
 	normalizePhoneToE164,
-	prepareLeadIntake,
+	prepareLeadIntake as prepareLeadIntakeCore,
 	resolveEnabledLeadChannels,
 } from "../src/core/leads/index.ts";
-import { getTrustedClientAddress } from "../src/core/security/trusted-client-address.ts";
 import { legalConsentConfig } from "../src/project/legal.config.ts";
+
+const prepareLeadIntake = (input, options = {}) =>
+	prepareLeadIntakeCore(input, {
+		currentConsentVersion: legalConsentConfig.currentConsentVersion,
+		...options,
+	});
+import { getTrustedClientAddress } from "../src/core/security/trusted-client-address.ts";
 
 const validPayload = {
 	name: "Иван Петров",
@@ -146,7 +152,7 @@ const formSource = readFileSync(
 assert.equal(formSource.includes("requestAttemptId"), true);
 assert.equal(formSource.includes("consentedAt:"), false);
 for (const file of [
-	"src/core/data-access/public/dto.ts",
+	"src/project/data-access/public/dto.ts",
 	"src/app/(site)/obekty/[slug]/page.tsx",
 	"packages/ui/src/views/catalog/StarterCatalogPageView.tsx",
 ]) {

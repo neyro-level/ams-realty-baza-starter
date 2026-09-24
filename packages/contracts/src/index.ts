@@ -1,4 +1,4 @@
-export const contractVersion = "1.0.0" as const;
+export const contractVersion = "2.0.0" as const;
 export const contractState = "frozen" as const;
 
 export type { PropertyCategory, PropertyDealType } from "./common";

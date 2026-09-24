@@ -43,6 +43,12 @@ export default {
 			from: { path: "^src/core/" },
 			to: { path: "^packages/ui/" },
 		},
+		{
+			name: "core-and-packages-do-not-import-project",
+			severity: "error",
+			from: { path: "^(?:src/core|packages/(?:ui|contracts))/" },
+			to: { path: "^src/project/" },
+		},
 	],
 	options: {
 		doNotFollow: { path: ["node_modules"] },

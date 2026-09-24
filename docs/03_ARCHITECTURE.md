@@ -123,7 +123,7 @@ Payload остаётся единственным schema/auth/Admin owner; publi
 |---|---|---|
 | Presentation contracts | `packages/contracts` | storage-neutral DTO; без Payload/DB imports |
 | Reusable UI | `packages/ui` | contracts/view models; без persistence и Next app imports |
-| Public reads | `src/core/data-access/public` | только Public Gateway policy и DTO output |
+| Public reads composition | `src/project/data-access/public` | Payload/project adapters compose reusable core rules and emit DTO output |
 | Privileged operations | `src/core/data-access/system` | именованные system operations; `overrideAccess: true` только здесь |
 | Feed mutation | `src/core/data-access/ingest` | ingest gateway и утверждённые atomic SQL operations |
 | Project schema/config | `src/project/collections`, `src/project/env.ts`, `src/project/jobs` | Payload остаётся единственным backend/schema owner |
@@ -139,7 +139,7 @@ public UI
   -> Payload-owned schema
 ```
 
-Reusable UI не импортирует Payload, DB clients или persistence types. Configurable outbound HTTP проходит через Safe Outbound Client; raw anonymous business REST закрывается на edge и Payload boundary. Public Gateway: `src/core/data-access/public`. System Gateway: `src/core/data-access/system`.
+Reusable UI не импортирует Payload, DB clients или persistence types. Configurable outbound HTTP проходит через Safe Outbound Client; raw anonymous business REST закрывается на edge и Payload boundary. Project-aware Public Gateway composition: `src/project/data-access/public`. Reusable rules stay in `src/core`; System Gateway: `src/core/data-access/system`. Dependency direction is `project -> core`, while `core/packages -> project` is forbidden by architecture and Dependency Cruiser guards.
 
 Indexing имеет один semantic source `src/project/indexing-policy.ts`. Starter
 fail-closed возвращает `noindex`; client использует явное owner decision
@@ -150,7 +150,7 @@ metadata robots и `/robots.txt`; starter Nginx фиксирует matching
 
 ## Env и runtime config
 
-`src/project/env.ts` — единственный владелец typed schema, определения режима и списка обязательных runtime-полей. `src/core/operations/runtime-env.ts` является только compatibility re-export и не содержит второй матрицы. Режимы: `build`, `development`, `migrate`, `runtime`, `test`; build не требует production secrets, а runtime fail-fast выполняется через instrumentation до обслуживания трафика.
+`src/project/env.ts` — единственный владелец typed schema, определения режима и списка обязательных runtime-полей. Второго compatibility re-export в `src/core` нет. Режимы: `build`, `development`, `migrate`, `runtime`, `test`; build не требует production secrets, а runtime fail-fast выполняется через instrumentation до обслуживания трафика.
 
 Прямое чтение `process.env` в runtime-коде допускается только для framework mode (`NODE_ENV`) и изолированных test-only переключателей (`AMS_ALLOW_TEST_DESTINATIONS`, `AMS_TEST_APPROVED_ORIGINS`). Остальные project runtime knobs читаются через `runtimeEnv`.
 

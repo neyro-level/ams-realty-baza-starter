@@ -4,7 +4,7 @@ export async function register() {
 	}
 
 	const { assertRuntimeEnvOrThrow } = await import(
-		"./src/core/operations/runtime-env.ts"
+		"./src/project/env.ts"
 	);
 	assertRuntimeEnvOrThrow();
 }

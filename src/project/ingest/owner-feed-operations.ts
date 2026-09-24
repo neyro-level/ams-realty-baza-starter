@@ -1,6 +1,5 @@
 import type { PayloadRequest } from "payload";
-import { projectConfig } from "../../project/project.config.ts";
-import { systemQueueJob } from "../data-access/system/queue-job.ts";
+import { systemQueueJob } from "../../core/data-access/system/queue-job.ts";
 
 const requestAccess = { overrideAccess: false as const };
 
@@ -60,6 +59,7 @@ export async function approveSuspiciousDeactivation(
 		importRunId: string;
 		approvedByUserId: string;
 		now?: Date;
+		approvalTtlMinutes: number;
 	},
 ): Promise<{ expiresAt: string }> {
 	const now = input.now ?? new Date();
@@ -82,7 +82,7 @@ export async function approveSuspiciousDeactivation(
 	}
 
 	const expiresAt = new Date(
-		now.getTime() + projectConfig.approvalTtlMinutes * 60_000,
+		now.getTime() + input.approvalTtlMinutes * 60_000,
 	).toISOString();
 
 	await req.payload.update({

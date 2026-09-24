@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 import {
 	getPublicSitemapShard,
 	getPublicSitemapShardCount,
-} from "@/core/data-access/public";
-import { absoluteUrl, staticPublicUrlEntries } from "@/core/seo/site";
+} from "@/project/data-access/public";
+import { absoluteUrl, staticPublicUrlEntries } from "@/project/seo/site";
 
 export const revalidate = 3600;
 

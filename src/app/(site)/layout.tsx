@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { StarterSiteFooter, StarterSiteHeader } from "@ams/realtbase-ui";
-import { getPublicShell } from "@/core/data-access/public";
+import { getPublicShell } from "@/project/data-access/public";
 
 export const revalidate = 3600;
 

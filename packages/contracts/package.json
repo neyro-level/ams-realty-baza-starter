@@ -1,11 +1,10 @@
 {
 	"name": "@ams/realtbase-contracts",
-	"version": "1.0.0",
+	"version": "2.0.0",
 	"private": true,
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",
-		"./fixtures": "./src/fixtures.ts",
 		"./journal": "./src/journal/index.ts"
 	}
 }

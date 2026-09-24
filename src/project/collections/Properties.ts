@@ -1,5 +1,5 @@
 import type { CollectionConfig, FieldAccess, PayloadRequest } from "payload";
-import { publicPropertyReadAccess } from "../../core/data-access/public/access-mode.ts";
+import { publicPropertyReadAccess } from "../data-access/public/access-mode.ts";
 import { applyDerivedFieldsOnWrite } from "../../core/ingest/derived-fields.ts";
 import {
 	applyPublishedSlugPolicy,

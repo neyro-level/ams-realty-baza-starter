@@ -1,6 +1,5 @@
 import { createHash, createHmac } from "node:crypto";
 import { z } from "zod";
-import { legalConsentConfig } from "../../project/legal.config.ts";
 
 export type LeadFormKind =
 	| "property_request"
@@ -113,8 +112,14 @@ export function prepareLeadIntake(
 	}
 
 	const payload = parsed.data;
-	const currentConsentVersion =
-		options?.currentConsentVersion ?? legalConsentConfig.currentConsentVersion;
+	const currentConsentVersion = options?.currentConsentVersion;
+	if (!currentConsentVersion) {
+		return reject(
+			"lead.consent_version_mismatch",
+			"Current consent version was not supplied by project composition.",
+			payload,
+		);
+	}
 	if (payload.consentVersion !== currentConsentVersion) {
 		return reject(
 			"lead.consent_version_mismatch",

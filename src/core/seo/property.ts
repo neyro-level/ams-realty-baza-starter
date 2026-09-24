@@ -1,4 +1,7 @@
-import type { PublicPropertyLifecycle } from "@/core/data-access/public/dto";
+export type PublicPropertyLifecycle = {
+	status: "active" | "archived";
+	isArchived: boolean;
+};
 import { sanitizeExplicitRedirectPath } from "./redirect-path.ts";
 
 export { sanitizeExplicitRedirectPath } from "./redirect-path.ts";

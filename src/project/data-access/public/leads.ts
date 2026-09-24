@@ -1,21 +1,21 @@
 import "server-only";
 
 import type { Payload, PayloadRequest } from "payload";
-import { createPayloadLeadOutboxRepository } from "../leads/payload-outbox-repository.ts";
-import { resolveEnabledLeadChannels } from "../../leads/channels.ts";
-import { hitInProcessLeadRateLimit } from "../../leads/in-process-rate-limit.ts";
+import { createPayloadLeadOutboxRepository } from "@/core/data-access/leads/payload-outbox-repository";
+import { resolveEnabledLeadChannels } from "@/core/leads/channels";
+import { hitInProcessLeadRateLimit } from "@/core/leads/in-process-rate-limit";
 import {
 	accelerateLeadDeliveryJobs,
 	commitLeadOutbox,
 	prepareLeadIntake,
 	type LeadIntakeRejected,
-} from "../../leads/index.ts";
-import { runtimeEnv } from "../../../project/env.ts";
-import { clientReadinessConfig } from "../../../project/client-readiness.config.ts";
-import { legalConsentConfig } from "../../../project/legal.config.ts";
-import { projectConfig } from "../../../project/project.config.ts";
-import { siteConfig } from "../../../project/site.config.ts";
-import { systemOverrideAccess } from "../system/overrides.ts";
+} from "@/core/leads/index";
+import { runtimeEnv } from "@/project/env";
+import { clientReadinessConfig } from "@/project/client-readiness.config";
+import { legalConsentConfig } from "@/project/legal.config";
+import { projectConfig } from "@/project/project.config";
+import { siteConfig } from "@/project/site.config";
+import { systemOverrideAccess } from "@/core/data-access/system/overrides";
 import { publicGatewayReadAccess } from "./access-mode.ts";
 import { getPublicGatewayPayload } from "./payload.ts";
 

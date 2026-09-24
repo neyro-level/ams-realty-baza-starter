@@ -66,10 +66,6 @@ export {
 	requireMoneyMinor,
 } from "./numeric-invariants.ts";
 export {
-	approveSuspiciousDeactivation,
-	queueManualFeedImport,
-} from "./owner-feed-operations.ts";
-export {
 	parseYrlFeed,
 	type YrlFeedParseResult,
 	type YrlFeedParseStats,

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPropertyGoneResponse } from "@/core/http/property-gone-response";
-import { getPublicProperty } from "@/core/data-access/public";
-import { absoluteUrl } from "@/core/seo/site";
+import { getPublicProperty } from "@/project/data-access/public";
+import { absoluteUrl } from "@/project/seo/site";
 
 export const dynamic = "force-dynamic";
 

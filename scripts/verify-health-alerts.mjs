@@ -214,14 +214,16 @@ assert.equal(
 );
 
 const {
-	evaluateRuntimeEnv,
-	assertRuntimeEnvOrThrow,
-	parseProjectEnv,
 	importStaleThresholdMs,
 	queuedImportOrphanThresholdMs,
 	pendingDeliveryOrphanThresholdMs,
 	isAlertChannelIndependent,
 } = await import("../src/core/operations/index.ts");
+const {
+	evaluateRuntimeEnv,
+	assertRuntimeEnvOrThrow,
+	parseProjectEnv,
+} = await import("../src/project/env.ts");
 
 assert.equal(
 	evaluateRuntimeEnv({ NEXT_PHASE: "phase-production-build" }, "build").ok,

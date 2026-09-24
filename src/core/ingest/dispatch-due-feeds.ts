@@ -1,4 +1,3 @@
-import { projectConfig } from "../../project/project.config.ts";
 import type { ClaimedFeedSource } from "../data-access/ingest/sql/index.ts";
 
 export type DispatchDueFeedsDeps = {
@@ -27,7 +26,7 @@ export type DispatchedFeed = {
 
 export async function dispatchDueFeeds({
 	now,
-	batchSize = projectConfig.dispatchBatchSize,
+	batchSize = 3,
 	claimDueFeedSources,
 	createQueuedImportRun,
 	enqueueImportFeed,

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, statfsSync } from "node:fs";
 import path from "node:path";
-import { runtimeEnv } from "../../project/env.ts";
+import { runtimeEnv } from "@/project/env";
 
 const SAFE_NAME = /[^a-zA-Z0-9._-]+/g;
 

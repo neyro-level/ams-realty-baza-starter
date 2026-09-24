@@ -3,14 +3,14 @@ import { readFileSync } from "node:fs";
 import {
 	buildCatalogSeoDecision,
 	catalogSeoParamPolicy,
-} from "../src/core/seo/catalog.ts";
+} from "../src/project/seo/catalog.ts";
 import { serializeJsonLdSafely } from "../src/core/seo/json-ld.ts";
 import {
 	getPropertyRobots,
 	resolvePropertyPageLifecycle,
 	sanitizeExplicitRedirectPath,
 } from "../src/core/seo/property.ts";
-import { staticPublicUrlEntries } from "../src/core/seo/site.ts";
+import { staticPublicUrlEntries } from "../src/project/seo/site.ts";
 import {
 	buildRobots,
 	getProjectIndexingPolicy,
@@ -77,7 +77,7 @@ for (const escaped of ["\\u003c", "\\u003e", "\\u0026", "\\u2028", "\\u2029"]) {
 }
 assert.deepEqual(JSON.parse(serializedJsonLd), adversarialJsonLd);
 const structuredDataSource = readFileSync(
-	"src/core/seo/structured-data.tsx",
+	"src/project/seo/structured-data.tsx",
 	"utf8",
 );
 assert.ok(structuredDataSource.includes("serializeJsonLdSafely(data)"));
@@ -210,7 +210,7 @@ assert.ok(sitemapSource.includes("generateSitemaps"));
 assert.match(sitemapSource, /export const revalidate = 3600;/);
 assert.equal(sitemapSource.includes("limit: 1000"), false);
 const catalogSource = readFileSync(
-	"src/core/data-access/public/catalog.ts",
+	"src/project/data-access/public/catalog.ts",
 	"utf8",
 );
 assert.equal(catalogSource.includes("limit: 1000"), false);

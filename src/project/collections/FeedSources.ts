@@ -1,5 +1,6 @@
 import type { CollectionConfig, PayloadRequest } from "payload";
-import { queueManualFeedImport, approveSuspiciousDeactivation } from "../../core/ingest/owner-feed-operations.ts";
+import { queueManualFeedImport, approveSuspiciousDeactivation } from "../ingest/owner-feed-operations.ts";
+import { projectConfig } from "../project.config.ts";
 import { normalizeEnabledFeedNextDueAt } from "../../core/ingest/feed-schedule.ts";
 import { getRuntimeClock } from "../../core/time/clock.ts";
 import { adminsAndOwners, hasRole, ownersOnly } from "../../core/access/roles.ts";
@@ -101,6 +102,7 @@ export const FeedSources: CollectionConfig = {
 					feedSourceId: id,
 					importRunId: String(body.importRunId),
 					approvedByUserId: String(req.user.id),
+					approvalTtlMinutes: projectConfig.approvalTtlMinutes,
 				});
 				return Response.json(result);
 			},

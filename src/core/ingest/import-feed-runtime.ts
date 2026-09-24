@@ -15,7 +15,9 @@ import type {
 } from "./feed-normalization.ts";
 import { parseYrlFeed } from "./yrl-parser.ts";
 import { startImportHeartbeat } from "./dispatch-due-feeds.ts";
-import { projectConfig } from "../../project/project.config.ts";
+
+const defaultHeartbeatIntervalMs = 15_000;
+const defaultIngestBatchSize = 100;
 
 export type ImportFeedSourceSnapshot = {
 	id: string;
@@ -141,7 +143,7 @@ export async function runImportFeed(
 
 	const heartbeat = startImportHeartbeat({
 		intervalMs:
-			deps.heartbeatIntervalMs ?? projectConfig.importHeartbeatIntervalMs,
+			deps.heartbeatIntervalMs ?? defaultHeartbeatIntervalMs,
 		tick: () =>
 			deps.touchHeartbeat({ importRunId: input.importRunId, now: deps.now() }),
 	});
@@ -178,7 +180,7 @@ export async function runImportFeed(
 		const parse = deps.parseFeed ?? parseYrlFeed;
 		const ingest = deps.ingest ?? ingestNormalizedFeed;
 		const repository = deps.createRepository(source.id);
-		const batchSize = deps.ingestBatchSize ?? projectConfig.ingestBatchSize;
+		const batchSize = deps.ingestBatchSize ?? defaultIngestBatchSize;
 		if (!Number.isInteger(batchSize) || batchSize < 1) {
 			throw new Error("ingestBatchSize must be a positive integer.");
 		}

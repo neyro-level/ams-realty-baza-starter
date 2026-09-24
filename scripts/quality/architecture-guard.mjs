@@ -2,6 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import {
 	findCacheGraphViolations,
+	findForbiddenProjectLiteralViolations,
+	findHrefLiteralReports,
 	findPackageBoundaryViolations,
 	findUiPersistenceViolations,
 } from "./architecture-rules.mjs";
@@ -46,13 +48,43 @@ const packageBoundaryFiles = [
 	...filesUnder("packages/contracts"),
 	...filesUnder("src/core"),
 ];
+const packageBoundaryEntries = packageBoundaryFiles.map((file) => ({
+	name: relative(file),
+	content: readFileSync(file, "utf8"),
+}));
 for (const violation of findPackageBoundaryViolations(
-	packageBoundaryFiles.map((file) => ({
-		name: relative(file),
-		content: readFileSync(file, "utf8"),
-	})),
+	packageBoundaryEntries,
 )) {
 	violations.push(violation);
+}
+
+const projectLiteralPolicyPath = path.join(root, "src", "project", "project-literals.json");
+if (!existsSync(projectLiteralPolicyPath)) {
+	violations.push("src/project/project-literals.json: project literal policy is missing");
+} else {
+	const projectLiteralPolicy = JSON.parse(readFileSync(projectLiteralPolicyPath, "utf8"));
+	for (const violation of findForbiddenProjectLiteralViolations(
+		packageBoundaryEntries,
+		projectLiteralPolicy.cityBrandDomainDenylist ?? [],
+	)) {
+		violations.push(violation);
+	}
+	const hrefReports = findHrefLiteralReports(
+		[
+			...filesUnder("src"),
+			...filesUnder("packages/ui"),
+			...filesUnder("packages/contracts"),
+		].map((file) => ({ name: relative(file), content: readFileSync(file, "utf8") })),
+	);
+	if (projectLiteralPolicy.hrefLiteralMode === "enforce") {
+		violations.push(...hrefReports);
+	} else {
+		console.log(`architecture href literal report: ${hrefReports.length}`);
+	}
+}
+
+if (!existsSync(path.join(root, "src", "project", "static-routes.ts"))) {
+	violations.push("src/project/static-routes.ts: project static route owner is missing");
 }
 
 for (const file of filesUnder("src")) {
@@ -70,7 +102,7 @@ for (const file of filesUnder("src")) {
 			name.startsWith("src/core/data-access/system/") ||
 			name.startsWith("src/project/jobs/") ||
 			name.startsWith("src/core/data-access/leads/") ||
-			name.startsWith("src/core/data-access/public/") ||
+			name.startsWith("src/project/data-access/public/") ||
 			name === "src/core/ingest/payload-feed-ingest-repository.ts" ||
 			name === "src/core/leads/deliver-lead.ts"
 		)
@@ -525,11 +557,9 @@ if (
 	violations.push("src/core/data-access/system/jobs module is missing");
 }
 
-if (
-	existsSync(path.join(root, "src", "core", "data-access", "public", "sql"))
-) {
+if (existsSync(path.join(root, "src", "project", "data-access", "public", "sql"))) {
 	violations.push(
-		"src/core/data-access/public/sql: public raw SQL layer must be removed",
+		"src/project/data-access/public/sql: public raw SQL layer must be removed",
 	);
 }
 
@@ -551,7 +581,7 @@ for (const leftover of [
 	}
 }
 
-const publicReadRoots = ["src/core/data-access/public", "src/app/(site)"];
+const publicReadRoots = ["src/project/data-access/public", "src/app/(site)"];
 const publicSqlForbidden =
 	/drizzle\.execute|from\s+["']@payloadcms\/db-postgres\/drizzle["']|payload\.db|db\.drizzle/;
 for (const directory of publicReadRoots) {

@@ -13,9 +13,9 @@ import {
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
 	findPublicPropertyLifecycleBySlug,
-} from "../../src/core/data-access/public/catalog.ts";
-import { submitPublicLead } from "../../src/core/data-access/public/leads.ts";
-import { findPublicPage } from "../../src/core/data-access/public/pages.ts";
+} from "../../src/project/data-access/public/catalog.ts";
+import { submitPublicLead } from "../../src/project/data-access/public/leads.ts";
+import { findPublicPage } from "../../src/project/data-access/public/pages.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { resolvePropertyPageLifecycle } from "../../src/core/seo/property.ts";
 import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
@@ -25,7 +25,7 @@ import {
 	isLocalMediaReady,
 	mediaOverwriteDisabled,
 	uniqueMediaFilename,
-} from "../../src/core/storage/local-fs.ts";
+} from "../../src/project/storage/local-fs.ts";
 import {
 	createControllableClock,
 	installRuntimeClock,

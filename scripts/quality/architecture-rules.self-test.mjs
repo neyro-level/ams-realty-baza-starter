@@ -4,6 +4,8 @@ import path from "node:path";
 import dependencyConfig from "../../.dependency-cruiser.mjs";
 import {
 	findCacheGraphViolations,
+	findForbiddenProjectLiteralViolations,
+	findHrefLiteralReports,
 	findPackageBoundaryViolations,
 	findUiPersistenceViolations,
 } from "./architecture-rules.mjs";
@@ -71,6 +73,43 @@ assert.equal(
 	]).length,
 	0,
 	"core pure-type DTO import fixture must remain allowed",
+);
+assert.equal(
+	findPackageBoundaryViolations([
+		fixture("allowed", "project-composes-core", "src/project/profile.ts"),
+	]).length,
+	0,
+	"project-to-core composition fixture must remain allowed",
+);
+assert.equal(
+	findPackageBoundaryViolations([
+		fixture("broken", "core-project-import", "src/core/profile/index.ts"),
+	]).length,
+	1,
+	"core-to-project fixture must fail",
+);
+assert.equal(
+	findForbiddenProjectLiteralViolations(
+		[fixture("broken", "project-literal", "packages/ui/src/brand.ts")],
+		["Example Project City"],
+	).length,
+	1,
+	"project literal in a reusable package must fail",
+);
+assert.equal(
+	findForbiddenProjectLiteralViolations(
+		[fixture("allowed", "core-dto-type-import", "src/core/catalog/dto.ts")],
+		["Example Project City"],
+	).length,
+	0,
+	"reusable code without project literals must remain allowed",
+);
+assert.equal(
+	findHrefLiteralReports([
+		fixture("broken", "href-literal", "packages/ui/src/navigation.tsx"),
+	]).length,
+	1,
+	"href literals must remain visible in report mode",
 );
 
 assert.equal(
@@ -141,6 +180,7 @@ for (const rule of [
 	"contracts-have-no-runtime-or-persistence-dependencies",
 	"ui-does-not-import-app-persistence",
 	"core-does-not-import-ui",
+	"core-and-packages-do-not-import-project",
 ]) {
 	assert.ok(
 		dependencyRules.has(rule),

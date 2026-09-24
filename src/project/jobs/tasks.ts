@@ -201,6 +201,8 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 			const result = await runImportFeed(
 				{
 					now: () => nowDate(),
+					heartbeatIntervalMs: projectConfig.importHeartbeatIntervalMs,
+					ingestBatchSize: projectConfig.ingestBatchSize,
 					claimQueuedImportRun: (claim) => claimQueuedImportRun(payload, claim),
 					touchHeartbeat: async (tick) => {
 						await touchImportRunHeartbeat(payload, tick);

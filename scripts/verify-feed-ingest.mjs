@@ -645,7 +645,7 @@ const importRuntime = readFileSync(
 	"utf8",
 );
 const ownerFeed = readFileSync(
-	"src/core/ingest/owner-feed-operations.ts",
+	"src/project/ingest/owner-feed-operations.ts",
 	"utf8",
 );
 assert.ok(

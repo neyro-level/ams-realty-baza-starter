@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { getSiteUrl } from "@/core/seo/site";
+import { getSiteUrl } from "@/project/seo/site";
 import {
 	getProjectIndexingPolicy,
 	metadataRobotsForPolicy,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import type { CatalogQueryInput } from "@/core/data-access/public";
-import { projectConfig } from "../../project/project.config.ts";
+import type { CatalogQueryInput } from "../data-access/public/index.ts";
+import { projectConfig } from "../project.config.ts";
 import { absoluteUrl, siteBrandName } from "./site.ts";
 
 const indexedFilterKeys = projectConfig.indexedCatalogFilterKeys;

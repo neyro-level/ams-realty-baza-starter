@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getSiteUrl } from "@/core/seo/site";
+import { getSiteUrl } from "@/project/seo/site";
 import {
 	buildRobots,
 	getProjectIndexingPolicy,

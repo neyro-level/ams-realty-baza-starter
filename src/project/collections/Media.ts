@@ -4,7 +4,7 @@ import {
 	mediaFileExists,
 	mediaOverwriteDisabled,
 	uniqueMediaFilename,
-} from "../../core/storage/local-fs.ts";
+} from "../storage/local-fs.ts";
 import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
 
 const allowedMimeTypes = [

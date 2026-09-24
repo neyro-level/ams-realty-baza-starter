@@ -1,0 +1,8 @@
+{
+	"cityBrandDomainDenylist": [
+		"AMS Realty Baza Starter",
+		"start-baza.ams24.ru",
+		"Демо-город"
+	],
+	"hrefLiteralMode": "report"
+}

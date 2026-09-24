@@ -3,13 +3,13 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { GonePropertyPageView, PropertyPageView } from "@ams/realtbase-ui";
 import { toMetadata } from "@/core/seo/page-metadata";
-import { getPublicProperty } from "@/core/data-access/public";
+import { getPublicProperty } from "@/project/data-access/public";
 import { getPropertyRobots } from "@/core/seo/property";
 import {
 	buildBreadcrumbJsonLd,
 	buildPropertyJsonLd,
 	JsonLdScript,
-} from "@/core/seo/structured-data";
+} from "@/project/seo/structured-data";
 import { siteConfig } from "@/project/site.config";
 import { leadConsentContext } from "@/project/legal.config";
 
