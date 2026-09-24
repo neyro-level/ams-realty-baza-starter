@@ -41,7 +41,10 @@ DECLARE
 		'properties_public_catalog_idx',
 		'properties_public_sitemap_idx',
 		'payload_jobs_wait_until_idx',
-		'payload_jobs_concurrency_key_idx'
+		'payload_jobs_concurrency_key_idx',
+		'site_settings_logo_idx',
+		'site_settings_social_links_order_idx',
+		'site_settings_social_links_parent_id_idx'
 	];
 	required_index text;
 	required_constraints text[] := ARRAY[
@@ -75,6 +78,16 @@ BEGIN
 			RAISE EXCEPTION 'Missing required property numeric constraint: %', required_constraint;
 		END IF;
 	END LOOP;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM information_schema.tables
+		WHERE table_schema = 'public' AND table_name = 'site_settings'
+	) OR NOT EXISTS (
+		SELECT 1 FROM information_schema.tables
+		WHERE table_schema = 'public' AND table_name = 'site_settings_social_links'
+	) THEN
+		RAISE EXCEPTION 'Missing site settings Global tables';
+	END IF;
 
 	IF NOT EXISTS (
 		SELECT 1

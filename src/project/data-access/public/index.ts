@@ -37,6 +37,7 @@ export {
 	publicPropertyRetainedArchivedWhere,
 } from "./catalog";
 export { publicGatewayPolicy } from "./policy";
+export { findPublicNap, toNapDTO } from "./nap";
 export {
 	getPublicCatalog,
 	getPublicHomePage,

@@ -1,5 +1,7 @@
 export const contractVersion = "2.0.0" as const;
-export const contractState = "frozen" as const;
+
+export type { NapDTO } from "./nap";
+export const contractState = "draft" as const;
 
 export type { PropertyCategory, PropertyDealType } from "./common";
 export type { MediaDTO } from "./media";
@@ -25,5 +27,13 @@ export type {
 	SiteNavItemDTO,
 } from "./shell";
 export type { BreadcrumbDTO, BreadcrumbItemDTO, PageSEOContract } from "./seo";
-export type { LeadFormContext, LeadFormKind, LeadPropertyContextDTO } from "./lead";
-export type { HomePageDTO, MarketingPageDTO, MarketingSectionDTO } from "./marketing";
+export type {
+	LeadFormContext,
+	LeadFormKind,
+	LeadPropertyContextDTO,
+} from "./lead";
+export type {
+	HomePageDTO,
+	MarketingPageDTO,
+	MarketingSectionDTO,
+} from "./marketing";

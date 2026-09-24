@@ -1,6 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { leadDeliveryRelationalContractUpSql } from "../../migrations/20260919_151000.ts";
 import {
+	siteSettingsDownSql,
+	siteSettingsUpSql,
+} from "../../migrations/20260924_111534.ts";
+import {
 	payloadAuthSecurityDownSql,
 	payloadAuthSecurityUpSql,
 } from "../../migrations/20260921_185354_add_reset_password_requested_at.ts";
@@ -245,6 +249,44 @@ export function provePayloadAuthSecurityMigration(testUri) {
 		);
 	}
 	psql(testUri, payloadAuthSecurityUpSql);
+}
+
+export function proveSiteSettingsMigration(testUri) {
+	psql(
+		testUri,
+		`CREATE TABLE media (id serial PRIMARY KEY);
+		 CREATE TABLE p8_05_migration_sentinel (id integer PRIMARY KEY, note text NOT NULL);
+		 INSERT INTO p8_05_migration_sentinel (id, note) VALUES (1, 'preserve-me');`,
+	);
+	psql(testUri, siteSettingsUpSql);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('site_settings','site_settings_social_links')",
+		) !== "2"
+	) {
+		throw new Error("Site settings migration did not create both tables.");
+	}
+	psql(
+		testUri,
+		"INSERT INTO site_settings (brand_name, phone) VALUES ('Fixture Agency', '+70000000000')",
+	);
+	psql(testUri, siteSettingsDownSql);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('site_settings','site_settings_social_links')",
+		) !== "0"
+	) {
+		throw new Error("Site settings migration down did not remove its tables.");
+	}
+	if (
+		psql(testUri, "SELECT note FROM p8_05_migration_sentinel WHERE id = 1") !==
+		"preserve-me"
+	) {
+		throw new Error("Site settings migration down changed unrelated data.");
+	}
+	psql(testUri, siteSettingsUpSql);
 }
 
 export function psqlOnTest(testUri, sql) {

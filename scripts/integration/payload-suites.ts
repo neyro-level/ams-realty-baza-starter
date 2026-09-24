@@ -16,6 +16,8 @@ import {
 } from "../../src/project/data-access/public/catalog.ts";
 import { submitPublicLead } from "../../src/project/data-access/public/leads.ts";
 import { findPublicPage } from "../../src/project/data-access/public/pages.ts";
+import { findPublicNap } from "../../src/project/data-access/public/nap.ts";
+import { fixtureSiteSettingsData } from "../../src/fixture/site-settings.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { resolvePropertyPageLifecycle } from "../../src/core/seo/property.ts";
 import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
@@ -47,6 +49,9 @@ installRuntimeClock(clock);
 
 const payload = await getPayload({ config });
 const access = systemOverrideAccess("system-job");
+const owner = { id: 10_001, collection: "users", roles: ["owner"] } as never;
+const admin = { id: 10_002, collection: "users", roles: ["admin"] } as never;
+const editor = { id: 10_003, collection: "users", roles: ["editor"] } as never;
 
 async function assertPubliclyInaccessible(
 	collection:
@@ -80,6 +85,34 @@ await assertPubliclyInaccessible("properties");
 await assertPubliclyInaccessible("pages");
 await assertPubliclyInaccessible("media");
 await assertPubliclyInaccessible("redirects");
+
+await assert.rejects(
+	() =>
+		payload.findGlobal({
+			slug: "site-settings",
+			overrideAccess: false,
+			user: null,
+		}),
+	"anonymous Local API must not read raw site settings",
+);
+await payload.updateGlobal({
+	slug: "site-settings",
+	data: fixtureSiteSettingsData,
+	overrideAccess: false,
+	user: owner,
+});
+const publicNap = await findPublicNap(payload);
+assert.deepEqual(publicNap, {
+	brandName: fixtureSiteSettingsData.brandName,
+	phone: { label: fixtureSiteSettingsData.phone, href: "tel:+70000000000" },
+	email: {
+		label: fixtureSiteSettingsData.email,
+		href: `mailto:${fixtureSiteSettingsData.email}`,
+	},
+	address: fixtureSiteSettingsData.address,
+	workingHours: fixtureSiteSettingsData.workingHours,
+	socialLinks: [],
+});
 
 const usersCollection = payload.config.collections.find(
 	(collection) => collection.slug === "users",
@@ -524,10 +557,6 @@ try {
 	hidden = status === 403 || /forbidden/i.test(String(error));
 }
 assert.equal(hidden, true, "created lead must stay inaccessible anonymously");
-
-const owner = { id: 10_001, collection: "users", roles: ["owner"] } as never;
-const admin = { id: 10_002, collection: "users", roles: ["admin"] } as never;
-const editor = { id: 10_003, collection: "users", roles: ["editor"] } as never;
 
 async function assertRoleReadDenied(
 	collection: "leads" | "lead-deliveries",

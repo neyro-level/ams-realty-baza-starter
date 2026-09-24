@@ -14,6 +14,7 @@ import { Properties } from "./src/project/collections/Properties.ts";
 import { Redirects } from "./src/project/collections/Redirects.ts";
 import { Users } from "./src/project/collections/Users.ts";
 import { runtimeEnv } from "./src/project/env.ts";
+import { SiteSettings } from "./src/project/globals/SiteSettings.ts";
 import { payloadJobsAutoRun } from "./src/project/jobs/queues.ts";
 import { payloadJobTasks } from "./src/project/jobs/tasks.ts";
 
@@ -23,7 +24,8 @@ const databaseUri =
 	runtimeEnv.DATABASE_URI ??
 	"postgresql://127.0.0.1:5432/ams_realtbase_not_configured";
 const payloadSecret =
-	runtimeEnv.PAYLOAD_SECRET ?? "build-only-payload-secret-replace-before-runtime";
+	runtimeEnv.PAYLOAD_SECRET ??
+	"build-only-payload-secret-replace-before-runtime";
 
 export default buildConfig({
 	admin: {
@@ -41,8 +43,13 @@ export default buildConfig({
 		Media,
 		Redirects,
 	],
-	cors: runtimeEnv.NEXT_PUBLIC_SERVER_URL ? [runtimeEnv.NEXT_PUBLIC_SERVER_URL] : [],
-	csrf: runtimeEnv.NEXT_PUBLIC_SERVER_URL ? [runtimeEnv.NEXT_PUBLIC_SERVER_URL] : [],
+	globals: [SiteSettings],
+	cors: runtimeEnv.NEXT_PUBLIC_SERVER_URL
+		? [runtimeEnv.NEXT_PUBLIC_SERVER_URL]
+		: [],
+	csrf: runtimeEnv.NEXT_PUBLIC_SERVER_URL
+		? [runtimeEnv.NEXT_PUBLIC_SERVER_URL]
+		: [],
 	cookiePrefix: "payload",
 	db: postgresAdapter({
 		migrationDir: resolve(projectRoot, "migrations"),
@@ -51,7 +58,9 @@ export default buildConfig({
 			max: runtimeEnv.DATABASE_POOL_MAX,
 		},
 		push:
-			process.env.NODE_ENV === "production" ? false : runtimeEnv.PAYLOAD_DB_PUSH,
+			process.env.NODE_ENV === "production"
+				? false
+				: runtimeEnv.PAYLOAD_DB_PUSH,
 	}),
 	graphQL: {
 		disable: true,

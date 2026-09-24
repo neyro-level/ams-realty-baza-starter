@@ -40,6 +40,9 @@ if [[ "$requires_database" == "true" ]]; then
 fi
 
 pnpm install --frozen-lockfile
+if [[ "$requires_database" == "true" ]]; then
+  DATABASE_URI="$DATABASE_URI_TEST" AMS_SKIP_LOCAL_ENV=true pnpm payload:migrate
+fi
 AMS_SKIP_LOCAL_ENV=true pnpm verify:merge-risky
 
 echo "SourceCraft targeted RISKY proof OK: scope=$RISK_SCOPE"

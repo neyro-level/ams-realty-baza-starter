@@ -106,9 +106,11 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
+    'site-settings': SiteSetting;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: null;
@@ -1151,6 +1153,43 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Canonical brand, contacts, requisites and map coordinates for public surfaces.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  brandName: string;
+  legalName?: string | null;
+  logo?: (number | null) | Media;
+  phone: string;
+  email?: string | null;
+  address?: string | null;
+  workingHours?: string | null;
+  telegram?: string | null;
+  whatsapp?: string | null;
+  socialLinks?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  requisites?: {
+    inn?: string | null;
+    kpp?: string | null;
+    ogrn?: string | null;
+    legalAddress?: string | null;
+  };
+  coordinates?: {
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
@@ -1167,6 +1206,45 @@ export interface PayloadJobsStat {
     | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  brandName?: T;
+  legalName?: T;
+  logo?: T;
+  phone?: T;
+  email?: T;
+  address?: T;
+  workingHours?: T;
+  telegram?: T;
+  whatsapp?: T;
+  socialLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  requisites?:
+    | T
+    | {
+        inn?: T;
+        kpp?: T;
+        ogrn?: T;
+        legalAddress?: T;
+      };
+  coordinates?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

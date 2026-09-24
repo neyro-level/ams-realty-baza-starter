@@ -32,6 +32,7 @@ import {
 	proveLeadDeliveryRelationalMigration,
 	provePayloadAuthSecurityMigration,
 	provePropertyNumericMigration,
+	proveSiteSettingsMigration,
 	psqlOnTest,
 	runPayloadMigrations,
 } from "./integration/test-database.mjs";
@@ -264,6 +265,8 @@ await prepareIntegrationDatabase(preferredUri);
 provePropertyNumericMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
 proveLeadDeliveryRelationalMigration(preferredUri);
+await prepareIntegrationDatabase(preferredUri);
+proveSiteSettingsMigration(preferredUri);
 const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {
