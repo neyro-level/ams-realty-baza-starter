@@ -219,7 +219,9 @@ assert.ok(
 	"CORS must be exact-origin driven",
 );
 assert.ok(
-	payloadConfig.includes('process.env.NODE_ENV === "production" ? false'),
+	/process\.env\.NODE_ENV\s*===\s*"production"\s*\?\s*false/s.test(
+		payloadConfig,
+	),
 	"production Payload db push must be hard-disabled",
 );
 assert.ok(
@@ -357,8 +359,27 @@ assert.equal(
 );
 assert.match(
 	read("src/proxy.ts"),
-	/export function proxy\s*\(/,
+	/export (?:async )?function proxy\s*\(/,
 	"src/proxy.ts must export function proxy",
+);
+const proxySource = read("src/proxy.ts");
+for (const required of [
+	"anonymousRawRestEdgeDecision",
+	'"/api/:path*"',
+	'"/obekty/:slug"',
+	"parseCurrentPropertyLifecyclePath",
+	"lookupCurrentPropertyLifecyclePreflight",
+	"overwriteLifecyclePreflightHeader",
+]) {
+	assert.ok(
+		proxySource.includes(required),
+		`proxy boundary missing ${required}`,
+	);
+}
+assert.equal(
+	proxySource.includes("fetch("),
+	false,
+	"proxy must not recursively fetch the application",
 );
 
 const { isAnonymousDeniedRawRestPath, anonymousRawRestEdgeDecision } =

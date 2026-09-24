@@ -227,7 +227,7 @@ if (!existsSync(proxyPath)) {
 			"src/proxy.ts: raw REST edge boundary must use anonymousRawRestEdgeDecision",
 		);
 	}
-	if (!/export function proxy\s*\(/.test(proxy)) {
+	if (!/export (?:async )?function proxy\s*\(/.test(proxy)) {
 		violations.push(
 			"src/proxy.ts: Next 16 request boundary must keep the named proxy export",
 		);
@@ -235,6 +235,21 @@ if (!existsSync(proxyPath)) {
 	if (!proxy.includes("notFound")) {
 		violations.push(
 			"src/proxy.ts: anonymous raw REST denial must return notFound",
+		);
+	}
+	if (
+		!proxy.includes('"/obekty/:slug"') ||
+		!proxy.includes("parseCurrentPropertyLifecyclePath") ||
+		!proxy.includes("lookupCurrentPropertyLifecyclePreflight") ||
+		!proxy.includes("overwriteLifecyclePreflightHeader")
+	) {
+		violations.push(
+			"src/proxy.ts: bounded property lifecycle preflight contract is missing",
+		);
+	}
+	if (proxy.includes("fetch(")) {
+		violations.push(
+			"src/proxy.ts: lifecycle preflight must not recursively fetch the application",
 		);
 	}
 }
