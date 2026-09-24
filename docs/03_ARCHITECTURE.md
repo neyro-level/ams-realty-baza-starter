@@ -12,14 +12,16 @@ Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №7 v2
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №8 v6
 APPROVED выполняется после CLEAN reconciliation через `MERGE_AFTER_GATE` в
-SourceCraft; GitHub получает только fast-forward mirror canonical `main`.
-Production и freeze tag в Plan №7 не входят.
+SourceCraft; GitHub получает только отдельный явный fast-forward mirror
+canonical `main`. Production, mirror и target tag `starter-v2.0.0` не входят
+в Developer implementation loop.
 
-## CI, mirror и release inventory — 2026-09-22
+## Historical CI, mirror and freeze baseline — 2026-09-22
 
-- Canonical SourceCraft `main`: `ca1b884d43e808d17e1eb18b05bad70ea358dd1c`.
+- Plan №7 completion SourceCraft `main`:
+  `ca1b884d43e808d17e1eb18b05bad70ea358dd1c`.
   GitHub mirror `main` равен этому SHA; active `.github/workflows` отсутствуют,
   но repository Actions setting остаётся включённым и выключается отдельной
   mirror-governance задачей.
@@ -43,10 +45,10 @@ Production и freeze tag в Plan №7 не входят.
   previous image/env rollback point. Текущий Dockerfile копирует весь `/app` и
   не использует standalone allowlist; release hardening остаётся отдельной
   RISKY-задачей до первого client production и не выполняется этим inventory.
-- Canonical freeze contract ожидает tag `starter-freeze-v2`, которого нет.
-  Наблюдаемый SourceCraft tag `starter-freeze` указывает на тот же `ca1b884d...`,
-  но имеет другое имя; до отдельного owner reconciliation состояние остаётся
-  `READY_FOR_OWNER_FREEZE_DECISION / NOT_FROZEN`.
+- Старое намерение создать `starter-freeze-v2` закрыто owner decision Plan №8.
+  Наблюдаемый SourceCraft tag `starter-freeze` остаётся историческим. Новый
+  target tag `starter-v2.0.0` требует отдельной команды после финальной
+  приёмки Plan №8.
 
 ## Stack и ownership
 
@@ -59,6 +61,42 @@ Production и freeze tag в Plan №7 не входят.
 Текущий lock snapshot: Next.js `16.3.5`, React `19.2.8`, Payload `3.90.1`.
 Фактические версии всегда определяют `package.json`, lockfile и runtime files.
 Major upgrade требует отдельного решения и targeted proof.
+
+## Geo-catalog platform: current and target
+
+Нормативный reusable target-контракт:
+`docs/platform/GEO_CATALOG_CONTRACT.md`. Он фиксирует vocabulary, PageKey,
+URL/status/profile semantics и cutover invariants. `02_PRODUCT_STRUCTURE.md`
+показывает current runtime рядом с target grammar.
+
+До исполнения профильного epic любой target-компонент имеет статус
+`APPROVED TARGET / NOT RUNTIME LIVE`. Текущее поведение определяется кодом,
+миграциями и существующими маршрутами. Переход выполняется expand-first:
+
+```text
+profile/grammar contracts
+  -> additive Payload schema and normalized data
+  -> frozen DTO + Public Gateway
+  -> resolver + Content Gate + reusable UI
+  -> discovery/lifecycle proof
+  -> atomic route cutover (P8-23A)
+  -> evidence-based cleanup (P8-23B)
+```
+
+Target dependency direction:
+
+```text
+project profile/data -> core pure functions
+app composition -> project + core + UI
+core/packages -X-> project
+```
+
+Profile передаётся в reusable core явно. Project-owned static routes, brand,
+domain, city literals и будущий literal denylist не переходят в core/packages.
+Payload остаётся единственным schema/auth/Admin owner; public reads продолжают
+идти через explicit Public Gateway и storage-neutral DTO. До P8-23A legacy
+`/nedvizhimost`, `/obekty/[slug]` и отдельная lifecycle HTTP boundary
+остаются действующим rollback path.
 
 ## Version-sensitive framework boundaries
 

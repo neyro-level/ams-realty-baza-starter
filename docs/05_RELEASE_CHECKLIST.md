@@ -1,6 +1,10 @@
 # Release Checklist
 
-Статус: `Plan №5 pre-production alignment PASS on main@089b0fb7`. Owner-operated demo contour существует, но этот SHA не выпускался. PII retention days остаются `NEEDS_OWNER`; финальный proof не заменяет отдельный release, rollout и live smoke.
+Статус: `Active release contract / Plan №8 release not authorized`. Исторический
+Plan №5 pre-production alignment прошёл на `main@089b0fb7`, но этот SHA не
+выпускался. Owner-operated demo contour существует. PII retention days остаются
+`NEEDS_OWNER`; implementation proof не заменяет отдельный release, rollout и
+live smoke.
 
 ## Перед Pull Request
 

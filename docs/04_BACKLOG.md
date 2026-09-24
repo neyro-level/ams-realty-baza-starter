@@ -1,19 +1,27 @@
 # Backlog
 
-Статус: `Plan №7 v2 EXECUTION COMPLETE / READY_FOR_OWNER_FREEZE_DECISION / NOT_FROZEN` — `AMS-REALTY-BAZA-STARTER-AUDIT-CORRECTIONS-7`.
-SourceCraft — primary, GitHub — one-way mirror. Production исключён.
+Статус: `Plan №8 v6 APPROVED / EXECUTION ACTIVE` —
+`AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8`. SourceCraft — primary, GitHub —
+one-way mirror. Production исключён.
 
-Требования, зависимости и acceptance находятся в `AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md`.
+Требования, зависимости и acceptance находятся в
+`AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md`. Текущие READY/in-progress/closed
+состояния принадлежат локальному Beads/ledger и не дублируются здесь.
 
 ## NOW
 
-- Выполненных READY-задач Plan №7 не осталось; итоговый `main@ca1b884d43e808d17e1eb18b05bad70ea358dd1c` и final decision proof сохранены как evidence.
-- Не считать SourceCraft tag `starter-freeze` каноническим `starter-freeze-v2`: имя расходится с утверждённым freeze contract и требует отдельного owner reconciliation.
-- Production release остаётся отдельным lifecycle и этим планом запрещён.
+- Исполнять только текущую READY-задачу утверждённого operational graph Plan №8.
+- Target contract: `platform/GEO_CATALOG_CONTRACT.md`; target routes не
+  считаются live до P8-23A.
+- Production release, GitHub mirror и tag `starter-v2.0.0` остаются отдельными
+  owner actions и implementation-планом запрещены.
 
 ## PRESERVED EXECUTION EVIDENCE
 
-- Plan №6 ниже — историческое evidence, не текущая инструкция.
+- Plan №7 и Plan №6 ниже — историческое evidence, не текущая инструкция.
+- Plan №7 завершён на
+  `main@ca1b884d43e808d17e1eb18b05bad70ea358dd1c`; старое намерение
+  `starter-freeze-v2` закрыто решением Plan №8.
 - EPIC-01…10 доставлены; implementation graph Task Manager закрыт, точные execution ledgers сохранены как историческое evidence.
 - EPIC-09 прошёл SourceCraft RISKY Gate №126 на exact head `2f09592343e681a97f43745530d6bae012865ddf` и был слит PR №109.
 - SourceCraft `main@a2a03d50b6a4db2cfff537d2d476ad14e82f198a` — итоговый merge Plan №6 до текущего статусного уточнения.
