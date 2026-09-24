@@ -3,6 +3,13 @@ import { getPayload } from "payload";
 import config from "../../payload.config.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { runPropertyGeoBackfill } from "../../src/core/data-access/system/property-geo-backfill.ts";
+import {
+	countInventory,
+	getGeoBySlug,
+	getListing,
+	getNearby,
+	getPropertyByPublicUrlId,
+} from "../../src/project/data-access/public/geo-catalog.ts";
 import { requirePayloadRuntime } from "../../src/project/env.ts";
 
 requirePayloadRuntime();
@@ -159,6 +166,109 @@ assert.equal(second.processed, 3);
 assert.equal(second.updated, 0);
 assert.equal(second.unchanged, 3);
 assert.equal(second.createdIssues, 0);
+
+for (const property of [matchedAfter, unknownAfter, scopedAfter]) {
+	await payload.update({
+		collection: "properties",
+		id: property.id,
+		data: { publishedAt: "2026-09-24T16:00:00.000Z" },
+		...access,
+	});
+}
+
+let observedQueries = 0;
+const observedPayload = new Proxy(payload, {
+	get(target, property, receiver) {
+		const value = Reflect.get(target, property, receiver);
+		if (
+			(property === "find" || property === "count") &&
+			typeof value === "function"
+		) {
+			return (...args: unknown[]) => {
+				observedQueries += 1;
+				return Reflect.apply(value, target, args);
+			};
+		}
+		return typeof value === "function" ? value.bind(target) : value;
+	},
+});
+
+observedQueries = 0;
+const primorskListing = await getListing(observedPayload, {
+	geo: "primorsk",
+	surface: "kvartiry",
+});
+assert.ok(primorskListing, "primary geo listing must resolve");
+assert.ok(
+	primorskListing.items.some(
+		(item) =>
+			item.kind === "property" && item.item.id === String(matchedAfter.id),
+	),
+	"primary geo property must be present in its listing",
+);
+assert.ok(
+	!primorskListing.items.some(
+		(item) =>
+			item.kind === "property" && item.item.id === String(scopedAfter.id),
+	),
+	"secondary geo property must not pollute the primary geo listing",
+);
+assert.ok(observedQueries <= 2, "listing query budget must not grow per item");
+
+const secondaryPublicUrlId = scopedAfter.publicUrlId;
+assert.equal(typeof secondaryPublicUrlId, "number");
+observedQueries = 0;
+assert.equal(
+	(
+		await getPropertyByPublicUrlId(
+			observedPayload,
+			secondaryPublicUrlId as number,
+		)
+	)?.id,
+	String(scopedAfter.id),
+	"secondary geo property must remain directly reachable by immutable public URL id",
+);
+assert.equal(
+	observedQueries,
+	1,
+	"property details lookup must use one bounded query",
+);
+
+observedQueries = 0;
+assert.equal(
+	(await getGeoBySlug(observedPayload, "zarechnyy"))?.slug,
+	"zarechnyy",
+);
+assert.equal(observedQueries, 1, "geo lookup must use one bounded query");
+
+observedQueries = 0;
+assert.deepEqual(
+	await getNearby(observedPayload, "primorsk"),
+	[],
+	"single-geo profile must not expose a non-routable agglomeration city",
+);
+assert.ok(
+	observedQueries <= 2,
+	"nearby lookup must stay within its fixed budget",
+);
+
+observedQueries = 0;
+assert.ok(
+	(await countInventory(observedPayload, {
+		geo: "primorsk",
+		surface: "kvartiry",
+	})) >= 2,
+);
+assert.ok(observedQueries <= 2, "inventory count must use a bounded aggregate");
+
+await assert.rejects(
+	() =>
+		getListing(observedPayload, {
+			surface: "kvartiry",
+		} as never),
+	/geo|invalid_type/i,
+	"listing must never infer a default city",
+);
 
 await payload.destroy();
 console.log("property geo integration suites: ok");

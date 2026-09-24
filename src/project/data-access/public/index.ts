@@ -37,6 +37,19 @@ export {
 	publicPropertyRetainedArchivedWhere,
 } from "./catalog";
 export { publicGatewayPolicy } from "./policy";
+export {
+	countInventory,
+	getDeveloper,
+	getDevelopment,
+	getGeoBySlug,
+	getGeoHub,
+	getListing,
+	getNearby,
+	getPropertyByPublicUrlId,
+	listDevelopments,
+	listGeoDevelopers,
+} from "./geo-catalog";
+export type { PublicListingInput } from "./geo-catalog";
 export { findPublicNap, toNapDTO } from "./nap";
 export {
 	getPublicCatalog,

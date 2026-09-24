@@ -19,7 +19,7 @@ import {
 	publicRedirectDestinationIsChain,
 } from "./payload-reads";
 
-const publicPropertySelect = {
+export const publicPropertySelect = {
 	slug: true,
 	status: true,
 	publicUrlId: true,
@@ -196,8 +196,14 @@ export const publicPropertyDetailsWhere: Where = {
 	or: [publicPropertyPublicationWhere, publicPropertyRetainedArchivedWhere],
 };
 
-function buildCatalogWhere(query: CatalogQuery): Where {
+function buildCatalogWhere(
+	query: CatalogQuery,
+	scope?: { cityId: number; districtId?: number },
+): Where {
 	const and: Where[] = [publicPropertyPublicationWhere];
+	if (scope) and.push({ cityRef: { equals: scope.cityId } });
+	if (scope?.districtId)
+		and.push({ districtRef: { equals: scope.districtId } });
 
 	if (query.query) {
 		and.push({
@@ -239,7 +245,7 @@ function sortForCatalog(sort: PropertySort): string {
 	}
 }
 
-function toPublicCatalogProperty(
+export function toPublicCatalogProperty(
 	property: PublicCatalogSelectedProperty,
 ): PublicCatalogProperty {
 	return {
@@ -327,6 +333,72 @@ export async function findPublicCatalogProperties(
 			view: query.view,
 		},
 	};
+}
+
+export async function findPublicCatalogPropertiesByGeo(
+	payload: Payload,
+	input: CatalogQueryInput,
+	scope: { cityId: number; districtId?: number },
+): Promise<PublicCatalogResult> {
+	const query = catalogQuerySchema.parse(input);
+	const result = await payload.find({
+		collection: "properties",
+		where: buildCatalogWhere(query, scope),
+		depth: publicGatewayPolicy.depth,
+		limit: query.limit,
+		page: query.page,
+		sort: sortForCatalog(query.sort),
+		select: publicPropertySelect,
+		overrideAccess: publicGatewayPolicy.overrideAccess,
+		context: publicGatewayPolicy.context,
+	});
+	return {
+		items: result.docs.map((property) =>
+			toPublicCatalogProperty(property as PublicCatalogSelectedProperty),
+		),
+		total: result.totalDocs,
+		page: result.page ?? query.page,
+		pageSize: result.limit,
+		totalPages: result.totalPages,
+		applied: {
+			query: query.query,
+			category: query.category,
+			dealType: query.dealType,
+			rooms: query.rooms,
+			priceFromMinor: query.priceFromMinor,
+			priceToMinor: query.priceToMinor,
+			areaFrom: query.areaFrom,
+			areaTo: query.areaTo,
+			sort: query.sort,
+			view: query.view,
+		},
+	};
+}
+
+export async function findPublicPropertyByPublicUrlId(
+	payload: Payload,
+	publicUrlId: number,
+): Promise<PublicCatalogProperty | null> {
+	if (!Number.isSafeInteger(publicUrlId) || publicUrlId <= 0) return null;
+	const result = await payload.find({
+		collection: "properties",
+		where: {
+			and: [
+				publicPropertyDetailsWhere,
+				{ publicUrlId: { equals: publicUrlId } },
+			],
+		},
+		depth: 0,
+		limit: 1,
+		page: 1,
+		select: publicPropertySelect,
+		overrideAccess: publicGatewayPolicy.overrideAccess,
+		context: publicGatewayPolicy.context,
+	});
+	const property = result.docs[0];
+	return property
+		? toPublicCatalogProperty(property as PublicCatalogSelectedProperty)
+		: null;
 }
 
 export async function findPublicPropertyBySlug(payload: Payload, slug: string) {

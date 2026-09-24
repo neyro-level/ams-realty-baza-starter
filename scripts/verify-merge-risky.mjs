@@ -13,6 +13,7 @@ const scopes = {
 	"auth-pii-leads": {
 		requiresDatabase: true,
 		commands: [
+			"verify:public-gateway",
 			"verify:lead-intake",
 			"verify:lead-analytics",
 			"verify:lead-outbox",

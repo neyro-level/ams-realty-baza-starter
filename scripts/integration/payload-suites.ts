@@ -14,6 +14,13 @@ import {
 	findPublicPropertyBySlug,
 	findPublicPropertyLifecycleBySlug,
 } from "../../src/project/data-access/public/catalog.ts";
+import {
+	countInventory,
+	getDeveloper,
+	getDevelopment,
+	listDevelopments,
+	listGeoDevelopers,
+} from "../../src/project/data-access/public/geo-catalog.ts";
 import { submitPublicLead } from "../../src/project/data-access/public/leads.ts";
 import { findPublicPage } from "../../src/project/data-access/public/pages.ts";
 import { findPublicNap } from "../../src/project/data-access/public/nap.ts";
@@ -76,18 +83,24 @@ const allocatedIds = parallelProperties.map((property) => property.publicUrlId);
 assert.equal(new Set(allocatedIds).size, parallelProperties.length);
 assert.ok(
 	allocatedIds.every(
-		(value): value is number => typeof value === "number" && Number.isSafeInteger(value) && value > 0,
+		(value): value is number =>
+			typeof value === "number" && Number.isSafeInteger(value) && value > 0,
 	),
 );
 const retainedId = parallelProperties[0].publicUrlId;
-if (typeof retainedId !== "number") throw new Error("publicUrlId default was not applied");
+if (typeof retainedId !== "number")
+	throw new Error("publicUrlId default was not applied");
 const republished = await payload.update({
 	collection: "properties",
 	id: parallelProperties[0].id,
 	data: { publishedAt: clock.nowIso() },
 	...access,
 });
-assert.equal(republished.publicUrlId, retainedId, "republication must retain publicUrlId");
+assert.equal(
+	republished.publicUrlId,
+	retainedId,
+	"republication must retain publicUrlId",
+);
 await assert.rejects(
 	() =>
 		payload.update({
@@ -145,16 +158,20 @@ const feedIdentityData = {
 	images: [],
 	slug: `feed-identity-${identitySuffix}`,
 };
-const firstFeedWrite = await identityRepository.createFeedProperty(feedIdentityData);
+const firstFeedWrite =
+	await identityRepository.createFeedProperty(feedIdentityData);
 const repeatedFeedIdentity = await identityRepository.findFeedProperty({
 	feedSourceId: String(identityFeedSource.id),
 	externalId: feedIdentityData.externalId,
 });
 assert.equal(repeatedFeedIdentity?.id, firstFeedWrite.id);
-const secondFeedWrite = await identityRepository.updateFeedProperty(firstFeedWrite.id, {
-	importHash: "hash-v2",
-	title: "Stable feed property updated",
-});
+const secondFeedWrite = await identityRepository.updateFeedProperty(
+	firstFeedWrite.id,
+	{
+		importHash: "hash-v2",
+		title: "Stable feed property updated",
+	},
+);
 assert.equal(secondFeedWrite.publicUrlId, firstFeedWrite.publicUrlId);
 
 async function assertPubliclyInaccessible(
@@ -261,6 +278,34 @@ const preparedDevelopment = await payload.create({
 	},
 	...access,
 });
+assert.equal(
+	(await getDevelopment(payload, preparedDevelopment.slug))?.id,
+	String(preparedDevelopment.id),
+	"published development must be reachable only through the public Gateway",
+);
+assert.ok(
+	(await listDevelopments(payload, { geo: developmentCity.slug })).some(
+		(item) => item.id === String(preparedDevelopment.id),
+	),
+);
+assert.equal(
+	(await getDeveloper(payload, preparedDeveloper.slug))?.id,
+	String(preparedDeveloper.id),
+	"published developer must be reachable only through the public Gateway",
+);
+assert.ok(
+	(await listGeoDevelopers(payload, developmentCity.slug)).some(
+		(item) => item.id === String(preparedDeveloper.id),
+	),
+);
+assert.equal(
+	await countInventory(payload, {
+		geo: developmentCity.slug,
+		surface: "novostroyki",
+	}),
+	1,
+	"development inventory aggregate must remain city-scoped",
+);
 await payload.update({
 	collection: "properties",
 	id: parallelProperties[1].id,
@@ -269,12 +314,14 @@ await payload.update({
 });
 assert.equal(
 	Number(
-		(await payload.findByID({
-			collection: "properties",
-			id: parallelProperties[1].id,
-			depth: 0,
-			...access,
-		})).development,
+		(
+			await payload.findByID({
+				collection: "properties",
+				id: parallelProperties[1].id,
+				depth: 0,
+				...access,
+			})
+		).development,
 	),
 	preparedDevelopment.id,
 );
@@ -292,7 +339,14 @@ await assert.rejects(
 				dataTier: "C",
 				source: "integration-fixture",
 				checkedAt: clock.nowIso(),
-				progress: [{ date: clock.nowIso(), percent: 10, source: "fixture", checkedAt: clock.nowIso() }],
+				progress: [
+					{
+						date: clock.nowIso(),
+						percent: 10,
+						source: "fixture",
+						checkedAt: clock.nowIso(),
+					},
+				],
 				status: "draft",
 			},
 			...access,
@@ -307,10 +361,26 @@ await payload.update({
 	data: { development: null },
 	...access,
 });
-await payload.delete({ collection: "developments", id: preparedDevelopment.id, ...access });
-await payload.delete({ collection: "developers", id: preparedDeveloper.id, ...access });
-await payload.delete({ collection: "cities", id: developmentCity.id, ...access });
-await payload.delete({ collection: "regions", id: developmentRegion.id, ...access });
+await payload.delete({
+	collection: "developments",
+	id: preparedDevelopment.id,
+	...access,
+});
+await payload.delete({
+	collection: "developers",
+	id: preparedDeveloper.id,
+	...access,
+});
+await payload.delete({
+	collection: "cities",
+	id: developmentCity.id,
+	...access,
+});
+await payload.delete({
+	collection: "regions",
+	id: developmentRegion.id,
+	...access,
+});
 
 await assert.rejects(
 	() =>

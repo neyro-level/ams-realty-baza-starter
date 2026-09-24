@@ -86,7 +86,8 @@ const publicPropertyWhere: Where = {
 
 export const publicPropertyReadAccess: Access = ({ req }) => {
 	if (isOperator(req.user)) return true;
-	if (isPropertyLifecycleRead(req) || isEntityLifecycleRead(req)) return propertyLifecycleWhere;
+	if (isPropertyLifecycleRead(req) || isEntityLifecycleRead(req))
+		return propertyLifecycleWhere;
 	if (!isPublicGatewayRead(req)) return false;
 	return publicPropertyWhere;
 };
@@ -98,8 +99,17 @@ const preparedEntityLifecycleWhere: Where = {
 	],
 };
 
+const publicPreparedEntityWhere: Where = {
+	and: [
+		{ publishedAt: { exists: true } },
+		{ status: { equals: "published" } },
+		{ contentPurgedAt: { exists: false } },
+	],
+};
+
 export const publicPreparedEntityLifecycleReadAccess: Access = ({ req }) => {
 	if (isOperator(req.user)) return true;
+	if (isPublicGatewayRead(req)) return publicPreparedEntityWhere;
 	return isEntityLifecycleRead(req) ? preparedEntityLifecycleWhere : false;
 };
 
