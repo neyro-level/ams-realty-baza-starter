@@ -22,6 +22,22 @@ Idempotency: browser создаёт UUID `requestAttemptId`; exact retry сох�
 
 Fraud fingerprint: keyed HMAC по `PAYLOAD_SECRET`, без raw IP/UA.
 
+## P8-19: extended attribution contract
+
+The runtime intake contract adds `legal`, `development_price` and `quiz` plus an
+optional normalized `context` (`geo`, `surface`, `district`, `propertyUrlId`,
+`development`, `developer`). Context is attribution only: it never authorizes a
+read, replaces a canonical entity, or creates another lead backend/outbox.
+
+This is classified `RISKY auth-pii-leads`. The additive migration extends the
+existing enum/table and has a guarded down path: rollback succeeds while the new
+fields are unused, but stops before data loss when an extended lead exists.
+
+Analytics is a separate provider-neutral event contract. It has a strict event
+and dimensions allowlist, an automated PII-key guard, a test sink and a project
+no-op adapter. No vendor, browser runtime or analytics persistence is enabled by
+this decision.
+
 Канал включается только если он перечислен в `LEAD_CHANNELS`, заданы credential refs и непустой `LEAD_OUTBOUND_HOSTS`. Значения секретов не хранятся в Git.
 
 ## Почему

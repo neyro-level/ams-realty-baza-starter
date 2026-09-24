@@ -61,6 +61,7 @@ function mapLead(doc: Record<string, unknown>): LeadRecord {
 			doc.property === null || doc.property === undefined
 				? undefined
 				: relationId(doc.property),
+		context: (doc.context as LeadRecord["context"]) ?? undefined,
 		utm: (doc.utm as LeadRecord["utm"]) ?? undefined,
 		consent: {
 			accepted: true,
@@ -110,6 +111,7 @@ export function createPayloadLeadOutboxRepository(
 						sourcePage: input.sourcePage,
 						referrer: input.referrer,
 						property: parsePropertyId(input.property),
+						context: input.context,
 						utm: input.utm,
 						consent: input.consent,
 						status: "new",

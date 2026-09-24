@@ -14,6 +14,7 @@ const scopes = {
 		requiresDatabase: true,
 		commands: [
 			"verify:lead-intake",
+			"verify:lead-analytics",
 			"verify:lead-outbox",
 			"verify:lead-delivery-state",
 			"verify:max-adapter",

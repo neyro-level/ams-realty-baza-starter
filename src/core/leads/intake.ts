@@ -5,7 +5,25 @@ export type LeadFormKind =
 	| "property_request"
 	| "callback"
 	| "consultation"
-	| "generic";
+	| "generic"
+	| "legal"
+	| "development_price"
+	| "quiz";
+
+export type LeadEntityContext = {
+	geo?: string;
+	surface?:
+		| "apartments"
+		| "new-buildings"
+		| "houses"
+		| "plots"
+		| "commercial"
+		| "garages";
+	district?: string;
+	propertyUrlId?: string;
+	development?: string;
+	developer?: string;
+};
 
 export type LeadIntakeAccepted = {
 	accepted: true;
@@ -19,6 +37,7 @@ export type LeadIntakeAccepted = {
 		sourcePage: string;
 		referrer?: string;
 		property?: string;
+		context?: LeadEntityContext;
 		utm?: {
 			source?: string;
 			medium?: string;
@@ -76,10 +95,38 @@ const leadIntakeSchema = z.object({
 	phone: z.string().trim().min(5).max(40),
 	email: z.string().trim().email().max(160).optional().or(z.literal("")),
 	message: z.string().trim().max(2000).optional().or(z.literal("")),
-	formKind: z.enum(["property_request", "callback", "consultation", "generic"]),
+	formKind: z.enum([
+		"property_request",
+		"callback",
+		"consultation",
+		"generic",
+		"legal",
+		"development_price",
+		"quiz",
+	]),
 	sourcePage: z.string().trim().min(1).max(512),
 	referrer: z.string().trim().max(512).optional().or(z.literal("")),
 	property: z.string().trim().max(128).optional().or(z.literal("")),
+	context: z
+		.object({
+			geo: normalizedContextKey().optional(),
+			surface: z
+				.enum([
+					"apartments",
+					"new-buildings",
+					"houses",
+					"plots",
+					"commercial",
+					"garages",
+				])
+				.optional(),
+			district: normalizedContextKey().optional(),
+			propertyUrlId: z.string().regex(/^[1-9]\d{0,18}$/).optional(),
+			development: normalizedContextKey().optional(),
+			developer: normalizedContextKey().optional(),
+		})
+		.strict()
+		.optional(),
 	utm: z
 		.object({
 			source: z.string().trim().max(120).optional().or(z.literal("")),
@@ -177,6 +224,7 @@ export function prepareLeadIntake(
 				payload.formKind === "property_request"
 					? emptyToUndefined(payload.property)
 					: undefined,
+			context: normalizeLeadContext(payload.context),
 			utm: normalizeUtm(payload.utm),
 			consent: {
 				accepted: true,
@@ -351,6 +399,21 @@ function normalizeUtm(input: z.output<typeof leadIntakeSchema>["utm"]) {
 function emptyToUndefined(value: string | undefined): string | undefined {
 	const trimmed = value?.trim();
 	return trimmed ? trimmed : undefined;
+}
+
+function normalizedContextKey() {
+	return z
+		.string()
+		.trim()
+		.toLowerCase()
+		.regex(/^[a-z0-9][a-z0-9-]{0,119}$/);
+}
+
+function normalizeLeadContext(
+	context: z.output<typeof leadIntakeSchema>["context"],
+): LeadEntityContext | undefined {
+	if (!context || !Object.values(context).some(Boolean)) return undefined;
+	return context;
 }
 
 function hashSafe(parts: string[]): string {

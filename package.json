@@ -49,7 +49,7 @@
 		"verify:a11y-starter": "node scripts/verify-a11y-starter.mjs",
 		"verify:drift": "node scripts/quality/drift-audit.mjs",
 		"verify:ui-core": "node scripts/quality/ui-core.mjs && pnpm quality:design-tokens && pnpm verify:drift && pnpm verify:a11y-starter && pnpm verify:seo-contracts",
-		"verify:daily": "pnpm contracts:test && pnpm contracts:check && pnpm verify:site-profile && pnpm verify:url-grammar && pnpm verify:property-lifecycle-preflight && pnpm verify:entity-lifecycle && pnpm verify:geo-hierarchy && pnpm verify:property-geo-backfill && pnpm verify:property-taxonomy && pnpm verify:developments && pnpm verify:contracts-v2 && pnpm verify:development-excel && pnpm quality:architecture && pnpm quality:guards && pnpm verify:clone-readiness && pnpm verify:a11y-starter && pnpm verify:drift && pnpm typecheck && pnpm lint",
+		"verify:daily": "pnpm contracts:test && pnpm contracts:check && pnpm verify:site-profile && pnpm verify:url-grammar && pnpm verify:property-lifecycle-preflight && pnpm verify:entity-lifecycle && pnpm verify:geo-hierarchy && pnpm verify:property-geo-backfill && pnpm verify:property-taxonomy && pnpm verify:developments && pnpm verify:contracts-v2 && pnpm verify:development-excel && pnpm verify:lead-analytics && pnpm quality:architecture && pnpm quality:guards && pnpm verify:clone-readiness && pnpm verify:a11y-starter && pnpm verify:drift && pnpm typecheck && pnpm lint",
 		"verify:public-gateway": "node scripts/verify-public-gateway.mjs",
 		"verify:site-profile": "node --experimental-strip-types scripts/verify-site-profile.ts",
 		"verify:url-grammar": "node --experimental-strip-types scripts/verify-url-grammar.ts",
@@ -70,6 +70,7 @@
 		"verify:feed-lifecycle": "node --experimental-strip-types scripts/verify-feed-lifecycle.mjs",
 		"verify:manual-ownership": "node --experimental-strip-types scripts/verify-manual-ownership.mjs",
 		"verify:lead-intake": "node --experimental-strip-types scripts/verify-lead-intake.mjs",
+		"verify:lead-analytics": "node --experimental-strip-types scripts/verify-lead-analytics.ts",
 		"verify:lead-outbox": "node --experimental-strip-types scripts/verify-lead-outbox.mjs",
 		"verify:lead-delivery-state": "node --experimental-strip-types scripts/verify-lead-delivery-state.mjs",
 		"verify:max-adapter": "node --experimental-strip-types scripts/verify-max-adapter.mjs",
@@ -86,7 +87,7 @@
 		"quality:architecture": "dependency-cruiser src packages scripts --config .dependency-cruiser.mjs --output-type err",
 		"quality:design-tokens": "node scripts/quality/design-tokens.mjs",
 		"quality:guards": "node scripts/quality/architecture-rules.self-test.mjs && node scripts/quality/architecture-guard.mjs && node scripts/quality/local-api-mode.mjs && node scripts/quality/design-tokens.mjs && node scripts/quality/module-governance.mjs && node scripts/quality/sourcecraft-policy.mjs && node scripts/quality/ui-core.mjs",
-		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm verify:development-excel && pnpm verify:jobs-config && pnpm verify:public-gateway && pnpm verify:feed-parser && pnpm verify:feed-ingest && pnpm verify:feed-media-mapping && pnpm verify:feed-lifecycle && pnpm verify:manual-ownership && pnpm verify:lead-intake && pnpm verify:lead-outbox && pnpm verify:lead-delivery-state && pnpm verify:max-adapter && pnpm verify:custom-webhook-adapter && pnpm verify:seo-contracts && pnpm verify:owner-operations && pnpm verify:health-alerts && pnpm verify:operational-recovery && pnpm verify:security-boundaries && pnpm verify:product-regression && pnpm verify:production-topology && pnpm verify:release-artifact && pnpm verify:integration && pnpm verify:clone-readiness && pnpm verify:a11y-starter && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
+		"verify": "pnpm contracts:test && pnpm contracts:check && pnpm verify:development-excel && pnpm verify:jobs-config && pnpm verify:public-gateway && pnpm verify:feed-parser && pnpm verify:feed-ingest && pnpm verify:feed-media-mapping && pnpm verify:feed-lifecycle && pnpm verify:manual-ownership && pnpm verify:lead-intake && pnpm verify:lead-analytics && pnpm verify:lead-outbox && pnpm verify:lead-delivery-state && pnpm verify:max-adapter && pnpm verify:custom-webhook-adapter && pnpm verify:seo-contracts && pnpm verify:owner-operations && pnpm verify:health-alerts && pnpm verify:operational-recovery && pnpm verify:security-boundaries && pnpm verify:product-regression && pnpm verify:production-topology && pnpm verify:release-artifact && pnpm verify:integration && pnpm verify:clone-readiness && pnpm verify:a11y-starter && pnpm quality:architecture && pnpm quality:guards && pnpm typecheck && pnpm lint && pnpm build",
 		"verify:foundation": "pnpm verify"
 	},
 	"dependencies": {

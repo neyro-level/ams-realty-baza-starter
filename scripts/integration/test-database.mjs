@@ -21,6 +21,10 @@ import {
 	developmentsDownSql,
 	developmentsUpSql,
 } from "../../migrations/20260924_180000_developments.ts";
+import {
+	leadContextDownSql,
+	leadContextUpSql,
+} from "../../migrations/20260924_233000_lead_context.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -503,6 +507,42 @@ export function proveDevelopmentsMigration(testUri) {
 		throw new Error("Developments down migration left domain tables behind.");
 	}
 	psql(testUri, developmentsUpSql);
+}
+
+export function proveLeadContextMigration(testUri) {
+	psql(
+		testUri,
+		`CREATE TYPE enum_leads_form_kind AS ENUM ('property_request', 'callback', 'consultation', 'generic');
+		 CREATE TABLE leads (id serial PRIMARY KEY, form_kind enum_leads_form_kind NOT NULL);
+		 CREATE TABLE p8_19_migration_sentinel (id integer PRIMARY KEY, note text NOT NULL);
+		 INSERT INTO leads (form_kind) VALUES ('callback');
+		 INSERT INTO p8_19_migration_sentinel VALUES (1, 'preserve-me');`,
+	);
+	psql(testUri, leadContextUpSql);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.columns WHERE table_name='leads' AND column_name LIKE 'context_%'",
+		) !== "6"
+	) {
+		throw new Error("Lead context migration did not add all context columns.");
+	}
+	psql(testUri, leadContextDownSql);
+	if (
+		psql(testUri, "SELECT note FROM p8_19_migration_sentinel WHERE id=1") !==
+		"preserve-me"
+	) {
+		throw new Error("Lead context down migration changed unrelated data.");
+	}
+	psql(testUri, leadContextUpSql);
+	psql(
+		testUri,
+		"INSERT INTO leads (form_kind, context_geo) VALUES ('legal', 'rostov-na-donu')",
+	);
+	expectPsqlFailure(testUri, leadContextDownSql, /extended lead context exists/i);
+	if (psql(testUri, "SELECT count(*) FROM leads WHERE form_kind='legal'") !== "1") {
+		throw new Error("Rejected lead context down migration changed retained leads.");
+	}
 }
 
 export function psqlOnTest(testUri, sql) {

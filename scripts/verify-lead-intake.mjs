@@ -53,6 +53,35 @@ assert.equal(
 );
 assertNoRawPii(accepted.safeDiagnostics);
 
+for (const formKind of ["legal", "development_price", "quiz"]) {
+	const contextual = prepareLeadIntake({
+		...validPayload,
+		formKind,
+		context: {
+			geo: "rostov-na-donu",
+			surface: "new-buildings",
+			district: "leninskiy",
+			propertyUrlId: "42",
+			development: "zhk-primer",
+			developer: "developer-primer",
+		},
+	});
+	assert.equal(contextual.accepted, true);
+	assert.equal(contextual.lead.formKind, formKind);
+	assert.equal(contextual.lead.context.propertyUrlId, "42");
+}
+
+for (const context of [
+	{ geo: "../../escape" },
+	{ surface: "unknown" },
+	{ propertyUrlId: "+79161234567" },
+	{ developer: "Иван Петров" },
+]) {
+	const rejectedContext = prepareLeadIntake({ ...validPayload, context });
+	assert.equal(rejectedContext.accepted, false);
+	assert.equal(rejectedContext.code, "lead.invalid_payload");
+}
+
 const exactRetry = prepareLeadIntake({
 	...validPayload,
 	renderedAt: "2026-09-16T12:29:50.000Z",

@@ -748,10 +748,21 @@ export interface Lead {
   phoneE164: string;
   email?: string | null;
   message?: string | null;
-  formKind: 'property_request' | 'callback' | 'consultation' | 'generic';
+  formKind: 'property_request' | 'callback' | 'consultation' | 'generic' | 'legal' | 'development_price' | 'quiz';
   sourcePage: string;
   referrer?: string | null;
   property?: (number | null) | Property;
+  /**
+   * Normalized attribution only. It never grants access or overrides canonical entity data.
+   */
+  context?: {
+    geo?: string | null;
+    surface?: ('apartments' | 'new-buildings' | 'houses' | 'plots' | 'commercial' | 'garages') | null;
+    district?: string | null;
+    propertyUrlId?: string | null;
+    development?: string | null;
+    developer?: string | null;
+  };
   utm?: {
     source?: string | null;
     medium?: string | null;
@@ -1588,6 +1599,16 @@ export interface LeadsSelect<T extends boolean = true> {
   sourcePage?: T;
   referrer?: T;
   property?: T;
+  context?:
+    | T
+    | {
+        geo?: T;
+        surface?: T;
+        district?: T;
+        propertyUrlId?: T;
+        development?: T;
+        developer?: T;
+      };
   utm?:
     | T
     | {

@@ -60,6 +60,7 @@ export {
 	evaluateLeadRateLimit,
 	type LeadIntakeRejected,
 	type LeadIntakeResult,
+	type LeadEntityContext,
 	normalizePhoneToE164,
 	prepareLeadIntake,
 } from "./intake.ts";

@@ -84,6 +84,9 @@ export const Leads: CollectionConfig = {
 				{ label: "Callback", value: "callback" },
 				{ label: "Consultation", value: "consultation" },
 				{ label: "Generic", value: "generic" },
+				{ label: "Legal", value: "legal" },
+				{ label: "Development price", value: "development_price" },
+				{ label: "Quiz", value: "quiz" },
 			],
 		},
 		{
@@ -101,6 +104,33 @@ export const Leads: CollectionConfig = {
 			type: "relationship",
 			relationTo: "properties",
 			index: true,
+		},
+		{
+			name: "context",
+			type: "group",
+			admin: {
+				description:
+					"Normalized attribution only. It never grants access or overrides canonical entity data.",
+			},
+			fields: [
+				{ name: "geo", type: "text", index: true },
+				{
+					name: "surface",
+					type: "select",
+					options: [
+						{ label: "Apartments", value: "apartments" },
+						{ label: "New buildings", value: "new-buildings" },
+						{ label: "Houses", value: "houses" },
+						{ label: "Plots", value: "plots" },
+						{ label: "Commercial", value: "commercial" },
+						{ label: "Garages", value: "garages" },
+					],
+				},
+				{ name: "district", type: "text", index: true },
+				{ name: "propertyUrlId", type: "text", index: true },
+				{ name: "development", type: "text", index: true },
+				{ name: "developer", type: "text", index: true },
+			],
 		},
 		{
 			name: "utm",

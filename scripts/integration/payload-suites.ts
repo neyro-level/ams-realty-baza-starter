@@ -687,6 +687,11 @@ const propertyLeadBody = {
 	formKind: "property_request",
 	sourcePage: `/obekty/${publishedProperty.slug}`,
 	property: String(publishedProperty.id),
+	context: {
+		geo: "rostov-na-donu",
+		surface: "apartments",
+		propertyUrlId: "999999999",
+	},
 	consentAccepted: true,
 	consentVersion: "pd-2026-01",
 	honeypot: "",
@@ -729,6 +734,13 @@ for (const persisted of persistedPropertyLeads.docs) {
 	);
 	assert.equal(persisted.sourcePage, `/obekty/${publishedProperty.slug}`);
 	assert.equal(persisted.consent?.version, "pd-2026-01");
+	assert.equal(persisted.context?.geo, "rostov-na-donu");
+	assert.equal(persisted.context?.surface, "apartments");
+	assert.equal(
+		persisted.context?.propertyUrlId,
+		String(publishedProperty.publicUrlId),
+		"property URL identity must be assigned from the canonical server record",
+	);
 	assert.notEqual(
 		persisted.consent?.consentedAt,
 		propertyLeadBody.submittedAt,
@@ -745,6 +757,53 @@ const mismatchedPropertyLead = await submitPublicLead({
 });
 assert.equal(mismatchedPropertyLead.accepted, false);
 assert.equal(mismatchedPropertyLead.code, "lead.invalid_payload");
+
+const priceLeadBody = {
+	name: "Integration Price Lead",
+	phone: "+79990000019",
+	formKind: "development_price",
+	sourcePage: "/novostroyki/zhk-integration/",
+	context: {
+		geo: "rostov-na-donu",
+		surface: "new-buildings",
+		district: "leninskiy",
+		development: "zhk-integration",
+		developer: "developer-integration",
+	},
+	consentAccepted: true,
+	consentVersion: "pd-2026-01",
+	honeypot: "",
+	renderedAt: "2026-09-18T11:59:50.000Z",
+	submittedAt: "2026-09-18T12:00:00.000Z",
+	requestAttemptId: "66666666-6666-4666-8666-666666666666",
+};
+assert.deepEqual(
+	await submitPublicLead({
+		body: priceLeadBody,
+		rateLimitKey: `integration-price-${suffix}`,
+	}),
+	{ accepted: true, reused: false },
+);
+assert.deepEqual(
+	await submitPublicLead({
+		body: priceLeadBody,
+		rateLimitKey: `integration-price-retry-${suffix}`,
+	}),
+	{ accepted: true, reused: true },
+);
+const persistedPriceLeads = await payload.find({
+	collection: "leads",
+	where: { phoneE164: { equals: "+79990000019" } },
+	limit: 2,
+	depth: 0,
+	...access,
+});
+assert.equal(persistedPriceLeads.totalDocs, 1);
+assert.equal(persistedPriceLeads.docs[0]?.formKind, "development_price");
+assert.equal(
+	persistedPriceLeads.docs[0]?.context?.development,
+	"zhk-integration",
+);
 
 const lead = await payload.create({
 	collection: "leads",

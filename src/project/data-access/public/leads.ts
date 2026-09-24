@@ -117,6 +117,10 @@ export async function submitPublicLead({
 		}
 		intake.lead.property = String(property.id);
 		intake.lead.sourcePage = canonicalSourcePage;
+		intake.lead.context = {
+			...intake.lead.context,
+			propertyUrlId: String(property.publicUrlId),
+		};
 	}
 	const repository = createPayloadLeadOutboxRepository(payload);
 	const committed = await commitLeadOutbox({
