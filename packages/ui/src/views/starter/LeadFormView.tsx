@@ -34,6 +34,28 @@ export type LeadFormViewProps = {
 	title?: string;
 	description?: string;
 	submitLabel?: string;
+	intakeKind?:
+		| "property_request"
+		| "callback"
+		| "consultation"
+		| "generic"
+		| "legal"
+		| "development_price"
+		| "quiz";
+	entityContext?: {
+		geo?: string;
+		surface?:
+			| "apartments"
+			| "new-buildings"
+			| "houses"
+			| "plots"
+			| "commercial"
+			| "garages";
+		district?: string;
+		propertyUrlId?: string;
+		development?: string;
+		developer?: string;
+	};
 };
 
 function toIntakeFormKind(
@@ -50,6 +72,8 @@ export function LeadFormView({
 	title = "Оставить заявку",
 	description = "Перезвоним и уточним задачу. Согласие на обработку данных обязательно.",
 	submitLabel = "Отправить заявку",
+	intakeKind,
+	entityContext,
 }: LeadFormViewProps) {
 	const ids = {
 		name: useId(),
@@ -115,9 +139,10 @@ export function LeadFormView({
 					name,
 					phone,
 					message,
-					formKind: toIntakeFormKind(context.formKind),
+					formKind: intakeKind ?? toIntakeFormKind(context.formKind),
 					sourcePage: context.sourcePage,
 					property: context.property?.id,
+					context: entityContext,
 					consentAccepted: true,
 					consentVersion: context.consentVersion,
 					honeypot: String(data.get("company") ?? ""),
@@ -152,6 +177,7 @@ export function LeadFormView({
 	return (
 		<form
 			id="lead-form"
+			data-lead-kind={intakeKind ?? toIntakeFormKind(context.formKind)}
 			aria-label="Форма заявки"
 			aria-describedby={formError ? ids.formError : undefined}
 			noValidate

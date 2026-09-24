@@ -17,10 +17,20 @@ import { StarterPropertyMediaGallery } from "./StarterPropertyMediaGallery";
 export function PropertyPageView({
 	property,
 	leadContext,
+	legalCheck,
 }: {
 	property: PropertyDetailsDTO;
 	leadContext: MarketingPageDTO["leadContext"];
+	legalCheck?: { href: string; evidenceLabel: string };
 }) {
+	const categoryTitle = {
+		apartment: "О квартире",
+		room: "О комнате",
+		house: "О доме",
+		land: "Об участке",
+		commercial: "О помещении",
+		garage: "О гараже",
+	}[property.category];
 	return (
 		<>
 			<section id="section-property-gallery">
@@ -34,11 +44,12 @@ export function PropertyPageView({
 							<div>
 								<div className="relative aspect-[16/9] overflow-hidden rounded-[var(--radius-lg)] bg-surface-subtle">
 									<StarterPropertyMediaGallery
-										images={property.gallery.length
-											? property.gallery
-											: property.primaryMedia
-												? [property.primaryMedia]
-												: []
+										images={
+											property.gallery.length
+												? property.gallery
+												: property.primaryMedia
+													? [property.primaryMedia]
+													: []
 										}
 										title={property.title}
 									/>
@@ -52,6 +63,9 @@ export function PropertyPageView({
 									</p>
 								</section>
 								<section id="section-property-characteristics">
+									<h2 className="mt-8 text-lead font-semibold">
+										{categoryTitle}
+									</h2>
 									<dl className="mt-8 grid gap-4 sm:grid-cols-2">
 										{property.characteristics.map((item) => (
 											<div
@@ -83,6 +97,12 @@ export function PropertyPageView({
 									<CardContent>
 										<Button asChild className="w-full">
 											<a href="#lead-form">Записаться на просмотр</a>
+										</Button>
+										<Button asChild variant="outline" className="mt-3 w-full">
+											<a href={legalCheck?.href ?? "#lead-form"}>
+												{legalCheck?.evidenceLabel ??
+													"Уточнить юридическую проверку"}
+											</a>
 										</Button>
 									</CardContent>
 								</Card>
