@@ -56,6 +56,9 @@ DECLARE
 		'payload_locked_documents_rels_regions_id_idx',
 		'payload_locked_documents_rels_cities_id_idx',
 		'payload_locked_documents_rels_districts_id_idx'
+		,'properties_region_ref_idx'
+		,'properties_city_ref_idx'
+		,'properties_district_ref_idx'
 	];
 	required_index text;
 	required_constraints text[] := ARRAY[
@@ -106,6 +109,26 @@ BEGIN
 			AND table_name IN ('regions', 'cities', 'districts')
 	) <> 3 THEN
 		RAISE EXCEPTION 'Missing canonical geo hierarchy tables';
+	END IF;
+
+	IF (
+		SELECT count(*) FROM information_schema.columns
+		WHERE table_schema = 'public'
+			AND table_name = 'properties'
+			AND column_name IN ('region_ref_id', 'city_ref_id', 'district_ref_id')
+	) <> 3 THEN
+		RAISE EXCEPTION 'Missing additive property geo reference columns';
+	END IF;
+
+	IF (
+		SELECT count(*) FROM pg_constraint
+		WHERE conname IN (
+			'properties_region_ref_id_regions_id_fk',
+			'properties_city_ref_id_cities_id_fk',
+			'properties_district_ref_id_districts_id_fk'
+		)
+	) <> 3 THEN
+		RAISE EXCEPTION 'Missing property geo reference foreign keys';
 	END IF;
 
 	IF (

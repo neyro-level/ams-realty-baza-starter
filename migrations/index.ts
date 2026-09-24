@@ -10,6 +10,7 @@ import * as migration_20260919_151000 from "./20260919_151000";
 import * as migration_20260921_185354_add_reset_password_requested_at from "./20260921_185354_add_reset_password_requested_at";
 import * as migration_20260924_111534 from "./20260924_111534";
 import * as migration_20260924_134500_geo_hierarchy from "./20260924_134500_geo_hierarchy";
+import * as migration_20260924_151000_property_geo_refs from "./20260924_151000_property_geo_refs";
 
 export const migrations = [
 	{
@@ -71,5 +72,10 @@ export const migrations = [
 		up: migration_20260924_134500_geo_hierarchy.up,
 		down: migration_20260924_134500_geo_hierarchy.down,
 		name: "20260924_134500_geo_hierarchy",
+	},
+	{
+		up: migration_20260924_151000_property_geo_refs.up,
+		down: migration_20260924_151000_property_geo_refs.down,
+		name: "20260924_151000_property_geo_refs",
 	},
 ];

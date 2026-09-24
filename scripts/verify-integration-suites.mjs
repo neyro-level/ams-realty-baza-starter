@@ -32,6 +32,7 @@ import {
 	proveGeoHierarchyMigration,
 	proveLeadDeliveryRelationalMigration,
 	provePayloadAuthSecurityMigration,
+	provePropertyGeoRefsMigration,
 	provePropertyNumericMigration,
 	proveSiteSettingsMigration,
 	psqlOnTest,
@@ -270,6 +271,8 @@ await prepareIntegrationDatabase(preferredUri);
 proveSiteSettingsMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
 proveGeoHierarchyMigration(preferredUri);
+await prepareIntegrationDatabase(preferredUri);
+provePropertyGeoRefsMigration(preferredUri);
 const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {
@@ -323,6 +326,21 @@ execFileSync(
 execFileSync(
 	"pnpm",
 	["exec", "payload", "run", "scripts/integration/geo-suites.ts"],
+	{
+		stdio: "inherit",
+		shell: process.platform === "win32",
+		env: {
+			...childEnv,
+			NODE_OPTIONS: [process.env.NODE_OPTIONS, "--conditions=react-server"]
+				.filter(Boolean)
+				.join(" "),
+		},
+	},
+);
+
+execFileSync(
+	"pnpm",
+	["exec", "payload", "run", "scripts/integration/property-geo-suites.ts"],
 	{
 		stdio: "inherit",
 		shell: process.platform === "win32",

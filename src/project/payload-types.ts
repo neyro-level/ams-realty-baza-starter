@@ -355,8 +355,20 @@ export interface Property {
   floor?: number | null;
   floors?: number | null;
   region?: string | null;
+  /**
+   * Canonical geo reference. Legacy region text remains the raw source during expand.
+   */
+  regionRef?: (number | null) | Region;
   locality?: string | null;
+  /**
+   * Canonical city reference. Legacy locality text remains the raw source during expand.
+   */
+  cityRef?: (number | null) | City;
   district?: string | null;
+  /**
+   * Canonical city-scoped district reference. Legacy district text remains the raw source during expand.
+   */
+  districtRef?: (number | null) | District;
   street?: string | null;
   house?: string | null;
   publicAddress?: string | null;
@@ -1071,8 +1083,11 @@ export interface PropertiesSelect<T extends boolean = true> {
   floor?: T;
   floors?: T;
   region?: T;
+  regionRef?: T;
   locality?: T;
+  cityRef?: T;
   district?: T;
+  districtRef?: T;
   street?: T;
   house?: T;
   publicAddress?: T;

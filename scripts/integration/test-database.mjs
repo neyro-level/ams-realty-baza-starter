@@ -12,6 +12,10 @@ import {
 	geoHierarchyDownSql,
 	geoHierarchyUpSql,
 } from "../../migrations/20260924_134500_geo_hierarchy.ts";
+import {
+	propertyGeoRefsDownSql,
+	propertyGeoRefsUpSql,
+} from "../../migrations/20260924_151000_property_geo_refs.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -373,6 +377,43 @@ export function proveGeoHierarchyMigration(testUri) {
 		throw new Error("Geo hierarchy down migration changed unrelated data.");
 	}
 	psql(testUri, geoHierarchyUpSql);
+}
+
+export function provePropertyGeoRefsMigration(testUri) {
+	psql(
+		testUri,
+		`CREATE TABLE regions (id serial PRIMARY KEY);
+		 CREATE TABLE cities (id serial PRIMARY KEY);
+		 CREATE TABLE districts (id serial PRIMARY KEY);
+		 CREATE TABLE properties (id serial PRIMARY KEY, region varchar, locality varchar, district varchar);
+		 CREATE TABLE p8_07_migration_sentinel (id integer PRIMARY KEY, note text NOT NULL);
+		 INSERT INTO regions DEFAULT VALUES;
+		 INSERT INTO cities DEFAULT VALUES;
+		 INSERT INTO districts DEFAULT VALUES;
+		 INSERT INTO properties (region, locality, district) VALUES ('raw-region', 'raw-city', 'raw-district');
+		 INSERT INTO p8_07_migration_sentinel (id, note) VALUES (1, 'preserve-me');`,
+	);
+	psql(testUri, propertyGeoRefsUpSql);
+	psql(
+		testUri,
+		"UPDATE properties SET region_ref_id=1, city_ref_id=1, district_ref_id=1 WHERE id=1",
+	);
+	psql(testUri, propertyGeoRefsDownSql);
+	if (
+		psql(
+			testUri,
+			"SELECT region || '|' || locality || '|' || district FROM properties WHERE id=1",
+		) !== "raw-region|raw-city|raw-district"
+	) {
+		throw new Error("Property geo refs down migration changed legacy raw geo.");
+	}
+	if (
+		psql(testUri, "SELECT note FROM p8_07_migration_sentinel WHERE id=1") !==
+		"preserve-me"
+	) {
+		throw new Error("Property geo refs down migration changed unrelated data.");
+	}
+	psql(testUri, propertyGeoRefsUpSql);
 }
 
 export function psqlOnTest(testUri, sql) {

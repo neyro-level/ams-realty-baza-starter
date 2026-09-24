@@ -1,5 +1,9 @@
 import type { CollectionConfig, FieldAccess, PayloadRequest } from "payload";
-import { publicPropertyReadAccess } from "../data-access/public/access-mode.ts";
+import {
+	adminsAndOwners,
+	hasRole,
+	ownersOnly,
+} from "../../core/access/roles.ts";
 import { applyDerivedFieldsOnWrite } from "../../core/ingest/derived-fields.ts";
 import {
 	applyPublishedSlugPolicy,
@@ -9,7 +13,7 @@ import {
 	shouldRecordManualOwnership,
 } from "../../core/ingest/manual-ownership.ts";
 import { normalizePropertyNumericWrite } from "../../core/ingest/numeric-invariants.ts";
-import { adminsAndOwners, hasRole, ownersOnly } from "../../core/access/roles.ts";
+import { publicPropertyReadAccess } from "../data-access/public/access-mode.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) =>
 	hasRole(req.user, ["owner", "admin"]);
@@ -365,13 +369,43 @@ export const Properties: CollectionConfig = {
 			type: "text",
 		},
 		{
+			name: "regionRef",
+			type: "relationship",
+			relationTo: "regions",
+			index: true,
+			admin: {
+				description:
+					"Canonical geo reference. Legacy region text remains the raw source during expand.",
+			},
+		},
+		{
 			name: "locality",
 			type: "text",
+		},
+		{
+			name: "cityRef",
+			type: "relationship",
+			relationTo: "cities",
+			index: true,
+			admin: {
+				description:
+					"Canonical city reference. Legacy locality text remains the raw source during expand.",
+			},
 		},
 		{
 			name: "district",
 			type: "text",
 			index: true,
+		},
+		{
+			name: "districtRef",
+			type: "relationship",
+			relationTo: "districts",
+			index: true,
+			admin: {
+				description:
+					"Canonical city-scoped district reference. Legacy district text remains the raw source during expand.",
+			},
 		},
 		{
 			name: "street",
