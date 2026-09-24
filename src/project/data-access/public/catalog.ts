@@ -22,6 +22,7 @@ import {
 const publicPropertySelect = {
 	slug: true,
 	status: true,
+	publicUrlId: true,
 	publishedAt: true,
 	contentPurgedAt: true,
 	market: true,
@@ -102,6 +103,7 @@ export type PublicCatalogProperty = Pick<
 	| "id"
 	| "slug"
 	| "status"
+	| "publicUrlId"
 	| "market"
 	| "category"
 	| "dealType"
@@ -243,6 +245,7 @@ function toPublicCatalogProperty(
 	return {
 		id: property.id,
 		slug: property.slug,
+		publicUrlId: property.publicUrlId,
 		status: property.status,
 		market: property.market,
 		category: property.category,

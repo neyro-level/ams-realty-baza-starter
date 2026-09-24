@@ -236,6 +236,36 @@ from choosing an obsolete consent version or arbitrary source page.
 Юридический текст и production `consentVersion` остаются owner/legal decision в
 `PROJECT.md`. Это не блокирует доказанную форму UI и persistence mapping.
 
+## Geo-catalog contract 2.0.0
+
+Plan 8 v6 и `ADR-CONTRACTS-V2-GEO-CATALOG` разрешают завершить начатый P8-05
+draft major. Ниже зафиксирована реализуемость новых presentation DTO. Public
+Gateway queries остаются scope P8-13; P8-12 доказывает форму, доступность
+источников и bounded composition без скрытого schema/runtime owner.
+
+| Contract | Source / composition | Query budget after P8-13 | Decision |
+|---|---|---|---|
+| `PageKeyDTO`, `PageLinkDTO` | pure URL grammar P8-04 | presentation only | VERIFIED RUNTIME |
+| `RegionDTO`, `CityDTO`, `DistrictDTO` | published geo collections P8-06; approved morphology only | one selected read or bounded relation join | VERIFIED SCHEMA + FIXTURE |
+| `GeoHubDTO` | city + bounded category/district/developer counts | bounded aggregate set, no per-card queries | VERIFIED CONTRACT; QUERY PROOF P8-13 |
+| `DeveloperCardDTO/DetailsDTO` | published developer P8-09 + bounded development count | selected read + bounded aggregate | VERIFIED SCHEMA + FIXTURE |
+| `DevelopmentCardDTO/DetailsDTO` | unified development P8-09; only kind-valid fields | selected read with fixed depth/limits | VERIFIED SCHEMA + FIXTURE |
+| `PropertyCardDTO.publicUrlId` | immutable sequence identity P8-08 | included in existing selected read | VERIFIED RUNTIME |
+| `PropertyCardDTO.pageKey/href` | category mapping + slug + publicUrlId → `buildUrl` | `O(1)` | VERIFIED FIXTURE |
+| `PropertyCategoryDetailsDTO` | allowlisted fields already persisted by P8-08 | `O(1)` mapping after selected read | VERIFIED SCHEMA + TYPECHECK |
+| `SeoMetaDTO` | explicit content/registry values and Content Gate decision | presentation only after source read | VERIFIED CONTRACT; POLICY P8-14/15 |
+| `BreadcrumbDTO` hrefs | ordered PageKeys → `buildUrl` | bounded `O(depth)` | VERIFIED FIXTURE |
+| `ListingPageDTO.items/total` | selected listing read + matching count | one page query + one count query | VERIFIED CONTRACT; QUERY PROOF P8-13 |
+| `ListingPageDTO.pagination` | validated page/pageSize/total | `O(1)` | VERIFIED FIXTURE |
+| `ListingPageDTO.subLinks/nearby` | Gate-eligible PageKeys; nearby only from approved agglomeration | bounded aggregate, no cross-city count pollution | VERIFIED CONTRACT; POLICY P8-13/15 |
+| `ListingPageDTO.robots/canonical` | Content Gate + canonical URL grammar | presentation only | VERIFIED CONTRACT; POLICY P8-15 |
+
+Fixture acceptance covers a region, two configured geos, district, developer,
+residential development, category-aware property and listing. The verifier
+rebuilds every fixture link through the real project grammar, checks property
+category discriminants and asserts listing canonical/SEO consistency. Synthetic
+fixture values are not demand research and cannot authorize indexability.
+
 ## Journal namespace
 
 Journal остаётся отдельным draft namespace и не входит в Base contract freeze.

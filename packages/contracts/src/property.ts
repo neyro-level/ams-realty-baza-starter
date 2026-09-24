@@ -1,6 +1,7 @@
 import type { AppliedPropertyFiltersDTO } from "./filters";
 import type { MediaDTO } from "./media";
 import type { PropertyCategory, PropertyDealType } from "./common";
+import type { PageKeyDTO } from "./routing";
 
 export type PropertyPriceDTO = {
 	priceMinor: number;
@@ -21,9 +22,47 @@ export type PropertyCharacteristicDTO = {
 	value: string;
 };
 
+export type PropertyCategoryDetailsDTO =
+	| {
+			category: "apartment" | "room";
+			rooms?: number;
+			totalArea?: number;
+			livingArea?: number;
+			kitchenArea?: number;
+			floor?: number;
+			floors?: number;
+	  }
+	| {
+			category: "house";
+			houseType?: string;
+			totalArea?: number;
+			lotAreaSotka?: number;
+			floors?: number;
+	  }
+	| {
+			category: "land";
+			lotAreaSotka?: number;
+			landCategory?: string;
+			permittedUse?: string;
+			communications?: readonly string[];
+	  }
+	| {
+			category: "commercial";
+			commercialType?: string;
+			totalArea?: number;
+			floor?: number;
+	  }
+	| {
+			category: "garage";
+			totalArea?: number;
+			garageType?: string;
+	  };
+
 export type PropertyCardDTO = {
 	id: string;
 	slug: string;
+	publicUrlId: number;
+	pageKey: PageKeyDTO;
 	href: string;
 	title: string;
 	category: PropertyCategory;
@@ -35,6 +74,7 @@ export type PropertyCardDTO = {
 	primaryMedia: MediaDTO | null;
 	summary: readonly PropertySummaryItemDTO[];
 	badges: readonly string[];
+	categoryDetails: PropertyCategoryDetailsDTO;
 };
 
 export type PropertyDetailsDTO = PropertyCardDTO & {

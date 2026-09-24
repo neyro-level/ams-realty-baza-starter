@@ -1,7 +1,9 @@
 import type { MediaDTO } from "./media";
+import type { PageKeyDTO } from "./routing";
 
 export type BreadcrumbItemDTO = {
 	label: string;
+	pageKey?: PageKeyDTO;
 	href?: string;
 };
 
@@ -9,7 +11,7 @@ export type BreadcrumbDTO = {
 	items: readonly BreadcrumbItemDTO[];
 };
 
-export type PageSEOContract = {
+export type SeoMetaDTO = {
 	title: string;
 	description: string;
 	canonicalPath: string;
@@ -21,3 +23,5 @@ export type PageSEOContract = {
 		image?: MediaDTO;
 	};
 };
+
+export type PageSEOContract = SeoMetaDTO;

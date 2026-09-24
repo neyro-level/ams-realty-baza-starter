@@ -1,24 +1,40 @@
 {
 	"schemaVersion": 2,
 	"contractVersion": "2.0.0",
-	"state": "draft",
+	"state": "frozen",
 	"algorithm": "sha256-normalized-lf",
 	"files": [
 		{
 			"path": "packages/contracts/src/common.ts",
-			"sha256": "7e6a23880fac92d8ca41a149c0a723314d20fee6ec3a6f7060ee946dd1ffd51e"
+			"sha256": "a89170d16dccdd756916aa9346fe01be9d8fb797fa51bd306ef5dd1902c88c5e"
+		},
+		{
+			"path": "packages/contracts/src/developer.ts",
+			"sha256": "ed53667e78c46c1c067eefc7d4653770a68dbe943b8f6d62929c282b38f0a9dd"
+		},
+		{
+			"path": "packages/contracts/src/development.ts",
+			"sha256": "8d9d7bdf3e46a9d20d6bef5aec93fff13e752a53641cdead9389cd0e195214a9"
 		},
 		{
 			"path": "packages/contracts/src/filters.ts",
 			"sha256": "b6be9dcd68484671944bdd5960cc05e318b61ea31cdf0258d61646daedf1ec41"
 		},
 		{
+			"path": "packages/contracts/src/geo.ts",
+			"sha256": "39a234e05d101ee0f8dd874ec59c8e80fd14df72d444e05cc9b59e928dabb32a"
+		},
+		{
 			"path": "packages/contracts/src/index.ts",
-			"sha256": "4dd2c9cdf31eeed3d6495c5ce813652ca9f92ea4d35fb6a4d71643fb29e2fbec"
+			"sha256": "50f04a4f55480d2191e37a25d5eb7f21eb77fbd509fb8c614e8eb5182d3d8fa6"
 		},
 		{
 			"path": "packages/contracts/src/lead.ts",
 			"sha256": "b1a3636d6286de1438f9cb610a828d9df6e2dd09e9eb066d598c4d6b9aa6c583"
+		},
+		{
+			"path": "packages/contracts/src/listing.ts",
+			"sha256": "fc79536e9d2df970fe6fc05dce0bba90af7e66faae99241dd36f837316f6dd70"
 		},
 		{
 			"path": "packages/contracts/src/marketing.ts",
@@ -34,16 +50,20 @@
 		},
 		{
 			"path": "packages/contracts/src/property.ts",
-			"sha256": "0609104c318f986680191b2e2ff1b8286b9ce8f8516997e79556cef55ee8d0e3"
+			"sha256": "0c61e839fac2e3e3fe263ab775c2615335c36f33987b8fd05503e8dac80738ae"
+		},
+		{
+			"path": "packages/contracts/src/routing.ts",
+			"sha256": "159a018e7549da1d43d8fb890df6d6d08ba7b0cba1fe52078e5b0eebbcaca699"
 		},
 		{
 			"path": "packages/contracts/src/seo.ts",
-			"sha256": "1f28af6e5477b8b3ad16e83de6654d61dcf269ddf8d7137563a7e35ef99101a2"
+			"sha256": "fb91ca81f5868677b11844b662ebfc0b73bb36c685c2805aa9f097f3a5a51f91"
 		},
 		{
 			"path": "packages/contracts/src/shell.ts",
 			"sha256": "5bf26382c69e7cf88b4ebfc994357b71bb7569a4b1fffb7d8bfa88375c1e6a54"
 		}
 	],
-	"aggregateSha256": "12d0f8a75c2dfe0766ae1b7187415ef8f9e76e35f4c37a9ba12aecc7d24ffa58"
+	"aggregateSha256": "94aaf0e8a7a83663c9f7edc1ec1724fbdff2577bf494729442ad6a0e8a05267d"
 }

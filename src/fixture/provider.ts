@@ -11,8 +11,11 @@ import type {
 	SiteHeaderDTO,
 } from "@ams/realtbase-contracts";
 import { siteConfig } from "../project/site.config.ts";
+import { siteProfile } from "../project/site-profile.ts";
+import { createProjectUrlGrammar } from "../project/url-grammar.ts";
 
 const brandName = siteConfig.brandName;
+const urlGrammar = createProjectUrlGrammar(siteProfile);
 const logo = {
 	kind: "managed" as const,
 	src: "/fixture/logo.svg",
@@ -72,6 +75,7 @@ export const fixtureFooter: SiteFooterDTO = {
 const propertySeed = [
 	{
 		id: "fixture-property-1",
+		publicUrlId: 1001,
 		slug: "svetlaya-kvartira-v-centre",
 		title: "Светлая квартира в центре",
 		price: 890_000_000,
@@ -84,6 +88,7 @@ const propertySeed = [
 	},
 	{
 		id: "fixture-property-2",
+		publicUrlId: 1002,
 		slug: "semeinaya-kvartira-s-vidom",
 		title: "Семейная квартира с видом",
 		price: 1_240_000_000,
@@ -96,6 +101,7 @@ const propertySeed = [
 	},
 	{
 		id: "fixture-property-3",
+		publicUrlId: 1003,
 		slug: "kvartira-dlya-spokoinoi-zhizni",
 		title: "Квартира для спокойной жизни",
 		price: 675_000_000,
@@ -110,9 +116,21 @@ const propertySeed = [
 
 export const fixtureProperties: readonly PropertyCardDTO[] = propertySeed.map(
 	(item) => ({
+		pageKey: {
+			kind: "property",
+			category: "kvartiry",
+			semantic: item.slug,
+			publicUrlId: item.publicUrlId,
+		},
 		id: item.id,
 		slug: item.slug,
-		href: `/obekty/${item.slug}`,
+		publicUrlId: item.publicUrlId,
+		href: urlGrammar.buildUrl({
+			kind: "property",
+			category: "kvartiry",
+			semantic: item.slug,
+			publicUrlId: item.publicUrlId,
+		}),
 		title: item.title,
 		category: "apartment",
 		dealType: "sale",
@@ -132,6 +150,10 @@ export const fixtureProperties: readonly PropertyCardDTO[] = propertySeed.map(
 		primaryMedia: null,
 		summary: item.summary,
 		badges: [],
+		categoryDetails: {
+			category: "apartment",
+			rooms: Number(item.summary[0]?.value),
+		},
 	}),
 );
 

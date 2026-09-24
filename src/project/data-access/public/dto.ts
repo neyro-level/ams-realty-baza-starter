@@ -4,6 +4,7 @@ import type {
 	HomePageDTO,
 	MarketingPageDTO,
 	PropertyCardDTO,
+	PropertyCategoryDetailsDTO,
 	PropertyDetailsDTO,
 	PropertyFilterDTO,
 	PropertyListDTO,
@@ -15,8 +16,20 @@ import type { PublicCatalogFacetsResult } from "./catalog";
 import { leadConsentContext } from "@/project/legal.config";
 import type { PublicPageRecord } from "./pages";
 import { siteConfig } from "@/project/site.config";
+import { siteProfile } from "@/project/site-profile";
+import { createProjectUrlGrammar } from "@/project/url-grammar";
 
 const brandName = siteConfig.brandName;
+const urlGrammar = createProjectUrlGrammar(siteProfile);
+
+const propertySurfaceByCategory = {
+	apartment: "kvartiry",
+	house: "doma",
+	land: "uchastki",
+	commercial: "kommercheskaya-nedvizhimost",
+	room: "komnaty",
+	garage: "garazhi",
+} as const;
 const logo = {
 	kind: "managed" as const,
 	src: "/fixture/logo.svg",
@@ -49,6 +62,15 @@ export type PublicPropertyDetailsDTO = PropertyDetailsDTO & {
 export function toPropertyCardDTO(
 	property: PublicCatalogProperty,
 ): PropertyCardDTO {
+	if (!property.publicUrlId) {
+		throw new Error(`Published property ${property.id} has no publicUrlId.`);
+	}
+	const pageKey = {
+		kind: "property" as const,
+		category: propertySurfaceByCategory[property.category],
+		semantic: property.slug,
+		publicUrlId: property.publicUrlId,
+	};
 	const address =
 		property.publicAddress ||
 		[property.locality, property.district].filter(Boolean).join(", ") ||
@@ -57,7 +79,9 @@ export function toPropertyCardDTO(
 	return {
 		id: String(property.id),
 		slug: property.slug,
-		href: `/obekty/${property.slug}`,
+		publicUrlId: property.publicUrlId,
+		pageKey,
+		href: urlGrammar.buildUrl(pageKey),
 		title: property.title,
 		category: property.category,
 		dealType: property.dealType,
@@ -107,7 +131,45 @@ export function toPropertyCardDTO(
 				: null,
 		]),
 		badges: [],
+		categoryDetails: toPropertyCategoryDetails(property),
 	};
+}
+
+function toPropertyCategoryDetails(
+	property: PublicCatalogProperty,
+): PropertyCategoryDetailsDTO {
+	switch (property.category) {
+		case "apartment":
+		case "room":
+			return {
+				category: property.category,
+				rooms: property.rooms ?? undefined,
+				totalArea: property.totalArea ?? undefined,
+				livingArea: property.livingArea ?? undefined,
+				kitchenArea: property.kitchenArea ?? undefined,
+				floor: property.floor ?? undefined,
+				floors: property.floors ?? undefined,
+			};
+		case "house":
+			return {
+				category: "house",
+				totalArea: property.totalArea ?? undefined,
+				floors: property.floors ?? undefined,
+			};
+		case "land":
+			return { category: "land" };
+		case "commercial":
+			return {
+				category: "commercial",
+				totalArea: property.totalArea ?? undefined,
+				floor: property.floor ?? undefined,
+			};
+		case "garage":
+			return {
+				category: "garage",
+				totalArea: property.totalArea ?? undefined,
+			};
+	}
 }
 
 export function toPropertyDetailsDTO(
