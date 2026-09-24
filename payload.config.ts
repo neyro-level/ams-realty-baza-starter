@@ -5,6 +5,8 @@ import { buildConfig } from "payload";
 import sharp from "sharp";
 import { Cities } from "./src/project/collections/Cities.ts";
 import { Districts } from "./src/project/collections/Districts.ts";
+import { Developers } from "./src/project/collections/Developers.ts";
+import { Developments } from "./src/project/collections/Developments.ts";
 import { FeedSources } from "./src/project/collections/FeedSources.ts";
 import { ImportIssues } from "./src/project/collections/ImportIssues.ts";
 import { ImportRuns } from "./src/project/collections/ImportRuns.ts";
@@ -40,6 +42,8 @@ export default buildConfig({
 		Regions,
 		Cities,
 		Districts,
+		Developers,
+		Developments,
 		Properties,
 		FeedSources,
 		ImportRuns,

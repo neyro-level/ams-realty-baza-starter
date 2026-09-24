@@ -69,7 +69,7 @@ module may be activated; it does not activate runtime code or collections.
 <!-- MODULE_GOVERNANCE_BEGIN -->
 | Module | State | Manifest |
 |---|---|---|
-| `novostroyki` | `disabled` | `docs/modules/novostroyki.md` |
+| `novostroyki` | `prepared` | `docs/modules/novostroyki.md` |
 | `journal` | `disabled` | `docs/modules/journal.md` |
 | `agents` | `disabled` | `docs/modules/agents.md` |
 <!-- MODULE_GOVERNANCE_END -->

@@ -60,6 +60,11 @@ DECLARE
 		,'properties_city_ref_idx'
 		,'properties_district_ref_idx'
 		,'properties_public_url_id_idx'
+		,'developers_slug_idx'
+		,'developments_slug_idx'
+		,'developments_kind_idx'
+		,'developments_city_idx'
+		,'properties_development_idx'
 	];
 	required_index text;
 	required_constraints text[] := ARRAY[
@@ -149,6 +154,32 @@ BEGIN
 			AND NOT tgisinternal
 	) THEN
 		RAISE EXCEPTION 'Missing immutable property public URL identity trigger';
+	END IF;
+
+	IF (
+		SELECT count(*) FROM information_schema.tables
+		WHERE table_schema = 'public'
+			AND table_name IN ('developers', 'developments')
+	) <> 2 THEN
+		RAISE EXCEPTION 'Missing prepared development domain tables';
+	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM information_schema.columns
+		WHERE table_schema = 'public'
+			AND table_name = 'properties'
+			AND column_name = 'development_id'
+	) THEN
+		RAISE EXCEPTION 'Missing optional property development relation';
+	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM pg_constraint
+		WHERE conrelid = 'developments'::regclass
+			AND conname = 'developments_kind_fields_guard'
+			AND contype = 'c'
+	) THEN
+		RAISE EXCEPTION 'Missing development kind field guard';
 	END IF;
 
 	IF (

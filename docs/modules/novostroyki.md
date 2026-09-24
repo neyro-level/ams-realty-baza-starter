@@ -2,7 +2,8 @@
 
 ## Status
 
-`DISABLED`. This document does not create runtime behavior.
+`PREPARED`. The private Payload schema exists, but no public route, navigation,
+sitemap, Gateway reader or indexing behavior is active.
 
 ## Prerequisites
 
@@ -23,7 +24,9 @@ are reserved only during activation after the canonical URL map is updated.
 
 ## Collections to add
 
-`residential-complexes`, `buildings`, `layouts`, `developers`.
+Unified `developments` with `kind = residential_complex | cottage_village`,
+plus `developers`. Layouts remain kind-specific child data; inventory units stay
+in `properties` through an optional `development` relation.
 
 ## Migration contract
 

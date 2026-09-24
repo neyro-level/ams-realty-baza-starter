@@ -17,6 +17,10 @@ import {
 	propertyGeoRefsUpSql,
 } from "../../migrations/20260924_151000_property_geo_refs.ts";
 import { propertyIdentityUpSql } from "../../migrations/20260924_170000_property_taxonomy_identity.ts";
+import {
+	developmentsDownSql,
+	developmentsUpSql,
+} from "../../migrations/20260924_180000_developments.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -448,6 +452,57 @@ export function provePropertyIdentityMigration(testUri) {
 	) {
 		throw new Error("Rejected identity update changed an assigned ID.");
 	}
+}
+
+export function proveDevelopmentsMigration(testUri) {
+	psql(
+		testUri,
+		`CREATE TABLE media (id serial PRIMARY KEY);
+		 CREATE TABLE regions (id serial PRIMARY KEY);
+		 CREATE TABLE cities (id serial PRIMARY KEY);
+		 CREATE TABLE districts (id serial PRIMARY KEY);
+		 CREATE TABLE properties (id serial PRIMARY KEY);
+		 CREATE TABLE payload_locked_documents_rels (id serial PRIMARY KEY);
+		 CREATE TABLE p8_09_migration_sentinel (id integer PRIMARY KEY, note text NOT NULL);
+		 INSERT INTO media DEFAULT VALUES;
+		 INSERT INTO regions DEFAULT VALUES;
+		 INSERT INTO cities DEFAULT VALUES;
+		 INSERT INTO districts DEFAULT VALUES;
+		 INSERT INTO properties DEFAULT VALUES;
+		 INSERT INTO p8_09_migration_sentinel VALUES (1, 'preserve-me');`,
+	);
+	psql(testUri, developmentsUpSql);
+	psql(
+		testUri,
+		`INSERT INTO developers (name, slug, source, checked_at) VALUES ('Fixture Developer', 'fixture-developer', 'fixture', now());
+		 INSERT INTO developments (name, slug, kind, region_id, city_id, developer_id, source, checked_at)
+		 VALUES ('Fixture RC', 'fixture', 'residential_complex', 1, 1, 1, 'fixture', now());
+		 INSERT INTO developments (name, slug, kind, region_id, city_id, developer_id, source, checked_at, plots_count)
+		 VALUES ('Fixture Village', 'fixture-village', 'cottage_village', 1, 1, 1, 'fixture', now(), 12);
+		 UPDATE properties SET development_id=1 WHERE id=1;`,
+	);
+	expectPsqlFailure(
+		testUri,
+		`INSERT INTO developments (name, slug, kind, region_id, city_id, developer_id, source, checked_at, plots_count)
+		 VALUES ('Polluted RC', 'polluted', 'residential_complex', 1, 1, 1, 'fixture', now(), 5)`,
+		/developments_kind_fields_guard/i,
+	);
+	psql(testUri, developmentsDownSql);
+	if (
+		psql(testUri, "SELECT note FROM p8_09_migration_sentinel WHERE id=1") !==
+		"preserve-me"
+	) {
+		throw new Error("Developments down migration changed unrelated data.");
+	}
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('developers','developments')",
+		) !== "0"
+	) {
+		throw new Error("Developments down migration left domain tables behind.");
+	}
+	psql(testUri, developmentsUpSql);
 }
 
 export function psqlOnTest(testUri, sql) {

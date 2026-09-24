@@ -72,6 +72,8 @@ export interface Config {
     regions: Region;
     cities: City;
     districts: District;
+    developers: Developer;
+    developments: Development;
     properties: Property;
     'feed-sources': FeedSource;
     'import-runs': ImportRun;
@@ -93,6 +95,8 @@ export interface Config {
     regions: RegionsSelect<false> | RegionsSelect<true>;
     cities: CitiesSelect<false> | CitiesSelect<true>;
     districts: DistrictsSelect<false> | DistrictsSelect<true>;
+    developers: DevelopersSelect<false> | DevelopersSelect<true>;
+    developments: DevelopmentsSelect<false> | DevelopmentsSelect<true>;
     properties: PropertiesSelect<false> | PropertiesSelect<true>;
     'feed-sources': FeedSourcesSelect<false> | FeedSourcesSelect<true>;
     'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
@@ -308,6 +312,155 @@ export interface District {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "developers".
+ */
+export interface Developer {
+  id: number;
+  name: string;
+  slug: string;
+  aliases?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  legalName?: string | null;
+  logo?: (number | null) | Media;
+  siteUrl?: string | null;
+  description?: string | null;
+  source: string;
+  checkedAt: string;
+  status: 'draft' | 'published' | 'archived';
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "developments".
+ */
+export interface Development {
+  id: number;
+  name: string;
+  slug: string;
+  kind: 'residential_complex' | 'cottage_village';
+  region: number | Region;
+  city: number | City;
+  district?: (number | null) | District;
+  developer: number | Developer;
+  address?: string | null;
+  coordinates?: {
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+  class?: string | null;
+  completion?: string | null;
+  deadline?: string | null;
+  salesStatus?: ('available' | 'limited' | 'sold_out' | 'paused') | null;
+  availability?: string | null;
+  dataTier: 'A' | 'B' | 'C';
+  source: string;
+  checkedAt: string;
+  prices?:
+    | {
+        label: string;
+        amountMinor: number;
+        currency: 'RUB';
+        source: string;
+        checkedAt: string;
+        id?: string | null;
+      }[]
+    | null;
+  lotsCount?: number | null;
+  mediaItems?:
+    | {
+        media: number | Media;
+        mediaType: 'image' | 'plan' | 'document';
+        rights: string;
+        source: string;
+        checkedAt: string;
+        id?: string | null;
+      }[]
+    | null;
+  layouts?:
+    | {
+        externalId?: string | null;
+        rooms?: number | null;
+        area?: number | null;
+        title: string;
+        id?: string | null;
+      }[]
+    | null;
+  progress?:
+    | {
+        date: string;
+        percent?: number | null;
+        note?: string | null;
+        source: string;
+        checkedAt: string;
+        id?: string | null;
+      }[]
+    | null;
+  communications?: {
+    gas?: boolean | null;
+    electricity?: boolean | null;
+    water?: boolean | null;
+    sewer?: boolean | null;
+  };
+  totalArea?: number | null;
+  plotsCount?: number | null;
+  villageClass?: string | null;
+  descriptions?:
+    | {
+        kind: 'short' | 'full' | 'location' | 'infrastructure';
+        text: string;
+        source: string;
+        checkedAt: string;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        source: string;
+        checkedAt: string;
+        id?: string | null;
+      }[]
+    | null;
+  externalIdentities?:
+    | {
+        source: string;
+        externalId: string;
+        id?: string | null;
+      }[]
+    | null;
+  status: 'draft' | 'published' | 'archived';
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "properties".
  */
 export interface Property {
@@ -326,6 +479,10 @@ export interface Property {
   lastSeenAt?: string | null;
   lastImportRun?: (number | null) | ImportRun;
   externalComplexId?: string | null;
+  /**
+   * Optional canonical development relation.
+   */
+  development?: (number | null) | Development;
   externalComplexName?: string | null;
   externalBuildingId?: string | null;
   externalLayoutId?: string | null;
@@ -517,25 +674,6 @@ export interface ImportRun {
   lastErrorRedacted?: string | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
 }
 /**
  * Owner operations: import warnings/errors with redacted messages and source links.
@@ -867,6 +1005,14 @@ export interface PayloadLockedDocument {
         value: number | District;
       } | null)
     | ({
+        relationTo: 'developers';
+        value: number | Developer;
+      } | null)
+    | ({
+        relationTo: 'developments';
+        value: number | Development;
+      } | null)
+    | ({
         relationTo: 'properties';
         value: number | Property;
       } | null)
@@ -1068,6 +1214,138 @@ export interface DistrictsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "developers_select".
+ */
+export interface DevelopersSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  aliases?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  legalName?: T;
+  logo?: T;
+  siteUrl?: T;
+  description?: T;
+  source?: T;
+  checkedAt?: T;
+  status?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "developments_select".
+ */
+export interface DevelopmentsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  kind?: T;
+  region?: T;
+  city?: T;
+  district?: T;
+  developer?: T;
+  address?: T;
+  coordinates?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+      };
+  class?: T;
+  completion?: T;
+  deadline?: T;
+  salesStatus?: T;
+  availability?: T;
+  dataTier?: T;
+  source?: T;
+  checkedAt?: T;
+  prices?:
+    | T
+    | {
+        label?: T;
+        amountMinor?: T;
+        currency?: T;
+        source?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  lotsCount?: T;
+  mediaItems?:
+    | T
+    | {
+        media?: T;
+        mediaType?: T;
+        rights?: T;
+        source?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  layouts?:
+    | T
+    | {
+        externalId?: T;
+        rooms?: T;
+        area?: T;
+        title?: T;
+        id?: T;
+      };
+  progress?:
+    | T
+    | {
+        date?: T;
+        percent?: T;
+        note?: T;
+        source?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  communications?:
+    | T
+    | {
+        gas?: T;
+        electricity?: T;
+        water?: T;
+        sewer?: T;
+      };
+  totalArea?: T;
+  plotsCount?: T;
+  villageClass?: T;
+  descriptions?:
+    | T
+    | {
+        kind?: T;
+        text?: T;
+        source?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        source?: T;
+        checkedAt?: T;
+        id?: T;
+      };
+  externalIdentities?:
+    | T
+    | {
+        source?: T;
+        externalId?: T;
+        id?: T;
+      };
+  status?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "properties_select".
  */
 export interface PropertiesSelect<T extends boolean = true> {
@@ -1079,6 +1357,7 @@ export interface PropertiesSelect<T extends boolean = true> {
   lastSeenAt?: T;
   lastImportRun?: T;
   externalComplexId?: T;
+  development?: T;
   externalComplexName?: T;
   externalBuildingId?: T;
   externalLayoutId?: T;

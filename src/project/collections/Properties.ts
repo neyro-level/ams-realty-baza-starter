@@ -227,6 +227,13 @@ export const Properties: CollectionConfig = {
 			index: true,
 		},
 		{
+			name: "development",
+			type: "relationship",
+			relationTo: "developments",
+			index: true,
+			admin: { description: "Optional canonical development relation." },
+		},
+		{
 			name: "externalComplexName",
 			type: "text",
 		},

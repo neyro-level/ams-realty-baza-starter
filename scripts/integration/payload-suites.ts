@@ -164,7 +164,9 @@ async function assertPubliclyInaccessible(
 		| "properties"
 		| "pages"
 		| "media"
-		| "redirects",
+		| "redirects"
+		| "developers"
+		| "developments",
 ) {
 	try {
 		const result = await payload.find({
@@ -189,6 +191,126 @@ await assertPubliclyInaccessible("properties");
 await assertPubliclyInaccessible("pages");
 await assertPubliclyInaccessible("media");
 await assertPubliclyInaccessible("redirects");
+await assertPubliclyInaccessible("developers");
+await assertPubliclyInaccessible("developments");
+
+const developmentRegion = await payload.create({
+	collection: "regions",
+	data: {
+		slug: `development-region-${identitySuffix}`,
+		title: "Development Region",
+		morphology: {
+			nominative: "Development Region",
+			genitive: "Development Region genitive",
+			prepositional: "Development Region prepositional",
+		},
+		shortName: "Development",
+		sortOrder: 90,
+		status: "published",
+		publishedAt: clock.nowIso(),
+	},
+	...access,
+});
+const developmentCity = await payload.create({
+	collection: "cities",
+	data: {
+		slug: `development-city-${identitySuffix}`,
+		title: "Development City",
+		morphology: {
+			nominative: "Development City",
+			genitive: "Development City genitive",
+			prepositional: "Development City prepositional",
+		},
+		preposition: "v",
+		cityType: "city",
+		region: developmentRegion.id,
+		morphologyApproved: true,
+		sortOrder: 90,
+		status: "published",
+		publishedAt: clock.nowIso(),
+	},
+	...access,
+});
+const preparedDeveloper = await payload.create({
+	collection: "developers",
+	data: {
+		name: "Prepared Developer",
+		slug: `prepared-developer-${identitySuffix}`,
+		source: "integration-fixture",
+		checkedAt: clock.nowIso(),
+		status: "published",
+		publishedAt: clock.nowIso(),
+	},
+	...access,
+});
+const preparedDevelopment = await payload.create({
+	collection: "developments",
+	data: {
+		name: "Prepared Residential Complex",
+		slug: `prepared-complex-${identitySuffix}`,
+		kind: "residential_complex",
+		region: developmentRegion.id,
+		city: developmentCity.id,
+		developer: preparedDeveloper.id,
+		dataTier: "B",
+		source: "integration-fixture",
+		checkedAt: clock.nowIso(),
+		layouts: [{ title: "One room", rooms: 1, area: 42 }],
+		status: "published",
+		publishedAt: clock.nowIso(),
+	},
+	...access,
+});
+await payload.update({
+	collection: "properties",
+	id: parallelProperties[1].id,
+	data: { development: preparedDevelopment.id },
+	...access,
+});
+assert.equal(
+	Number(
+		(await payload.findByID({
+			collection: "properties",
+			id: parallelProperties[1].id,
+			depth: 0,
+			...access,
+		})).development,
+	),
+	preparedDevelopment.id,
+);
+await assert.rejects(
+	() =>
+		payload.create({
+			collection: "developments",
+			data: {
+				name: "Polluted Cottage Village",
+				slug: `polluted-village-${identitySuffix}`,
+				kind: "cottage_village",
+				region: developmentRegion.id,
+				city: developmentCity.id,
+				developer: preparedDeveloper.id,
+				dataTier: "C",
+				source: "integration-fixture",
+				checkedAt: clock.nowIso(),
+				progress: [{ date: clock.nowIso(), percent: 10, source: "fixture", checkedAt: clock.nowIso() }],
+				status: "draft",
+			},
+			...access,
+		}),
+	/kind=cottage_village/,
+);
+await assertPubliclyInaccessible("developers");
+await assertPubliclyInaccessible("developments");
+await payload.update({
+	collection: "properties",
+	id: parallelProperties[1].id,
+	data: { development: null },
+	...access,
+});
+await payload.delete({ collection: "developments", id: preparedDevelopment.id, ...access });
+await payload.delete({ collection: "developers", id: preparedDeveloper.id, ...access });
+await payload.delete({ collection: "cities", id: developmentCity.id, ...access });
+await payload.delete({ collection: "regions", id: developmentRegion.id, ...access });
 
 await assert.rejects(
 	() =>

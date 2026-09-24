@@ -23,7 +23,7 @@ const requiredSections = [
 ];
 
 const collectionMarkers = {
-	novostroyki: ["residential-complexes", "buildings", "layouts", "developers"],
+	novostroyki: ["developments", "developers"],
 	journal: ["posts"],
 	agents: ["agents"],
 };
@@ -45,7 +45,10 @@ function parseProjectStates(projectText) {
 			.find((line) => line.includes(`| \`${module}\` |`));
 		if (!row) continue;
 		const cells = [...row.matchAll(/`([^`]+)`/g)].map((match) => match[1]);
-		if (cells.length !== 3 || !["enabled", "disabled"].includes(cells[1]))
+		if (
+			cells.length !== 3 ||
+			!["enabled", "prepared", "disabled"].includes(cells[1])
+		)
 			continue;
 		states.set(module, { state: cells[1], manifest: cells[2] });
 	}
@@ -78,6 +81,20 @@ function sourceMarkers(sourceFiles, module) {
 	return [...new Set(markers)];
 }
 
+function publicSurfaceMarkers(sourceFiles, module) {
+	const route = module === "novostroyki" ? "novostroyki" : module;
+	const routePath = new RegExp(`(?:^|/)app/(?:[^/]+/)*${route}(?:/|$)`);
+	const publicOwner = /(?:sitemap\.ts|navigation|menu|site-header|site-footer)/i;
+	const publicLiteral = new RegExp(`["'\\x60]/?${route}(?:/|["'\\x60])`);
+	return sourceFiles.flatMap((file) => {
+		if (routePath.test(file.name)) return [file.name];
+		if (publicOwner.test(file.name) && publicLiteral.test(file.content)) {
+			return [file.name];
+		}
+		return [];
+	});
+}
+
 export function evaluateGovernance({ projectText, manifests, sourceFiles }) {
 	const parsed = parseProjectStates(projectText);
 	const violations = [...parsed.violations];
@@ -96,9 +113,15 @@ export function evaluateGovernance({ projectText, manifests, sourceFiles }) {
 		}
 		if (!config) continue;
 		const markers = sourceMarkers(sourceFiles, module);
-		if (markers.length > 0 && config.state !== "enabled") {
+		if (markers.length > 0 && config.state === "disabled") {
 			violations.push(
 				`${module} has runtime markers while disabled: ${markers.join(", ")}`,
+			);
+		}
+		const publicMarkers = publicSurfaceMarkers(sourceFiles, module);
+		if (publicMarkers.length > 0 && config.state === "prepared") {
+			violations.push(
+				`${module} has public surface markers while prepared: ${publicMarkers.join(", ")}`,
 			);
 		}
 		if (config.manifest !== `docs/modules/${module}.md`) {
@@ -160,6 +183,26 @@ if (
 	);
 }
 
+const preparedRouteViolations = evaluateGovernance({
+	projectText,
+	manifests,
+	sourceFiles: [
+		{
+			name: "src/app/(site)/novostroyki/page.tsx",
+			content: 'export default function Page() { return "public"; }',
+		},
+	],
+});
+if (
+	!preparedRouteViolations.some((violation) =>
+		violation.includes("novostroyki has public surface markers while prepared"),
+	)
+) {
+	actualViolations.push(
+		"negative fixture did not reject a prepared novostroyki public route",
+	);
+}
+
 if (actualViolations.length > 0) {
 	console.error(
 		actualViolations.map((violation) => `- ${violation}`).join("\n"),
@@ -168,5 +211,5 @@ if (actualViolations.length > 0) {
 }
 
 console.log(
-	"Module governance: PASS (3 manifests; disabled runtime marker fixture rejected)",
+	"Module governance: PASS (3 manifests; disabled and prepared negative fixtures rejected)",
 );

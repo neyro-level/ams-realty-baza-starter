@@ -12,6 +12,7 @@ import * as migration_20260924_111534 from "./20260924_111534";
 import * as migration_20260924_134500_geo_hierarchy from "./20260924_134500_geo_hierarchy";
 import * as migration_20260924_151000_property_geo_refs from "./20260924_151000_property_geo_refs";
 import * as migration_20260924_170000_property_taxonomy_identity from "./20260924_170000_property_taxonomy_identity";
+import * as migration_20260924_180000_developments from "./20260924_180000_developments";
 
 export const migrations = [
 	{
@@ -83,5 +84,10 @@ export const migrations = [
 		up: migration_20260924_170000_property_taxonomy_identity.up,
 		down: migration_20260924_170000_property_taxonomy_identity.down,
 		name: "20260924_170000_property_taxonomy_identity",
+	},
+	{
+		up: migration_20260924_180000_developments.up,
+		down: migration_20260924_180000_developments.down,
+		name: "20260924_180000_developments",
 	},
 ];
