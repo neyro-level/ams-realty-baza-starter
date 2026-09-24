@@ -44,7 +44,18 @@ DECLARE
 		'payload_jobs_concurrency_key_idx',
 		'site_settings_logo_idx',
 		'site_settings_social_links_order_idx',
-		'site_settings_social_links_parent_id_idx'
+		'site_settings_social_links_parent_id_idx',
+		'regions_slug_idx',
+		'cities_slug_idx',
+		'cities_region_idx',
+		'cities_agglomeration_of_idx',
+		'districts_city_slug_unique_idx',
+		'districts_parent_idx',
+		'districts_synonyms_order_idx',
+		'districts_synonyms_parent_id_idx',
+		'payload_locked_documents_rels_regions_id_idx',
+		'payload_locked_documents_rels_cities_id_idx',
+		'payload_locked_documents_rels_districts_id_idx'
 	];
 	required_index text;
 	required_constraints text[] := ARRAY[
@@ -87,6 +98,30 @@ BEGIN
 		WHERE table_schema = 'public' AND table_name = 'site_settings_social_links'
 	) THEN
 		RAISE EXCEPTION 'Missing site settings Global tables';
+	END IF;
+
+	IF (
+		SELECT count(*) FROM information_schema.tables
+		WHERE table_schema = 'public'
+			AND table_name IN ('regions', 'cities', 'districts')
+	) <> 3 THEN
+		RAISE EXCEPTION 'Missing canonical geo hierarchy tables';
+	END IF;
+
+	IF (
+		SELECT count(*) FROM pg_trigger
+		WHERE tgname IN (
+			'regions_root_slug_guard',
+			'cities_root_slug_guard',
+			'cities_agglomeration_guard',
+			'districts_slug_guard',
+			'regions_prevent_published_slug_change',
+			'cities_prevent_published_slug_change',
+			'districts_prevent_published_slug_change',
+			'districts_parent_guard'
+		) AND NOT tgisinternal
+	) <> 8 THEN
+		RAISE EXCEPTION 'Missing canonical geo hierarchy triggers';
 	END IF;
 
 	IF NOT EXISTS (

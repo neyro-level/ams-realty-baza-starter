@@ -29,6 +29,7 @@ import { startFixtureHttpServer } from "./integration/fixture-http-server.mjs";
 import { createMemoryFeedRepository } from "./integration/memory-feed-repository.mjs";
 import {
 	prepareIntegrationDatabase,
+	proveGeoHierarchyMigration,
 	proveLeadDeliveryRelationalMigration,
 	provePayloadAuthSecurityMigration,
 	provePropertyNumericMigration,
@@ -267,6 +268,8 @@ await prepareIntegrationDatabase(preferredUri);
 proveLeadDeliveryRelationalMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
 proveSiteSettingsMigration(preferredUri);
+await prepareIntegrationDatabase(preferredUri);
+proveGeoHierarchyMigration(preferredUri);
 const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {
@@ -305,6 +308,21 @@ for (const [key, value] of Object.entries(childEnv)) {
 execFileSync(
 	"pnpm",
 	["exec", "payload", "run", "scripts/integration/payload-suites.ts"],
+	{
+		stdio: "inherit",
+		shell: process.platform === "win32",
+		env: {
+			...childEnv,
+			NODE_OPTIONS: [process.env.NODE_OPTIONS, "--conditions=react-server"]
+				.filter(Boolean)
+				.join(" "),
+		},
+	},
+);
+
+execFileSync(
+	"pnpm",
+	["exec", "payload", "run", "scripts/integration/geo-suites.ts"],
 	{
 		stdio: "inherit",
 		shell: process.platform === "win32",

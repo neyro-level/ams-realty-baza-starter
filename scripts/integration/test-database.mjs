@@ -1,13 +1,17 @@
 import { execFileSync } from "node:child_process";
 import { leadDeliveryRelationalContractUpSql } from "../../migrations/20260919_151000.ts";
 import {
+	payloadAuthSecurityDownSql,
+	payloadAuthSecurityUpSql,
+} from "../../migrations/20260921_185354_add_reset_password_requested_at.ts";
+import {
 	siteSettingsDownSql,
 	siteSettingsUpSql,
 } from "../../migrations/20260924_111534.ts";
 import {
-	payloadAuthSecurityDownSql,
-	payloadAuthSecurityUpSql,
-} from "../../migrations/20260921_185354_add_reset_password_requested_at.ts";
+	geoHierarchyDownSql,
+	geoHierarchyUpSql,
+} from "../../migrations/20260924_134500_geo_hierarchy.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -287,6 +291,88 @@ export function proveSiteSettingsMigration(testUri) {
 		throw new Error("Site settings migration down changed unrelated data.");
 	}
 	psql(testUri, siteSettingsUpSql);
+}
+
+export function proveGeoHierarchyMigration(testUri) {
+	psql(
+		testUri,
+		`CREATE TABLE p8_06_migration_sentinel (id integer PRIMARY KEY, note text NOT NULL);
+		 CREATE TABLE payload_locked_documents_rels (id serial PRIMARY KEY);
+		 INSERT INTO p8_06_migration_sentinel (id, note) VALUES (1, 'preserve-me');`,
+	);
+	psql(testUri, geoHierarchyUpSql);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('regions','cities','districts')",
+		) !== "3"
+	) {
+		throw new Error("Geo hierarchy migration did not create all three tables.");
+	}
+	psql(
+		testUri,
+		`INSERT INTO regions (slug, title, morphology_nominative, morphology_genitive, morphology_prepositional, short_name, sort_order, status, published_at, updated_at, created_at)
+		 VALUES ('primorskiy-kray', 'Fixture Region', 'Fixture Region', 'Fixture Region genitive', 'Fixture Region prepositional', 'Fixture', 10, 'published', now(), now(), now());
+		 INSERT INTO cities (slug, title, morphology_nominative, morphology_genitive, morphology_prepositional, preposition, city_type, region_id, morphology_approved, sort_order, status, published_at, updated_at, created_at)
+		 VALUES ('primorsk', 'Fixture Primary City', 'Fixture Primary City', 'Fixture Primary City genitive', 'Fixture Primary City prepositional', 'v', 'city', 1, true, 10, 'published', now(), now(), now());
+		 INSERT INTO cities (slug, title, morphology_nominative, morphology_genitive, morphology_prepositional, preposition, city_type, region_id, agglomeration_of_id, morphology_approved, sort_order, status, published_at, updated_at, created_at)
+		 VALUES ('zarechnyy', 'Fixture Nearby City', 'Fixture Nearby City', 'Fixture Nearby City genitive', 'Fixture Nearby City prepositional', 'v', 'city', 1, 1, true, 20, 'published', now(), now(), now());
+		 INSERT INTO districts (slug, title, morphology_nominative, morphology_genitive, morphology_prepositional, district_type, city_id, preposition, morphology_approved, sort_order, status, published_at, updated_at, created_at)
+		 VALUES ('severnyy', 'Fixture District', 'Fixture District', 'Fixture District genitive', 'Fixture District prepositional', 'microdistrict', 1, 'na', true, 10, 'published', now(), now(), now());
+		 INSERT INTO districts (slug, title, morphology_nominative, morphology_genitive, morphology_prepositional, district_type, city_id, parent_id, preposition, morphology_approved, sort_order, status, updated_at, created_at)
+		 VALUES ('yuzhnyy', 'Fixture Child District', 'Fixture Child District', 'Fixture Child District genitive', 'Fixture Child District prepositional', 'administrative', 1, 1, 'v', true, 20, 'draft', now(), now());`,
+	);
+	expectPsqlFailure(
+		testUri,
+		"INSERT INTO regions (slug,title,morphology_nominative,morphology_genitive,morphology_prepositional,short_name,sort_order,status,updated_at,created_at) VALUES ('primorsk','Collision','Collision','Collision','Collision','Collision',0,'draft',now(),now())",
+		/already owned by a city/i,
+	);
+	expectPsqlFailure(
+		testUri,
+		"INSERT INTO cities (slug,title,morphology_nominative,morphology_genitive,morphology_prepositional,preposition,city_type,region_id,morphology_approved,sort_order,status,updated_at,created_at) VALUES ('novostroyki','Reserved','Reserved','Reserved','Reserved','v','city',1,true,0,'draft',now(),now())",
+		/reserved namespace/i,
+	);
+	expectPsqlFailure(
+		testUri,
+		"INSERT INTO districts (slug,title,morphology_nominative,morphology_genitive,morphology_prepositional,district_type,city_id,preposition,morphology_approved,sort_order,status,updated_at,created_at) VALUES ('severnyy','Duplicate','Duplicate','Duplicate','Duplicate','microdistrict',1,'na',true,0,'draft',now(),now())",
+		/districts_city_slug_unique_idx/i,
+	);
+	expectPsqlFailure(
+		testUri,
+		"INSERT INTO districts (slug,title,morphology_nominative,morphology_genitive,morphology_prepositional,district_type,city_id,preposition,morphology_approved,sort_order,status,updated_at,created_at) VALUES ('dvukhkomnatnye','Facet collision','Facet collision','Facet collision','Facet collision','microdistrict',1,'na',true,0,'draft',now(),now())",
+		/reserved facet namespace/i,
+	);
+	expectPsqlFailure(
+		testUri,
+		"UPDATE cities SET agglomeration_of_id = 2 WHERE id = 1",
+		/agglomeration hierarchy contains a cycle/i,
+	);
+	expectPsqlFailure(
+		testUri,
+		"UPDATE cities SET slug = 'primorsk-renamed' WHERE id = 1",
+		/published geo slug is immutable/i,
+	);
+	expectPsqlFailure(
+		testUri,
+		"UPDATE districts SET parent_id = 2 WHERE id = 1",
+		/district hierarchy contains a cycle/i,
+	);
+	psql(testUri, geoHierarchyDownSql);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name IN ('regions','cities','districts')",
+		) !== "0"
+	) {
+		throw new Error("Geo hierarchy down migration left geo tables behind.");
+	}
+	if (
+		psql(testUri, "SELECT note FROM p8_06_migration_sentinel WHERE id = 1") !==
+		"preserve-me"
+	) {
+		throw new Error("Geo hierarchy down migration changed unrelated data.");
+	}
+	psql(testUri, geoHierarchyUpSql);
 }
 
 export function psqlOnTest(testUri, sql) {

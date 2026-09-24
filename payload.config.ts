@@ -3,6 +3,8 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildConfig } from "payload";
 import sharp from "sharp";
+import { Cities } from "./src/project/collections/Cities.ts";
+import { Districts } from "./src/project/collections/Districts.ts";
 import { FeedSources } from "./src/project/collections/FeedSources.ts";
 import { ImportIssues } from "./src/project/collections/ImportIssues.ts";
 import { ImportRuns } from "./src/project/collections/ImportRuns.ts";
@@ -12,6 +14,7 @@ import { Media } from "./src/project/collections/Media.ts";
 import { Pages } from "./src/project/collections/Pages.ts";
 import { Properties } from "./src/project/collections/Properties.ts";
 import { Redirects } from "./src/project/collections/Redirects.ts";
+import { Regions } from "./src/project/collections/Regions.ts";
 import { Users } from "./src/project/collections/Users.ts";
 import { runtimeEnv } from "./src/project/env.ts";
 import { SiteSettings } from "./src/project/globals/SiteSettings.ts";
@@ -34,6 +37,9 @@ export default buildConfig({
 	collections: [
 		Users,
 		Pages,
+		Regions,
+		Cities,
+		Districts,
 		Properties,
 		FeedSources,
 		ImportRuns,

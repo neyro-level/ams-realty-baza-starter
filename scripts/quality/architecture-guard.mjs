@@ -472,6 +472,9 @@ const classified = new Set(Object.keys(boundary.classifiedCollections ?? {}));
 const requiredCollections = [
 	"users",
 	"pages",
+	"regions",
+	"cities",
+	"districts",
 	"properties",
 	"feed-sources",
 	"import-runs",
@@ -498,6 +501,9 @@ if (boundary.classifiedCollections?.media !== "deny-anonymous") {
 const denyAnonymousFiles = {
 	users: "src/project/collections/Users.ts",
 	pages: "src/project/collections/Pages.ts",
+	regions: "src/project/collections/Regions.ts",
+	cities: "src/project/collections/Cities.ts",
+	districts: "src/project/collections/Districts.ts",
 	properties: "src/project/collections/Properties.ts",
 	"feed-sources": "src/project/collections/FeedSources.ts",
 	"import-runs": "src/project/collections/ImportRuns.ts",
@@ -509,6 +515,9 @@ const denyAnonymousFiles = {
 };
 const classifiedPublicReadAccess = {
 	pages: "publicPageReadAccess",
+	regions: "geoReadAccess",
+	cities: "geoReadAccess",
+	districts: "geoReadAccess",
 	properties: "publicPropertyReadAccess",
 	redirects: "publicRedirectReadAccess",
 };

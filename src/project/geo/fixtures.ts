@@ -1,0 +1,90 @@
+export const geoHierarchyFixtures = {
+	region: {
+		slug: "primorskiy-kray",
+		title: "Приморский край",
+		morphology: {
+			nominative: "Приморский край",
+			genitive: "Приморского края",
+			prepositional: "Приморском крае",
+		},
+		shortName: "Приморье",
+		sortOrder: 10,
+	},
+	cities: [
+		{
+			slug: "primorsk",
+			title: "Приморск",
+			morphology: {
+				nominative: "Приморск",
+				genitive: "Приморска",
+				prepositional: "Приморске",
+			},
+			preposition: "v",
+			cityType: "city",
+			morphologyApproved: true,
+			sortOrder: 10,
+			districts: [
+				{
+					slug: "severnyy",
+					title: "Северный район",
+					districtType: "microdistrict",
+					parent: null,
+					synonyms: [{ value: "Северный" }],
+					preposition: "na",
+					morphologyApproved: true,
+					sortOrder: 10,
+					morphology: {
+						nominative: "Северный район",
+						genitive: "Северного района",
+						prepositional: "Северном районе",
+					},
+				},
+				{
+					slug: "yuzhnyy",
+					title: "Южный район",
+					districtType: "administrative",
+					parent: null,
+					synonyms: [{ value: "Южный" }],
+					preposition: "v",
+					morphologyApproved: true,
+					sortOrder: 20,
+					morphology: {
+						nominative: "Южный район",
+						genitive: "Южного района",
+						prepositional: "Южном районе",
+					},
+				},
+			],
+		},
+		{
+			slug: "zarechnyy",
+			title: "Заречный",
+			morphology: {
+				nominative: "Заречный",
+				genitive: "Заречного",
+				prepositional: "Заречном",
+			},
+			preposition: "v",
+			cityType: "city",
+			morphologyApproved: true,
+			sortOrder: 20,
+			districts: [
+				{
+					slug: "tsentralnyy",
+					title: "Центральный район",
+					districtType: "administrative",
+					parent: null,
+					synonyms: [{ value: "Центр" }],
+					preposition: "v",
+					morphologyApproved: true,
+					sortOrder: 10,
+					morphology: {
+						nominative: "Центральный район",
+						genitive: "Центрального района",
+						prepositional: "Центральном районе",
+					},
+				},
+			],
+		},
+	],
+} as const;

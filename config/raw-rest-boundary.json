@@ -11,6 +11,9 @@
 	"classifiedCollections": {
 		"users": "admin-auth",
 		"pages": "deny-anonymous",
+		"regions": "deny-anonymous",
+		"cities": "deny-anonymous",
+		"districts": "deny-anonymous",
 		"properties": "deny-anonymous",
 		"feed-sources": "deny-anonymous",
 		"import-runs": "deny-anonymous",
@@ -24,6 +27,9 @@
 	"anonymousDenyCollections": [
 		"users",
 		"pages",
+		"regions",
+		"cities",
+		"districts",
 		"properties",
 		"feed-sources",
 		"import-runs",

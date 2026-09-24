@@ -52,6 +52,9 @@ assert.deepEqual(
 
 for (const collection of [
 	"pages",
+	"regions",
+	"cities",
+	"districts",
 	"properties",
 	"feed-sources",
 	"import-runs",
@@ -70,6 +73,9 @@ for (const collection of [
 const collectionFileBySlug = {
 	users: "src/project/collections/Users.ts",
 	pages: "src/project/collections/Pages.ts",
+	regions: "src/project/collections/Regions.ts",
+	cities: "src/project/collections/Cities.ts",
+	districts: "src/project/collections/Districts.ts",
 	properties: "src/project/collections/Properties.ts",
 	"feed-sources": "src/project/collections/FeedSources.ts",
 	"import-runs": "src/project/collections/ImportRuns.ts",
@@ -82,6 +88,9 @@ const collectionFileBySlug = {
 
 const classifiedPublicReadAccess = {
 	pages: "publicPageReadAccess",
+	regions: "geoReadAccess",
+	cities: "geoReadAccess",
+	districts: "geoReadAccess",
 	properties: "publicPropertyReadAccess",
 	redirects: "publicRedirectReadAccess",
 };
@@ -387,6 +396,9 @@ const { isAnonymousDeniedRawRestPath, anonymousRawRestEdgeDecision } =
 for (const slug of [
 	"properties",
 	"pages",
+	"regions",
+	"cities",
+	"districts",
 	"leads",
 	"lead-deliveries",
 	"users",
@@ -427,6 +439,9 @@ const fakeSession = "aaaaaaaaaa.bbbbbbbbbb.cccccccccc";
 for (const pathname of [
 	"/api/leads",
 	"/api/properties",
+	"/api/regions",
+	"/api/cities",
+	"/api/districts",
 	"/api/users",
 	"/api/payload-jobs",
 ]) {

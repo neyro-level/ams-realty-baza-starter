@@ -69,6 +69,9 @@ export interface Config {
   collections: {
     users: User;
     pages: Page;
+    regions: Region;
+    cities: City;
+    districts: District;
     properties: Property;
     'feed-sources': FeedSource;
     'import-runs': ImportRun;
@@ -87,6 +90,9 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    regions: RegionsSelect<false> | RegionsSelect<true>;
+    cities: CitiesSelect<false> | CitiesSelect<true>;
+    districts: DistrictsSelect<false> | DistrictsSelect<true>;
     properties: PropertiesSelect<false> | PropertiesSelect<true>;
     'feed-sources': FeedSourcesSelect<false> | FeedSourcesSelect<true>;
     'import-runs': ImportRunsSelect<false> | ImportRunsSelect<true>;
@@ -195,6 +201,108 @@ export interface Page {
     description?: string | null;
     noindex?: boolean | null;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions".
+ */
+export interface Region {
+  id: number;
+  /**
+   * Canonical lowercase ASCII identity. Published values cannot be renamed before redirect lifecycle is enabled.
+   */
+  slug: string;
+  title: string;
+  morphology: {
+    nominative: string;
+    genitive: string;
+    prepositional: string;
+  };
+  shortName: string;
+  sortOrder: number;
+  status: 'draft' | 'published' | 'archived';
+  /**
+   * Set on first publication and retained as the immutable slug boundary.
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cities".
+ */
+export interface City {
+  id: number;
+  /**
+   * Canonical lowercase ASCII identity. Published values cannot be renamed before redirect lifecycle is enabled.
+   */
+  slug: string;
+  title: string;
+  morphology: {
+    nominative: string;
+    genitive: string;
+    prepositional: string;
+  };
+  preposition: 'v' | 'na';
+  cityType: 'city' | 'urban_settlement' | 'settlement' | 'village';
+  region: number | Region;
+  /**
+   * Optional primary city for nearby aggregation. Must remain in the same region and acyclic.
+   */
+  agglomerationOf?: (number | null) | City;
+  coordinates?: {
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+  morphologyApproved: boolean;
+  sortOrder: number;
+  status: 'draft' | 'published' | 'archived';
+  /**
+   * Set on first publication and retained as the immutable slug boundary.
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "districts".
+ */
+export interface District {
+  id: number;
+  /**
+   * Canonical lowercase ASCII identity. Published values cannot be renamed before redirect lifecycle is enabled.
+   */
+  slug: string;
+  title: string;
+  morphology: {
+    nominative: string;
+    genitive: string;
+    prepositional: string;
+  };
+  districtType: 'administrative' | 'microdistrict';
+  city: number | City;
+  /**
+   * Optional parent district in the same city.
+   */
+  parent?: (number | null) | District;
+  synonyms?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  preposition: 'v' | 'na';
+  morphologyApproved: boolean;
+  sortOrder: number;
+  status: 'draft' | 'published' | 'archived';
+  /**
+   * Set on first publication and retained as the immutable slug boundary.
+   */
+  publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -716,6 +824,18 @@ export interface PayloadLockedDocument {
         value: number | Page;
       } | null)
     | ({
+        relationTo: 'regions';
+        value: number | Region;
+      } | null)
+    | ({
+        relationTo: 'cities';
+        value: number | City;
+      } | null)
+    | ({
+        relationTo: 'districts';
+        value: number | District;
+      } | null)
+    | ({
         relationTo: 'properties';
         value: number | Property;
       } | null)
@@ -829,6 +949,89 @@ export interface PagesSelect<T extends boolean = true> {
         description?: T;
         noindex?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regions_select".
+ */
+export interface RegionsSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  morphology?:
+    | T
+    | {
+        nominative?: T;
+        genitive?: T;
+        prepositional?: T;
+      };
+  shortName?: T;
+  sortOrder?: T;
+  status?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cities_select".
+ */
+export interface CitiesSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  morphology?:
+    | T
+    | {
+        nominative?: T;
+        genitive?: T;
+        prepositional?: T;
+      };
+  preposition?: T;
+  cityType?: T;
+  region?: T;
+  agglomerationOf?: T;
+  coordinates?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+      };
+  morphologyApproved?: T;
+  sortOrder?: T;
+  status?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "districts_select".
+ */
+export interface DistrictsSelect<T extends boolean = true> {
+  slug?: T;
+  title?: T;
+  morphology?:
+    | T
+    | {
+        nominative?: T;
+        genitive?: T;
+        prepositional?: T;
+      };
+  districtType?: T;
+  city?: T;
+  parent?: T;
+  synonyms?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  preposition?: T;
+  morphologyApproved?: T;
+  sortOrder?: T;
+  status?: T;
+  publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

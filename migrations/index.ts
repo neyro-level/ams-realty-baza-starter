@@ -9,6 +9,7 @@ import * as migration_20260919_140536_add_payload_jobs from "./20260919_140536_a
 import * as migration_20260919_151000 from "./20260919_151000";
 import * as migration_20260921_185354_add_reset_password_requested_at from "./20260921_185354_add_reset_password_requested_at";
 import * as migration_20260924_111534 from "./20260924_111534";
+import * as migration_20260924_134500_geo_hierarchy from "./20260924_134500_geo_hierarchy";
 
 export const migrations = [
 	{
@@ -65,5 +66,10 @@ export const migrations = [
 		up: migration_20260924_111534.up,
 		down: migration_20260924_111534.down,
 		name: "20260924_111534",
+	},
+	{
+		up: migration_20260924_134500_geo_hierarchy.up,
+		down: migration_20260924_134500_geo_hierarchy.down,
+		name: "20260924_134500_geo_hierarchy",
 	},
 ];

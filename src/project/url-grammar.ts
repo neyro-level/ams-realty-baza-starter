@@ -5,12 +5,12 @@ import {
 import type { SiteProfile } from "../core/profile/index.ts";
 import { projectStaticRoutes } from "./static-routes.ts";
 
-const fixtureDistricts = {
+export const projectDistrictSlugFixtures = {
 	primorsk: ["severnyy"],
 	zarechnyy: ["tsentralnyy"],
 } as const;
 
-const fixtureFacets = {
+export const projectFacetSlugFixtures = {
 	primorsk: {
 		kvartiry: ["dvukhkomnatnye"],
 		doma: ["s-gazom"],
@@ -25,13 +25,16 @@ export function createProjectUrlGrammar(profile: SiteProfile) {
 	const districtSlugsByGeo = Object.fromEntries(
 		geoSlugs.map((geo) => [
 			geo,
-			fixtureDistricts[geo as keyof typeof fixtureDistricts] ?? [],
+			projectDistrictSlugFixtures[
+				geo as keyof typeof projectDistrictSlugFixtures
+			] ?? [],
 		]),
 	) as UrlGrammarInput["districtSlugsByGeo"];
 	const facetSlugsByGeoCategory = Object.fromEntries(
 		geoSlugs.map((geo) => [
 			geo,
-			fixtureFacets[geo as keyof typeof fixtureFacets] ?? {},
+			projectFacetSlugFixtures[geo as keyof typeof projectFacetSlugFixtures] ??
+				{},
 		]),
 	) as UrlGrammarInput["facetSlugsByGeoCategory"];
 
