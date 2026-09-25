@@ -13,9 +13,8 @@
   SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
 - Единственная текущая planning basis —
   `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`, Plan №9 v4
-  `READY_FOR_OWNER_APPROVAL`. v3 был утверждён, но importer preflight выявил
-  metadata-format drift до Task Manager writes; v4 требует повторного approval.
-  Execution и production пока запрещены; `.beads` не коммитится.
+  `APPROVED`. Execution разрешён только через reconciled Task Manager graph;
+  production и S15 остаются owner/release gate. `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
