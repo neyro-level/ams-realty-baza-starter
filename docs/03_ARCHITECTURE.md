@@ -130,6 +130,13 @@ plural formatter, а ключи и маркетинговые формулиро
 понижает итоговое решение `decidePage` до `noindex,follow` и исключает страницу
 из discovery; ручной SEO fallback `safeSeo` в geo-catalog запрещён.
 
+SEO Registry имеет одного editable owner: `docs/seo/SEO_REGISTRY_SEED.csv`.
+Команда `pnpm seo:registry:generate` валидирует CSV и детерминированно создаёт
+`src/project/seo/registry-seed.ts`, который использует runtime; ручная правка
+generated-файла и параллельный registry в Payload запрещены. Drift блокируется
+`pnpm seo:registry:check` внутри `verify:daily`; решение закреплено в
+`docs/adr/ADR-SEO-REGISTRY-CSV-OWNER.md`.
+
 ## Client clone boundary
 
 `clone:prepare` принимает только утверждённый preset и exact source tag

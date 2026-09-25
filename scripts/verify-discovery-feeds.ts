@@ -42,6 +42,8 @@ function listingCandidate(
 				snapshotDate: "2026-09-24",
 				status: "approved",
 				synthetic: false,
+				release: "starter-v2.1.0",
+				contentGateRule: "listing",
 				tier: "P1",
 				minimumObjects: 5,
 				defaultRobots: "index,follow",

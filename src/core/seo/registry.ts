@@ -8,11 +8,13 @@ export const seoEvidenceSources = [
 ] as const;
 
 export const seoTiers = ["P1", "P2", "TEST", "NONE"] as const;
+export const seoRobots = ["index,follow", "noindex,follow"] as const;
+export const seoRegistryStatuses = ["draft", "approved", "retired"] as const;
 
 export type SeoEvidenceSource = (typeof seoEvidenceSources)[number];
 export type SeoTier = (typeof seoTiers)[number];
-export type SeoRobots = "index,follow" | "noindex,follow";
-export type SeoRegistryStatus = "draft" | "approved" | "retired";
+export type SeoRobots = (typeof seoRobots)[number];
+export type SeoRegistryStatus = (typeof seoRegistryStatuses)[number];
 
 export type ApprovedMorphology = {
 	approved: boolean;
@@ -55,6 +57,8 @@ export type SeoRegistryRow<TemplateKey extends string = string> = {
 	description: string;
 	status: SeoRegistryStatus;
 	morphologyApproved: boolean;
+	release: string;
+	contentGateRule: string;
 };
 
 export type SeoRegistryGuardInput = {
@@ -178,6 +182,12 @@ export function assertSeoRegistry(input: SeoRegistryGuardInput): void {
 		}
 		if (!(seoTiers as readonly string[]).includes(row.tier)) {
 			throw new Error(`Unsupported SEO tier: ${row.tier}`);
+		}
+		if (!(seoRobots as readonly string[]).includes(row.defaultRobots)) {
+			throw new Error(`Unsupported SEO robots directive: ${row.defaultRobots}`);
+		}
+		if (!(seoRegistryStatuses as readonly string[]).includes(row.status)) {
+			throw new Error(`Unsupported SEO registry status: ${row.status}`);
 		}
 		const expectedUrl = input.buildUrl(row.pageKey);
 		if (row.url !== expectedUrl) {

@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { validateRegistryCsv } from "./seo-registry.ts";
 import {
 	assertSeoRegistry,
 	formatRussianPlural,
@@ -18,6 +20,58 @@ const grammar = createProjectUrlGrammar(
 	fixtureDistrictRouteRegistryFor(siteProfileFixtures.multiGeo),
 );
 const now = new Date("2026-09-24T12:00:00.000Z");
+const csvSource = readFileSync("docs/seo/SEO_REGISTRY_SEED.csv", "utf8");
+const csvRows = validateRegistryCsv(csvSource);
+assert.deepEqual(csvRows, projectSeoRegistrySeed);
+
+const [csvHeader, homeCsvRow] = csvSource.split(/\r?\n/);
+assert.ok(csvHeader && homeCsvRow);
+
+for (const [name, profile] of Object.entries(siteProfileFixtures)) {
+	const [profileRow] = validateRegistryCsv(`${csvHeader}\n${homeCsvRow}\n`);
+	assert.ok(profileRow);
+	const profileGrammar = createProjectUrlGrammar(
+		profile,
+		fixtureDistrictRouteRegistryFor(profile),
+	);
+	assert.doesNotThrow(
+		() =>
+			assertSeoRegistry({
+				rows: [{ ...profileRow, targetPhrases: [`${name} home intent`] }],
+				buildUrl: profileGrammar.buildUrl,
+				now,
+			}),
+		`${name} CSV fixture`,
+	);
+}
+
+const duplicateCsv = `${csvSource.trimEnd()}\n${csvSource.split(/\r?\n/)[1]}\n`;
+assert.throws(() => validateRegistryCsv('"unterminated'), /unterminated quoted field/);
+assert.throws(
+	() => validateRegistryCsv(csvSource.replace("pageKey,url,canonical", "url,pageKey,canonical")),
+	/columns or order differ/,
+);
+assert.throws(() => validateRegistryCsv(duplicateCsv), /Duplicate SEO URL|Duplicate SEO intent/);
+assert.throws(
+	() => validateRegistryCsv(csvSource.replace('"","fallback_no_data"', '"1","fallback_no_data"')),
+	/must keep value null/,
+);
+assert.throws(
+	() => validateRegistryCsv(csvSource.replace('"draft","true","starter-v2.1.0"', '"approved","true","starter-v2.1.0"')),
+	/Synthetic SEO row cannot be approved/,
+);
+assert.throws(
+	() => validateRegistryCsv(csvSource.replace('"draft","true","starter-v2.1.0","listing"', '"unknown","true","starter-v2.1.0","listing"')),
+	/Unsupported SEO registry status/,
+);
+assert.throws(
+	() => validateRegistryCsv(csvSource.replace('"noindex,follow","home"', '"unknown","home"')),
+	/Unsupported SEO robots directive/,
+);
+assert.throws(
+	() => validateRegistryCsv(csvSource.replace('"starter-v2.1.0","listing"', '"starter-v2.1.0","unknown"')),
+	/Unsupported contentGateRule/,
+);
 
 assertSeoRegistry({
 	rows: projectSeoRegistrySeed,
