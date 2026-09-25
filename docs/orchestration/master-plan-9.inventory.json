@@ -4,11 +4,11 @@
   "source": {
     "plan_id": "AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9",
     "path": "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
-    "version": "v4",
+    "version": "v5",
     "status": "APPROVED",
     "approved_by": "owner",
-    "approved_at": "2026-09-25T13:09:46+03:00",
-    "sha256": "2dd95609ec249ff22e7ff4081e09ce5ab8cbeec52b033808668a984713c3639c",
+    "approved_at": "2026-09-25T14:44:24+03:00",
+    "sha256": "3cc9d1f0e5fc974fb84ed647ace66f796e657735447cc921ca203b1611acd330",
     "epic_anchors": [
       "EPIC-S0",
       "EPIC-S1",
@@ -43,7 +43,7 @@
       "source_anchor": "EPIC-S0",
       "goal": "Active project canon consistently describes Starter v2.1 and Plan 9 without activating production.",
       "scope": [
-        "Exact EPIC-S0 contract in approved Plan 9 v4",
+        "Exact EPIC-S0 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -203,7 +203,7 @@
       "source_anchor": "EPIC-S1",
       "goal": "Validated project profile explicitly owns geo, market, category, SEO, module and route matrices.",
       "scope": [
-        "Exact EPIC-S1 contract in approved Plan 9 v4",
+        "Exact EPIC-S1 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -366,7 +366,7 @@
       "source_anchor": "EPIC-S2",
       "goal": "Published Payload districts and validated project SEO facets resolve without runtime code fixtures.",
       "scope": [
-        "Exact EPIC-S2 contract in approved Plan 9 v4",
+        "Exact EPIC-S2 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -529,7 +529,7 @@
       "source_anchor": "EPIC-S3",
       "goal": "Resolver returns factual direct-final 200, 301, 308, 404 or 410 decisions without synthetic counts.",
       "scope": [
-        "Exact EPIC-S3 contract in approved Plan 9 v4",
+        "Exact EPIC-S3 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -693,7 +693,7 @@
       "source_anchor": "EPIC-S4",
       "goal": "decidePage is the only semantic owner of availability, indexability and discovery decisions.",
       "scope": [
-        "Exact EPIC-S4 contract in approved Plan 9 v4",
+        "Exact EPIC-S4 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -857,7 +857,7 @@
       "source_anchor": "EPIC-S5",
       "goal": "Reusable core contains only generic rendering and morphology machinery while project config owns marketing templates.",
       "scope": [
-        "Exact EPIC-S5 contract in approved Plan 9 v4",
+        "Exact EPIC-S5 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -1021,7 +1021,7 @@
       "source_anchor": "EPIC-S6",
       "goal": "The seed CSV deterministically validates and generates the single typed project SEO registry.",
       "scope": [
-        "Exact EPIC-S6 contract in approved Plan 9 v4",
+        "Exact EPIC-S6 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -1184,7 +1184,7 @@
       "source_anchor": "EPIC-S7",
       "goal": "Catalog behavior is server-validated, index-safe and based on bounded factual queries.",
       "scope": [
-        "Exact EPIC-S7 contract in approved Plan 9 v4",
+        "Exact EPIC-S7 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -1348,7 +1348,7 @@
       "source_anchor": "EPIC-S8",
       "goal": "Development availability, prices, media and completeness are persisted and exposed consistently.",
       "scope": [
-        "Exact EPIC-S8 contract in approved Plan 9 v4",
+        "Exact EPIC-S8 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -1512,7 +1512,7 @@
       "source_anchor": "EPIC-S9",
       "goal": "Internal navigation is PageKey and Gate derived and never links to redirects or missing pages.",
       "scope": [
-        "Exact EPIC-S9 contract in approved Plan 9 v4",
+        "Exact EPIC-S9 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -1675,7 +1675,7 @@
       "source_anchor": "EPIC-S10A",
       "goal": "The existing site-settings Global is the sole public brand owner and discovery surfaces use Gateway DTO plus decidePage.",
       "scope": [
-        "Exact EPIC-S10A contract in approved Plan 9 v4",
+        "Exact EPIC-S10A contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -1838,7 +1838,7 @@
       "source_anchor": "EPIC-S10B",
       "goal": "IndexNow enqueues deduplicated same-origin canonical URLs only when Gate decisions materially change.",
       "scope": [
-        "Exact EPIC-S10B contract in approved Plan 9 v4",
+        "Exact EPIC-S10B contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -2001,7 +2001,7 @@
       "source_anchor": "EPIC-S11",
       "goal": "Gateway reads use bounded cache tags and the documented fixture meets measured p95 budgets.",
       "scope": [
-        "Exact EPIC-S11 contract in approved Plan 9 v4",
+        "Exact EPIC-S11 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -2165,7 +2165,7 @@
       "source_anchor": "EPIC-S12",
       "goal": "Architecture and runtime invariants fail closed across all five reference profiles.",
       "scope": [
-        "Exact EPIC-S12 contract in approved Plan 9 v4",
+        "Exact EPIC-S12 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -2328,7 +2328,7 @@
       "source_anchor": "EPIC-S13",
       "goal": "Four schemaVersion 2 presets generate complete project-owned clone inputs in a clean checkout.",
       "scope": [
-        "Exact EPIC-S13 contract in approved Plan 9 v4",
+        "Exact EPIC-S13 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
@@ -2492,7 +2492,7 @@
       "source_anchor": "EPIC-S14",
       "goal": "The existing visual system renders final v2.1 routes and states without a second primitive foundation.",
       "scope": [
-        "Exact EPIC-S14 contract in approved Plan 9 v4",
+        "Exact EPIC-S14 contract in approved Plan 9 v5",
         "No work outside the local and default epic contracts"
       ],
       "acceptance_criteria": [
