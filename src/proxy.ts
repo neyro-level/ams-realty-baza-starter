@@ -4,8 +4,13 @@ import {
 	overwriteLifecyclePreflightHeader,
 	parseCurrentPropertyLifecyclePath,
 } from "./core/http/property-lifecycle-preflight.ts";
-import { createPropertyGoneResponse } from "./core/http/property-gone-response.ts";
+import { createEntityGoneResponse } from "./core/http/property-gone-response.ts";
 import { lookupCurrentPropertyLifecyclePreflight } from "./project/data-access/public/property-lifecycle-preflight.ts";
+import { lookupCanonicalEntityLifecyclePreflight } from "./project/data-access/public/entity-lifecycle-preflight.ts";
+import { createProjectUrlGrammar } from "./project/url-grammar.ts";
+import { siteProfile } from "./project/site-profile.ts";
+
+const urlGrammar = createProjectUrlGrammar(siteProfile);
 
 export async function proxy(request: NextRequest) {
 	const denial = anonymousRawRestEdgeDecision(
@@ -23,13 +28,16 @@ export async function proxy(request: NextRequest) {
 	const propertySlug = parseCurrentPropertyLifecyclePath(
 		request.nextUrl.pathname,
 	);
-	if (!propertySlug) {
-		return NextResponse.next({ request: { headers: requestHeaders } });
-	}
-
-	const decision = await lookupCurrentPropertyLifecyclePreflight(propertySlug);
+	const canonicalPageKey = urlGrammar.parseUrl(request.nextUrl.pathname);
+	const decision = propertySlug
+		? await lookupCurrentPropertyLifecyclePreflight(propertySlug)
+		: canonicalPageKey
+			? await lookupCanonicalEntityLifecyclePreflight(canonicalPageKey)
+			: { kind: "pass" as const };
 	if (decision.kind === "gone") {
-		return createPropertyGoneResponse(propertySlug);
+		return createEntityGoneResponse(
+			"label" in decision ? String(decision.label) : (propertySlug ?? "entity"),
+		);
 	}
 	if (decision.kind === "redirect") {
 		return NextResponse.redirect(
@@ -43,5 +51,17 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/api/:path*", "/obekty/:slug"],
+	matcher: [
+		"/api/:path*",
+		"/obekty/:slug",
+		"/kvartiry/:slug",
+		"/doma/:slug",
+		"/uchastki/:slug",
+		"/kommercheskaya-nedvizhimost/:slug",
+		"/komnaty/:slug",
+		"/garazhi/:slug",
+		"/novostroyki/:slug",
+		"/kottedzhnye-poselki/:slug",
+		"/zastroyshchiki/:slug",
+	],
 };

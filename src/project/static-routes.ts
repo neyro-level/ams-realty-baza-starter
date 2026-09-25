@@ -7,7 +7,7 @@ export type ProjectStaticRoute = {
 
 export const projectStaticRoutes = [
 	{ path: "/", changeFrequency: "daily", priority: 1, indexable: true },
-	{ path: "/nedvizhimost", changeFrequency: "daily", priority: 0.9, indexable: true },
+	{ path: "/nedvizhimost", changeFrequency: "daily", priority: 0.9, indexable: false },
 	{ path: "/uslugi", changeFrequency: "weekly", priority: 0.7, indexable: true },
 	{ path: "/o-kompanii", changeFrequency: "monthly", priority: 0.6, indexable: true },
 	{ path: "/ipoteka", changeFrequency: "weekly", priority: 0.7, indexable: true },

@@ -5,7 +5,15 @@ import {
 
 const allowedPathPrefixes = [
 	"/",
-	"/nedvizhimost",
+	"/kvartiry",
+	"/doma",
+	"/uchastki",
+	"/kommercheskaya-nedvizhimost",
+	"/komnaty",
+	"/garazhi",
+	"/novostroyki",
+	"/kottedzhnye-poselki",
+	"/zastroyshchiki",
 	"/obekty",
 	"/uslugi",
 	"/o-kompanii",

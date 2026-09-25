@@ -6,8 +6,8 @@
 
 Текущий execution source — Plan №8 v6 `APPROVED`. Его target — переносимая
 geo-first catalog platform поверх того же `AMS_PROFILE=REALTY_BASE`. Target
-contract находится в `docs/platform/GEO_CATALOG_CONTRACT.md`; новые target
-routes и модели не считаются live до соответствующих merge и P8-23A cutover.
+contract находится в `docs/platform/GEO_CATALOG_CONTRACT.md`; P8-23A canonical
+route cutover реализован, production по-прежнему не входит в Plan №8.
 
 ## Зафиксировано
 
@@ -55,7 +55,7 @@ routes и модели не считаются live до соответству�
 | Field ownership | `manual → field override → owning feed`; foreign-feed identity is degenerate for REALTY_BASE |
 | Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
 | Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
-| Geo-catalog target | Plan №8 v6 + `docs/platform/GEO_CATALOG_CONTRACT.md`; current runtime remains authoritative until staged implementation/cutover |
+| Geo-catalog runtime | Plan №8 v6 + `docs/platform/GEO_CATALOG_CONTRACT.md`; P8-23A canonical resolver/catch-all cutover implemented, P8-23B owns cleanup |
 | Geo modes | Target supports `SINGLE_GEO | MULTI_GEO`; active value will be owned by the future SiteProfile (P8-03), not inferred from current routes |
 | Development model | One future `developments` entity with `kind = residential_complex | cottage_village` and strict kind-specific validation (P8-09) |
 | Plan 8 delivery | Every epic uses `MERGE_AFTER_GATE`; production, mirror and tag remain separate owner actions |

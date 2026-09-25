@@ -30,12 +30,12 @@ import {
 	toPropertyListDTO,
 	toShellDTO,
 } from "./dto";
-import {
-	fallbackPublicPage,
-	findPublicPage,
-	findPublicPages,
-} from "./pages";
+import { fallbackPublicPage, findPublicPage, findPublicPages } from "./pages";
 import { getOptionalPublicGatewayPayload } from "./payload";
+import { findPublicNap } from "./nap";
+import { propertyCategorySurface } from "@/core/property/taxonomy";
+import { createProjectUrlGrammar } from "@/project/url-grammar";
+import { siteProfile } from "@/project/site-profile";
 
 export type PublicPropertyPageState =
 	| {
@@ -53,8 +53,11 @@ export type PublicPropertyPageState =
 
 const urlsPerShard = projectConfig.sitemapUrlsPerShard;
 const queryPageSize = projectConfig.sitemapQueryPageSize;
+const urlGrammar = createProjectUrlGrammar(siteProfile);
 
-function emptyCatalog(query: CatalogQueryInput = { limit: 24, page: 1 }): PublicCatalogResult {
+function emptyCatalog(
+	query: CatalogQueryInput = { limit: 24, page: 1 },
+): PublicCatalogResult {
 	const parsed = catalogQuerySchema.parse(query);
 	return {
 		items: [],
@@ -84,10 +87,7 @@ function indexableStaticEntries(): PublicUrlEntry[] {
 }
 
 async function listRange<T>(
-	readPage: (input: {
-		limit: number;
-		offset: number;
-	}) => Promise<readonly T[]>,
+	readPage: (input: { limit: number; offset: number }) => Promise<readonly T[]>,
 	offset: number,
 	limit: number,
 ): Promise<T[]> {
@@ -108,7 +108,11 @@ export async function getPublicShell() {
 	if (!payload) {
 		return toShellDTO([]);
 	}
-	return toShellDTO(await findPublicPages(payload));
+	const [pages, nap] = await Promise.all([
+		findPublicPages(payload),
+		findPublicNap(payload),
+	]);
+	return toShellDTO(pages, nap);
 }
 
 export async function getPublicCatalog(
@@ -162,7 +166,9 @@ export async function getPublicSitemapShardCount() {
 	return Math.max(1, Math.ceil(totals.total / urlsPerShard));
 }
 
-export async function getPublicSitemapShard(id: number): Promise<PublicUrlEntry[]> {
+export async function getPublicSitemapShard(
+	id: number,
+): Promise<PublicUrlEntry[]> {
 	if (!Number.isInteger(id) || id < 0) return [];
 	const payload = await getOptionalPublicGatewayPayload();
 	const staticEntries = indexableStaticEntries();
@@ -221,7 +227,12 @@ export async function getPublicSitemapShard(id: number): Promise<PublicUrlEntry[
 		);
 		entries.push(
 			...properties.map((property) => ({
-				path: `/obekty/${property.slug}`,
+				path: urlGrammar.buildUrl({
+					kind: "property" as const,
+					category: propertyCategorySurface[property.category],
+					semantic: property.slug,
+					publicUrlId: property.publicUrlId,
+				}),
 				lastModified: property.updatedAt,
 				changeFrequency: "daily" as const,
 				priority: 0.8,

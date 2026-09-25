@@ -3,6 +3,7 @@ import "server-only";
 import type {
 	HomePageDTO,
 	MarketingPageDTO,
+	NapDTO,
 	PropertyCardDTO,
 	PropertyCategoryDetailsDTO,
 	PropertyDetailsDTO,
@@ -336,45 +337,59 @@ export function toPropertyFilterDTO(
 	};
 }
 
-export function toShellDTO(pages: readonly PublicPageRecord[]) {
+export function toShellDTO(
+	pages: readonly PublicPageRecord[],
+	nap?: NapDTO | null,
+) {
 	const starterNavigation = [
-		{ label: "Недвижимость", href: "/nedvizhimost" },
-		{ label: "Услуги", href: "/uslugi" },
-		{ label: "Ипотека", href: "/ipoteka" },
-		{ label: "О компании", href: "/o-kompanii" },
-		{ label: "Контакты", href: "/kontakty" },
+		{ label: "Недвижимость", href: urlGrammar.buildUrl({ kind: "categoryRoot", category: "kvartiry" }) },
+		{ label: "Услуги", href: "/uslugi/" },
+		{ label: "Ипотека", href: "/ipoteka/" },
+		{ label: "О компании", href: "/o-kompanii/" },
+		{ label: "Контакты", href: "/kontakty/" },
 	];
 	const cmsNavigation = pages
 		.filter((page) => page.slug !== "home")
 		.slice(0, 6)
-		.map((page) => ({ label: page.title, href: `/${page.slug}` }));
+		.map((page) => ({ label: page.title, href: `/${page.slug}/` }));
 	const links = cmsNavigation.length ? cmsNavigation : starterNavigation;
+	const shellBrandName = nap?.brandName ?? brandName;
+	const shellLogo = nap?.logo ?? logo;
+	const phone = nap?.phone ?? {
+		label: "+7 (000) 000-00-00",
+		href: "tel:+70000000000" as const,
+	};
 
 	const header: SiteHeaderDTO = {
-		brandName,
+		brandName: shellBrandName,
 		homeHref: "/",
-		logo,
+		logo: shellLogo,
 		navigation: links,
-		phone: { label: "+7 (000) 000-00-00", href: "tel:+70000000000" },
-		primaryAction: { label: "Подобрать объект", href: "/nedvizhimost" },
+		phone,
+		primaryAction: { label: "Подобрать объект", href: "/kvartiry/" },
 	};
 
 	const footer: SiteFooterDTO = {
-		brandName,
-		logo,
+		brandName: shellBrandName,
+		logo: shellLogo,
 		groups: [{ title: "Разделы", links }],
-		contacts: [{ label: "+7 (000) 000-00-00", href: "tel:+70000000000" }],
+		contacts: compact([
+			phone,
+			nap?.email,
+			nap?.address ? { label: nap.address, href: "/kontakty/" } : null,
+			...(nap?.socialLinks ?? []),
+		]),
 		legalLinks: [
 			{
 				label: "Политика конфиденциальности",
-				href: "/politika-konfidencialnosti",
+				href: "/politika-konfidencialnosti/",
 			},
 			{
 				label: "Согласие на обработку данных",
-				href: "/soglasie-na-obrabotku-personalnyh-dannyh",
+				href: "/soglasie-na-obrabotku-personalnyh-dannyh/",
 			},
 		],
-		copyright: `© ${brandName}`,
+		copyright: `© ${shellBrandName}`,
 	};
 
 	return { header, footer } as const;
@@ -416,22 +431,22 @@ export function toHomePageDTO(page: PublicPageRecord | null): HomePageDTO {
 		serviceLinks: [
 			{
 				label: "Купить",
-				href: "/nedvizhimost",
+				href: "/kvartiry/",
 				description: "Квартиры и дома в каталоге",
 			},
 			{
 				label: "Продать",
-				href: "/prodat",
+				href: "/prodat/",
 				description: "Оценка и сопровождение продажи",
 			},
 			{
 				label: "Сдать",
-				href: "/sdat",
+				href: "/sdat/",
 				description: "Аренда без лишней неопределённости",
 			},
 			{
 				label: "Ипотека",
-				href: "/ipoteka",
+				href: "/ipoteka/",
 				description: "Подбор программы и одобрение",
 			},
 		],

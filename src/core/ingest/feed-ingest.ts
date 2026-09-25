@@ -325,7 +325,7 @@ export async function ingestNormalizedFeed({
 	if (result.createdCount > 0 || result.updatedCount > 0) {
 		result.invalidatedTargets = [
 			{ type: "tag", tag: "properties" },
-			{ type: "path", path: "/nedvizhimost", routeType: "page" },
+			{ type: "path", path: "/kvartiry/", routeType: "page" },
 		];
 		await invalidateCache?.(result.invalidatedTargets);
 	}

@@ -1,17 +1,21 @@
 # Product Structure
 
-Статус: `Current runtime + approved Plan 8 target`.
+Статус: `Plan 8 canonical runtime cutover implemented`.
 
 ## Текущий публичный runtime
 
-Эта таблица описывает реально существующие маршруты до P8-23A. Target-контракт
-ниже не объявляет новые URL реализованными.
+P8-23A переключает динамический public runtime на canonical resolver. Статические
+маршруты остаются explicit; legacy donor routes существуют только как прямые
+переходы до P8-23B cleanup.
 
 | Назначение | Текущий URL |
 |---|---|
 | Главная | `/` |
-| Каталог | `/nedvizhimost` |
-| Карточка объекта | `/obekty/[slug]` |
+| Каталог | `/{category}/`, `/{geo}/{category}/`, bounded district/facet routes |
+| Карточка объекта | `/{category}/{semantic}-{publicUrlId}/` |
+| Geo hub | `/{geo}/` |
+| Застройщики | `/zastroyshchiki/`, `/zastroyshchiki/{slug}/`, `/{geo}/zastroyshchiki/` |
+| Проекты | `/novostroyki/zhk-{slug}/`, `/kottedzhnye-poselki/kp-{slug}/` |
 | Услуги | `/uslugi` |
 | О компании | `/o-kompanii` |
 | Ипотека | `/ipoteka` |
@@ -53,29 +57,30 @@ PageKey, URL grammar, resolution order, status/profile model и lifecycle
 | Target surface | Canonical grammar | Текущий статус |
 |---|---|---|
 | Главная | `/` | live |
-| Geo hub | `/{geo}/` | target, not live |
-| Категория по geo | `/{geo}/{category}/` | target, not live |
-| Район или whitelist facet | `/{geo}/{category}/{sub}/` | target, not live |
-| Root-категория | `/{category}/` | target, not live |
-| Объект | `/{category}/{semantic}-{publicUrlId}/` | target, not live |
-| Застройщики geo | `/{geo}/zastroyshchiki/` | target, not live |
-| Застройщики root/detail | `/zastroyshchiki/`, `/zastroyshchiki/{slug}/` | target, not live |
-| ЖК | `/novostroyki/zhk-{slug}/` | target, not live |
-| Коттеджный посёлок | `/kottedzhnye-poselki/kp-{slug}/` | target, not live |
-| Project static routes | explicit declarations from project profile | current routes stay live through cutover |
+| Geo hub | `/{geo}/` | live via resolver |
+| Категория по geo | `/{geo}/{category}/` | live via resolver |
+| Район или whitelist facet | `/{geo}/{category}/{sub}/` | live via resolver |
+| Root-категория | `/{category}/` | live via resolver |
+| Объект | `/{category}/{semantic}-{publicUrlId}/` | live via resolver |
+| Застройщики geo | `/{geo}/zastroyshchiki/` | live via resolver |
+| Застройщики root/detail | `/zastroyshchiki/`, `/zastroyshchiki/{slug}/` | live via resolver |
+| ЖК | `/novostroyki/zhk-{slug}/` | live via resolver |
+| Коттеджный посёлок | `/kottedzhnye-poselki/kp-{slug}/` | live via resolver |
+| Project static routes | explicit declarations from project profile | live, explicit routes preserved |
 
 Инварианты target-грамматики: не более трёх сегментов, lowercase, canonical
 trailing slash, property URL не содержит geo, parent района не входит в URL.
-Legacy `/nedvizhimost`, `/obekty/[slug]` и lifecycle boundary сохраняются до
-проверенного cutover и удаляются только по P8-23B evidence.
+Legacy `/nedvizhimost` и `/obekty/[slug]` делают один прямой `308` на canonical
+URL. Lifecycle boundary сохраняется до P8-23B evidence.
 
 ## Current vs target ownership
 
-- **Current runtime:** перечисленные выше App Router routes и их существующая
-  query SEO/lifecycle/cache логика.
+- **Current runtime:** explicit static routes + один catch-all dispatcher,
+  общий resolver для HTML и metadata, canonical lifecycle preflight в proxy.
 - **Target contract:** `platform/GEO_CATALOG_CONTRACT.md`.
 - **Target implementation:** schema, profile, grammar, resolver, Gate, UI и
   discovery epics Plan №8.
-- **Cutover owner:** только P8-23A; до него target routes не становятся public.
+- **Cutover owner:** P8-23A; implementation evidence —
+  `docs/plan8/S8_23A_RUNTIME_CUTOVER_EVIDENCE.md`.
 - **Cleanup owner:** P8-23B после принятого cutover proof; raw legacy geo/source
   data не удаляется транзакцией cutover.

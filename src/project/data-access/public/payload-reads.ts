@@ -70,8 +70,10 @@ export async function aggregatePublicCatalogFacets(
 			rooms.set(doc.rooms, (rooms.get(doc.rooms) ?? 0) + 1);
 		}
 		if (typeof doc.priceMinor === "number") {
-			priceMin = priceMin == null ? doc.priceMinor : Math.min(priceMin, doc.priceMinor);
-			priceMax = priceMax == null ? doc.priceMinor : Math.max(priceMax, doc.priceMinor);
+			priceMin =
+				priceMin == null ? doc.priceMinor : Math.min(priceMin, doc.priceMinor);
+			priceMax =
+				priceMax == null ? doc.priceMinor : Math.max(priceMax, doc.priceMinor);
 		}
 	}
 
@@ -94,7 +96,9 @@ export async function aggregatePublicCatalogFacets(
 	};
 }
 
-export async function countPublicSitemapProperties(payload: Payload): Promise<number> {
+export async function countPublicSitemapProperties(
+	payload: Payload,
+): Promise<number> {
 	const result = await payload.count({
 		collection: "properties",
 		where: publicPropertyPublicationWhere,
@@ -106,21 +110,68 @@ export async function countPublicSitemapProperties(payload: Payload): Promise<nu
 export async function listPublicSitemapPropertiesPage(
 	payload: Payload,
 	input: { limit: number; offset: number },
-): Promise<readonly { slug: string; updatedAt: string }[]> {
-	return listOffsetPage({
-		payload,
-		collection: "properties",
-		where: publicPropertyPublicationWhere,
-		sort: "-updatedAt",
-		input,
-	});
+): Promise<
+	readonly {
+		slug: string;
+		publicUrlId: number;
+		category: "apartment" | "house" | "land" | "commercial" | "room" | "garage";
+		updatedAt: string;
+	}[]
+> {
+	const limit = Math.trunc(input.limit);
+	const offset = Math.trunc(input.offset);
+	if (!Number.isInteger(limit) || limit < 1) {
+		throw new Error("sitemap page size must be a positive integer.");
+	}
+	if (!Number.isInteger(offset) || offset < 0) {
+		throw new Error("sitemap offset must be a non-negative integer.");
+	}
+
+	const pageSize = Math.min(100, Math.max(limit, 1));
+	const items: {
+		slug: string;
+		publicUrlId: number;
+		category: "apartment" | "house" | "land" | "commercial" | "room" | "garage";
+		updatedAt: string;
+	}[] = [];
+	let skipped = 0;
+	for (let page = 1; items.length < limit && page <= 50; page += 1) {
+		const result = await payload.find({
+			collection: "properties",
+			where: publicPropertyPublicationWhere,
+			limit: pageSize,
+			page,
+			sort: "-updatedAt",
+			select: {
+				slug: true,
+				publicUrlId: true,
+				category: true,
+				updatedAt: true,
+			},
+			...access,
+		});
+		if (!result.docs.length) break;
+		for (const doc of result.docs) {
+			if (!doc.slug || !doc.publicUrlId || !doc.category) continue;
+			if (skipped < offset) {
+				skipped += 1;
+				continue;
+			}
+			items.push({
+				slug: doc.slug,
+				publicUrlId: doc.publicUrlId,
+				category: doc.category,
+				updatedAt: doc.updatedAt,
+			});
+			if (items.length >= limit) break;
+		}
+		if (result.docs.length < pageSize) break;
+	}
+	return items;
 }
 
 const publicPublishedPagesWhere: Where = {
-	and: [
-		{ status: { equals: "published" } },
-		{ publishedAt: { exists: true } },
-	],
+	and: [{ status: { equals: "published" } }, { publishedAt: { exists: true } }],
 };
 
 function isIndexableSitemapPage(doc: {
@@ -130,7 +181,9 @@ function isIndexableSitemapPage(doc: {
 	return Boolean(doc.slug) && doc.slug !== "home" && !doc.seo?.noindex;
 }
 
-export async function countPublicSitemapPages(payload: Payload): Promise<number> {
+export async function countPublicSitemapPages(
+	payload: Payload,
+): Promise<number> {
 	const result = await payload.find({
 		collection: "pages",
 		where: publicPublishedPagesWhere,
@@ -179,50 +232,6 @@ export async function listPublicSitemapPagesPage(
 			slug: page.slug as string,
 			updatedAt: page.updatedAt,
 		}));
-}
-
-async function listOffsetPage(input: {
-	payload: Payload;
-	collection: "properties" | "pages";
-	where: Where;
-	sort: string;
-	input: { limit: number; offset: number };
-}): Promise<readonly { slug: string; updatedAt: string }[]> {
-	const limit = Math.trunc(input.input.limit);
-	const offset = Math.trunc(input.input.offset);
-	if (!Number.isInteger(limit) || limit < 1) {
-		throw new Error("sitemap page size must be a positive integer.");
-	}
-	if (!Number.isInteger(offset) || offset < 0) {
-		throw new Error("sitemap offset must be a non-negative integer.");
-	}
-
-	const pageSize = Math.min(100, limit);
-	const items: { slug: string; updatedAt: string }[] = [];
-	let skipped = 0;
-	for (let page = 1; items.length < limit && page <= 50; page += 1) {
-		const result = await input.payload.find({
-			collection: input.collection,
-			where: input.where,
-			limit: pageSize,
-			page,
-			sort: input.sort,
-			select: { slug: true, updatedAt: true },
-			...access,
-		});
-		if (!result.docs.length) break;
-		for (const doc of result.docs) {
-			if (!doc.slug) continue;
-			if (skipped < offset) {
-				skipped += 1;
-				continue;
-			}
-			items.push({ slug: doc.slug, updatedAt: doc.updatedAt });
-			if (items.length >= limit) break;
-		}
-		if (result.docs.length < pageSize) break;
-	}
-	return items;
 }
 
 export async function findPublicPropertyLifecycleRow(

@@ -37,7 +37,7 @@ export function PropertyPageView({
 				<Section space="hero">
 					<Container>
 						<nav className="mb-6 text-caption text-content-default">
-							<a href="/">Главная</a> / <a href="/nedvizhimost">Недвижимость</a>{" "}
+							<a href="/">Главная</a> / <a href="/kvartiry/">Недвижимость</a>{" "}
 							/ {property.title}
 						</nav>
 						<div className="grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">

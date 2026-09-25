@@ -25,11 +25,11 @@ const logo = {
 };
 
 const navigation = [
-	{ label: "Недвижимость", href: "/nedvizhimost" },
-	{ label: "Услуги", href: "/uslugi" },
-	{ label: "Ипотека", href: "/ipoteka" },
-	{ label: "О компании", href: "/o-kompanii" },
-	{ label: "Контакты", href: "/kontakty" },
+	{ label: "Недвижимость", href: "/kvartiry/" },
+	{ label: "Услуги", href: "/uslugi/" },
+	{ label: "Ипотека", href: "/ipoteka/" },
+	{ label: "О компании", href: "/o-kompanii/" },
+	{ label: "Контакты", href: "/kontakty/" },
 ] as const;
 
 export const fixtureHeader: SiteHeaderDTO = {
@@ -38,7 +38,7 @@ export const fixtureHeader: SiteHeaderDTO = {
 	logo,
 	navigation,
 	phone: { label: "+7 (000) 000-00-00", href: "tel:+70000000000" },
-	primaryAction: { label: "Подобрать объект", href: "/nedvizhimost" },
+	primaryAction: { label: "Подобрать объект", href: "/kvartiry/" },
 };
 
 export const fixtureFooter: SiteFooterDTO = {
@@ -49,8 +49,8 @@ export const fixtureFooter: SiteFooterDTO = {
 		{
 			title: "Услуги",
 			links: [
-				{ label: "Продать", href: "/prodat" },
-				{ label: "Сдать", href: "/sdat" },
+				{ label: "Продать", href: "/prodat/" },
+				{ label: "Сдать", href: "/sdat/" },
 			],
 		},
 		{ title: "Компания", links: navigation.slice(3) },
@@ -62,11 +62,11 @@ export const fixtureFooter: SiteFooterDTO = {
 	legalLinks: [
 		{
 			label: "Политика конфиденциальности",
-			href: "/politika-konfidencialnosti",
+			href: "/politika-konfidencialnosti/",
 		},
 		{
 			label: "Согласие на обработку данных",
-			href: "/soglasie-na-obrabotku-personalnyh-dannyh",
+			href: "/soglasie-na-obrabotku-personalnyh-dannyh/",
 		},
 	],
 	copyright: `© ${brandName}`,
@@ -194,7 +194,8 @@ const pageSeo = (
 ): PageSEOContract => ({
 	title: `${title} — ${brandName}`,
 	description,
-	canonicalPath,
+	canonicalPath:
+		canonicalPath === "/" ? "/" : `${canonicalPath.replace(/\/+$/, "")}/`,
 	indexing: "noindex",
 	following: "nofollow",
 });
@@ -237,18 +238,18 @@ export const fixtureHome: HomePageDTO = {
 	serviceLinks: [
 		{
 			label: "Купить",
-			href: "/nedvizhimost",
+			href: "/kvartiry/",
 			description: "Квартиры из актуального каталога",
 		},
-		{ label: "Продать", href: "/prodat", description: "Оценка и план продажи" },
+		{ label: "Продать", href: "/prodat/", description: "Оценка и план продажи" },
 		{
 			label: "Сдать",
-			href: "/sdat",
+			href: "/sdat/",
 			description: "Поиск арендатора и сопровождение",
 		},
 		{
 			label: "Ипотека",
-			href: "/ipoteka",
+			href: "/ipoteka/",
 			description: "Подбор сценария финансирования",
 		},
 	],

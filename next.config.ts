@@ -47,6 +47,7 @@ const adminCsp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+	trailingSlash: true,
 	transpilePackages: ["@ams/realtbase-ui", "@ams/realtbase-contracts"],
 	images: {
 		remotePatterns: toNextImageRemotePatterns(allowedImageHosts),

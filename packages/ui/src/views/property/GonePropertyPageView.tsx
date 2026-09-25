@@ -17,7 +17,7 @@ export function GonePropertyPageView({ slug }: { slug: string }) {
 					выполняется.
 				</p>
 				<Button asChild className="mt-8 rounded-full">
-					<a href="/nedvizhimost">Смотреть актуальные объекты</a>
+					<a href="/kvartiry/">Смотреть актуальные объекты</a>
 				</Button>
 			</Container>
 		</Section>

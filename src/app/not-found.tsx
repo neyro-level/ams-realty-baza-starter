@@ -21,7 +21,7 @@ export default function NotFound() {
 							<Link href="/">На главную</Link>
 						</Button>
 						<Button asChild variant="outline">
-							<Link href="/nedvizhimost">В каталог</Link>
+							<Link href="/kvartiry/">В каталог</Link>
 						</Button>
 					</div>
 				</Container>

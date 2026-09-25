@@ -69,9 +69,10 @@ Major upgrade требует отдельного решения и targeted pro
 URL/status/profile semantics и cutover invariants. `02_PRODUCT_STRUCTURE.md`
 показывает current runtime рядом с target grammar.
 
-До исполнения профильного epic любой target-компонент имеет статус
-`APPROVED TARGET / NOT RUNTIME LIVE`. Текущее поведение определяется кодом,
-миграциями и существующими маршрутами. Переход выполняется expand-first:
+После P8-23A canonical PageKey routes обслуживаются одним catch-all dispatcher;
+explicit static routes, Payload Admin/API и security proxy остаются отдельными
+framework boundaries. HTML и metadata используют один cached resolution result.
+Переход выполнен expand-first:
 
 ```text
 profile/grammar contracts
@@ -94,9 +95,9 @@ core/packages -X-> project
 Profile передаётся в reusable core явно. Project-owned static routes, brand,
 domain, city literals и будущий literal denylist не переходят в core/packages.
 Payload остаётся единственным schema/auth/Admin owner; public reads продолжают
-идти через explicit Public Gateway и storage-neutral DTO. До P8-23A legacy
-`/nedvizhimost`, `/obekty/[slug]` и отдельная lifecycle HTTP boundary
-остаются действующим rollback path.
+идти через explicit Public Gateway и storage-neutral DTO. Legacy
+`/nedvizhimost`, `/obekty/[slug]` и отдельная lifecycle HTTP boundary остаются
+rollback path до P8-23B; один switchback commit восстанавливает старое wiring.
 
 ## Version-sensitive framework boundaries
 

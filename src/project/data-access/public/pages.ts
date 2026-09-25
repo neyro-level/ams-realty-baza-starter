@@ -18,7 +18,7 @@ function pageSeo(
 	description?: string | null,
 	noindex?: boolean | null,
 ): PageSEOContract {
-	const canonicalPath = slug === "home" ? "/" : `/${slug}`;
+	const canonicalPath = slug === "home" ? "/" : `/${slug}/`;
 	const seoTitle = title.includes(siteConfig.brandName)
 		? title
 		: `${title} — ${siteConfig.brandName}`;

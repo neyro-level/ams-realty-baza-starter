@@ -292,7 +292,7 @@ export async function runImportFeed(
 			if (ingestResult.invalidatedTargets.length === 0) {
 				ingestResult.invalidatedTargets = [
 					{ type: "tag", tag: "properties" },
-					{ type: "path", path: "/nedvizhimost", routeType: "page" },
+					{ type: "path", path: "/kvartiry/", routeType: "page" },
 				];
 			}
 		}

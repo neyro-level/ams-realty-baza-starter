@@ -145,7 +145,7 @@ const revalidation = await postBatchedHttpRevalidate({
 	secret: revalidateSecret,
 	targets: [
 		{ type: "tag", tag: "properties" },
-		{ type: "path", path: "/nedvizhimost", routeType: "page" },
+		{ type: "path", path: "/kvartiry/", routeType: "page" },
 	],
 	reason: "required-integration-proof",
 });
@@ -159,7 +159,7 @@ assert.deepEqual(
 	invalidatedTargets,
 	[
 		{ type: "tag", tag: "properties" },
-		{ type: "path", path: "/nedvizhimost", routeType: "page" },
+		{ type: "path", path: "/kvartiry/", routeType: "page" },
 	],
 	"the internal Route Handler executor must invoke the in-process invalidator boundary",
 );

@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { Payload } from "payload";
+import type { Payload, Where } from "payload";
 import type {
 	LifecycleEntityType,
 	LifecyclePublicationStatus,
@@ -38,12 +38,20 @@ export type PublicEntityLifecycleLookup =
 export async function findPublicEntityLifecycle(input: {
 	payload: Payload;
 	entityType: LifecycleEntityType;
-	slug: string;
+	slug?: string;
+	publicUrlId?: number;
 	canonicalPath: string;
 }): Promise<PublicEntityLifecycleLookup> {
+	const where: Where | null =
+		input.entityType === "property" && input.publicUrlId
+			? { publicUrlId: { equals: input.publicUrlId } }
+			: input.slug
+				? { slug: { equals: input.slug } }
+				: null;
+	if (!where) throw new Error("Entity lifecycle lookup requires an identity.");
 	const result = await input.payload.find({
 		collection: collections[input.entityType],
-		where: { slug: { equals: input.slug } },
+		where,
 		limit: 1,
 		page: 1,
 		depth: 0,

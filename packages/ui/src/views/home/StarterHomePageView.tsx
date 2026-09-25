@@ -39,7 +39,7 @@ export function HomeHeroSection({ page, featured }: HomeSectionProps) {
 					</p>
 					<div className="mt-7 flex flex-wrap gap-3">
 						<Button asChild size="lg">
-							<a href="/nedvizhimost">Смотреть объекты</a>
+							<a href="/kvartiry/">Смотреть объекты</a>
 						</Button>
 						<Button asChild size="lg" variant="outline">
 							<a href="#lead-form">Оставить заявку</a>
@@ -59,7 +59,7 @@ export function HomeHeroSection({ page, featured }: HomeSectionProps) {
 						</CardHeader>
 						<CardFooter>
 							<Button asChild variant="outline">
-								<a href="/nedvizhimost">Открыть каталог</a>
+								<a href="/kvartiry/">Открыть каталог</a>
 							</Button>
 						</CardFooter>
 					</Card>

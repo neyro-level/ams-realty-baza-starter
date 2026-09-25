@@ -18,7 +18,7 @@ export function renderPropertyGoneHtml(slug: string): string {
 <p>410</p>
 <h1>Объект снят с публикации</h1>
 <p>Страница объекта ${safeSlug} больше не содержит публичные данные после окончания retention-периода. Автоматический редирект на главную не выполняется.</p>
-<p><a href="/nedvizhimost">Смотреть актуальные объекты</a></p>
+<p><a href="/kvartiry/">Смотреть актуальные объекты</a></p>
 </main>
 </body>
 </html>`;
@@ -30,3 +30,5 @@ export function createPropertyGoneResponse(slug: string): Response {
 		headers: goneCacheHeaders,
 	});
 }
+
+export const createEntityGoneResponse = createPropertyGoneResponse;
