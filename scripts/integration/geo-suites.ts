@@ -74,6 +74,7 @@ const nearby = await payload.create({
 
 const primaryDistrictFixture = primaryFixture.districts[0];
 const siblingDistrictFixture = primaryFixture.districts[1];
+const childDistrictFixture = primaryFixture.districts[2];
 const nearbyDistrictFixture = nearbyFixture.districts[0];
 const mutableDistrictFixture = <
 	T extends { synonyms: readonly { value: string }[] },
@@ -113,8 +114,20 @@ const nearbyDistrict = await payload.create({
 	},
 	...access,
 });
+const childDistrict = await payload.create({
+	collection: "districts",
+	data: {
+		...mutableDistrictFixture(childDistrictFixture),
+		city: primary.id,
+		parent: siblingDistrict.id,
+		status: "published",
+		publishedAt: now,
+	},
+	...access,
+});
 assert.equal(relationId(primaryDistrict.city), String(primary.id));
 assert.equal(relationId(nearbyDistrict.city), String(nearby.id));
+assert.equal(relationId(childDistrict.parent), String(siblingDistrict.id));
 assert.equal(primaryDistrict.parent, null);
 assert.equal(primaryDistrict.preposition, "na");
 
@@ -279,7 +292,7 @@ const districtCount = await payload.count({
 	...access,
 });
 assert.equal(cityCount.totalDocs, 3);
-assert.equal(districtCount.totalDocs, 3);
+assert.equal(districtCount.totalDocs, 4);
 
 await payload.destroy();
 console.log("geo integration suites: ok");

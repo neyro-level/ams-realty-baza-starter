@@ -96,12 +96,16 @@ const allDistrictFixtures = [
 	...geoHierarchyFixtures.cities[0].districts,
 	...geoHierarchyFixtures.cities[1].districts,
 ];
-assert.equal(allDistrictFixtures.length, 3);
+assert.equal(allDistrictFixtures.length, 4);
 const northern = allDistrictFixtures.find(
 	(district) => district.slug === "severnyy",
 );
 assert.equal(northern?.districtType, "microdistrict");
 assert.equal(northern?.parent, null);
 assert.equal(northern?.preposition, "na");
+const child = allDistrictFixtures.find(
+	(district) => district.slug === "solnechnyy",
+);
+assert.equal(child?.parent, "yuzhnyy");
 
 console.log("verify:geo-hierarchy passed");
