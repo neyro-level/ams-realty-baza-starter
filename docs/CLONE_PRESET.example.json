@@ -1,0 +1,43 @@
+{
+	"schemaVersion": 1,
+	"projectId": "CLIENT-PROJECT-ID",
+	"packageName": "client-realty-site",
+	"brandName": "Клиент Недвижимость",
+	"defaultDescription": "Недвижимость в Клиентограде",
+	"domain": "realty-client.ru",
+	"preset": "MIXED",
+	"geoMode": "SINGLE_GEO",
+	"primaryGeo": "klientograd",
+	"productionIndexing": "noindex",
+	"geos": [
+		{
+			"slug": "klientograd",
+			"title": "Клиентоград",
+			"morphologyApproved": true,
+			"morphology": {
+				"nominative": "Клиентоград",
+				"genitive": "Клиентограда",
+				"prepositional": "Клиентограде"
+			}
+		}
+	],
+	"nap": {
+		"phone": "+7 900 000-00-00",
+		"email": "hello@realty-client.ru",
+		"address": "Клиентоград, ул. Примерная, 1",
+		"workingHours": "Пн-Пт 09:00-18:00"
+	},
+	"brandAssets": {
+		"status": "ready",
+		"logoPath": "/brand/logo.svg",
+		"tokenSource": "src/app/globals.css"
+	},
+	"feed": {
+		"status": "ready",
+		"mode": "external-urls"
+	},
+	"developmentExcel": {
+		"status": "ready",
+		"template": "client-developments.xlsx"
+	}
+}

@@ -8,6 +8,7 @@ import {
 } from "@/project/data-access/public/catalog";
 import { toPropertyCardDTO } from "@/project/data-access/public/dto";
 import { getOptionalPublicGatewayPayload } from "@/project/data-access/public/payload";
+import { siteConfig } from "@/project/site.config";
 
 export type LegacyPropertyRoute =
 	| { kind: "missing" }
@@ -19,6 +20,9 @@ export async function resolveLegacyPropertyRoute(
 ): Promise<LegacyPropertyRoute> {
 	const payload = await getOptionalPublicGatewayPayload();
 	if (!payload) {
+		if ((siteConfig.projectKind as "starter-demo" | "client") === "client") {
+			return { kind: "missing" };
+		}
 		const property = fixtureProperties.find(
 			(candidate) => candidate.slug === slug,
 		);

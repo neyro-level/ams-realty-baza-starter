@@ -101,6 +101,23 @@ Payload остаётся единственным schema/auth/Admin owner; publi
 старые catalog/property/sitemap presentation owners удалены; rollback — revert
 cleanup PR, без удаления raw geo/source данных.
 
+## Client clone boundary
+
+`clone:prepare` принимает только утверждённый preset и exact source tag
+`starter-v2.0.0`; обычный запуск требует clean checkout и совпадение tag с
+`HEAD`. Preset определяет project identity, catalog-first режим,
+`SINGLE_GEO | MULTI_GEO`, проверенную морфологию, NAP, indexing, brand/feed и
+development Excel readiness. Генерируемые владельцы —
+`src/project/site-profile.config.ts` и `docs/CLIENT_BOOTSTRAP.json`.
+
+Clone preparation удаляет только starter-specific evidence/demo deploy assets;
+Core 5.5, `packages/**`, migrations, guards и общие security/data contracts
+сохраняются byte-for-byte. Storage topology не скрыта внутри preparation:
+`clone:activate-timeweb-storage` остаётся отдельным idempotent шагом после
+client topology decision. Runtime с `projectKind=client` и отсутствующими
+Payload records возвращает пустой результат и никогда не подмешивает starter
+fixtures.
+
 ## Version-sensitive framework boundaries
 
 - Next.js `16.3.5` intentionally uses `src/proxy.ts` with the named

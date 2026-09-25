@@ -20,27 +20,44 @@ domain: start-baza.ams24.ru, noindex
 
 ## B. Client development
 
-1. Создать client repository из immutable starter tag `starter-freeze-v1`.
-2. Переименовать package/project identity.
-3. Изменить identity в `src/project/site.config.ts` и установить
-   `projectKind: "client"`.
-4. Зафиксировать client identity отдельным commit, убедиться в clean checkout и
-   выполнить `pnpm clone:activate-timeweb-storage`. Команда добавляет точно
-   совместимый `@payloadcms/storage-s3@3.90.1`, подключает Media к Timeweb S3,
-   добавляет client-only env schema и выполняет typecheck. Повторный запуск —
-   безопасный no-op; starter demo команда не изменяет.
-5. Заполнить `docs/PROJECT.md` и `src/project/client-readiness.config.ts`:
-   client domain, retention, allowlists и enabled lead channels.
-6. Использовать отдельные локальные PostgreSQL и секреты;
-   секреты хранить только в Secret Master.
-7. Заменить fixture-контент, контакты и правовые тексты.
+Tag `starter-v2.0.0` создаёт владелец отдельной командой только после финальной
+приёмки Plan №8. До появления этого immutable tag клиентский clone не начинать.
+
+1. Создать отдельный client repository из exact tag `starter-v2.0.0`.
+2. Скопировать `docs/CLONE_PRESET.example.json` во временный утверждаемый preset
+   вне Git и заполнить `projectId`, package/brand/domain, один из режимов
+   `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`, `SINGLE_GEO | MULTI_GEO`,
+   морфологию каждого geo, NAP-контакты, indexing decision, logo/tokens, feed и
+   development Excel readiness.
+3. В clean checkout выполнить:
+
+   ```bash
+   pnpm clone:prepare --preset-file=C:/secure/client-preset.json --source-tag=starter-v2.0.0
+   pnpm verify:clone-bootstrap
+   ```
+
+   Команда fail-closed проверяет, что checkout чистый и `HEAD` совпадает с
+   immutable tag. Затем она генерирует project SiteProfile, client identity и
+   `docs/CLIENT_BOOTSTRAP.json`, очищает demo fixture runtime и starter-only
+   evidence, но не меняет `src/core/**`, `packages/**`, migrations или guards.
+   Повтор с тем же preset — no-op; другой preset требует новый чистый clone.
+4. Проверить и закоммитить generated client bootstrap. Затем заполнить
+   `src/project/client-readiness.config.ts`: retention, legal approval,
+   allowlists, deployment/database/media topology и lead channels.
+5. Создать geo/district data по утверждённой морфологии, заполнить SEO registry,
+   установить brand tokens/logo, подключить feed и development Excel по
+   `docs/CLIENT_BOOTSTRAP.json`. В client mode отсутствие Payload data означает
+   пустой каталог: starter demo fixture не используется как fallback.
+6. Использовать отдельные локальные PostgreSQL и секреты; секреты хранить только
+   в Secret Master.
+7. После отдельного topology decision выполнить
+   `pnpm clone:activate-timeweb-storage`. Команда добавляет точно совместимый
+   `@payloadcms/storage-s3@3.90.1`, подключает Media к Timeweb S3, добавляет
+   client-only env schema и выполняет typecheck. Она не входит в
+   `clone:prepare`; повторный запуск — безопасный no-op.
 8. Выполнить `pnpm install --frozen-lockfile`, `pnpm verify:daily` и
-   `pnpm verify:client-readiness --mode=fixture-client`.
-9. После фиксации client identity выполнить `pnpm clone:prepare`. Команда
-   разрешена только при `projectKind: "client"` (либо с явным `--client`),
-   удаляет starter-only history/proofs/demo assets, сохраняет Core 5.5 и общие
-   security/data проверки, создаёт `docs/CLONE_PROVENANCE.md`. Повторный запуск
-   безопасен и ничего не меняет.
+   `pnpm verify:client-readiness`. До production дополнительно пройти release
+   gates раздела D.
 
 После Design Intake нового клиента UI cleanup выполняется отдельно:
 

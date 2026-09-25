@@ -44,6 +44,7 @@
 		"verify:merge-risky": "node scripts/verify-merge-risky.mjs",
 		"verify:clone-readiness": "node scripts/verify-clone-readiness.mjs && node scripts/verify-clone-prepare.mjs",
 		"verify:clone-prepare": "node scripts/verify-clone-prepare.mjs",
+		"verify:clone-bootstrap": "node scripts/verify-clone-bootstrap.mjs",
 		"verify:starter:clone-readiness": "pnpm verify:clone-readiness",
 		"verify:client:readiness": "pnpm verify:client-readiness",
 		"verify:client-clone-proof": "node scripts/verify-final-client-clone.mjs",

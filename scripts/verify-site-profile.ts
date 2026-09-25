@@ -6,9 +6,11 @@ import {
 	siteProfileSchema,
 } from "../src/core/profile/index.ts";
 import {
+	createProjectSiteProfile,
 	siteProfile,
 	siteProfileFixtures,
 } from "../src/project/site-profile.ts";
+import { projectSiteProfileConfig } from "../src/project/site-profile.config.ts";
 
 for (const [name, fixture] of Object.entries(siteProfileFixtures)) {
 	assert.equal(
@@ -18,7 +20,8 @@ for (const [name, fixture] of Object.entries(siteProfileFixtures)) {
 	);
 	assert.equal(fixture.primaryGeo, "primorsk");
 }
-assert.equal(siteProfile, siteProfileFixtures.singleGeo);
+assert.deepEqual(siteProfile, siteProfileFixtures.singleGeo);
+assert.deepEqual(siteProfile, createProjectSiteProfile(projectSiteProfileConfig));
 assert.equal(siteProfile.preset, "MIXED");
 assert.equal(siteProfile.geoMode, "SINGLE_GEO");
 assert.equal(

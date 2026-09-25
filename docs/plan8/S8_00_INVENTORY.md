@@ -173,6 +173,7 @@ Domain verification commands currently registered:
   `verify:operational-recovery`, `verify:security-boundaries`,
   `verify:product-regression`, `verify:production-topology`.
 - Clone/release evidence: `verify:clone-readiness`, `verify:clone-prepare`,
+  `verify:clone-bootstrap`,
   `verify:client-readiness` (alias `verify:client:readiness`),
   `verify:starter:clone-readiness`, `verify:client-clone-proof`,
   `verify:release-artifact`, `release:manifest`.

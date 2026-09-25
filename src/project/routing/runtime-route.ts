@@ -20,6 +20,7 @@ import {
 import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
 import { siteProfile } from "@/project/site-profile";
+import { siteConfig } from "@/project/site.config";
 import { getOptionalPublicGatewayPayload } from "@/project/data-access/public/payload";
 import {
 	countInventory,
@@ -143,6 +144,19 @@ async function resolveFixtureRuntimeRoute(
 	return { decision, ...(data ? { data } : {}) };
 }
 
+async function resolveEmptyClientRuntimeRoute(
+	pathname: string,
+): Promise<RuntimeRouteResolution> {
+	const port = createFixtureResolverDataPort({ grammar, pages: [] });
+	return {
+		decision: await createRouteResolver({
+			profile: siteProfile,
+			grammar,
+			port,
+		}).resolvePath(pathname),
+	};
+}
+
 function entityType(pageKey: PageKey) {
 	if (pageKey.kind === "property") return "property" as const;
 	if (pageKey.kind === "development") return "development" as const;
@@ -186,7 +200,11 @@ function listingInput(pageKey: Extract<PageKey, { kind: `category${string}` }>) 
 export const resolveRuntimeRoute = cache(
 	async (pathname: string): Promise<RuntimeRouteResolution> => {
 		const payload = await getOptionalPublicGatewayPayload();
-		if (!payload) return resolveFixtureRuntimeRoute(pathname);
+		if (!payload) {
+			return (siteConfig.projectKind as "starter-demo" | "client") === "client"
+				? resolveEmptyClientRuntimeRoute(pathname)
+				: resolveFixtureRuntimeRoute(pathname);
+		}
 
 		const data = new Map<string, RuntimeRouteData>();
 		const inventory = new Map<string, number>();

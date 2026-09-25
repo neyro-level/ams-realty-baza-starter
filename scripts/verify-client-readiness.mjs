@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { clientReadinessConfig } from "../src/project/client-readiness.config.ts";
 import { siteConfig } from "../src/project/site.config.ts";
+import { validateCloneBootstrap } from "./clone-preset.mjs";
 
 const starterBrand = "AMS Realty Baza Starter";
 const starterDomain = "start-baza.ams24.ru";
@@ -219,6 +220,18 @@ const errors = validateClientReadiness({
 	brandName: siteConfig.brandName,
 	runtimeOrigin: process.env.NEXT_PUBLIC_SERVER_URL,
 });
+if (siteConfig.projectKind === "client") {
+	const bootstrap = validateCloneBootstrap(process.cwd());
+	if (bootstrap.productionIndexing !== clientReadinessConfig.productionIndexing) {
+		errors.push("bootstrap-indexing-decision-drift");
+	}
+	if (bootstrap.domain !== clientReadinessConfig.domain) {
+		errors.push("bootstrap-domain-drift");
+	}
+	if (bootstrap.nap.brandName !== siteConfig.brandName) {
+		errors.push("bootstrap-brand-identity-drift");
+	}
+}
 assert.deepEqual(errors, [], `Client readiness failed: ${errors.join(", ")}`);
 console.log(
 	`verify:client-readiness: ${siteConfig.projectKind === "client" ? "PASS" : "not applicable (starter-demo)"}`,

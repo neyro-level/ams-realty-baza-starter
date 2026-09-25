@@ -58,6 +58,9 @@ Plan №8.
 | Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
 | Geo-catalog runtime | Plan №8 v6 + `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover and guarded post-cutover cleanup implemented |
 | Geo modes | Target supports `SINGLE_GEO | MULTI_GEO`; active value will be owned by the future SiteProfile (P8-03), not inferred from current routes |
+| Clone preset | `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`; `clone:prepare` consumes an approved JSON preset and generates project SiteProfile plus `docs/CLIENT_BOOTSTRAP.json` |
+| Client fixture boundary | `projectKind=client` never falls back to starter demo properties when Payload data is absent; empty client data produces an empty/not-found runtime result |
+| Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |
 | Development model | One future `developments` entity with `kind = residential_complex | cottage_village` and strict kind-specific validation (P8-09) |
 | Plan 8 delivery | Every epic uses `MERGE_AFTER_GATE`; production, mirror and tag remain separate owner actions |
 | Target release tag | `starter-v2.0.0`; not created by implementation loop |
@@ -104,6 +107,8 @@ pnpm verify:merge-standard
 pnpm verify:merge-risky
 pnpm verify:ui-core
 pnpm verify:client-readiness
+pnpm verify:clone-bootstrap
+pnpm verify:client-clone-proof
 ```
 
 `verify:merge-standard` не запускает PostgreSQL suite. `verify:merge-risky`

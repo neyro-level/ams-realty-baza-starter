@@ -5,6 +5,8 @@ import {
 	type SiteProfile,
 	type SiteProfileInput,
 } from "../core/profile/index.ts";
+import { projectSiteProfileConfig } from "./site-profile.config.ts";
+import type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";
 
 const defaultFacets: SiteProfileInput["facetWhitelist"] = {
 	kvartiry: ["rooms", "district", "price", "area"],
@@ -48,7 +50,7 @@ function createFixtureProfile(input: {
 	preset: SitePreset;
 	geoMode: "SINGLE_GEO" | "MULTI_GEO";
 }): SiteProfile {
-	const geos: SiteProfileInput["geos"] = {
+	const geos = {
 		primorsk: { published: true, status: "ACTIVE" },
 		...(input.geoMode === "MULTI_GEO"
 			? {
@@ -59,7 +61,19 @@ function createFixtureProfile(input: {
 					},
 				}
 			: {}),
-	};
+	} as SiteProfileInput["geos"];
+	return createProjectSiteProfile({
+		preset: input.preset,
+		geoMode: input.geoMode,
+		primaryGeo: "primorsk",
+		geos,
+	});
+}
+
+export function createProjectSiteProfile(
+	input: ProjectSiteProfileConfig,
+): SiteProfile {
+	const geos = input.geos as SiteProfileInput["geos"];
 	const categoryStatus = surfaceStatuses(input.preset);
 	const marketCapability = {
 		newbuild: input.preset === "SECONDARY_FIRST" ? "PREPARED_OFF" : "ACTIVE",
@@ -81,7 +95,7 @@ function createFixtureProfile(input: {
 	return defineSiteProfile({
 		preset: input.preset,
 		geoMode: input.geoMode,
-		primaryGeo: "primorsk",
+		primaryGeo: input.primaryGeo,
 		geos,
 		categoryStatus,
 		marketCapability,
@@ -142,4 +156,4 @@ export const siteProfileFixtures = {
 	}),
 } as const;
 
-export const siteProfile = siteProfileFixtures.singleGeo;
+export const siteProfile = createProjectSiteProfile(projectSiteProfileConfig);
