@@ -20,6 +20,8 @@ Task Manager graph. Текущие приоритеты принадлежат
 | Эксплуатация starter demo | `OPERATIONS.md` |
 | Подготовка коммерческого client clone | `CLONE_ONBOARDING.md` |
 | Geo/catalog URL, status, resolution и lifecycle | `platform/GEO_CATALOG_CONTRACT.md` |
+| Граница reusable platform и project composition | `adr/ADR-PLATFORM-LAYOUT.md` |
+| Кандидаты на отдельный future upstream workstream | `UPSTREAM_CANDIDATES.md` |
 
 ## Активное планирование
 

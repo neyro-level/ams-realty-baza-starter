@@ -1,6 +1,6 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 9 V4 APPROVED / TASK MANAGER HANDOFF`.
+Статус: `ACTIVE / PLAN 9 V4 APPROVED / TASK MANAGER EXECUTION`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
@@ -9,7 +9,8 @@ READY или in-progress задач. Завершённые планы и invent
 Plan №9 `STARTER v2.1 / CLONE READINESS` прошёл финальный аудит и явно утверждён
 владельцем как `v4 APPROVED` в
 `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`. Implementation выполняется
-только через clean reconciled Task Manager graph; production не разрешён.
+через clean reconciled Task Manager graph; текущий первый stream — S0. Production
+не разрешён.
 
 ## NOW
 

@@ -20,11 +20,11 @@ domain: start-baza.ams24.ru, noindex
 
 ## B. Client development
 
-Plan №8 принят, но tag `starter-v2.0.0` ещё не создан. Его создаёт владелец
-отдельной командой после проверки canonical `main`. До появления этого
-immutable tag клиентский clone не начинать.
+Plan №9 v4 утверждён, но tag `starter-v2.1.0` ещё не создан. Его создаёт
+владелец отдельной release-командой только после исполнения Plan №9 и проверки
+canonical `main`. До появления этого immutable tag клиентский clone не начинать.
 
-1. Создать отдельный client repository из exact tag `starter-v2.0.0`.
+1. Создать отдельный client repository из exact tag `starter-v2.1.0`.
 2. Скопировать `docs/CLONE_PRESET.example.json` во временный утверждаемый preset
    вне Git и заполнить `projectId`, package/brand/domain, один из режимов
    `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`, `SINGLE_GEO | MULTI_GEO`,
@@ -33,7 +33,7 @@ immutable tag клиентский clone не начинать.
 3. В clean checkout выполнить:
 
    ```bash
-   pnpm clone:prepare --preset-file=C:/secure/client-preset.json --source-tag=starter-v2.0.0
+   pnpm clone:prepare --preset-file=C:/secure/client-preset.json --source-tag=starter-v2.1.0
    pnpm verify:clone-bootstrap
    ```
 

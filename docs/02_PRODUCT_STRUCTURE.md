@@ -70,8 +70,9 @@ guarded cleanup.
 
 Инварианты target-грамматики: не более трёх сегментов, lowercase, canonical
 trailing slash, property URL не содержит geo, parent района не входит в URL.
-Legacy `/nedvizhimost` и `/obekty/[slug]` делают один прямой `308` на canonical
-URL. Отдельная proof-only lifecycle HTTP boundary удалена в P8-23B: реальные
+Legacy `/nedvizhimost` и `/obekty/[slug]` делают один прямой `301` на итоговый
+canonical URL. Только нормализация trailing slash использует `308`. Отдельная
+proof-only lifecycle HTTP boundary удалена в P8-23B: реальные
 canonical `301/410` обслуживает bounded preflight в `src/proxy.ts`. Raw legacy
 geo/source fields и history redirects не удалялись.
 
