@@ -20,12 +20,13 @@ for (const path of removedRuntime) {
 }
 
 const catalogCompatibility = source("src/app/(site)/nedvizhimost/page.tsx");
-assert.match(catalogCompatibility, /permanentRedirect\("\/kvartiry\/"\)/);
+assert.match(catalogCompatibility, /notFound\(\)/);
+assert.doesNotMatch(catalogCompatibility, /permanentRedirect/);
 assert.doesNotMatch(catalogCompatibility, /CatalogPageView|getPublicCatalog/);
 
 const propertyCompatibility = source("src/app/(site)/obekty/[slug]/page.tsx");
-assert.match(propertyCompatibility, /resolveLegacyPropertyRoute/);
-assert.match(propertyCompatibility, /permanentRedirect\(route\.destination\)/);
+assert.match(propertyCompatibility, /notFound\(\)/);
+assert.doesNotMatch(propertyCompatibility, /permanentRedirect/);
 assert.doesNotMatch(
 	propertyCompatibility,
 	/GonePropertyPageView|getPublicProperty|generateMetadata/,
@@ -40,6 +41,7 @@ assert.doesNotMatch(
 const proxy = source("src/proxy.ts");
 assert.match(proxy, /lookupCanonicalEntityLifecyclePreflight/);
 assert.match(proxy, /lookupCurrentPropertyLifecyclePreflight/);
+assert.match(proxy, /matchLegacyRoute/);
 assert.doesNotMatch(proxy, /fetch\(/);
 
 const propertyCollection = source("src/project/collections/Properties.ts");

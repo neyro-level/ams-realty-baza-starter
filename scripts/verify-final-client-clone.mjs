@@ -33,9 +33,15 @@ function hash(value) {
 
 for (const entry of matrix) {
 	const clone = mkdtempSync(join(tmpdir(), `ams-p8-24-${entry.suffix}-`));
-	const presetPath = join(tmpdir(), `ams-p8-24-${entry.suffix}-${process.pid}.json`);
+	const presetPath = join(
+		tmpdir(),
+		`ams-p8-24-${entry.suffix}-${process.pid}.json`,
+	);
 	try {
-		execFileSync("git", ["worktree", "add", "--detach", clone, "HEAD"], { cwd: root, stdio: "pipe" });
+		execFileSync("git", ["worktree", "add", "--detach", clone, "HEAD"], {
+			cwd: root,
+			stdio: "pipe",
+		});
 		for (const relativePath of [
 			"scripts/clone-prepare.mjs",
 			"scripts/clone-preset.mjs",
@@ -44,7 +50,7 @@ for (const entry of matrix) {
 			"src/project/site-profile.config.types.ts",
 			"src/project/site-profile.ts",
 			"src/project/routing/runtime-route.ts",
-			"src/project/routing/legacy-route.ts",
+			"src/project/routing/legacy-route-manifest.ts",
 		]) {
 			cpSync(join(root, relativePath), join(clone, relativePath));
 		}
@@ -53,7 +59,11 @@ for (const entry of matrix) {
 				slug: `${entry.suffix}-city`,
 				title: "Тестоград",
 				morphologyApproved: true,
-				morphology: { nominative: "Тестоград", genitive: "Тестограда", prepositional: "Тестограде" },
+				morphology: {
+					nominative: "Тестоград",
+					genitive: "Тестограда",
+					prepositional: "Тестограде",
+				},
 			},
 			...(entry.geoMode === "MULTI_GEO"
 				? [
@@ -61,7 +71,11 @@ for (const entry of matrix) {
 							slug: `${entry.suffix}-satellite`,
 							title: "Спутник",
 							morphologyApproved: true,
-							morphology: { nominative: "Спутник", genitive: "Спутника", prepositional: "Спутнике" },
+							morphology: {
+								nominative: "Спутник",
+								genitive: "Спутника",
+								prepositional: "Спутнике",
+							},
 							agglomerationOf: `${entry.suffix}-city`,
 						},
 					]
@@ -79,10 +93,22 @@ for (const entry of matrix) {
 			primaryGeo: `${entry.suffix}-city`,
 			productionIndexing: "noindex",
 			geos,
-			nap: { phone: "+7 900 000-00-00", email: `hello@${entry.suffix}.local`, address: "Тестоград", workingHours: "09:00-18:00" },
-			brandAssets: { status: "ready", logoPath: "/brand/logo.svg", tokenSource: "src/app/globals.css" },
+			nap: {
+				phone: "+7 900 000-00-00",
+				email: `hello@${entry.suffix}.local`,
+				address: "Тестоград",
+				workingHours: "09:00-18:00",
+			},
+			brandAssets: {
+				status: "ready",
+				logoPath: "/brand/logo.svg",
+				tokenSource: "src/app/globals.css",
+			},
 			feed: { status: "ready", mode: "external-urls" },
-			developmentExcel: { status: "ready", template: "client-developments.xlsx" },
+			developmentExcel: {
+				status: "ready",
+				template: "client-developments.xlsx",
+			},
 		};
 		writeFileSync(presetPath, JSON.stringify(preset));
 		const args = [
@@ -94,19 +120,47 @@ for (const entry of matrix) {
 			"--date=2026-09-25T00:00:00.000Z",
 		];
 		const proofEnvironment = { ...process.env, AMS_CLONE_PROOF_MODE: "1" };
-		execFileSync(process.execPath, args, { cwd: clone, env: proofEnvironment, stdio: "pipe" });
-		execFileSync(process.execPath, [join(clone, "scripts/verify-clone-bootstrap.mjs"), `--root=${clone}`], { cwd: clone, stdio: "pipe" });
-		assert.equal(git(clone, ["diff", "--", "src/core", "packages", "migrations"]).trim(), "");
+		execFileSync(process.execPath, args, {
+			cwd: clone,
+			env: proofEnvironment,
+			stdio: "pipe",
+		});
+		execFileSync(
+			process.execPath,
+			[join(clone, "scripts/verify-clone-bootstrap.mjs"), `--root=${clone}`],
+			{ cwd: clone, stdio: "pipe" },
+		);
+		assert.equal(
+			git(clone, ["diff", "--", "src/core", "packages", "migrations"]).trim(),
+			"",
+		);
 		assert.equal(git(clone, ["diff", "--", "scripts/quality"]).trim(), "");
-		assert.match(readFileSync(join(clone, "src/project/site-profile.config.ts"), "utf8"), new RegExp(entry.preset));
-		assert.match(readFileSync(join(clone, "src/project/routing/runtime-route.ts"), "utf8"), /resolveEmptyClientRuntimeRoute/);
+		assert.match(
+			readFileSync(join(clone, "src/project/site-profile.config.ts"), "utf8"),
+			new RegExp(entry.preset),
+		);
+		assert.match(
+			readFileSync(join(clone, "src/project/routing/runtime-route.ts"), "utf8"),
+			/resolveEmptyClientRuntimeRoute/,
+		);
 		const firstDiffHash = hash(git(clone, ["diff"]));
-		execFileSync(process.execPath, args, { cwd: clone, env: proofEnvironment, stdio: "pipe" });
-		assert.equal(hash(git(clone, ["diff"])), firstDiffHash, `${entry.preset} repeat must be idempotent`);
+		execFileSync(process.execPath, args, {
+			cwd: clone,
+			env: proofEnvironment,
+			stdio: "pipe",
+		});
+		assert.equal(
+			hash(git(clone, ["diff"])),
+			firstDiffHash,
+			`${entry.preset} repeat must be idempotent`,
+		);
 		console.log(`verify:client-clone-proof: ${entry.preset} PASS`);
 	} finally {
 		try {
-			execFileSync("git", ["worktree", "remove", "--force", clone], { cwd: root, stdio: "pipe" });
+			execFileSync("git", ["worktree", "remove", "--force", clone], {
+				cwd: root,
+				stdio: "pipe",
+			});
 		} catch {
 			rmSync(clone, { recursive: true, force: true });
 		}
@@ -114,4 +168,6 @@ for (const entry of matrix) {
 	}
 }
 
-console.log("verify:client-clone-proof: PASS (three presets, no core/packages/guards/migrations diff)");
+console.log(
+	"verify:client-clone-proof: PASS (three presets, no core/packages/guards/migrations diff)",
+);

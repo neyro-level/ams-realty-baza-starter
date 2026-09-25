@@ -7,7 +7,7 @@ export type PropertyPageLifecycleState =
 	| { kind: "active"; statusCode: 200 }
 	| { kind: "archived"; statusCode: 200; robots: "noindex" }
 	| { kind: "gone"; statusCode: 410; robots: "noindex" }
-	| { kind: "redirect"; statusCode: 308; destination: string };
+	| { kind: "redirect"; statusCode: 301; destination: string };
 
 export function resolvePropertyPageLifecycle(
 	input:
@@ -31,7 +31,7 @@ export function resolvePropertyPageLifecycle(
 		if (destination) {
 			return {
 				kind: "redirect",
-				statusCode: 308,
+				statusCode: 301,
 				destination,
 			};
 		}

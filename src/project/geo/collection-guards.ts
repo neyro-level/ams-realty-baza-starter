@@ -9,13 +9,12 @@ import {
 	type GeoPublicationStatus,
 	normalizeGeoPublication,
 } from "../../core/geo/hierarchy.ts";
-import {
-	catalogSurfaceSlugs,
-} from "../../core/profile/index.ts";
+import { catalogSurfaceSlugs } from "../../core/profile/index.ts";
 import {
 	isPlatformReservedRoot,
 	platformReservedRoots,
 } from "../../core/routing/url-grammar.ts";
+import { legacyRouteRoots } from "../routing/legacy-route-manifest.ts";
 import { siteProfile } from "../site-profile.ts";
 import { projectStaticRoutes } from "../static-routes.ts";
 import { geoValidationContext } from "./access.ts";
@@ -45,6 +44,7 @@ export const reservedGeoRootSlugs = new Set<string>([
 	...catalogSurfaceSlugs,
 	"zastroyshchiki",
 	...staticRoots,
+	...legacyRouteRoots,
 	...configuredReservedRoots,
 ]);
 

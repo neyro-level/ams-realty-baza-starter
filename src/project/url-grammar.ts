@@ -1,8 +1,9 @@
+import type { SiteProfile } from "../core/profile/index.ts";
 import {
 	createUrlGrammar,
 	type UrlGrammarInput,
 } from "../core/routing/index.ts";
-import type { SiteProfile } from "../core/profile/index.ts";
+import { legacyRouteRoots } from "./routing/legacy-route-manifest.ts";
 import { projectStaticRoutes } from "./static-routes.ts";
 
 export type ProjectDistrictRouteRegistry = NonNullable<
@@ -29,9 +30,12 @@ export function createProjectUrlGrammar(
 		staticPaths: projectStaticRoutes
 			.map((route) => route.path)
 			.filter((path) => path !== "/"),
-		moduleRootSlugs: Object.values(profile.modules).flatMap(
-			(module) => module.reservedRoots,
-		),
+		moduleRootSlugs: [
+			...legacyRouteRoots,
+			...Object.values(profile.modules).flatMap(
+				(module) => module.reservedRoots,
+			),
+		],
 		districtSlugsByGeoCategory,
 		facetSlugsByGeoCategory,
 	});

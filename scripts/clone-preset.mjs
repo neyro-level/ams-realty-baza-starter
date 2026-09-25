@@ -65,12 +65,6 @@ const platformReservedRoots = [
 const staticRoutes = [
 	{ path: "/", changeFrequency: "daily", priority: 1, indexable: true },
 	{
-		path: "/nedvizhimost",
-		changeFrequency: "daily",
-		priority: 0.9,
-		indexable: false,
-	},
-	{
 		path: "/uslugi",
 		changeFrequency: "weekly",
 		priority: 0.7,

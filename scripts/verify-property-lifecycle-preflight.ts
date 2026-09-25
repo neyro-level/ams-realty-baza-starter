@@ -35,6 +35,20 @@ assert.deepEqual(
 assert.deepEqual(
 	resolvePropertyLifecyclePreflight({
 		found: true,
+		status: "active",
+		publishedAt: "2026-09-24T00:00:00.000Z",
+		contentPurgedAt: null,
+		canonicalPath: "/kvartiry/kvartira-42-42/",
+	}),
+	{
+		kind: "redirect",
+		statusCode: 301,
+		destination: "/kvartiry/kvartira-42-42/",
+	},
+);
+assert.deepEqual(
+	resolvePropertyLifecyclePreflight({
+		found: true,
 		status: "archived",
 		publishedAt: "2026-09-24T00:00:00.000Z",
 		contentPurgedAt: "2026-09-24T01:00:00.000Z",

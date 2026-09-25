@@ -1,4 +1,5 @@
 import { resolvePropertyPageLifecycle } from "../seo/property.ts";
+import { sanitizeExplicitRedirectPath } from "../seo/redirect-path.ts";
 
 export const lifecyclePreflightHeader = "x-ams-property-lifecycle-preflight";
 export type LifecyclePreflightHeaderValue = "not-applicable" | "pass";
@@ -11,6 +12,7 @@ export type PropertyLifecycleLookup =
 			publishedAt?: string | null;
 			contentPurgedAt?: string | null;
 			explicitRedirectPath?: string | null;
+			canonicalPath?: string | null;
 	  };
 
 export type PropertyLifecyclePreflightDecision =
@@ -49,6 +51,15 @@ export function resolvePropertyLifecyclePreflight(
 			statusCode: 301,
 			destination: lifecycle.destination,
 		};
+	}
+	if (
+		lookup.found &&
+		(lifecycle.kind === "active" || lifecycle.kind === "archived")
+	) {
+		const destination = sanitizeExplicitRedirectPath(lookup.canonicalPath);
+		if (destination) {
+			return { kind: "redirect", statusCode: 301, destination };
+		}
 	}
 	return { kind: "pass" };
 }

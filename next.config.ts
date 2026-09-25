@@ -1,19 +1,24 @@
-import type { NextConfig } from "next";
 import { withPayload } from "@payloadcms/next/withPayload";
+import type { NextConfig } from "next";
 import {
 	buildImageCspSrc,
 	parseAllowedImageHosts,
 	toNextImageRemotePatterns,
 } from "./src/core/ingest/image-hosts.ts";
 
-const allowedImageHosts = parseAllowedImageHosts(process.env.EXTERNAL_IMAGE_HOSTS);
+const allowedImageHosts = parseAllowedImageHosts(
+	process.env.EXTERNAL_IMAGE_HOSTS,
+);
 const imageCspSrc = buildImageCspSrc(allowedImageHosts);
 
 const baseSecurityHeaders = [
 	{ key: "X-Content-Type-Options", value: "nosniff" },
 	{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
 	{ key: "X-Frame-Options", value: "SAMEORIGIN" },
-	{ key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+	{
+		key: "Permissions-Policy",
+		value: "camera=(), microphone=(), geolocation=()",
+	},
 	{
 		key: "Strict-Transport-Security",
 		value: "max-age=63072000; includeSubDomains; preload",
@@ -48,6 +53,7 @@ const adminCsp = [
 
 const nextConfig: NextConfig = {
 	trailingSlash: true,
+	skipTrailingSlashRedirect: true,
 	transpilePackages: ["@ams/realtbase-ui", "@ams/realtbase-contracts"],
 	images: {
 		remotePatterns: toNextImageRemotePatterns(allowedImageHosts),
