@@ -1,5 +1,8 @@
 # FINAL CORE 5.5 AUDIT
 
+> Historical evidence на указанном SHA. Текущий runtime и release readiness
+> этим аудитом не подтверждаются.
+
 Checked: 2026-09-18  
 Baseline SHA (program start of corrections on `main` after EPIC-10): `f39826c` (historical EPIC-10 close; not re-audited here).  
 **Final SHA of this audit (worktree HEAD / `origin/main` at EPIC-20 start):** `61200e5a0b08a6f17e5c9fe5c79ce808c780c351`

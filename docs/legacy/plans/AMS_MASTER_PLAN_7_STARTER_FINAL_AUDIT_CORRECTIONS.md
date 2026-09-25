@@ -1,5 +1,7 @@
 # AMS MASTER PLAN №7 — STARTER FINAL AUDIT CORRECTIONS / FREEZE v2
 
+> Archive status: `EXECUTION_COMPLETE / EVIDENCE`. Не использовать как READY-граф.
+
 **Plan ID:** `AMS-REALTY-BAZA-STARTER-AUDIT-CORRECTIONS-7`
 **Version:** `v2`
 **Status:** `APPROVED`

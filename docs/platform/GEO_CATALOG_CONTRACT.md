@@ -1,14 +1,13 @@
 # Geo-Catalog Platform Contract
 
-Status: `APPROVED TARGET / NOT RUNTIME LIVE`
+Status: `ACTIVE / IMPLEMENTED`
 
-Owner plan: `AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8 v6`
+Origin: `AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8 v6` (`EXECUTION_COMPLETE`)
 
-This document is the reusable contract for geo/catalog URL, page resolution,
-profile status and lifecycle semantics. It does not claim that target routes,
-collections or UI are already implemented. Current runtime truth remains the
-code and migrations until each Plan 8 epic lands; public cutover belongs only
-to P8-23A.
+This document is the active reusable contract for geo/catalog URL, page
+resolution, profile status and lifecycle semantics. P8-23A completed the public
+cutover and P8-23B completed guarded cleanup. Code, migrations and tests remain
+the runtime truth for implementation details.
 
 ## 1. Boundary and invariants
 
@@ -19,9 +18,9 @@ to P8-23A.
   project + core + UI; reusable core/packages may not import project.
 - Project-owned static routes, brand, domain and geo literals are injected
   explicitly. Reusable core/packages do not contain client-specific literals.
-- Schema evolution is additive until accepted cutover evidence permits separate
-  cleanup. Raw legacy geo/source data is retained.
-- Existing runtime and rollback path remain available until P8-23A acceptance.
+- Raw legacy geo/source data is retained after the accepted cutover cleanup.
+- Rollback of the cutover/cleanup uses the recorded P8-23A/P8-23B changes; the
+  removed proof-only runtime is not an active fallback.
 - Starter topology remains local PostgreSQL + `MEDIA_DIR`; clone topology is a
   separate project decision.
 - Production indexing, release, mirror and tag creation require separate owner
@@ -59,7 +58,7 @@ trailing slash where applicable.
 
 ## 3. Canonical URL grammar
 
-| PageKey | Canonical target |
+| PageKey | Canonical URL |
 |---|---|
 | `home` | `/` |
 | `geoHub` | `/{geo}/` |
@@ -116,7 +115,7 @@ invalid.
 
 ## 5. Profile and availability
 
-The future SiteProfile is the explicit input to reusable core and contains:
+SiteProfile is the explicit input to reusable core and contains:
 
 - `geoMode`, `primaryGeo`;
 - `categoryStatus`, `marketCapability`;
@@ -191,11 +190,10 @@ development and developer thresholds are profile-owned.
 | canonical slash normalization | one 308 |
 | legacy/canonical move | one direct 301 to final URL |
 
-Canonical 301/410 transport must be proven against installed Next.js 16,
-including RSC/client navigation and bounded performance, before route cutover.
-Until that proof and P8-23A, the current
-`/http/property-lifecycle/[slug]` boundary remains the rollback-safe live
-owner.
+Canonical 301/410 transport is implemented through bounded preflight in
+`src/proxy.ts` and covered by the accepted P8-23A/P8-23B proof. The former
+proof-only `/http/property-lifecycle/[slug]` boundary is removed and guarded
+against return.
 
 ## 9. Discovery, navigation and cache
 
@@ -213,7 +211,7 @@ owner.
 - IndexNow is event-driven for publish, canonical move, archive and gone; key
   material is runtime-only and never enters payloads or logs.
 
-## 10. Current-to-target transition
+## 10. Implemented transition
 
 ```text
 current routes/data
@@ -225,22 +223,15 @@ current routes/data
   -> P8-23B contract cleanup
 ```
 
-Before P8-23A:
-
-- `/nedvizhimost`, `/obekty/[slug]`, static/legal routes, Payload Admin/API
-  and the current lifecycle boundary retain current ownership;
-- target generators may exist only unwired;
-- no target document is evidence that a public route exists.
-
-P8-23A must preserve Payload Admin/API/security and provide the complete
-status/robots/canonical/breadcrumb/performance/UI proof. P8-23B may remove only
-runtime proven replaced by that accepted cutover; it does not drop retained raw
-legacy data.
+P8-23A preserved Payload Admin/API/security and switched canonical public
+resolution. P8-23B removed only runtime proven replaced by the accepted
+cutover. `/nedvizhimost` and `/obekty/[slug]` remain bounded redirect-only
+compatibility adapters; raw legacy geo/source data remains retained.
 
 ## 11. Change control
 
-This contract is implemented by Plan 8 epics. A change to PageKey vocabulary,
+This contract was implemented by Plan 8 epics. A change to PageKey vocabulary,
 URL collision precedence, status semantics, lifecycle codes or dependency
-direction requires an explicit plan finding/revision before implementation.
+direction requires an explicit approved task or plan revision before implementation.
 An ADR is created only for a genuinely hard-to-reverse deviation that cannot be
 stated unambiguously in Architecture or Clone Onboarding.

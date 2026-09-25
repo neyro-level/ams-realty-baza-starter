@@ -1,5 +1,8 @@
 # AMS MASTER PLAN №8 — GEO-CATALOG PLATFORM
 
+> Archive status: `EXECUTION_COMPLETE / EVIDENCE`. Итоговый отчёт:
+> `../../plan8/S8_25_FINAL_EXECUTION_REPORT.md`. Не использовать как READY-граф.
+
 ```text
 Plan ID: AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8
 Version: v6

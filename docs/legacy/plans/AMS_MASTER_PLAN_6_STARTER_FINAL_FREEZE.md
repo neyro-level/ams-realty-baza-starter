@@ -1,5 +1,7 @@
 # AMS MASTER PLAN №6 — STARTER FINAL FREEZE / CLIENT CLONE READINESS
 
+> Archive status: `EXECUTION_COMPLETE / EVIDENCE`. Не использовать как READY-граф.
+
 **Plan ID:** `AMS-REALTBASE-STARTER-FINAL-FREEZE`  
 **Version:** `v4`
 **Status:** `APPROVED`

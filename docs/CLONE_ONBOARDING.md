@@ -20,8 +20,9 @@ domain: start-baza.ams24.ru, noindex
 
 ## B. Client development
 
-Tag `starter-v2.0.0` создаёт владелец отдельной командой только после финальной
-приёмки Plan №8. До появления этого immutable tag клиентский clone не начинать.
+Plan №8 принят, но tag `starter-v2.0.0` ещё не создан. Его создаёт владелец
+отдельной командой после проверки canonical `main`. До появления этого
+immutable tag клиентский clone не начинать.
 
 1. Создать отдельный client repository из exact tag `starter-v2.0.0`.
 2. Скопировать `docs/CLONE_PRESET.example.json` во временный утверждаемый preset

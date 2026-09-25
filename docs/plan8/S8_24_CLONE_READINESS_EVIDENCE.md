@@ -1,6 +1,6 @@
 # S8-24 — Clone tooling and client readiness evidence
 
-Status: `IMPLEMENTED / DELIVERY_PENDING`
+Status: `DELIVERED / EVIDENCE`
 
 ## Scope
 
@@ -59,5 +59,6 @@ profile/runtime fixture isolation and repeats preparation to prove idempotence.
 - A prepared clone with the wrong preset is not mutated in place; recreate it
   from the immutable `starter-v2.0.0` tag with the approved preset.
 
-Final exact-head checks, SourceCraft RISKY Gate and canonical merge evidence are
-recorded by the P8-24 delivery task.
+Delivery: SourceCraft PR `154`, accepted head
+`3fbf8b11351a1ac16b85b87a635b41d53aac0acf`, RISKY Gate `240`, squash merge
+`a6f6d0a7826022782172165a9fd601f407dcc2cd`.

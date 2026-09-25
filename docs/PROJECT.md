@@ -4,11 +4,9 @@
 `MEDIA_DIR` на AMS Server. Он проверяет шаблон, но не задаёт production-топологию
 клиентского клона. Закупка клиентской инфраструктуры **не входит в этот план**.
 
-Текущий execution source — Plan №8 v6 `APPROVED`. Его target — переносимая
-geo-first catalog platform поверх того же `AMS_PROFILE=REALTY_BASE`. Target
-contract находится в `docs/platform/GEO_CATALOG_CONTRACT.md`; P8-23A canonical
-route cutover и P8-23B cleanup реализованы, production по-прежнему не входит в
-Plan №8.
+Plan №8 v6 исполнен. Переносимая geo-first catalog platform, P8-23A canonical
+route cutover и P8-23B cleanup находятся в текущем runtime. Канонический
+контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Production не выполнялся.
 
 ## Зафиксировано
 
@@ -56,13 +54,13 @@ Plan №8.
 | Field ownership | `manual → field override → owning feed`; foreign-feed identity is degenerate for REALTY_BASE |
 | Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
 | Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
-| Geo-catalog runtime | Plan №8 v6 + `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover and guarded post-cutover cleanup implemented |
-| Geo modes | Target supports `SINGLE_GEO | MULTI_GEO`; active value will be owned by the future SiteProfile (P8-03), not inferred from current routes |
+| Geo-catalog runtime | `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover и guarded cleanup реализованы |
+| Geo modes | `SINGLE_GEO | MULTI_GEO`; active value принадлежит validated SiteProfile и не выводится из текущих маршрутов |
 | Clone preset | `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`; `clone:prepare` consumes an approved JSON preset and generates project SiteProfile plus `docs/CLIENT_BOOTSTRAP.json` |
 | Client fixture boundary | `projectKind=client` never falls back to starter demo properties when Payload data is absent; empty client data produces an empty/not-found runtime result |
 | Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |
-| Development model | One future `developments` entity with `kind = residential_complex | cottage_village` and strict kind-specific validation (P8-09) |
-| Plan 8 delivery | Every epic uses `MERGE_AFTER_GATE`; production, mirror and tag remain separate owner actions |
+| Development model | Одна `developments` entity с `kind = residential_complex | cottage_village` и strict kind-specific validation |
+| Plan 8 delivery | `EXECUTION_COMPLETE`; production, mirror и tag остаются отдельными owner actions |
 | Target release tag | `starter-v2.0.0`; not created by implementation loop |
 
 ## Optional modules

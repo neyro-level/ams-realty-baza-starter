@@ -1,65 +1,51 @@
 # Backlog
 
-Статус: `Plan №8 v6 APPROVED / EXECUTION ACTIVE` —
-`AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8`. SourceCraft — primary, GitHub —
-one-way mirror. Production исключён.
+Статус: `ACTIVE / NO APPROVED EXECUTION PLAN`.
 
-Требования, зависимости и acceptance находятся в
-`AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md`. Текущие READY/in-progress/closed
-состояния принадлежат локальному Beads/ledger и не дублируются здесь.
+Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
+READY или in-progress задач. Завершённые планы и inventories находятся в
+`legacy/`; они не являются очередью к повторному исполнению.
 
 ## NOW
 
-- Исполнять только текущую READY-задачу утверждённого operational graph Plan №8.
-- Target contract: `platform/GEO_CATALOG_CONTRACT.md`; target routes не
-  считаются live до P8-23A.
-- Production release, GitHub mirror и tag `starter-v2.0.0` остаются отдельными
-  owner actions и implementation-планом запрещены.
+- Поддерживать канонические документы и runtime без скрытого расширения scope.
+- Любая новая реализация начинается отдельным task contract и рабочим потоком
+  от актуального SourceCraft `main`.
+- Production не выпускался; demo-контур не считается подтверждением актуального
+  release SHA.
 
-## PRESERVED EXECUTION EVIDENCE
+## NEXT — только по команде владельца
 
-- Plan №7 и Plan №6 ниже — историческое evidence, не текущая инструкция.
-- Plan №7 завершён на
-  `main@ca1b884d43e808d17e1eb18b05bad70ea358dd1c`; старое намерение
-  `starter-freeze-v2` закрыто решением Plan №8.
-- EPIC-01…10 доставлены; implementation graph Task Manager закрыт, точные execution ledgers сохранены как историческое evidence.
-- EPIC-09 прошёл SourceCraft RISKY Gate №126 на exact head `2f09592343e681a97f43745530d6bae012865ddf` и был слит PR №109.
-- SourceCraft `main@a2a03d50b6a4db2cfff537d2d476ad14e82f198a` — итоговый merge Plan №6 до текущего статусного уточнения.
-- GitHub `main` синхронизирован с SourceCraft как зеркало.
-- Созданный после исполнения tag `starter-freeze-v1` удалён по последующему явному решению владельца; текущее состояние не является freeze.
-- EPIC-14 слит в SourceCraft `main@ca1b884d43e808d17e1eb18b05bad70ea358dd1c`; ручной `merge-risky` run №145 завершён успешно.
+- Создать immutable tag `starter-v2.0.0` после отдельной финальной проверки
+  текущего canonical `main`.
+- Выполнить release starter demo на `start-baza.ams24.ru`, включая immutable
+  artifact, rollout, live smoke и rollback point.
+- Начать client clone только из exact `starter-v2.0.0` и утверждённого preset.
+- Для client production определить реальные `leadRetentionDays`,
+  `archiveRetentionDays`, legal/indexing и topology decisions.
 
-## DONE IN PLAN №5
+## LATER / trigger-based
 
-- `EPIC-01…12` — mandatory gates, access/cache/numeric/data/job boundaries,
-  architecture/UI guards, UI cleanup и canonical docs доставлены в SourceCraft
-  `main`;
-- `EPIC-13` — exact-head Core 5.5 / UI Core 5.0 proof закрыт на PR 101,
-  RISKY Gate №118 и merge `089b0fb7`; повторно не исполнять без нового SHA;
-- exact PR/SHA/run evidence хранится в Task Manager ledgers, а не дублируется в
-  backlog.
+- Личный кабинет, Redis, broker, PostGIS, отдельный search engine, второй jobs
+  runner и multi-currency — только по новому продуктовому trigger.
+- Live provider proof Timeweb Managed PostgreSQL/S3 выполняется в client clone,
+  а не в starter demo.
+- Performance/RUM и реальные delivery-channel проверки принадлежат конкретному
+  release/client scope; исторические proofs их не заменяют.
 
-## LATER / OUTSIDE PLAN
+## Завершённое evidence
 
-- production release — только отдельная команда владельца;
-- client clone topology, PII retention values и promotion from demo требуют
-  отдельных owner decisions.
+- Plan №8: implementation `bd570ee40db9e25f73a24013be836dd3876282ac`,
+  docs-only reconciliation `c5803cfbac5d2c1817451fdee6aa96e3b975934e`,
+  итоговый отчёт `plan8/S8_25_FINAL_EXECUTION_REPORT.md`.
+- Plan №7: завершённый исторический execution record.
+- Plans №2–6: закрытая история; не исполнять повторно без нового approved scope.
 
 ## Политика доставки
 
-- Новый независимый stream: отдельная ветка/worktree от актуального `main`,
-  SourceCraft PR и профильный Gate перед merge.
-- Production требует отдельной команды. GitHub используется только как зеркало
-  канонического SourceCraft `main`.
-
-## Закрытый CORE-ALIGN v1
-
-Закрыт на `main@f8344de` (Plan №4, EPIC-01…08). Не исполнять заново.
-
-## Исторический CORRECTIONS v3
-
-Закрыт на `main@14e9bf53` (EPIC 11–21). Не исполнять заново.
-
-## Исторический HARDENING v2
-
-Закрыт на `main@f39826c` (EPIC 0–10).
+- Один независимый stream = одна branch/worktree = один Pull Request.
+- `DELIVERY_PROFILE=COMMERCIAL`: перед merge обязателен review и один ручной
+  exact-head SourceCraft Gate выбранного риска.
+- SourceCraft — primary; GitHub получает только явный fast-forward mirror
+  canonical `main`.
+- Production и tag требуют отдельных команд владельца.

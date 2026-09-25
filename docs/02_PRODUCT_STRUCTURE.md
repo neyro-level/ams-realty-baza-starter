@@ -1,6 +1,6 @@
 # Product Structure
 
-Статус: `Plan 8 canonical runtime cutover + post-cutover cleanup implemented`.
+Статус: `ACTIVE / CANONICAL GEO-CATALOG RUNTIME`.
 
 ## Текущий публичный runtime
 
@@ -47,12 +47,12 @@ P8-23A переключает динамический public runtime на canon
 
 Финальные SEO index/canonical/redirect решения добавляются сюда при реализации соответствующих маршрутов.
 
-## Approved target: geo-catalog platform
+## Geo-catalog platform contract
 
 Reusable target-контракт: `platform/GEO_CATALOG_CONTRACT.md`. Он фиксирует
 PageKey, URL grammar, resolution order, status/profile model и lifecycle
-семантику. Реализация выполняется по Plan №8; atomic public cutover принадлежит
-только P8-23A.
+семантику. Контракт реализован; P8-23A выполнил atomic public cutover, P8-23B —
+guarded cleanup.
 
 | Target surface | Canonical grammar | Текущий статус |
 |---|---|---|
@@ -75,15 +75,15 @@ URL. Отдельная proof-only lifecycle HTTP boundary удалена в P8-
 canonical `301/410` обслуживает bounded preflight в `src/proxy.ts`. Raw legacy
 geo/source fields и history redirects не удалялись.
 
-## Current vs target ownership
+## Runtime ownership
 
 - **Current runtime:** explicit static routes + один catch-all dispatcher,
   общий resolver для HTML и metadata, canonical lifecycle preflight в proxy.
-- **Target contract:** `platform/GEO_CATALOG_CONTRACT.md`.
-- **Target implementation:** schema, profile, grammar, resolver, Gate, UI и
-  discovery epics Plan №8.
-- **Cutover owner:** P8-23A; implementation evidence —
+- **Canonical contract:** `platform/GEO_CATALOG_CONTRACT.md`.
+- **Implementation:** schema, profile, grammar, resolver, Gate, UI и discovery
+  работают в текущем runtime.
+- **Cutover evidence:** P8-23A —
   `docs/plan8/S8_23A_RUNTIME_CUTOVER_EVIDENCE.md`.
-- **Cleanup owner:** P8-23B; evidence —
+- **Cleanup evidence:** P8-23B —
   `docs/plan8/S8_23B_POST_CUTOVER_CLEANUP_EVIDENCE.md`. Raw legacy geo/source
   data сохранены.

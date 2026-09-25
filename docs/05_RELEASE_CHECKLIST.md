@@ -1,15 +1,14 @@
 # Release Checklist
 
-Статус: `Active release contract / Plan №8 release not authorized`. Исторический
-Plan №5 pre-production alignment прошёл на `main@089b0fb7`, но этот SHA не
-выпускался. Owner-operated demo contour существует. PII retention days остаются
-`NEEDS_OWNER`; implementation proof не заменяет отдельный release, rollout и
-live smoke.
+Статус: `ACTIVE RELEASE CONTRACT / NO CURRENT RELEASE AUTHORIZATION`. Plan №8
+исполнен, но production не выпускался. Owner-operated demo contour существует.
+PII retention days остаются `NEEDS_OWNER`; implementation proof не заменяет
+отдельный release, rollout и live smoke.
 
 ## Перед Pull Request
 
 - scope соответствует одной claimed-задаче и одному worktree;
-- source documents и runtime не расходятся;
+- source documents и runtime не имеют известного незафиксированного drift;
 - релевантные локальные проверки завершены;
 - секреты, PII и generated artifacts не попали в diff;
 - новые или изменённые секреты заведены в Secret Master, а не в Doppler, git, markdown или logs;
@@ -31,7 +30,8 @@ live smoke.
 ## Перед production
 
 - есть отдельная команда владельца на release;
-- canonical `main` чистый, итоговый SHA известен;
+- SourceCraft canonical `main` чистый, итоговый SHA известен, а GitHub не
+  используется как release source;
 - target domain для internal production: `start-baza.ams24.ru`, режим `noindex`;
 - server identity, owner-approved local PostgreSQL on AMS Server and runtime env file permissions are confirmed without moving secrets into git/logs;
 - S3 не требуется для starter; media = `MEDIA_DIR`.

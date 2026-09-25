@@ -1,6 +1,6 @@
 # PRD — AMS Realty Baza Starter
 
-Статус: `Active foundation + approved Plan 8 geo-catalog target`.
+Статус: `ACTIVE / GEO-CATALOG PLATFORM IMPLEMENTED`.
 
 ## Продукт
 
@@ -25,23 +25,24 @@ AMS Realty Baza Starter — коммерческая базовая платфо
 
 Единый проверяемый foundation, который сохраняет визуальные паттерны Atlas, но не переносит его технический долг. UI зависит от presentation contracts, а Payload реализует эти contracts через Gateway и DTO.
 
-## Approved Plan 8 extension
+## Реализованная geo-catalog platform
 
-Plan №8 преобразует foundation в переносимую geo-first catalog platform:
+Plan №8 преобразовал foundation в переносимую geo-first catalog platform:
 single-geo и multi-geo профили, каноническая URL-грамматика, нормализованные
 geo/taxonomy entities, developments/developers, Public Gateway/DTO, SEO Registry,
 Content Gate и проверяемый route cutover. Target-контракт:
 `platform/GEO_CATALOG_CONTRACT.md`.
 
-Это утверждённый target, а не описание уже работающего runtime. До P8-23A
-публичными остаются текущие маршруты из `02_PRODUCT_STRUCTURE.md`.
+Canonical public cutover и post-cutover cleanup завершены. Текущие маршруты и
+совместимость описаны в `02_PRODUCT_STRUCTURE.md`; итоговое evidence —
+`plan8/S8_25_FINAL_EXECUTION_REPORT.md`.
 
 ## Не входит без отдельного trigger
 
 Личный кабинет, Redis, broker, PostGIS, поисковый движок, второй backend/ORM,
 отдельный jobs runner и multi-currency. Bounded feed-image mirror и подготовка
-модуля новостроек получили явный trigger только внутри Plan №8 и не считаются
-реализованными до соответствующих epics.
+модуля новостроек реализованы только в границах, зафиксированных текущим
+runtime и `PROJECT.md`; это не включает личный кабинет или второй backend.
 
 Продуктовые границы определяет `02_PRODUCT_STRUCTURE.md`, технические —
 `03_ARCHITECTURE.md`, текущую работу — `04_BACKLOG.md`.

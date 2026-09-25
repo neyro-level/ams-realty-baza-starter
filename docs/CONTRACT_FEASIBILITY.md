@@ -1,5 +1,8 @@
 # Contract Feasibility
 
+> Evidence document, сохранённый по каноническому пути для contract freeze
+> guard. Не является текущим backlog или заменой runtime tests.
+
 Статус: `VERIFIED`.
 
 Документ отвечает за реализуемость presentation contracts. DTO принадлежат

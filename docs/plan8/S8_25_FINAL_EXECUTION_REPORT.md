@@ -1,6 +1,6 @@
 # S8-25 — Final execution report
 
-Status: `IMPLEMENTATION_MAIN_ACCEPTED / EVIDENCE_DELIVERY_PENDING`
+Status: `EXECUTION_COMPLETE / EVIDENCE`
 
 Checked: 2026-09-25
 
@@ -106,9 +106,11 @@ exact-head STANDARD or RISKY Gate.
 | P8-23B | 153 | `a7ad7c8fb516680ced4aa6d8d94c18ced41df622` | RISKY 237 | `671a3f1fcf6564eb57f509916528f5cc7b243a81` |
 | P8-24 | 154 | `3fbf8b11351a1ac16b85b87a635b41d53aac0acf` | RISKY 240 | `a6f6d0a7826022782172165a9fd601f407dcc2cd` |
 
-P8-25 evidence delivery will append its own PR/head/STANDARD Gate/merge facts to
-the Task Manager ledger. This report intentionally records the implementation
-SHA, not its future docs-only merge SHA.
+P8-25 evidence delivery: SourceCraft PR `156`, accepted head
+`06a68a260761b18e9da12b9044b23958fb2e1153`, STANDARD Gate `246`, squash merge
+`c5803cfbac5d2c1817451fdee6aa96e3b975934e`. The implementation SHA remains
+`bd570ee40db9e25f73a24013be836dd3876282ac`; the later SHA is docs-only
+reconciliation.
 
 ## Limitations and owner gates
 
@@ -118,19 +120,19 @@ SHA, not its future docs-only merge SHA.
   lint exits `0` and this evidence PR does not change those files.
 - No live demo rollout, production smoke, DNS, remote database migration or
   external delivery channel was executed.
-- `starter-v2.0.0`, GitHub mirror and `start-baza.ams24.ru` rollout remain
-  separate explicit owner actions after final evidence reconciliation.
+- `starter-v2.0.0` and `start-baza.ams24.ru` rollout remain separate explicit
+  owner actions. GitHub mirror is an operational copy action, not production.
 
 ## Recovery and final reconciliation contract
 
-The evidence PR is docs-only. After it merges, final reconciliation must prove:
+The evidence PR was docs-only. Final reconciliation proved:
 
 1. its first parent is
    `bd570ee40db9e25f73a24013be836dd3876282ac`;
 2. the only changed path is this accepted report;
 3. Task Manager remains `CLEAN` with coverage `28/28` and all P8-25 tasks
    closed;
-4. the full suite is not repeated on the docs-only merge.
+4. the full suite was not repeated on the docs-only merge.
 
 Rollback is the revert of the evidence PR only. The accepted implementation
 remains at `bd570ee40db9e25f73a24013be836dd3876282ac`.

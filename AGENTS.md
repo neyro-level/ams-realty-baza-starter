@@ -7,14 +7,13 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Текущий execution source: `docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md`
-  (`Plan ID: AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8`, `Version: v6`,
-  `APPROVED`). Plan №7 исполнен на SourceCraft
-  `main@ca1b884d43e808d17e1eb18b05bad70ea358dd1c` и читается как
-  `EXECUTION_COMPLETE / EVIDENCE`, а не как очередь READY-задач.
-- Operational graph: Plan №8 импортирован в локальный stealth Beads; актуальные
-  READY/in-progress/closed статусы принадлежат Beads и execution ledger.
-  `.beads` не коммитится.
+- Последняя программа Plan №8 v6 исполнена полностью и сохранена как evidence:
+  `docs/plan8/S8_25_FINAL_EXECUTION_REPORT.md`. Принятый implementation SHA —
+  `bd570ee40db9e25f73a24013be836dd3876282ac`; docs-only reconciliation слит в
+  SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
+- Активного execution plan и READY-графа сейчас нет. Текущий приоритет задаёт
+  `docs/04_BACKLOG.md`; завершённые планы и inventories — только historical
+  evidence. `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
@@ -22,28 +21,26 @@
 
 1. `docs/README.md`.
 2. Релевантный раздел `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md`.
-3. `docs/PROJECT.md`.
-4. `docs/03_ARCHITECTURE.md`.
+3. `docs/01_PRD.md`, `02_PRODUCT_STRUCTURE.md`, `03_ARCHITECTURE.md` и
+   `04_BACKLOG.md` по scope.
+4. `docs/PROJECT.md` — решения этого starter instance.
 5. `docs/DESIGN.md` или `docs/OPERATIONS.md` по scope.
-6. `docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md` — текущий approved plan.
-7. `docs/04_BACKLOG.md`.
-8. Профильный `docs/modules/*/manifest.md`, только когда модуль входит в scope.
-9. `docs/legacy/` — только для исторического evidence.
+6. Профильный ADR/module/research документ, только когда он входит в scope.
+7. `docs/plan8/`, `docs/proofs/` и `docs/legacy/` — только для evidence.
 
 ## Invariants
 
 - Один независимый stream = одна branch/worktree = один Pull Request.
 - Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
-- Plan №7 v2 исполнен и сохранён как evidence. Старое намерение создать
-  `starter-freeze-v2` закрыто решением Plan №8; существующий tag
-  `starter-freeze` остаётся историческим. Целевой новый tag
-  `starter-v2.0.0` создаётся только по отдельной явной команде после финальной
-  приёмки Plan №8. Production в Plan №8 не входит.
+- Планы №6–8 исполнены и не являются очередью работ. Существующий tag
+  `starter-freeze` остаётся историческим. Целевой tag `starter-v2.0.0`
+  создаётся только по отдельной явной команде владельца; production также
+  требует отдельной команды.
 - Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.
 - Автономность не отменяет COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.
 - Production выполняется только по отдельной явной команде владельца.
 - Новые пароли, API tokens, SSH keys, database credentials и service credentials хранятся только в Secret Master. Для доступа к секретам использовать trigger `подключись к секрет мастеру`; для Git-доступов SourceCraft/GitHub — trigger `подключись к гид-сервису`. Значения секретов не печатать в чат, markdown, логи или git.
-- До contract freeze UI работает через presentation contracts и fixture provider.
+- UI работает через замороженные presentation contracts и Public Gateway/fixture provider по режиму.
 - Payload не диктует форму UI; public data проходит через Gateway и DTO.
 - Новая инфраструктура или модуль добавляются только по доказанному trigger.
 - Не заменять неизвестное решение догадкой: фиксировать `TODO` или `NEEDS_OWNER` в профильном документе.

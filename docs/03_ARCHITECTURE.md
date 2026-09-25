@@ -1,6 +1,6 @@
 # Architecture
 
-Статус: `Active / pre-production implementation`.
+Статус: `ACTIVE / PRE-PRODUCTION STARTER`.
 
 ## Профиль
 
@@ -13,18 +13,15 @@ Secrets source=Secret Master / self-hosted Infisical
 ```
 
 Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №8 v6
-APPROVED выполняется после CLEAN reconciliation через `MERGE_AFTER_GATE` в
-SourceCraft; GitHub получает только отдельный явный fast-forward mirror
-canonical `main`. Production, mirror и target tag `starter-v2.0.0` не входят
-в Developer implementation loop.
+исполнен полностью; итоговый implementation принят на `bd570ee4`, а docs-only
+reconciliation — на `c5803cf`. GitHub получает только отдельный явный
+fast-forward mirror canonical `main`. Production и target tag
+`starter-v2.0.0` остаются отдельными owner actions.
 
-## Historical CI, mirror and freeze baseline — 2026-09-22
+## Delivery baseline
 
-- Plan №7 completion SourceCraft `main`:
-  `ca1b884d43e808d17e1eb18b05bad70ea358dd1c`.
-  GitHub mirror `main` равен этому SHA; active `.github/workflows` отсутствуют,
-  но repository Actions setting остаётся включённым и выключается отдельной
-  mirror-governance задачей.
+- Canonical repository — SourceCraft; GitHub — mirror-only. Точное равенство
+  SHA подтверждается после каждого явно запрошенного mirror.
 - Portfolio `PROJECT_CLASS=STANDARD` не меняет project
   `DELIVERY_PROFILE=COMMERCIAL`: template/demo требует review и один ручной
   exact-head SourceCraft Gate перед merge.
@@ -45,10 +42,8 @@ canonical `main`. Production, mirror и target tag `starter-v2.0.0` не вхо�
   previous image/env rollback point. Текущий Dockerfile копирует весь `/app` и
   не использует standalone allowlist; release hardening остаётся отдельной
   RISKY-задачей до первого client production и не выполняется этим inventory.
-- Старое намерение создать `starter-freeze-v2` закрыто owner decision Plan №8.
-  Наблюдаемый SourceCraft tag `starter-freeze` остаётся историческим. Новый
-  target tag `starter-v2.0.0` требует отдельной команды после финальной
-  приёмки Plan №8.
+- Наблюдаемый SourceCraft tag `starter-freeze` остаётся историческим. Новый
+  target tag `starter-v2.0.0` требует отдельной команды владельца.
 
 ## Stack и ownership
 
@@ -217,7 +212,7 @@ PostgreSQL constraints из migration `20260919_120900`.
 - static tasks: `dispatchDueFeeds`, `jobsJanitor`, `leadRetentionCleanup`,
   `catalogLifecycle`, `recoverLeadDeliveries`; programmatic tasks:
   `importFeed`, `deliverLead`, `submitIndexNow`;
-- `index-now` is programmatic and remains unwired until P8-23A cutover. Its jobs
+- `index-now` is programmatic and event-driven after the P8-23A cutover. Its jobs
   contain only event ID, same-origin URLs and attempt number; the runtime key is
   read only from environment and never enters a job payload or diagnostic output;
 - imports queue имеет `limit: 1`; один application runtime является jobs owner;
