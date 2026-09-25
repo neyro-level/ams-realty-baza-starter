@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createSafeNavigationBuilder } from "../src/core/navigation/index.ts";
-import type { PageKey } from "../src/core/routing/index.ts";
+import type { PageKey, ResolverPageRecord } from "../src/core/routing/index.ts";
 import { createRouteResolver } from "../src/core/routing/index.ts";
 import type { ContentGateDecision } from "../src/core/seo/content-gate.ts";
 import {
@@ -31,6 +31,23 @@ function gate(
 	};
 }
 
+function activeRecord(
+	pageKey: PageKey,
+	primaryGeo: string,
+): ResolverPageRecord {
+	return {
+		lifecycle: "active",
+		geo: "geo" in pageKey ? pageKey.geo : primaryGeo,
+		market:
+			pageKey.kind === "property"
+				? "secondary"
+				: pageKey.kind === "development"
+					? "newbuild"
+					: null,
+		dataTier: pageKey.kind === "development" ? "B" : null,
+	};
+}
+
 for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 	const grammar = createProjectUrlGrammar(profile);
 	const navigation = createSafeNavigationBuilder({ profile, grammar });
@@ -53,7 +70,11 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 		grammar,
 		port: createFixtureResolverDataPort({
 			grammar,
-			pages: links.map(({ pageKey }) => ({ pageKey, inventory: 20 })),
+			pages: links.map(({ pageKey }) => ({
+				pageKey,
+				inventory: 20,
+				record: activeRecord(pageKey, profile.primaryGeo),
+			})),
 		}),
 	});
 	for (const link of links) {
@@ -143,7 +164,11 @@ const fixtureResolver = createRouteResolver({
 	grammar,
 	port: createFixtureResolverDataPort({
 		grammar,
-		pages: fixtureLinks.map(({ pageKey }) => ({ pageKey, inventory: 20 })),
+		pages: fixtureLinks.map(({ pageKey }) => ({
+			pageKey,
+			inventory: 20,
+			record: activeRecord(pageKey as PageKey, profile.primaryGeo),
+		})),
 	}),
 });
 for (const link of fixtureLinks) {

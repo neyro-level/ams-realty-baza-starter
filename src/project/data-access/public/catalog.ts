@@ -8,9 +8,8 @@ import type {
 } from "@ams/realtbase-contracts";
 import type { Payload, Where } from "payload";
 import { z } from "zod";
-import type { PropertiesSelect, Property } from "@/project/payload-types";
 import { sanitizeExplicitRedirectPath } from "@/core/seo/redirect-path";
-import { publicGatewayPolicy } from "./policy";
+import type { PropertiesSelect, Property } from "@/project/payload-types";
 import {
 	aggregatePublicCatalogFacets,
 	findPublicPropertyLifecycleRow,
@@ -18,6 +17,7 @@ import {
 	listPublicSitemapPropertiesPage,
 	publicRedirectDestinationIsChain,
 } from "./payload-reads";
+import { publicGatewayPolicy } from "./policy";
 
 export const publicPropertySelect = {
 	slug: true,
@@ -134,6 +134,9 @@ export type PublicPropertyLifecycleLookup =
 	| { found: false }
 	| {
 			found: true;
+			slug: string;
+			publicUrlId: number;
+			category: PropertyCategory;
 			status: Property["status"];
 			publishedAt?: string | null;
 			contentPurgedAt?: string | null;
@@ -198,12 +201,17 @@ export const publicPropertyDetailsWhere: Where = {
 
 function buildCatalogWhere(
 	query: CatalogQuery,
-	scope?: { cityId: number; districtId?: number },
+	scope?: {
+		cityId: number;
+		districtId?: number;
+		markets?: readonly Property["market"][];
+	},
 ): Where {
 	const and: Where[] = [publicPropertyPublicationWhere];
 	if (scope) and.push({ cityRef: { equals: scope.cityId } });
 	if (scope?.districtId)
 		and.push({ districtRef: { equals: scope.districtId } });
+	if (scope?.markets?.length) and.push({ market: { in: [...scope.markets] } });
 
 	if (query.query) {
 		and.push({
@@ -338,7 +346,11 @@ export async function findPublicCatalogProperties(
 export async function findPublicCatalogPropertiesByGeo(
 	payload: Payload,
 	input: CatalogQueryInput,
-	scope: { cityId: number; districtId?: number },
+	scope: {
+		cityId: number;
+		districtId?: number;
+		markets?: readonly Property["market"][];
+	},
 ): Promise<PublicCatalogResult> {
 	const query = catalogQuerySchema.parse(input);
 	const result = await payload.find({
@@ -437,6 +449,9 @@ export async function findPublicPropertyLifecycleBySlug(
 
 	return {
 		found: true,
+		slug: property.slug,
+		publicUrlId: property.publicUrlId,
+		category: property.category,
 		status: property.status,
 		publishedAt: property.publishedAt,
 		contentPurgedAt: property.contentPurgedAt,

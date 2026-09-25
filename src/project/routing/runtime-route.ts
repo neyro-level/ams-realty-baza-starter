@@ -1,6 +1,5 @@
 import "server-only";
 
-import { cache } from "react";
 import type {
 	DeveloperCardDTO,
 	DeveloperDetailsDTO,
@@ -10,6 +9,8 @@ import type {
 	ListingPageDTO,
 	PropertyDetailsDTO,
 } from "@ams/realtbase-contracts";
+import { cache } from "react";
+import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
 import {
 	createRouteResolver,
 	type PageKey,
@@ -17,28 +18,30 @@ import {
 	type ResolverPageRecord,
 	type ResolverResult,
 } from "@/core/routing";
-import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
-import { createProjectUrlGrammar } from "@/project/url-grammar";
-import { getCachedDistrictRouteRegistry } from "@/project/routing/district-registry";
-import { siteProfile } from "@/project/site-profile";
-import { siteConfig } from "@/project/site.config";
-import { getOptionalPublicGatewayPayload } from "@/project/data-access/public/payload";
+import { geoCatalogContractFixtures } from "@/fixture/geo-catalog";
+import { fixtureProperties, getFixtureProperty } from "@/fixture/provider";
+import { createFixtureResolverDataPort } from "@/fixture/resolver";
+import { fixtureDistrictRouteRegistryFor } from "@/fixture/route-registries";
+import { findPublicEntityLifecycle } from "@/project/data-access/public/entity-lifecycle";
 import {
+	countGeoInventory,
 	countInventory,
 	getDeveloper,
 	getDevelopment,
+	getDevelopmentRouteFacts,
 	getGeoHub,
 	getListing,
 	getPropertyByPublicUrlId,
+	getPropertyRouteFacts,
 	listDevelopments,
 	listGeoDevelopers,
 } from "@/project/data-access/public/geo-catalog";
-import { findPublicEntityLifecycle } from "@/project/data-access/public/entity-lifecycle";
+import { getOptionalPublicGatewayPayload } from "@/project/data-access/public/payload";
 import { findPublicRedirectByFromPath } from "@/project/data-access/public/payload-reads";
-import { createFixtureResolverDataPort } from "@/fixture/resolver";
-import { geoCatalogContractFixtures } from "@/fixture/geo-catalog";
-import { fixtureDistrictRouteRegistryFor } from "@/fixture/route-registries";
-import { fixtureProperties, getFixtureProperty } from "@/fixture/provider";
+import { getCachedDistrictRouteRegistry } from "@/project/routing/district-registry";
+import { siteConfig } from "@/project/site.config";
+import { siteProfile } from "@/project/site-profile";
+import { createProjectUrlGrammar } from "@/project/url-grammar";
 
 export type RuntimeRouteData =
 	| { kind: "geoHub"; value: GeoHubDTO }
@@ -80,12 +83,23 @@ async function resolveFixtureRuntimeRoute(
 		grammar,
 		pages: pages.map((pageKey) => ({
 			pageKey,
-			inventory: 100,
+			inventory:
+				pageKey.kind === "categoryRoot" ||
+				pageKey.kind === "categoryGeo" ||
+				pageKey.kind === "categoryGeoDistrict" ||
+				pageKey.kind === "categoryGeoFacet"
+					? geoCatalogContractFixtures.listing.total
+					: 1,
 			record: {
 				lifecycle: "active",
-				...(pageKey.kind === "property"
-					? { market: "secondary" as const }
-					: {}),
+				geo: "geo" in pageKey ? pageKey.geo : siteProfile.primaryGeo,
+				market:
+					pageKey.kind === "property"
+						? "secondary"
+						: pageKey.kind === "development"
+							? "newbuild"
+							: null,
+				dataTier: pageKey.kind === "development" ? "B" : null,
 			},
 		})),
 	});
@@ -169,24 +183,30 @@ function entityType(pageKey: PageKey) {
 function lifecycleRecord(
 	lifecycle: ReturnType<typeof resolveEntityPageLifecycle>,
 	grammar: ReturnType<typeof createProjectUrlGrammar>,
+	facts: Pick<ResolverPageRecord, "geo" | "market" | "dataTier"> = {
+		geo: null,
+		market: null,
+		dataTier: null,
+	},
 	canonicalPageKey?: PageKey,
 ): ResolverPageRecord | null {
 	switch (lifecycle.kind) {
 		case "missing":
 			return null;
 		case "gone":
-			return { lifecycle: "purged", canonicalPageKey };
+			return { lifecycle: "purged", canonicalPageKey, ...facts };
 		case "redirect":
 			return {
 				lifecycle: "purged",
 				canonicalPageKey,
+				...facts,
 				replacementPageKey:
 					grammar.parseUrl(lifecycle.destination) ?? undefined,
 			};
 		case "archived":
-			return { lifecycle: "archived", canonicalPageKey };
+			return { lifecycle: "archived", canonicalPageKey, ...facts };
 		case "active":
-			return { lifecycle: "active", canonicalPageKey };
+			return { lifecycle: "active", canonicalPageKey, ...facts };
 	}
 }
 
@@ -223,7 +243,9 @@ export const resolveRuntimeRoute = cache(
 		const port: ResolverDataPort = {
 			async findRedirect(path) {
 				const redirect = await findPublicRedirectByFromPath(payload, path);
-				return redirect ? { destinationPath: redirect.to } : null;
+				return redirect?.statusCode === "301"
+					? { destinationPath: redirect.to, statusCode: 301 }
+					: null;
 			},
 			async countInventory(pageKey) {
 				const key = keyOf(pageKey);
@@ -240,20 +262,33 @@ export const resolveRuntimeRoute = cache(
 						geo: input.geo,
 						surface: input.surface,
 						...(input.district ? { district: input.district } : {}),
+						...(input.facet ? { facet: input.facet } : {}),
 					});
 				}
-				return 100;
+				return inventory.get(key) ?? 0;
 			},
 			async lookupPage(pageKey) {
 				const key = keyOf(pageKey);
 				if (pageKey.kind === "home" || pageKey.kind === "static") {
-					return { lifecycle: "active" };
+					inventory.set(key, 0);
+					return {
+						lifecycle: "active",
+						geo: null,
+						market: null,
+						dataTier: null,
+					};
 				}
 				if (pageKey.kind === "geoHub") {
 					const hub = await getGeoHub(payload, pageKey.geo, grammar);
 					if (!hub) return null;
 					data.set(key, { kind: "geoHub", value: hub });
-					return { lifecycle: "active", geo: pageKey.geo };
+					inventory.set(key, await countGeoInventory(payload, pageKey.geo));
+					return {
+						lifecycle: "active",
+						geo: pageKey.geo,
+						market: null,
+						dataTier: null,
+					};
 				}
 				if (
 					pageKey.kind === "categoryRoot" ||
@@ -272,7 +307,12 @@ export const resolveRuntimeRoute = cache(
 						value: { ...listing, pageKey, href: key },
 					});
 					inventory.set(key, listing.total);
-					return { lifecycle: "active", geo: listingInput(pageKey).geo };
+					return {
+						lifecycle: "active",
+						geo: listingInput(pageKey).geo,
+						market: null,
+						dataTier: null,
+					};
 				}
 				if (
 					pageKey.kind === "geoDevelopers" ||
@@ -285,7 +325,12 @@ export const resolveRuntimeRoute = cache(
 					const developers = await listGeoDevelopers(payload, geo);
 					data.set(key, { kind: "developers", value: developers });
 					inventory.set(key, developers.length);
-					return { lifecycle: "active", geo };
+					return {
+						lifecycle: "active",
+						geo,
+						market: null,
+						dataTier: null,
+					};
 				}
 
 				const type = entityType(pageKey);
@@ -308,19 +353,29 @@ export const resolveRuntimeRoute = cache(
 
 				let routeData: RuntimeRouteData;
 				let canonicalPageKey: PageKey;
+				let facts: Pick<ResolverPageRecord, "geo" | "market" | "dataTier">;
 				if (pageKey.kind === "property") {
-					const property = await getPropertyByPublicUrlId(
-						payload,
-						pageKey.publicUrlId,
-					);
-					if (!property) return null;
+					const [property, propertyFacts] = await Promise.all([
+						getPropertyByPublicUrlId(payload, pageKey.publicUrlId),
+						getPropertyRouteFacts(payload, pageKey.publicUrlId),
+					]);
+					if (!property || !propertyFacts) return null;
 					canonicalPageKey = property.pageKey as PageKey;
 					routeData = { kind: "property", value: property };
+					facts = { ...propertyFacts, dataTier: null };
 				} else if (pageKey.kind === "development") {
-					const development = await getDevelopment(payload, pageKey.slug);
-					if (!development) return null;
+					const [development, developmentFacts] = await Promise.all([
+						getDevelopment(payload, pageKey.slug),
+						getDevelopmentRouteFacts(payload, pageKey.slug),
+					]);
+					if (!development || !developmentFacts) return null;
 					canonicalPageKey = development.pageKey as PageKey;
 					routeData = { kind: "development", value: development };
+					facts = {
+						geo: developmentFacts.geo,
+						market: "newbuild",
+						dataTier: developmentFacts.dataTier,
+					};
 				} else {
 					const developer = await getDeveloper(payload, pageKey.slug);
 					if (!developer) return null;
@@ -333,8 +388,20 @@ export const resolveRuntimeRoute = cache(
 							limit: 48,
 						}),
 					};
+					facts = { geo: null, market: null, dataTier: null };
 				}
-				const record = lifecycleRecord(lifecycle, grammar, canonicalPageKey);
+				inventory.set(
+					key,
+					routeData.kind === "developer"
+						? routeData.value.developmentsCount
+						: 1,
+				);
+				const record = lifecycleRecord(
+					lifecycle,
+					grammar,
+					facts,
+					canonicalPageKey,
+				);
 				if (record) data.set(key, routeData);
 				return record;
 			},

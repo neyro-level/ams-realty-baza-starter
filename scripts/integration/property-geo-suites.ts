@@ -3,6 +3,7 @@ import { getPayload } from "payload";
 import config from "../../payload.config.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { runPropertyGeoBackfill } from "../../src/core/data-access/system/property-geo-backfill.ts";
+import { defineSiteProfile } from "../../src/core/profile/index.ts";
 import {
 	countInventory,
 	getGeoBySlug,
@@ -11,6 +12,8 @@ import {
 	getPropertyByPublicUrlId,
 } from "../../src/project/data-access/public/geo-catalog.ts";
 import { requirePayloadRuntime } from "../../src/project/env.ts";
+import { siteProfile } from "../../src/project/site-profile.ts";
+import { createProjectUrlGrammar } from "../../src/project/url-grammar.ts";
 
 requirePayloadRuntime();
 const payload = await getPayload({ config });
@@ -67,6 +70,8 @@ const createProperty = (input: {
 	slug: string;
 	locality: string;
 	district: string;
+	market?: "secondary" | "newbuild";
+	rooms?: number;
 }) =>
 	payload.create({
 		collection: "properties",
@@ -76,12 +81,13 @@ const createProperty = (input: {
 			origin: "feed",
 			status: "active",
 			slug: input.slug,
-			market: "secondary",
+			market: input.market ?? "secondary",
 			category: "apartment",
 			dealType: "sale",
 			region: "Приморье",
 			locality: input.locality,
 			district: input.district,
+			rooms: input.rooms,
 			title: `Geo fixture ${input.externalId}`,
 		},
 		...access,
@@ -92,6 +98,15 @@ const matched = await createProperty({
 	slug: `geo-matched-${suffix}`,
 	locality: "Приморск",
 	district: "Северный",
+	rooms: 2,
+});
+const newbuild = await createProperty({
+	externalId: `newbuild-${suffix}`,
+	slug: `geo-newbuild-${suffix}`,
+	locality: "Приморск",
+	district: "Северный",
+	market: "newbuild",
+	rooms: 1,
 });
 const unknown = await createProperty({
 	externalId: `unknown-${suffix}`,
@@ -112,8 +127,8 @@ const first = await runPropertyGeoBackfill({
 	apply: true,
 	batchSize: 2,
 });
-assert.equal(first.processed, 3);
-assert.equal(first.updated, 3);
+assert.equal(first.processed, 4);
+assert.equal(first.updated, 4);
 assert.equal(first.createdIssues, 1);
 
 const [matchedAfter, unknownAfter, scopedAfter] = await Promise.all([
@@ -162,12 +177,12 @@ const second = await runPropertyGeoBackfill({
 	apply: true,
 	batchSize: 2,
 });
-assert.equal(second.processed, 3);
+assert.equal(second.processed, 4);
 assert.equal(second.updated, 0);
-assert.equal(second.unchanged, 3);
+assert.equal(second.unchanged, 4);
 assert.equal(second.createdIssues, 0);
 
-for (const property of [matchedAfter, unknownAfter, scopedAfter]) {
+for (const property of [matchedAfter, newbuild, unknownAfter, scopedAfter]) {
 	await payload.update({
 		collection: "properties",
 		id: property.id,
@@ -214,6 +229,48 @@ assert.ok(
 	"secondary geo property must not pollute the primary geo listing",
 );
 assert.ok(observedQueries <= 2, "listing query budget must not grow per item");
+
+const facetListing = await getListing(observedPayload, {
+	geo: "primorsk",
+	surface: "kvartiry",
+	facet: "dvukhkomnatnye",
+});
+assert.ok(facetListing, "configured SEO facet must resolve");
+assert.deepEqual(
+	facetListing.items
+		.filter((item) => item.kind === "property")
+		.map((item) => item.item.id),
+	[String(matchedAfter.id)],
+	"SEO facet must affect both result rows and total",
+);
+assert.equal(facetListing.total, 1);
+
+const secondaryOnlyInput = structuredClone(siteProfile);
+secondaryOnlyInput.marketStatus.primorsk.newbuild = "OUT";
+const secondaryOnlyProfile = defineSiteProfile(secondaryOnlyInput);
+const secondaryOnlyGrammar = createProjectUrlGrammar(secondaryOnlyProfile);
+const secondaryOnlyListing = await getListing(
+	observedPayload,
+	{ geo: "primorsk", surface: "kvartiry" },
+	secondaryOnlyGrammar,
+	secondaryOnlyProfile,
+);
+assert.ok(secondaryOnlyListing);
+assert.ok(
+	!secondaryOnlyListing.items.some(
+		(item) => item.kind === "property" && item.item.id === String(newbuild.id),
+	),
+	"geo marketStatus=OUT must remove newbuild rows",
+);
+assert.equal(
+	await countInventory(
+		observedPayload,
+		{ geo: "primorsk", surface: "kvartiry" },
+		secondaryOnlyProfile,
+	),
+	secondaryOnlyListing.total,
+	"market-scoped result and inventory counts must agree",
+);
 
 const secondaryPublicUrlId = scopedAfter.publicUrlId;
 assert.equal(typeof secondaryPublicUrlId, "number");

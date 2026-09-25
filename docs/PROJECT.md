@@ -87,7 +87,10 @@ with `export function proxy`; `src/middleware.ts` is forbidden. Anonymous
 `{ error: "notFound" }` 404 unless a Payload session cookie is present. Public
 lead create remains `POST /api/public/leads`. Canonical entity pages use the
 shared catch-all resolver; `src/proxy.ts` owns bounded lifecycle `301/410`.
-Legacy `/obekty/[slug]` remains redirect-only, while the former proof-only
+The declared legacy manifest owns `/nedvizhimost` and `/obekty/[slug]` as
+direct-final `301`; their App Router files are 404-only fallbacks. Next's
+automatic slash redirect is disabled so `src/proxy.ts` can own canonical `308`
+without creating a legacy redirect chain. The former proof-only
 `/http/property-lifecycle/[slug]` route is removed and guarded against return.
 
 Current URL map and current/target split: `02_PRODUCT_STRUCTURE.md`. Reusable

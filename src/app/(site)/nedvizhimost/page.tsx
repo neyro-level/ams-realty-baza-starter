@@ -1,7 +1,7 @@
-import { permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default function LegacyCatalogPage() {
-	permanentRedirect("/kvartiry/");
+	notFound();
 }

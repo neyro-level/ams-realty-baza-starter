@@ -2,28 +2,28 @@ import type {
 	PageKey,
 	ResolverDataPort,
 	ResolverPageRecord,
+	UrlGrammar,
 } from "../core/routing/index.ts";
-import type { UrlGrammar } from "../core/routing/index.ts";
 
 export function createFixtureResolverDataPort(input: {
 	grammar: UrlGrammar;
 	pages: readonly {
 		pageKey: PageKey;
-		record?: ResolverPageRecord;
-		inventory?: number;
+		record: ResolverPageRecord;
+		inventory: number;
 	}[];
 	redirects?: Readonly<Record<string, string>>;
 }): ResolverDataPort {
 	const records = new Map(
 		input.pages.map((item) => [
 			input.grammar.buildUrl(item.pageKey),
-			item.record ?? { lifecycle: "active" as const },
+			item.record,
 		]),
 	);
 	const inventory = new Map(
 		input.pages.map((item) => [
 			input.grammar.buildUrl(item.pageKey),
-			item.inventory ?? 100,
+			item.inventory,
 		]),
 	);
 	const redirects = new Map(Object.entries(input.redirects ?? {}));
@@ -34,7 +34,9 @@ export function createFixtureResolverDataPort(input: {
 		},
 		async findRedirect(path) {
 			const destinationPath = redirects.get(path);
-			return destinationPath ? { destinationPath } : null;
+			return destinationPath
+				? { destinationPath, statusCode: 301 as const }
+				: null;
 		},
 		async countInventory(pageKey) {
 			return inventory.get(input.grammar.buildUrl(pageKey)) ?? 0;

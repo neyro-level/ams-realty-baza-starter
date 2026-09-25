@@ -1,18 +1,46 @@
 import "server-only";
 
 import {
-	resolvePropertyLifecyclePreflight,
 	type PropertyLifecyclePreflightDecision,
+	resolvePropertyLifecyclePreflight,
 } from "../../../core/http/property-lifecycle-preflight.ts";
+import { propertyCategorySurface } from "../../../core/property/taxonomy.ts";
+import { fixtureProperties } from "../../../fixture/provider.ts";
+import { siteConfig } from "../../site.config.ts";
+import { siteProfile } from "../../site-profile.ts";
+import { createProjectUrlGrammar } from "../../url-grammar.ts";
 import { findPublicPropertyLifecycleBySlug } from "./catalog.ts";
 import { getOptionalPublicGatewayPayload } from "./payload.ts";
+
+const grammar = createProjectUrlGrammar(siteProfile);
 
 export async function lookupCurrentPropertyLifecyclePreflight(
 	slug: string,
 ): Promise<PropertyLifecyclePreflightDecision> {
 	const payload = await getOptionalPublicGatewayPayload();
-	if (!payload) return { kind: "pass" };
+	if (!payload) {
+		if ((siteConfig.projectKind as "starter-demo" | "client") === "client") {
+			return { kind: "pass" };
+		}
+		const property = fixtureProperties.find(
+			(candidate) => candidate.slug === slug,
+		);
+		return property
+			? { kind: "redirect", statusCode: 301, destination: property.href }
+			: { kind: "pass" };
+	}
+	const lookup = await findPublicPropertyLifecycleBySlug(payload, slug);
 	return resolvePropertyLifecyclePreflight(
-		await findPublicPropertyLifecycleBySlug(payload, slug),
+		lookup.found
+			? {
+					...lookup,
+					canonicalPath: grammar.buildUrl({
+						kind: "property",
+						category: propertyCategorySurface[lookup.category],
+						semantic: lookup.slug,
+						publicUrlId: lookup.publicUrlId,
+					}),
+				}
+			: lookup,
 	);
 }

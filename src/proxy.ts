@@ -1,14 +1,15 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { anonymousRawRestEdgeDecision } from "./core/security/anonymous-raw-rest.ts";
+import { type NextRequest, NextResponse } from "next/server";
+import { createEntityGoneResponse } from "./core/http/property-gone-response.ts";
 import {
 	overwriteLifecyclePreflightHeader,
 	parseCurrentPropertyLifecyclePath,
 } from "./core/http/property-lifecycle-preflight.ts";
-import { createEntityGoneResponse } from "./core/http/property-gone-response.ts";
-import { lookupCurrentPropertyLifecyclePreflight } from "./project/data-access/public/property-lifecycle-preflight.ts";
+import { anonymousRawRestEdgeDecision } from "./core/security/anonymous-raw-rest.ts";
 import { lookupCanonicalEntityLifecyclePreflight } from "./project/data-access/public/entity-lifecycle-preflight.ts";
-import { createProjectUrlGrammar } from "./project/url-grammar.ts";
+import { lookupCurrentPropertyLifecyclePreflight } from "./project/data-access/public/property-lifecycle-preflight.ts";
+import { matchLegacyRoute } from "./project/routing/legacy-route-manifest.ts";
 import { siteProfile } from "./project/site-profile.ts";
+import { createProjectUrlGrammar } from "./project/url-grammar.ts";
 
 const urlGrammar = createProjectUrlGrammar(siteProfile);
 
@@ -25,9 +26,17 @@ export async function proxy(request: NextRequest) {
 		request.headers,
 		"not-applicable",
 	);
-	const propertySlug = parseCurrentPropertyLifecyclePath(
-		request.nextUrl.pathname,
-	);
+	const legacyRoute = matchLegacyRoute(request.nextUrl.pathname);
+	if (legacyRoute.kind === "catalog") {
+		return NextResponse.redirect(
+			new URL(legacyRoute.destination, request.url),
+			legacyRoute.statusCode,
+		);
+	}
+	const propertySlug =
+		legacyRoute.kind === "property"
+			? legacyRoute.slug
+			: parseCurrentPropertyLifecyclePath(request.nextUrl.pathname);
 	const canonicalPageKey = urlGrammar.parseUrl(request.nextUrl.pathname);
 	const decision = propertySlug
 		? await lookupCurrentPropertyLifecyclePreflight(propertySlug)
@@ -45,6 +54,16 @@ export async function proxy(request: NextRequest) {
 			decision.statusCode,
 		);
 	}
+	if (canonicalPageKey) {
+		const builtPath = urlGrammar.buildUrl(canonicalPageKey);
+		const canonicalPath =
+			builtPath === "/" ? builtPath : `${builtPath.replace(/\/+$/, "")}/`;
+		if (canonicalPath !== request.nextUrl.pathname) {
+			const destination = new URL(canonicalPath, request.url);
+			destination.search = request.nextUrl.search;
+			return NextResponse.redirect(destination, 308);
+		}
+	}
 
 	requestHeaders = overwriteLifecyclePreflightHeader(requestHeaders, "pass");
 	return NextResponse.next({ request: { headers: requestHeaders } });
@@ -52,16 +71,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
 	matcher: [
-		"/api/:path*",
-		"/obekty/:slug",
-		"/kvartiry/:slug",
-		"/doma/:slug",
-		"/uchastki/:slug",
-		"/kommercheskaya-nedvizhimost/:slug",
-		"/komnaty/:slug",
-		"/garazhi/:slug",
-		"/novostroyki/:slug",
-		"/kottedzhnye-poselki/:slug",
-		"/zastroyshchiki/:slug",
+		"/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
 	],
 };

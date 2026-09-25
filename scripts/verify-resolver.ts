@@ -1,14 +1,35 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { defineSiteProfile } from "../src/core/profile/index.ts";
 import {
 	createRouteResolver,
 	type PageKey,
+	type ResolverPageRecord,
 } from "../src/core/routing/index.ts";
 import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
-import { defineSiteProfile } from "../src/core/profile/index.ts";
-import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
+import { matchLegacyRoute } from "../src/project/routing/legacy-route-manifest.ts";
+import { siteProfileFixtures } from "../src/project/site-profile.ts";
+import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
+
+function activeRecord(
+	pageKey: PageKey,
+	primaryGeo: string,
+	overrides: Partial<ResolverPageRecord> = {},
+): ResolverPageRecord {
+	return {
+		lifecycle: "active",
+		geo: "geo" in pageKey ? pageKey.geo : primaryGeo,
+		market:
+			pageKey.kind === "property"
+				? "secondary"
+				: pageKey.kind === "development"
+					? "newbuild"
+					: null,
+		dataTier: pageKey.kind === "development" ? "B" : null,
+		...overrides,
+	};
+}
 
 for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 	const grammar = createProjectUrlGrammar(
@@ -16,13 +37,18 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 		fixtureDistrictRouteRegistryFor(profile),
 	);
 	const primaryGeo = profile.primaryGeo;
-	const pages: { pageKey: PageKey; inventory?: number }[] = [
-		{ pageKey: { kind: "home" } },
-		{ pageKey: { kind: "geoHub", geo: primaryGeo } },
-		{ pageKey: { kind: "categoryRoot", category: "kvartiry" } },
-		{ pageKey: { kind: "categoryGeo", geo: primaryGeo, category: "kvartiry" } },
-		{ pageKey: { kind: "developerRoot" } },
+	const pageKeys: PageKey[] = [
+		{ kind: "home" },
+		{ kind: "geoHub", geo: primaryGeo },
+		{ kind: "categoryRoot", category: "kvartiry" },
+		{ kind: "categoryGeo", geo: primaryGeo, category: "kvartiry" },
+		{ kind: "developerRoot" },
 	];
+	const pages = pageKeys.map((pageKey) => ({
+		pageKey,
+		inventory: 12,
+		record: activeRecord(pageKey, primaryGeo),
+	}));
 	const resolver = createRouteResolver({
 		profile,
 		grammar,
@@ -46,6 +72,18 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 		assert.equal(root.inSitemap, false);
 	}
 }
+
+assert.deepEqual(matchLegacyRoute("/nedvizhimost/"), {
+	kind: "catalog",
+	destination: "/kvartiry/",
+	statusCode: 301,
+});
+assert.deepEqual(matchLegacyRoute("/obekty/dom-42"), {
+	kind: "property",
+	slug: "dom-42",
+	statusCode: 301,
+});
+assert.deepEqual(matchLegacyRoute("/kvartiry/"), { kind: "none" });
 
 const profile = siteProfileFixtures.multiGeo;
 const grammar = createProjectUrlGrammar(
@@ -90,19 +128,50 @@ const lowInventory = {
 const port = createFixtureResolverDataPort({
 	grammar,
 	pages: [
-		{ pageKey: canonicalProperty },
+		{
+			pageKey: canonicalProperty,
+			inventory: 1,
+			record: activeRecord(canonicalProperty, profile.primaryGeo),
+		},
 		{
 			pageKey: wrongCategoryProperty,
-			record: { lifecycle: "active", canonicalPageKey: canonicalProperty },
+			inventory: 1,
+			record: activeRecord(wrongCategoryProperty, profile.primaryGeo, {
+				canonicalPageKey: canonicalProperty,
+			}),
 		},
-		{ pageKey: replacementProperty },
-		{ pageKey: goneProperty, record: { lifecycle: "purged" } },
+		{
+			pageKey: replacementProperty,
+			inventory: 1,
+			record: activeRecord(replacementProperty, profile.primaryGeo),
+		},
+		{
+			pageKey: goneProperty,
+			inventory: 0,
+			record: activeRecord(goneProperty, profile.primaryGeo, {
+				lifecycle: "purged",
+			}),
+		},
 		{
 			pageKey: movedProperty,
-			record: { lifecycle: "purged", replacementPageKey: replacementProperty },
+			inventory: 0,
+			record: activeRecord(movedProperty, profile.primaryGeo, {
+				lifecycle: "purged",
+				replacementPageKey: replacementProperty,
+			}),
 		},
-		{ pageKey: archivedProperty, record: { lifecycle: "archived" } },
-		{ pageKey: lowInventory, inventory: 0 },
+		{
+			pageKey: archivedProperty,
+			inventory: 1,
+			record: activeRecord(archivedProperty, profile.primaryGeo, {
+				lifecycle: "archived",
+			}),
+		},
+		{
+			pageKey: lowInventory,
+			inventory: 0,
+			record: activeRecord(lowInventory, profile.primaryGeo),
+		},
 	],
 	redirects: {
 		"/old-property/": grammar.buildUrl(canonicalProperty),
@@ -116,7 +185,7 @@ const resolver = createRouteResolver({ profile, grammar, port });
 assert.deepEqual(await resolver.resolvePath("/old-property/"), {
 	kind: "redirect",
 	destinationPath: grammar.buildUrl(canonicalProperty),
-	statusCode: 308,
+	statusCode: 301,
 });
 for (const path of ["/chain-a/", "/loop/"]) {
 	assert.deepEqual(await resolver.resolvePath(path), {
@@ -129,7 +198,7 @@ assert.deepEqual(
 	{
 		kind: "redirect",
 		destinationPath: grammar.buildUrl(canonicalProperty),
-		statusCode: 308,
+		statusCode: 301,
 	},
 );
 assert.deepEqual(await resolver.resolvePath(grammar.buildUrl(goneProperty)), {
@@ -139,7 +208,7 @@ assert.deepEqual(await resolver.resolvePath(grammar.buildUrl(goneProperty)), {
 assert.deepEqual(await resolver.resolvePath(grammar.buildUrl(movedProperty)), {
 	kind: "redirect",
 	destinationPath: grammar.buildUrl(replacementProperty),
-	statusCode: 308,
+	statusCode: 301,
 });
 const archived = await resolver.resolvePath(grammar.buildUrl(archivedProperty));
 assert.equal(archived.kind, "page");
@@ -150,6 +219,7 @@ if (archived.kind === "page") {
 }
 for (const path of [
 	"/kvartiry/primorsk/",
+	"/novostroyki/primorsk/",
 	"/primorsk/kvartiry/severnyy/dvukhkomnatnye/",
 	"/primorsk/kvartiry/severnyy/extra/",
 	"/missing/",
@@ -177,11 +247,45 @@ const inactiveResolver = createRouteResolver({
 	grammar: inactiveGrammar,
 	port: createFixtureResolverDataPort({
 		grammar: inactiveGrammar,
-		pages: [{ pageKey: inactiveGeoKey }],
+		pages: [
+			{
+				pageKey: inactiveGeoKey,
+				inventory: 12,
+				record: activeRecord(inactiveGeoKey, inactiveProfile.primaryGeo),
+			},
+		],
 	}),
 });
 assert.deepEqual(
 	await inactiveResolver.resolvePath(inactiveGrammar.buildUrl(inactiveGeoKey)),
+	{ kind: "notFound", statusCode: 404 },
+);
+
+const singleProfile = siteProfileFixtures.singleGeoThreeCities;
+const singleGrammar = createProjectUrlGrammar(singleProfile);
+const forbiddenSecondaryGeo = {
+	kind: "categoryGeo",
+	geo: "zarechnyy",
+	category: "kvartiry",
+} as const;
+const singleResolver = createRouteResolver({
+	profile: singleProfile,
+	grammar: singleGrammar,
+	port: createFixtureResolverDataPort({
+		grammar: singleGrammar,
+		pages: [
+			{
+				pageKey: forbiddenSecondaryGeo,
+				inventory: 12,
+				record: activeRecord(forbiddenSecondaryGeo, singleProfile.primaryGeo),
+			},
+		],
+	}),
+});
+assert.deepEqual(
+	await singleResolver.resolvePath(
+		singleGrammar.buildUrl(forbiddenSecondaryGeo),
+	),
 	{ kind: "notFound", statusCode: 404 },
 );
 
@@ -200,7 +304,13 @@ const secondaryResolver = createRouteResolver({
 	grammar: secondaryGrammar,
 	port: createFixtureResolverDataPort({
 		grammar: secondaryGrammar,
-		pages: [{ pageKey: preparedOffKey }],
+		pages: [
+			{
+				pageKey: preparedOffKey,
+				inventory: 12,
+				record: activeRecord(preparedOffKey, secondaryProfile.primaryGeo),
+			},
+		],
 	}),
 });
 assert.deepEqual(

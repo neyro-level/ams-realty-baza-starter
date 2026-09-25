@@ -12,20 +12,20 @@ import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
 const source = (path: string) => readFileSync(path, "utf8");
 assert.match(source("next.config.ts"), /trailingSlash:\s*true/);
+assert.match(source("next.config.ts"), /skipTrailingSlashRedirect:\s*true/);
 assert.match(
 	source("src/app/(site)/[...segments]/page.tsx"),
 	/generateMetadata[\s\S]+resolveRuntimeRoute[\s\S]+CanonicalRuntimePage/,
 );
-assert.match(source("src/proxy.ts"), /\/api\/:path\*/);
+assert.match(source("src/proxy.ts"), /_next\/static\|_next\/image/);
+assert.match(
+	source("src/proxy.ts"),
+	/NextResponse\.redirect\(destination, 308\)/,
+);
 assert.match(source("src/proxy.ts"), /lookupCanonicalEntityLifecyclePreflight/);
-assert.match(
-	source("src/app/(site)/nedvizhimost/page.tsx"),
-	/permanentRedirect\("\/kvartiry\/"\)/,
-);
-assert.match(
-	source("src/app/(site)/obekty/[slug]/page.tsx"),
-	/resolveLegacyPropertyRoute[\s\S]+permanentRedirect\(route\.destination\)/,
-);
+assert.match(source("src/app/(site)/nedvizhimost/page.tsx"), /notFound\(\)/);
+assert.match(source("src/app/(site)/obekty/[slug]/page.tsx"), /notFound\(\)/);
+assert.match(source("src/proxy.ts"), /matchLegacyRoute/);
 
 for (const path of [
 	"src/app/not-found.tsx",
@@ -90,12 +90,17 @@ for (const profile of Object.values(siteProfileFixtures)) {
 			grammar,
 			pages: pages.map((pageKey) => ({
 				pageKey,
-				inventory: 100,
+				inventory: 12,
 				record: {
 					lifecycle: "active",
-					...(pageKey.kind === "property"
-						? { market: "secondary" as const }
-						: {}),
+					geo: "geo" in pageKey ? pageKey.geo : profile.primaryGeo,
+					market:
+						pageKey.kind === "property"
+							? "secondary"
+							: pageKey.kind === "development"
+								? "newbuild"
+								: null,
+					dataTier: pageKey.kind === "development" ? "B" : null,
 				},
 			})),
 			redirects: {

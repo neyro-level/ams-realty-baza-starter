@@ -251,7 +251,8 @@ if (!existsSync(proxyPath)) {
 		);
 	}
 	if (
-		!proxy.includes('"/obekty/:slug"') ||
+		!proxy.includes("_next/static|_next/image") ||
+		!proxy.includes("matchLegacyRoute") ||
 		!proxy.includes("parseCurrentPropertyLifecyclePath") ||
 		!proxy.includes("lookupCurrentPropertyLifecyclePreflight") ||
 		!proxy.includes("overwriteLifecyclePreflightHeader")
@@ -320,13 +321,26 @@ if (!existsSync(propertyPagePath)) {
 } else {
 	const propertyPage = readFileSync(propertyPagePath, "utf8");
 	if (
-		!propertyPage.includes("resolveLegacyPropertyRoute") ||
+		!propertyPage.includes("notFound") ||
+		propertyPage.includes("permanentRedirect") ||
 		propertyPage.includes("GonePropertyPage")
 	) {
 		violations.push(
-			"src/app/(site)/obekty/[slug]/page.tsx: legacy route must stay redirect-only without the removed visual runtime",
+			"src/app/(site)/obekty/[slug]/page.tsx: proxy-owned legacy route fallback must stay 404-only without a 308 redirect",
 		);
 	}
+}
+const legacyManifestPath = path.join(
+	root,
+	"src/project/routing/legacy-route-manifest.ts",
+);
+if (
+	!existsSync(legacyManifestPath) ||
+	!readFileSync(legacyManifestPath, "utf8").includes("statusCode: 301")
+) {
+	violations.push(
+		"src/project/routing/legacy-route-manifest.ts: declared direct 301 legacy transport is missing",
+	);
 }
 for (const removedRuntime of [
 	"packages/ui/src/views/catalog/StarterCatalogPageView.tsx",

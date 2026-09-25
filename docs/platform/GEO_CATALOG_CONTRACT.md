@@ -172,6 +172,11 @@ but its geo hub/listing is not, breadcrumbs render the geo as text rather than a
 link to a 404. Nearby aggregation is agglomeration-only and never pollutes one
 city's inventory count with another city's records.
 
+Catalog rows and inventory totals use the same `geo + marketStatus + facet`
+query contract. `PREPARED_OFF | OUT` markets contribute neither rows nor counts;
+unconfigured geo is fail-closed. Runtime inventory is always read from the
+active data port and never replaced with a synthetic placeholder.
+
 ## 7. SEO Registry and Content Gate
 
 SEO Registry rows bind one PageKey/canonical URL to measured or explicitly
@@ -205,9 +210,11 @@ development and developer thresholds are profile-owned.
 | legacy/canonical move | one direct 301 to final URL |
 
 Canonical 301/410 transport is implemented through bounded preflight in
-`src/proxy.ts` and covered by the accepted P8-23A/P8-23B proof. The former
-proof-only `/http/property-lifecycle/[slug]` boundary is removed and guarded
-against return.
+`src/proxy.ts`. `skipTrailingSlashRedirect=true` delegates canonical slash
+normalization to that same boundary, preventing Next from inserting a `308`
+before a legacy `301`. The former proof-only
+`/http/property-lifecycle/[slug]` boundary is removed and guarded against
+return.
 
 `/nedvizhimost` and `/obekty/*` belong to the declared legacy manifest and use
 one direct `301` to the final canonical URL. A canonical path that differs only

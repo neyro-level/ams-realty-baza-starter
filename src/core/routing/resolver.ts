@@ -1,7 +1,7 @@
 import {
+	type CatalogSurfaceSlug,
 	catalogSurfaceMarketMatrix,
 	isConfiguredRouteAvailable,
-	type CatalogSurfaceSlug,
 	type Market,
 	type ProfileStatus,
 	type SiteProfile,
@@ -12,12 +12,14 @@ export type ResolverPageRecord = {
 	lifecycle: "active" | "archived" | "purged";
 	canonicalPageKey?: PageKey;
 	replacementPageKey?: PageKey;
-	geo?: string;
-	market?: Market;
+	geo: string | null;
+	market: Market | null;
+	dataTier: "A" | "B" | "C" | null;
 };
 
 export type ResolverRedirectRecord = {
 	destinationPath: string;
+	statusCode: 301;
 };
 
 export interface ResolverDataPort {
@@ -36,7 +38,7 @@ export type ResolverPageResult = {
 
 export type ResolverResult =
 	| ResolverPageResult
-	| { kind: "redirect"; destinationPath: string; statusCode: 308 }
+	| { kind: "redirect"; destinationPath: string; statusCode: 301 | 308 }
 	| { kind: "notFound"; statusCode: 404 }
 	| { kind: "gone"; statusCode: 410 };
 
@@ -70,7 +72,11 @@ export function createRouteResolver(input: {
 		if (allowStoredRedirect) {
 			const stored = await port.findRedirect(requestPath);
 			if (stored) {
-				return resolveDirectRedirect(stored.destinationPath, visited);
+				return resolveDirectRedirect(
+					stored.destinationPath,
+					stored.statusCode,
+					visited,
+				);
 			}
 		}
 
@@ -91,6 +97,7 @@ export function createRouteResolver(input: {
 
 	async function resolveDirectRedirect(
 		destination: string,
+		statusCode: 301,
 		visited: Set<string>,
 	): Promise<ResolverResult> {
 		const destinationPath = normalizeRequestPath(destination);
@@ -101,7 +108,7 @@ export function createRouteResolver(input: {
 		return {
 			kind: "redirect",
 			destinationPath: target.canonicalPath,
-			statusCode: 308,
+			statusCode,
 		};
 	}
 
@@ -117,6 +124,7 @@ export function createRouteResolver(input: {
 			if (!record.replacementPageKey) return { kind: "gone", statusCode: 410 };
 			return resolveDirectRedirect(
 				grammar.buildUrl(record.replacementPageKey),
+				301,
 				visited,
 			);
 		}
@@ -124,7 +132,7 @@ export function createRouteResolver(input: {
 		if (record.canonicalPageKey) {
 			const recordCanonicalPath = grammar.buildUrl(record.canonicalPageKey);
 			if (recordCanonicalPath !== canonicalPath) {
-				return resolveDirectRedirect(recordCanonicalPath, visited);
+				return resolveDirectRedirect(recordCanonicalPath, 301, visited);
 			}
 		}
 
@@ -156,6 +164,9 @@ function routeDecision(
 	const statuses: ProfileStatus[] = [];
 
 	const addGeo = (geo: string): boolean => {
+		if (profile.geoMode === "SINGLE_GEO" && geo !== profile.primaryGeo) {
+			return false;
+		}
 		const definition = profile.geos[geo];
 		if (!definition?.published) return false;
 		statuses.push(definition.hubStatus);
@@ -192,7 +203,7 @@ function routeDecision(
 		}
 		return true;
 	};
-	const addMarket = (market?: Market, geo?: string): boolean => {
+	const addMarket = (market: Market | null, geo: string | null): boolean => {
 		if (!market) return true;
 		statuses.push(profile.marketCapability[market]);
 		if (geo && profile.marketStatus[geo])
@@ -227,7 +238,7 @@ function routeDecision(
 			break;
 		case "property":
 			if (!addSurface(pageKey.category)) return unavailable();
-			addMarket(record.market);
+			addMarket(record.market, record.geo);
 			break;
 		case "development": {
 			const surface =
@@ -235,7 +246,7 @@ function routeDecision(
 					? "novostroyki"
 					: "kottedzhnye-poselki";
 			if (!addSurface(surface)) return unavailable();
-			addMarket("newbuild");
+			addMarket("newbuild", record.geo);
 			break;
 		}
 	}

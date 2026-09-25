@@ -17,6 +17,11 @@ import type {
 } from "@ams/realtbase-contracts";
 import type { Payload, Where } from "payload";
 import { z } from "zod";
+import {
+	catalogSurfaceMarketMatrix,
+	type Market,
+	type SiteProfile,
+} from "@/core/profile";
 import type { UrlGrammar } from "@/core/routing";
 import type {
 	City,
@@ -24,15 +29,15 @@ import type {
 	Development,
 	District,
 	Media,
+	Property,
 	Region,
 } from "@/project/payload-types";
 import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
 import {
+	type CatalogQueryInput,
 	findPublicCatalogPropertiesByGeo,
 	findPublicPropertyByPublicUrlId,
-	publicPropertyPublicationWhere,
-	type CatalogQueryInput,
 } from "./catalog";
 import { toPropertyCardDTO, toPropertyDetailsDTO } from "./dto";
 import { publicGatewayPolicy } from "./policy";
@@ -151,7 +156,7 @@ export async function getGeoHub(
 			`Каталог недвижимости: ${city.title}.`,
 			href,
 		),
-		categoryLinks: activeSurfaces().map((surface) =>
+		categoryLinks: activeSurfaces(siteProfile).map((surface) =>
 			pageLink(
 				{ kind: "categoryGeo", geo, category: surface },
 				surfaceLabel(surface),
@@ -182,6 +187,7 @@ export async function getListing(
 	payload: Payload,
 	input: PublicListingInput,
 	grammar: UrlGrammar = urlGrammar,
+	profile: SiteProfile = siteProfile,
 ): Promise<ListingPageDTO | null> {
 	const parsed = z
 		.object({
@@ -204,7 +210,7 @@ export async function getListing(
 		})
 		.strict()
 		.parse(input);
-	if (!isRoutableGeo(parsed.geo)) return null;
+	if (!Object.hasOwn(profile.geos, parsed.geo)) return null;
 	const city = await findGeoRecord(payload, parsed.geo);
 	if (!city) return null;
 	const district = parsed.district
@@ -216,6 +222,16 @@ export async function getListing(
 			)
 		: null;
 	if (parsed.district && !district) return null;
+	const markets = availableMarketsForSurface(
+		profile,
+		parsed.geo,
+		parsed.surface,
+	);
+	if (markets.length === 0) return null;
+	const facetQuery = parsed.facet
+		? catalogQueryForSeoFacet(profile, parsed.geo, parsed.surface, parsed.facet)
+		: {};
+	if (parsed.facet && !facetQuery) return null;
 
 	const pageKey: PageKeyDTO = parsed.district
 		? {
@@ -269,6 +285,7 @@ export async function getListing(
 		payload,
 		{
 			...((parsed.query as CatalogQueryInput | undefined) ?? {}),
+			...facetQuery,
 			page,
 			limit: pageSize,
 			...propertyFilter,
@@ -276,6 +293,7 @@ export async function getListing(
 		{
 			cityId: Number(city.id),
 			districtId: district ? Number(district.id) : undefined,
+			markets,
 		},
 	);
 	return listingDTO(
@@ -298,6 +316,31 @@ export async function getPropertyByPublicUrlId(
 	return property ? toPropertyDetailsDTO(property, []) : null;
 }
 
+export async function getPropertyRouteFacts(
+	payload: Payload,
+	publicUrlId: number,
+): Promise<{ market: Market; geo: string | null } | null> {
+	const result = await payload.find({
+		collection: "properties",
+		where: { publicUrlId: { equals: publicUrlId } },
+		depth: 1,
+		limit: 1,
+		page: 1,
+		select: { market: true, cityRef: true },
+		...gatewayAccess,
+	});
+	const property = result.docs[0] as
+		| Pick<Property, "market" | "cityRef">
+		| undefined;
+	if (!property) return null;
+	return {
+		market: property.market,
+		geo: isObjectRelation<City>(property.cityRef)
+			? property.cityRef.slug
+			: null,
+	};
+}
+
 export async function getDevelopment(
 	payload: Payload,
 	slug: string,
@@ -313,6 +356,29 @@ export async function getDevelopment(
 	});
 	const development = result.docs[0] as Development | undefined;
 	return development ? toDevelopmentDetailsDTO(development) : null;
+}
+
+export async function getDevelopmentRouteFacts(
+	payload: Payload,
+	slug: string,
+): Promise<{ geo: string; dataTier: Development["dataTier"] } | null> {
+	const result = await payload.find({
+		collection: "developments",
+		where: { slug: { equals: slugSchema.parse(slug) } },
+		depth: 1,
+		limit: 1,
+		page: 1,
+		select: { city: true, dataTier: true },
+		...gatewayAccess,
+	});
+	const development = result.docs[0] as
+		| Pick<Development, "city" | "dataTier">
+		| undefined;
+	if (!development) return null;
+	const city = isObjectRelation<City>(development.city)
+		? development.city
+		: null;
+	return city ? { geo: city.slug, dataTier: development.dataTier } : null;
 }
 
 export async function listDevelopments(
@@ -425,7 +491,13 @@ export async function getNearby(
 
 export async function countInventory(
 	payload: Payload,
-	input: { geo: string; surface: CatalogSurfaceSlug; district?: string },
+	input: {
+		geo: string;
+		surface: CatalogSurfaceSlug;
+		district?: string;
+		facet?: string;
+	},
+	profile: SiteProfile = siteProfile,
 ): Promise<number> {
 	const geo = slugSchema.parse(input.geo);
 	const city = await findGeoRecord(payload, geo);
@@ -439,10 +511,17 @@ export async function countInventory(
 			)
 		: null;
 	if (input.district && !district) return 0;
+	const markets = availableMarketsForSurface(profile, geo, input.surface);
+	if (markets.length === 0) return 0;
+	const facetQuery = input.facet
+		? catalogQueryForSeoFacet(profile, geo, input.surface, input.facet)
+		: {};
+	if (input.facet && !facetQuery) return 0;
 	if (
 		input.surface === "novostroyki" ||
 		input.surface === "kottedzhnye-poselki"
 	) {
+		if (!markets.includes("newbuild") || input.facet) return 0;
 		const and: Where[] = [
 			{ city: { equals: Number(city.id) } },
 			{
@@ -462,20 +541,57 @@ export async function countInventory(
 		});
 		return result.totalDocs;
 	}
-	const scope: Where[] = [
-		publicPropertyPublicationWhere,
-		{ cityRef: { equals: Number(city.id) } },
-	];
-	if (district) scope.push({ districtRef: { equals: Number(district.id) } });
 	const filter = surfacePropertyFilter(input.surface);
-	if (filter.category) scope.push({ category: { equals: filter.category } });
-	if (filter.dealType) scope.push({ dealType: { equals: filter.dealType } });
-	const result = await payload.count({
-		collection: "properties",
-		where: { and: scope },
-		...gatewayAccess,
+	const result = await findPublicCatalogPropertiesByGeo(
+		payload,
+		{ ...filter, ...facetQuery, page: 1, limit: 1 },
+		{
+			cityId: Number(city.id),
+			districtId: district ? Number(district.id) : undefined,
+			markets,
+		},
+	);
+	return result.total;
+}
+
+export async function countGeoInventory(
+	payload: Payload,
+	geo: string,
+	profile: SiteProfile = siteProfile,
+): Promise<number> {
+	const city = await findGeoRecord(payload, slugSchema.parse(geo));
+	if (!city) return 0;
+	const activeSurfacesForGeo = activeSurfaces(profile).filter((surface) => {
+		const status = profile.geoCategoryStatus[geo]?.[surface];
+		return status === "ACTIVE" || status === "NOINDEX_AUTO";
 	});
-	return result.totalDocs;
+	const markets = [
+		...new Set(
+			activeSurfacesForGeo.flatMap((surface) =>
+				availableMarketsForSurface(profile, geo, surface),
+			),
+		),
+	];
+	const propertyCount = markets.length
+		? await payload.count({
+				collection: "properties",
+				where: {
+					and: [
+						{ cityRef: { equals: Number(city.id) } },
+						{ market: { in: markets } },
+					],
+				},
+				...gatewayAccess,
+			})
+		: { totalDocs: 0 };
+	const developmentCount = markets.includes("newbuild")
+		? await payload.count({
+				collection: "developments",
+				where: { city: { equals: Number(city.id) } },
+				...gatewayAccess,
+			})
+		: { totalDocs: 0 };
+	return propertyCount.totalDocs + developmentCount.totalDocs;
 }
 
 async function findGeoRecord(
@@ -863,6 +979,41 @@ function listingDTO(
 	};
 }
 
+function availableMarketsForSurface(
+	profile: SiteProfile,
+	geo: string,
+	surface: CatalogSurfaceSlug,
+): Market[] {
+	return catalogSurfaceMarketMatrix[surface].filter((market) => {
+		const capability = profile.marketCapability[market];
+		const geoStatus = profile.marketStatus[geo]?.[market];
+		return (
+			(capability === "ACTIVE" || capability === "NOINDEX_AUTO") &&
+			(geoStatus === "ACTIVE" || geoStatus === "NOINDEX_AUTO")
+		);
+	});
+}
+
+function catalogQueryForSeoFacet(
+	profile: SiteProfile,
+	geo: string,
+	surface: CatalogSurfaceSlug,
+	slug: string,
+): Partial<CatalogQueryInput> | null {
+	const facet = profile.seoFacets[slug];
+	if (!facet || facet.geo !== geo || facet.category !== surface) return null;
+	if (facet.filter.key !== "rooms" || !Array.isArray(facet.filter.value)) {
+		return null;
+	}
+	const rooms = facet.filter.value.filter(
+		(value): value is number =>
+			typeof value === "number" && Number.isSafeInteger(value) && value > 0,
+	);
+	return rooms.length === facet.filter.value.length && rooms.length > 0
+		? { rooms }
+		: null;
+}
+
 function surfacePropertyFilter(
 	surface: CatalogSurfaceSlug,
 ): Pick<CatalogQueryInput, "category" | "dealType"> {
@@ -881,10 +1032,9 @@ function surfacePropertyFilter(
 	return category ? { category, dealType: "sale" } : {};
 }
 
-function activeSurfaces(): CatalogSurfaceSlug[] {
-	return Object.entries(siteProfile.categoryStatus).flatMap(
-		([surface, status]) =>
-			status === "PREPARED_OFF" ? [] : [surface as CatalogSurfaceSlug],
+function activeSurfaces(profile: SiteProfile): CatalogSurfaceSlug[] {
+	return Object.entries(profile.categoryStatus).flatMap(([surface, status]) =>
+		status === "PREPARED_OFF" ? [] : [surface as CatalogSurfaceSlug],
 	);
 }
 

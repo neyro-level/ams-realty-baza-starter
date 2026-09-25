@@ -5,13 +5,13 @@ import {
 	resolvePropertyPageLifecycle,
 	sanitizeExplicitRedirectPath,
 } from "../src/core/seo/property.ts";
-import { staticPublicUrlEntries } from "../src/project/seo/site.ts";
 import {
 	buildRobots,
 	getProjectIndexingPolicy,
 	metadataRobotsForPolicy,
 	resolveIndexingPolicy,
 } from "../src/project/indexing-policy.ts";
+import { staticPublicUrlEntries } from "../src/project/seo/site.ts";
 
 const fixtureOrigin = "https://realty-client.example";
 assert.equal(getProjectIndexingPolicy(), "noindex");
@@ -133,7 +133,7 @@ assert.deepEqual(
 	}),
 	{
 		kind: "redirect",
-		statusCode: 308,
+		statusCode: 301,
 		destination: "/obekty/explicit-target",
 	},
 );
@@ -211,10 +211,16 @@ assert.equal(
 	"home must not be force-dynamic",
 );
 assert.ok(
-	readFileSync("src/app/(site)/nedvizhimost/page.tsx", "utf8").includes(
-		'permanentRedirect("/kvartiry/")',
+	readFileSync("src/project/routing/legacy-route-manifest.ts", "utf8").includes(
+		'to: "/kvartiry/"',
 	),
-	"legacy catalog must remain a direct canonical redirect",
+	"legacy catalog must remain in the direct redirect manifest",
+);
+assert.ok(
+	readFileSync("src/app/(site)/nedvizhimost/page.tsx", "utf8").includes(
+		"notFound()",
+	),
+	"legacy catalog fallback page must fail closed",
 );
 
 console.log("verify-seo-contracts: ok");

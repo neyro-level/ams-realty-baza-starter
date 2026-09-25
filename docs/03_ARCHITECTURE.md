@@ -104,11 +104,14 @@ client-specific defaults. Опубликованные Payload districts фор�
 Project-owned static routes, brand, domain, city literals и будущий literal
 denylist не переходят в core/packages.
 Payload остаётся единственным schema/auth/Admin owner; public reads продолжают
-идти через explicit Public Gateway и storage-neutral DTO. После P8-23B
-`/nedvizhimost` и `/obekty/[slug]` остались только bounded redirect adapters для
-исторических публичных ссылок. Отдельная proof-only lifecycle HTTP boundary и
-старые catalog/property/sitemap presentation owners удалены; rollback — revert
-cleanup PR, без удаления raw geo/source данных.
+идти через explicit Public Gateway и storage-neutral DTO. Legacy manifest в
+`src/project/routing/legacy-route-manifest.ts` — единственный owner прямых `301`
+для `/nedvizhimost` и `/obekty/[slug]`; соответствующие App Router files только
+fail-closed 404 fallbacks. `src/proxy.ts` также владеет canonical slash `308`,
+потому автоматический Next trailing-slash redirect отключён. Отдельная
+proof-only lifecycle HTTP boundary и старые catalog/property/sitemap
+presentation owners удалены; rollback — revert cleanup PR, без удаления raw
+geo/source данных.
 
 ## Client clone boundary
 
@@ -134,10 +137,10 @@ fixtures.
   deprecated in this Next line and is forbidden in this project. Pinned
   reference: [Next.js 16 Proxy](https://nextjs.org/docs/16/app/api-reference/file-conventions/proxy).
 - Canonical entity pages belong to the catch-all resolver. `src/proxy.ts`
-  returns real `301/410` lifecycle responses before rendering. The legacy
-  `/obekty/[slug]` page is redirect-only and never owns metadata or a visual
-  gone state; the former `/http/property-lifecycle/[slug]` proof route is
-  forbidden by guards after P8-23B.
+  returns real `301/308/410` responses before rendering. Legacy redirects are
+  manifest-owned; legacy App Router pages are 404-only fallbacks and never own
+  metadata or a visual gone state. The former
+  `/http/property-lifecycle/[slug]` proof route is forbidden by guards.
 - Payload `jobs.autoRun` cron `* * * * *` is only the queue polling/execution
   ticker. It is not a business schedule. Business cadence is owned by the task
   registry: `dispatchDueFeeds` = `*/5 * * * *`; `jobsJanitor`,

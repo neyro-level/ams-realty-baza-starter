@@ -238,6 +238,9 @@ export async function findPublicPropertyLifecycleRow(
 	payload: Payload,
 	slug: string,
 ): Promise<{
+	slug: string;
+	publicUrlId: number;
+	category: "apartment" | "house" | "land" | "commercial" | "room" | "garage";
 	status: "active" | "archived";
 	publishedAt: string | null;
 	contentPurgedAt: string | null;
@@ -248,6 +251,9 @@ export async function findPublicPropertyLifecycleRow(
 		limit: 1,
 		page: 1,
 		select: {
+			slug: true,
+			publicUrlId: true,
+			category: true,
 			status: true,
 			publishedAt: true,
 			contentPurgedAt: true,
@@ -256,8 +262,11 @@ export async function findPublicPropertyLifecycleRow(
 		depth: 0,
 	});
 	const row = result.docs[0];
-	if (!row) return null;
+	if (!row?.slug || !row.publicUrlId || !row.category) return null;
 	return {
+		slug: row.slug,
+		publicUrlId: row.publicUrlId,
+		category: row.category,
 		status: row.status === "archived" ? "archived" : "active",
 		publishedAt: row.publishedAt ?? null,
 		contentPurgedAt: row.contentPurgedAt ?? null,

@@ -9,6 +9,19 @@ import {
 	finishImportRun,
 	touchImportRunHeartbeat,
 } from "../../src/core/data-access/ingest/sql/index.ts";
+import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
+import { createPayloadFeedIngestRepository } from "../../src/core/ingest/payload-feed-ingest-repository.ts";
+import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
+import { defineLeadDeliveryPolicy } from "../../src/core/leads/delivery-policy.ts";
+import { defineSiteProfile } from "../../src/core/profile/index.ts";
+import { resolvePropertyPageLifecycle } from "../../src/core/seo/property.ts";
+import {
+	createControllableClock,
+	installRuntimeClock,
+	resetRuntimeClock,
+} from "../../src/core/time/clock.ts";
+import { fixtureSiteSettingsData } from "../../src/fixture/site-settings.ts";
+import { LeadDeliveries } from "../../src/project/collections/LeadDeliveries.ts";
 import {
 	findPublicCatalogProperties,
 	findPublicPropertyBySlug,
@@ -22,25 +35,8 @@ import {
 	listGeoDevelopers,
 } from "../../src/project/data-access/public/geo-catalog.ts";
 import { submitPublicLead } from "../../src/project/data-access/public/leads.ts";
-import { findPublicPage } from "../../src/project/data-access/public/pages.ts";
 import { findPublicNap } from "../../src/project/data-access/public/nap.ts";
-import { fixtureSiteSettingsData } from "../../src/fixture/site-settings.ts";
-import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
-import { resolvePropertyPageLifecycle } from "../../src/core/seo/property.ts";
-import { runDeliverLeadTask } from "../../src/core/leads/deliver-lead.ts";
-import { defineLeadDeliveryPolicy } from "../../src/core/leads/delivery-policy.ts";
-import {
-	getMediaDirectory,
-	isLocalMediaReady,
-	mediaOverwriteDisabled,
-	uniqueMediaFilename,
-} from "../../src/project/storage/local-fs.ts";
-import {
-	createControllableClock,
-	installRuntimeClock,
-	resetRuntimeClock,
-} from "../../src/core/time/clock.ts";
-import { LeadDeliveries } from "../../src/project/collections/LeadDeliveries.ts";
+import { findPublicPage } from "../../src/project/data-access/public/pages.ts";
 import { requirePayloadRuntime } from "../../src/project/env.ts";
 import {
 	payloadJobQueues,
@@ -48,7 +44,13 @@ import {
 } from "../../src/project/jobs/registry.ts";
 import { payloadJobTasks } from "../../src/project/jobs/tasks.ts";
 import { projectConfig } from "../../src/project/project.config.ts";
-import { createPayloadFeedIngestRepository } from "../../src/core/ingest/payload-feed-ingest-repository.ts";
+import { siteProfile } from "../../src/project/site-profile.ts";
+import {
+	getMediaDirectory,
+	isLocalMediaReady,
+	mediaOverwriteDisabled,
+	uniqueMediaFilename,
+} from "../../src/project/storage/local-fs.ts";
 
 requirePayloadRuntime();
 
@@ -303,8 +305,35 @@ assert.equal(
 		geo: developmentCity.slug,
 		surface: "novostroyki",
 	}),
+	0,
+	"unconfigured geo inventory must fail closed",
+);
+const configuredDevelopmentGeoInput = structuredClone(siteProfile);
+configuredDevelopmentGeoInput.geoMode = "MULTI_GEO";
+configuredDevelopmentGeoInput.geos[developmentCity.slug] = {
+	published: true,
+	hubStatus: "ACTIVE",
+};
+configuredDevelopmentGeoInput.geoCategoryStatus[developmentCity.slug] = {
+	...configuredDevelopmentGeoInput.geoCategoryStatus.primorsk,
+};
+configuredDevelopmentGeoInput.marketStatus[developmentCity.slug] = {
+	newbuild: "ACTIVE",
+	secondary: "ACTIVE",
+};
+configuredDevelopmentGeoInput.developersSurface.byGeo[developmentCity.slug] =
+	"ACTIVE";
+const configuredDevelopmentGeo = defineSiteProfile(
+	configuredDevelopmentGeoInput,
+);
+assert.equal(
+	await countInventory(
+		payload,
+		{ geo: developmentCity.slug, surface: "novostroyki" },
+		configuredDevelopmentGeo,
+	),
 	1,
-	"development inventory aggregate must remain city-scoped",
+	"configured development inventory aggregate must remain city-scoped",
 );
 await payload.update({
 	collection: "properties",
