@@ -107,7 +107,7 @@ exact-head STANDARD or RISKY Gate.
 | P8-24 | 154 | `3fbf8b11351a1ac16b85b87a635b41d53aac0acf` | RISKY 240 | `a6f6d0a7826022782172165a9fd601f407dcc2cd` |
 
 P8-25 evidence delivery: SourceCraft PR `156`, accepted head
-`06a68a260761b18e9da12b9044b23958fb2e1153`, STANDARD Gate `246`, squash merge
+`40ecd20520a062e843a2b4e3980cc35066eaea11`, STANDARD Gate `246`, squash merge
 `c5803cfbac5d2c1817451fdee6aa96e3b975934e`. The implementation SHA remains
 `bd570ee40db9e25f73a24013be836dd3876282ac`; the later SHA is docs-only
 reconciliation.
