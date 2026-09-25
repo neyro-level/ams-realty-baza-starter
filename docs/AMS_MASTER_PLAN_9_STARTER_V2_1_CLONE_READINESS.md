@@ -1,22 +1,22 @@
 # AMS MASTER PLAN №9 — STARTER v2.1 / CLONE READINESS
 
 Plan ID: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9
-Version: v4
-Status: APPROVED
-Phase: APPROVAL_HANDOFF
-Baseline: SourceCraft `main@6671b0f0c2ceaf62749cc3b6b78b591c6fe51ed6`  
-Owner input: `STARTER v2.1 — готовность к клонам`, received 2026-09-25  
-Approved by: owner
-Approved at: 2026-09-25T13:09:46+03:00
-Delivery profile: `COMMERCIAL`  
-Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`  
+Version: v5
+Status: READY_FOR_OWNER_APPROVAL
+Phase: FINAL_AUDIT
+Baseline: SourceCraft `main@6671b0f0c2ceaf62749cc3b6b78b591c6fe51ed6`
+Owner input: `STARTER v2.1 — готовность к клонам`, received 2026-09-25
+Delivery profile: `COMMERCIAL`
+Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`
 Production authorization: `NONE`
 
 Этот документ — единственная активная основа нового master plan. Планы №2–8
 остаются историческим evidence в `docs/legacy/` и не являются очередью работ.
-Plan №9 прошёл финальный аудит и exact v4 утверждён владельцем явной фразой
-`План утверждён`. Implementation разрешается только через импортированный и
-reconciled Task Manager graph; production остаётся запрещён.
+Plan №9 прошёл финальный аудит. Exact v4 был утверждён и импортирован, S0
+implementation закрыт с evidence, но delivery preflight остановился до PR на
+whitespace findings полного branch diff. v5 нормализует только whitespace
+source/inventory и требует approval перед versioned Task Manager Upgrade;
+production остаётся запрещён.
 
 ## 1. Primary goal и границы
 
@@ -213,6 +213,7 @@ explicitly approved scope.
 | MP9-A16 | MINOR | Preliminary count mixed implementation graph with release gate | Separated 16 implementation epics S0-S14 from S15 owner/release gate | `RESOLVED` |
 | MP9-A17 | MINOR | Project router still exposed only closed Plan №8 and the old tag target | AGENTS/README/Backlog now point to exact v3 as approval-only planning basis; Plan №8 stays evidence | `RESOLVED` |
 | MP9-A18 | BLOCKER | Approved v3 used inline-code values in Version/Status; canonical importer rejects them before Task Manager writes | v4 normalizes plan metadata to plain machine-readable lines; no epic or requirement changed | `RESOLVED / REAPPROVAL REQUIRED` |
+| MP9-A19 | BLOCKER | Full v4 branch review found four trailing-space findings in approved plan metadata and one blank-at-EOF finding in inventory | v5 removes only whitespace; S0 PR/Gate were not created, graph upgrade waits for owner approval | `RESOLVED / REAPPROVAL REQUIRED` |
 
 ## 6. Dependency graph и delivery order
 
@@ -548,7 +549,7 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 - Stop: no release command, dirty main, changed SHA,
   missing artifact/rollback or any red/unknown required proof.
 
-## 8. Final four-pass audit of exact v4
+## 8. Final four-pass audit of exact v5
 
 ### Pass 1 — logic and completeness
 
@@ -612,7 +613,7 @@ Owner decisions
 Night Run Readiness: READY_WITH_LIMITS
 ```
 
-`READY_WITH_LIMITS` means the exact v4 graph is executable and has no unresolved
+`READY_WITH_LIMITS` means the exact v5 graph is executable and has no unresolved
 planning blocker, but it cannot skip a blocked epic because the owner explicitly
 required strict sequential merge delivery. Removing that limit would change the
 approved execution policy rather than merely improve the graph.
@@ -677,6 +678,19 @@ approved execution policy rather than merely improve the graph.
 - Owner approval: exact v4 approved on 2026-09-25; approval handoff authorized.
 - Resulting version: `v4 APPROVED`.
 
+### Revision input `MP9-R5`
+
+- Source: full S0 delivery diff review after v4 import and implementation.
+- Finding: `git diff --check origin/main...HEAD` found four Markdown trailing
+  spaces in the approved plan header and one extra blank line at inventory EOF.
+- Change: whitespace-only normalization. Plan ID, all 16 implementation epics,
+  dependencies, risk scopes, acceptance, verification and S15 boundary are
+  unchanged. Existing S0 implementation evidence remains valid.
+- Delivery state: no PR, Gate or merge was started; v4 graph pauses at
+  `ams9-task-s0-delivery` until an approved v5 Upgrade reconciles cleanly.
+- Exact-v5 four-pass audit: `PASS`; blockers/major/open owner decisions = `0/0/0`.
+- Resulting version: `v5 READY_FOR_OWNER_APPROVAL`.
+
 | Version | Date | Status | Input | Result |
 |---|---|---|---|---|
 | v0 | 2026-09-25 | DRAFT | Owner attachment `STARTER v2.1 — готовность к клонам` | Existing plan basis accepted for assembly |
@@ -684,14 +698,15 @@ approved execution policy rather than merely improve the graph.
 | v2 | 2026-09-25 | REVIEW | MP9-R2 owner decisions | Self-contained scope; registry path and S10 split fixed; zero before-approval decisions; final audit not started |
 | v3 | 2026-09-25 | APPROVED | MP9-R3 final four-pass audit + explicit owner approval | Exact approved execution source; READY_WITH_LIMITS only because delivery is intentionally serial |
 | v4 | 2026-09-25 | APPROVED | MP9-R4 importer metadata compatibility + explicit owner approval | Exact approved execution source; handoff authorized |
+| v5 | 2026-09-25 | READY_FOR_OWNER_APPROVAL | MP9-R5 whitespace-only delivery correction | No scope change; versioned Upgrade requires exact owner approval |
 
 ## 10. Current handoff state
 
 ```text
-Plan: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9 v4 APPROVED
-Phase: APPROVAL_HANDOFF
-Task Manager import: PENDING VALIDATE / INIT / IMPORT / RECONCILE
-Developer handoff: PENDING CLEAN RECONCILIATION
+Plan: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9 v5 READY_FOR_OWNER_APPROVAL
+Phase: FINAL_AUDIT
+Task Manager: v4 graph paused at ams9-task-s0-delivery; v5 Upgrade NOT ALLOWED
+Developer handoff: PAUSED BEFORE PR/GATE
 Production: NOT AUTHORIZED
-Next: docs checkpoint → inventory v2 → Task Manager → Developer goal
+Next: exact owner phrase «План утверждён» or «План утвержден» for v5
 ```
