@@ -40,7 +40,7 @@ function isActive(value: string | undefined): boolean {
 
 function activeGeo(profile: SiteProfile, geo: string): boolean {
 	const definition = profile.geos[geo];
-	return Boolean(definition?.published && isActive(definition.status));
+	return Boolean(definition?.published && isActive(definition.hubStatus));
 }
 
 function activeCategory(

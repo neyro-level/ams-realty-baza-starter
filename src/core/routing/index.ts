@@ -1,5 +1,6 @@
 export {
 	createUrlGrammar,
+	isPlatformReservedRoot,
 	platformReservedRoots,
 	propertySurfaceSlugs,
 	transliterateToSlug,

@@ -43,6 +43,9 @@ export function createProjectUrlGrammar(profile: SiteProfile) {
 		staticPaths: projectStaticRoutes
 			.map((route) => route.path)
 			.filter((path) => path !== "/"),
+		moduleRootSlugs: Object.values(profile.modules).flatMap(
+			(module) => module.reservedRoots,
+		),
 		districtSlugsByGeo,
 		facetSlugsByGeoCategory,
 	});

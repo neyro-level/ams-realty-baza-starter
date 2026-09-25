@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import {
 	defineSiteProfile,
+	getGeoHubStatus,
 	isConfiguredRouteAvailable,
 	isGeoHubAvailable,
+	seoTierMetrics,
 	siteProfileSchema,
 } from "../src/core/profile/index.ts";
 import {
@@ -20,17 +22,42 @@ for (const [name, fixture] of Object.entries(siteProfileFixtures)) {
 	);
 	assert.equal(fixture.primaryGeo, "primorsk");
 }
-assert.deepEqual(siteProfile, siteProfileFixtures.singleGeo);
-assert.deepEqual(siteProfile, createProjectSiteProfile(projectSiteProfileConfig));
+assert.equal(Object.keys(siteProfileFixtures).length, 5);
+assert.deepEqual(
+	siteProfile,
+	createProjectSiteProfile(projectSiteProfileConfig),
+);
 assert.equal(siteProfile.preset, "MIXED");
 assert.equal(siteProfile.geoMode, "SINGLE_GEO");
-assert.equal(
-	siteProfileFixtures.multiGeo.geos.zarechnyy?.agglomerationOf,
+assert.deepEqual(Object.keys(siteProfileFixtures.singleGeoThreeCities.geos), [
 	"primorsk",
+	"zarechnyy",
+	"beregovoy",
+]);
+assert.equal(
+	siteProfileFixtures.singleGeoThreeCities.geos.zarechnyy?.hubStatus,
+	"PREPARED_OFF",
 );
+assert.equal(getGeoHubStatus(siteProfile, "missing"), "PREPARED_OFF");
+
+const ownedFields = [
+	"categoryStatus",
+	"marketCapability",
+	"geoCategoryStatus",
+	"marketStatus",
+	"developersSurface",
+	"seoTiers",
+	"gate",
+	"staticRoutes",
+	"modules",
+] as const;
+for (const field of ownedFields) {
+	assert.ok(field in projectSiteProfileConfig, `project config owns ${field}`);
+}
 
 function expectInvalid(
 	name: string,
+	path: readonly (string | number)[],
 	mutate: (profile: Record<string, unknown>) => void,
 ) {
 	const candidate = structuredClone(siteProfileFixtures.multiGeo) as Record<
@@ -38,17 +65,32 @@ function expectInvalid(
 		unknown
 	>;
 	mutate(candidate);
-	assert.equal(siteProfileSchema.safeParse(candidate).success, false, name);
+	const result = siteProfileSchema.safeParse(candidate);
+	assert.equal(result.success, false, name);
+	if (result.success) return;
+	assert.ok(
+		result.error.issues.some(
+			(issue) => JSON.stringify(issue.path) === JSON.stringify(path),
+		),
+		`${name}: expected issue path ${path.join(".")}, received ${result.error.issues
+			.map((issue) => issue.path.join("."))
+			.join(", ")}`,
+	);
 }
 
-expectInvalid("unknown primary geo", (profile) => {
+expectInvalid("unknown primary geo", ["primaryGeo"], (profile) => {
 	profile.primaryGeo = "missing";
 });
-expectInvalid("single geo cannot contain two geos", (profile) => {
-	profile.geoMode = "SINGLE_GEO";
-});
+expectInvalid(
+	"single geo cannot expose two routable hubs",
+	["geos"],
+	(profile) => {
+		profile.geoMode = "SINGLE_GEO";
+	},
+);
 expectInvalid(
 	"active geo category requires active platform category",
+	["geoCategoryStatus", "primorsk", "kvartiry"],
 	(profile) => {
 		const category = profile.categoryStatus as Record<string, string>;
 		category.kvartiry = "OUT";
@@ -56,80 +98,101 @@ expectInvalid(
 );
 expectInvalid(
 	"active geo market requires active platform market",
+	["marketStatus", "primorsk", "secondary"],
 	(profile) => {
 		const market = profile.marketCapability as Record<string, string>;
 		market.secondary = "PREPARED_OFF";
 	},
 );
-expectInvalid("active geo developers require active root", (profile) => {
-	const developers = profile.developersSurface as {
-		root: string;
-		byGeo: Record<string, string>;
-	};
-	developers.root = "OUT";
-});
-expectInvalid("unknown geo matrix key", (profile) => {
-	const matrix = profile.marketStatus as Record<string, unknown>;
-	matrix.unknown = { newbuild: "OUT", secondary: "OUT" };
-});
-expectInvalid("agglomeration parent must exist", (profile) => {
-	const geos = profile.geos as Record<string, { agglomerationOf?: string }>;
-	geos.zarechnyy.agglomerationOf = "missing";
-});
-expectInvalid("self agglomeration", (profile) => {
-	const geos = profile.geos as Record<string, { agglomerationOf?: string }>;
-	geos.zarechnyy.agglomerationOf = "zarechnyy";
-});
-expectInvalid("price fail threshold follows stale threshold", (profile) => {
-	const gate = profile.gate as {
-		priceStaleDays: number;
-		priceFailDays: number;
-	};
-	gate.priceFailDays = gate.priceStaleDays;
-});
-expectInvalid("unknown profile field", (profile) => {
+expectInvalid(
+	"active geo developers require active root",
+	["developersSurface", "byGeo", "primorsk"],
+	(profile) => {
+		const developers = profile.developersSurface as {
+			root: string;
+			byGeo: Record<string, string>;
+		};
+		developers.root = "OUT";
+	},
+);
+expectInvalid(
+	"unknown geo matrix key",
+	["marketStatus", "unknown"],
+	(profile) => {
+		const matrix = profile.marketStatus as Record<string, unknown>;
+		matrix.unknown = { newbuild: "OUT", secondary: "OUT" };
+	},
+);
+expectInvalid(
+	"agglomeration parent must exist",
+	["geos", "zarechnyy", "agglomerationOf"],
+	(profile) => {
+		const geos = profile.geos as Record<string, { agglomerationOf?: string }>;
+		geos.zarechnyy.agglomerationOf = "missing";
+	},
+);
+expectInvalid(
+	"self agglomeration",
+	["geos", "zarechnyy", "agglomerationOf"],
+	(profile) => {
+		const geos = profile.geos as Record<string, { agglomerationOf?: string }>;
+		geos.zarechnyy.agglomerationOf = "zarechnyy";
+	},
+);
+expectInvalid(
+	"price fail threshold follows stale threshold",
+	["gate", "priceFailDays"],
+	(profile) => {
+		const gate = profile.gate as {
+			priceStaleDays: number;
+			priceFailDays: number;
+		};
+		gate.priceFailDays = gate.priceStaleDays;
+	},
+);
+expectInvalid(
+	"SEO tiers descend strictly",
+	["seoTiers", "bands"],
+	(profile) => {
+		const seo = profile.seoTiers as { bands: { P2: number; TEST: number } };
+		seo.bands.TEST = seo.bands.P2;
+	},
+);
+expectInvalid("unknown profile field", [], (profile) => {
 	profile.projectBrand = "must stay outside reusable core";
 });
 
+for (const metric of seoTierMetrics) {
+	const candidate = structuredClone(siteProfileFixtures.singleGeo);
+	candidate.seoTiers.metric = metric;
+	assert.equal(siteProfileSchema.safeParse(candidate).success, true, metric);
+}
+
 assert.equal(
-	isConfiguredRouteAvailable({
-		status: "NOINDEX_AUTO",
-		inventory: 9,
-		minimumInventory: 10,
-	}),
+	isConfiguredRouteAvailable({ status: "NOINDEX_AUTO", inventory: 0 }),
 	false,
 );
 assert.equal(
-	isConfiguredRouteAvailable({
-		status: "NOINDEX_AUTO",
-		inventory: 10,
-		minimumInventory: 10,
-	}),
+	isConfiguredRouteAvailable({ status: "NOINDEX_AUTO", inventory: 1 }),
 	true,
 );
 assert.equal(
-	isConfiguredRouteAvailable({
-		status: "ACTIVE",
-		inventory: 0,
-		minimumInventory: 10,
-	}),
+	isConfiguredRouteAvailable({ status: "ACTIVE", inventory: 0 }),
 	true,
 );
 assert.equal(
 	isGeoHubAvailable({
 		published: false,
-		status: "ACTIVE",
+		hubStatus: "ACTIVE",
 		inventory: 100,
-		minimumInventory: 10,
 	}),
 	false,
 );
 assert.equal(
 	isGeoHubAvailable({
 		published: true,
-		status: "OUT",
+		hubStatus: "OUT",
 		inventory: 100,
-		minimumInventory: 10,
 	}),
 	false,
 );
@@ -138,4 +201,6 @@ assert.deepEqual(
 	defineSiteProfile(siteProfileFixtures.singleGeo),
 	siteProfileFixtures.singleGeo,
 );
-console.log("verify:site-profile passed (4 fixtures + invalid matrix)");
+console.log(
+	"verify:site-profile passed (5 fixtures + explicit matrices + invalid paths)",
+);

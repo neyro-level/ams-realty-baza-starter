@@ -11,7 +11,8 @@ needs before schema design begins.
 
 ## Enabled flag owner
 
-The `agents` row in `docs/PROJECT.md`.
+The `agents` entry in validated `src/project/site-profile.config.ts`;
+`docs/PROJECT.md` mirrors it for operators.
 
 ## Reserved URLs
 

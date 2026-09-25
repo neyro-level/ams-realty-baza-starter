@@ -56,8 +56,8 @@ route cutover и P8-23B cleanup находятся в текущем runtime. К
 | Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
 | Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
 | Geo-catalog runtime | `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover и guarded cleanup реализованы |
-| Geo modes | `SINGLE_GEO | MULTI_GEO`; active value принадлежит validated SiteProfile и не выводится из текущих маршрутов |
-| Clone preset | `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`; `clone:prepare` consumes an approved JSON preset and generates project SiteProfile plus `docs/CLIENT_BOOTSTRAP.json` |
+| Geo modes | `SINGLE_GEO | MULTI_GEO`; validated SiteProfile separates geo `published` from `hubStatus`; SINGLE_GEO owns exactly one routable primary hub |
+| Clone preset | `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`; `clone:prepare` generates the complete explicit SiteProfile matrix plus `docs/CLIENT_BOOTSTRAP.json` |
 | Client fixture boundary | `projectKind=client` never falls back to starter demo properties when Payload data is absent; empty client data produces an empty/not-found runtime result |
 | Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |
 | Development model | Одна `developments` entity с `kind = residential_complex | cottage_village` и strict kind-specific validation |
@@ -66,8 +66,10 @@ route cutover и P8-23B cleanup находятся в текущем runtime. К
 
 ## Optional modules
 
-`PROJECT.md` is the owner of module activation state. A manifest documents how a
-module may be activated; it does not activate runtime code or collections.
+Validated `src/project/site-profile.config.ts` is the runtime owner of module
+state and reserved module spaces. This table mirrors that configuration for
+operators; a manifest documents activation requirements and does not activate
+runtime code or collections by itself.
 
 <!-- MODULE_GOVERNANCE_BEGIN -->
 | Module | State | Manifest |

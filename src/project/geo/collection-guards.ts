@@ -13,8 +13,10 @@ import {
 	catalogSurfaceSlugs,
 	type SiteProfile,
 } from "../../core/profile/index.ts";
-import { platformReservedRoots } from "../../core/routing/url-grammar.ts";
-import { projectConfig } from "../project.config.ts";
+import {
+	isPlatformReservedRoot,
+	platformReservedRoots,
+} from "../../core/routing/url-grammar.ts";
 import { siteProfile } from "../site-profile.ts";
 import { projectStaticRoutes } from "../static-routes.ts";
 import { projectFacetSlugFixtures } from "../url-grammar.ts";
@@ -36,11 +38,8 @@ const staticRoots = projectStaticRoutes.flatMap((route) => {
 	const root = route.path.split("/").filter(Boolean)[0];
 	return root ? [root] : [];
 });
-const configuredReservedRoots = projectConfig.reservedNamespaces.flatMap(
-	(namespace) => {
-		const root = namespace.split("/").filter(Boolean)[0];
-		return root ? [root] : [];
-	},
+const configuredReservedRoots = Object.values(siteProfile.modules).flatMap(
+	(module) => module.reservedRoots,
 );
 
 export const reservedGeoRootSlugs = new Set<string>([
@@ -153,6 +152,11 @@ export async function validateRootGeoWrite(input: {
 }): Promise<GeoData> {
 	normalizeGeoWrite(input.data, input.originalDoc, input.label);
 	const slug = String(input.data.slug);
+	if (isPlatformReservedRoot(slug)) {
+		throw new Error(
+			`${input.label} slug is reserved by the platform: ${slug}.`,
+		);
+	}
 	assertSlugOutsideNamespace(slug, reservedGeoRootSlugs, input.label);
 	if (
 		await rootSlugExists(

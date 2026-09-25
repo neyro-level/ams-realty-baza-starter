@@ -158,7 +158,7 @@ assert.deepEqual(await resolver.resolvePath(grammar.buildUrl(lowInventory)), {
 });
 
 const inactiveInput = structuredClone(siteProfileFixtures.multiGeo);
-inactiveInput.geos.zarechnyy.status = "OUT";
+inactiveInput.geos.zarechnyy.hubStatus = "OUT";
 const inactiveProfile = defineSiteProfile(inactiveInput);
 const inactiveGrammar = createProjectUrlGrammar(inactiveProfile);
 const inactiveGeoKey = { kind: "geoHub", geo: "zarechnyy" } as const;
@@ -211,5 +211,5 @@ for (const forbidden of [
 }
 
 console.log(
-	"verify:resolver passed (four profiles + page/redirect/404/410 + no-chain matrix)",
+	"verify:resolver passed (five profiles + page/redirect/404/410 + no-chain matrix)",
 );

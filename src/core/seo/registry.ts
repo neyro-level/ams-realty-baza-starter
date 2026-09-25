@@ -20,10 +20,11 @@ export const seoTemplateKeys = [
 	"developer",
 	"property",
 ] as const;
+export const seoTiers = ["P1", "P2", "TEST", "NONE"] as const;
 
 export type SeoEvidenceSource = (typeof seoEvidenceSources)[number];
 export type SeoTemplateKey = (typeof seoTemplateKeys)[number];
-export type SeoTier = "P1" | "P2" | "TEST";
+export type SeoTier = (typeof seoTiers)[number];
 export type SeoRobots = "index,follow" | "noindex,follow";
 export type SeoRegistryStatus = "draft" | "approved" | "retired";
 
@@ -268,6 +269,9 @@ export function assertSeoRegistry(input: SeoRegistryGuardInput): void {
 	for (const row of input.rows) {
 		if (!(seoEvidenceSources as readonly string[]).includes(row.source)) {
 			throw new Error(`Unsupported SEO evidence source: ${row.source}`);
+		}
+		if (!(seoTiers as readonly string[]).includes(row.tier)) {
+			throw new Error(`Unsupported SEO tier: ${row.tier}`);
 		}
 		const expectedUrl = input.buildUrl(row.pageKey);
 		if (row.url !== expectedUrl) {

@@ -43,7 +43,7 @@ try {
 	);
 	writeFileSync(
 		join(fixture, "src/project/project.config.ts"),
-		'export const projectConfig = { reservedNamespaces: ["/novostroyki", "/komplex", "/journal"] };\n',
+		"export const projectConfig = {};\n",
 	);
 	writeFileSync(join(fixture, "src/project/site-profile.config.ts"), "starter\n");
 	for (const path of [

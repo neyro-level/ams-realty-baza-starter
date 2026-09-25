@@ -1,14 +1,14 @@
 import {
 	catalogSurfaceSlugs,
 	defineSiteProfile,
+	isConfiguredRouteAvailable,
 	type SitePreset,
 	type SiteProfile,
-	type SiteProfileInput,
 } from "../core/profile/index.ts";
 import { projectSiteProfileConfig } from "./site-profile.config.ts";
 import type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";
 
-const defaultFacets: SiteProfileInput["facetWhitelist"] = {
+const defaultFacetWhitelist: ProjectSiteProfileConfig["facetWhitelist"] = {
 	kvartiry: ["rooms", "district", "price", "area"],
 	doma: ["district", "price", "area"],
 	uchastki: ["district", "price", "area"],
@@ -20,9 +20,68 @@ const defaultFacets: SiteProfileInput["facetWhitelist"] = {
 	"kottedzhnye-poselki": ["district", "developer"],
 };
 
+const defaultStaticRoutes: ProjectSiteProfileConfig["staticRoutes"] = [
+	{ path: "/", changeFrequency: "daily", priority: 1, indexable: true },
+	{
+		path: "/nedvizhimost",
+		changeFrequency: "daily",
+		priority: 0.9,
+		indexable: false,
+	},
+	{
+		path: "/uslugi",
+		changeFrequency: "weekly",
+		priority: 0.7,
+		indexable: true,
+	},
+	{
+		path: "/o-kompanii",
+		changeFrequency: "monthly",
+		priority: 0.6,
+		indexable: true,
+	},
+	{
+		path: "/ipoteka",
+		changeFrequency: "weekly",
+		priority: 0.7,
+		indexable: true,
+	},
+	{
+		path: "/prodat",
+		changeFrequency: "weekly",
+		priority: 0.7,
+		indexable: true,
+	},
+	{ path: "/sdat", changeFrequency: "weekly", priority: 0.7, indexable: true },
+	{
+		path: "/kontakty",
+		changeFrequency: "monthly",
+		priority: 0.6,
+		indexable: true,
+	},
+	{
+		path: "/politika-konfidencialnosti",
+		changeFrequency: "yearly",
+		priority: 0.2,
+		indexable: false,
+	},
+	{
+		path: "/soglasie-na-obrabotku-personalnyh-dannyh",
+		changeFrequency: "yearly",
+		priority: 0.2,
+		indexable: false,
+	},
+];
+
+const defaultModules: ProjectSiteProfileConfig["modules"] = {
+	novostroyki: { state: "prepared", reservedRoots: ["komplex"] },
+	journal: { state: "disabled", reservedRoots: ["journal"] },
+	agents: { state: "disabled", reservedRoots: ["sotrudniki"] },
+};
+
 function surfaceStatuses(
 	preset: SitePreset,
-): SiteProfileInput["categoryStatus"] {
+): ProjectSiteProfileConfig["categoryStatus"] {
 	return Object.fromEntries(
 		catalogSurfaceSlugs.map((surface) => {
 			if (preset === "NEWBUILD_FIRST") {
@@ -43,70 +102,74 @@ function surfaceStatuses(
 			}
 			return [surface, "ACTIVE"];
 		}),
-	) as SiteProfileInput["categoryStatus"];
+	) as ProjectSiteProfileConfig["categoryStatus"];
 }
 
-function createFixtureProfile(input: {
+function inactiveSurfaceStatuses(): ProjectSiteProfileConfig["categoryStatus"] {
+	return Object.fromEntries(
+		catalogSurfaceSlugs.map((surface) => [surface, "PREPARED_OFF"]),
+	) as ProjectSiteProfileConfig["categoryStatus"];
+}
+
+export function createPresetSiteProfileConfig(input: {
 	preset: SitePreset;
-	geoMode: "SINGLE_GEO" | "MULTI_GEO";
-}): SiteProfile {
-	const geos = {
-		primorsk: { published: true, status: "ACTIVE" },
-		...(input.geoMode === "MULTI_GEO"
-			? {
-					zarechnyy: {
-						published: true,
-						status: "NOINDEX_AUTO" as const,
-						agglomerationOf: "primorsk",
-					},
-				}
-			: {}),
-	} as SiteProfileInput["geos"];
-	return createProjectSiteProfile({
-		preset: input.preset,
-		geoMode: input.geoMode,
-		primaryGeo: "primorsk",
-		geos,
-	});
-}
-
-export function createProjectSiteProfile(
-	input: ProjectSiteProfileConfig,
-): SiteProfile {
-	const geos = input.geos as SiteProfileInput["geos"];
+	geoMode: ProjectSiteProfileConfig["geoMode"];
+	primaryGeo: string;
+	geos: ProjectSiteProfileConfig["geos"];
+}): ProjectSiteProfileConfig {
 	const categoryStatus = surfaceStatuses(input.preset);
 	const marketCapability = {
 		newbuild: input.preset === "SECONDARY_FIRST" ? "PREPARED_OFF" : "ACTIVE",
 		secondary: input.preset === "NEWBUILD_FIRST" ? "NOINDEX_AUTO" : "ACTIVE",
 	} as const;
+	const inactiveMarkets = {
+		newbuild: "PREPARED_OFF",
+		secondary: "PREPARED_OFF",
+	} as const;
 	const geoCategoryStatus = Object.fromEntries(
-		Object.keys(geos).map((geo) => [geo, { ...categoryStatus }]),
-	) as SiteProfileInput["geoCategoryStatus"];
-	const marketStatus = Object.fromEntries(
-		Object.keys(geos).map((geo) => [geo, { ...marketCapability }]),
-	) as SiteProfileInput["marketStatus"];
-	const developersByGeo = Object.fromEntries(
-		Object.keys(geos).map((geo) => [
+		Object.entries(input.geos).map(([geo, definition]) => [
 			geo,
-			input.preset === "SECONDARY_FIRST" ? "NOINDEX_AUTO" : "ACTIVE",
+			isConfiguredRouteAvailable({ status: definition.hubStatus, inventory: 1 })
+				? { ...categoryStatus }
+				: inactiveSurfaceStatuses(),
 		]),
-	) as SiteProfileInput["developersSurface"]["byGeo"];
+	) as ProjectSiteProfileConfig["geoCategoryStatus"];
+	const marketStatus = Object.fromEntries(
+		Object.entries(input.geos).map(([geo, definition]) => [
+			geo,
+			isConfiguredRouteAvailable({ status: definition.hubStatus, inventory: 1 })
+				? { ...marketCapability }
+				: { ...inactiveMarkets },
+		]),
+	) as ProjectSiteProfileConfig["marketStatus"];
+	const developersByGeo = Object.fromEntries(
+		Object.entries(input.geos).map(([geo, definition]) => [
+			geo,
+			!isConfiguredRouteAvailable({
+				status: definition.hubStatus,
+				inventory: 1,
+			})
+				? "PREPARED_OFF"
+				: input.preset === "SECONDARY_FIRST"
+					? "NOINDEX_AUTO"
+					: "ACTIVE",
+		]),
+	) as ProjectSiteProfileConfig["developersSurface"]["byGeo"];
 
-	return defineSiteProfile({
+	return {
 		preset: input.preset,
 		geoMode: input.geoMode,
 		primaryGeo: input.primaryGeo,
-		geos,
+		geos: input.geos,
 		categoryStatus,
 		marketCapability,
 		geoCategoryStatus,
 		marketStatus,
-		defaultNearbyGeoStatus: "NOINDEX_AUTO",
 		developersSurface: {
 			root: input.preset === "SECONDARY_FIRST" ? "NOINDEX_AUTO" : "ACTIVE",
 			byGeo: developersByGeo,
 		},
-		facetWhitelist: defaultFacets,
+		facetWhitelist: defaultFacetWhitelist,
 		seoTiers: {
 			metric: "searchDemand",
 			snapshotDate: "2026-09-24",
@@ -136,11 +199,45 @@ export function createProjectSiteProfile(
 			developerGeoMin: 5,
 			developerDescMinChars: 600,
 		},
+		staticRoutes: defaultStaticRoutes,
+		modules: defaultModules,
 		entityPrefixes: {
 			residentialComplex: "zhk-",
 			cottageVillage: "kp-",
 		},
-	});
+	};
+}
+
+export function createProjectSiteProfile(
+	input: ProjectSiteProfileConfig,
+): SiteProfile {
+	return defineSiteProfile(input);
+}
+
+function createFixtureProfile(input: {
+	preset: SitePreset;
+	geoMode: ProjectSiteProfileConfig["geoMode"];
+}): SiteProfile {
+	const geos: ProjectSiteProfileConfig["geos"] = {
+		primorsk: { published: true, hubStatus: "ACTIVE" },
+		...(input.geoMode === "MULTI_GEO"
+			? {
+					zarechnyy: {
+						published: true,
+						hubStatus: "NOINDEX_AUTO" as const,
+						agglomerationOf: "primorsk",
+					},
+				}
+			: {}),
+	};
+	return createProjectSiteProfile(
+		createPresetSiteProfileConfig({
+			preset: input.preset,
+			geoMode: input.geoMode,
+			primaryGeo: "primorsk",
+			geos,
+		}),
+	);
 }
 
 export const siteProfileFixtures = {
@@ -154,6 +251,22 @@ export const siteProfileFixtures = {
 		preset: "SECONDARY_FIRST",
 		geoMode: "MULTI_GEO",
 	}),
+	singleGeoThreeCities: createProjectSiteProfile(
+		createPresetSiteProfileConfig({
+			preset: "MIXED",
+			geoMode: "SINGLE_GEO",
+			primaryGeo: "primorsk",
+			geos: {
+				primorsk: { published: true, hubStatus: "ACTIVE" },
+				zarechnyy: {
+					published: true,
+					hubStatus: "PREPARED_OFF",
+					agglomerationOf: "primorsk",
+				},
+				beregovoy: { published: false, hubStatus: "PREPARED_OFF" },
+			},
+		}),
+	),
 } as const;
 
 export const siteProfile = createProjectSiteProfile(projectSiteProfileConfig);

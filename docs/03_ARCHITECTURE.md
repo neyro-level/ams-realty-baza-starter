@@ -95,8 +95,11 @@ core/packages -X-> project
 `src/platform/**`, применяются к фактической reusable surface, а не создают
 новый каталог-владелец.
 
-Profile передаётся в reusable core явно. Project-owned static routes, brand,
-domain, city literals и будущий literal denylist не переходят в core/packages.
+Profile передаётся в reusable core явно. Validated project config полностью
+владеет geo/category/market/developer matrices, SEO tiers, Gate, static routes
+и module spaces; reusable core не подставляет client-specific defaults.
+Project-owned static routes, brand, domain, city literals и будущий literal
+denylist не переходят в core/packages.
 Payload остаётся единственным schema/auth/Admin owner; public reads продолжают
 идти через explicit Public Gateway и storage-neutral DTO. После P8-23B
 `/nedvizhimost` и `/obekty/[slug]` остались только bounded redirect adapters для

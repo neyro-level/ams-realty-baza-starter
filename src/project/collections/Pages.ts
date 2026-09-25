@@ -1,7 +1,8 @@
 import type { CollectionConfig } from "payload";
 import { publicPageReadAccess } from "../data-access/public/access-mode.ts";
 import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
-import { projectConfig } from "../project.config.ts";
+import { isPlatformReservedRoot } from "../../core/routing/index.ts";
+import { reservedGeoRootSlugs } from "../geo/collection-guards.ts";
 
 export const Pages: CollectionConfig = {
 	slug: "pages",
@@ -20,13 +21,12 @@ export const Pages: CollectionConfig = {
 			({ data }) => {
 				if (!data || typeof data.slug !== "string") return data;
 				const slug = data.slug.trim().replace(/^\/+/, "");
-				const path = `/${slug}`;
-				const reserved = projectConfig.reservedNamespaces.some(
-					(namespace) => path === namespace || path.startsWith(`${namespace}/`),
-				);
+				const root = slug.split("/", 1)[0] ?? "";
+				const reserved =
+					reservedGeoRootSlugs.has(root) || isPlatformReservedRoot(root);
 				if (reserved) {
 					throw new Error(
-						`CMS page slug cannot occupy reserved namespace ${path}.`,
+						`CMS page slug cannot occupy reserved namespace /${root}.`,
 					);
 				}
 				data.slug = slug;

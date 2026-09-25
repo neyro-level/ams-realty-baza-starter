@@ -1,17 +1,13 @@
 import { execFileSync } from "node:child_process";
-import {
-	existsSync,
-	readFileSync,
-	rmSync,
-	writeFileSync,
-} from "node:fs";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import {
 	buildCloneBootstrap,
 	clonePresetHash,
-	parseReservedNamespaces,
 	readClonePreset,
 	renderSiteProfileConfig,
+	reservedRootsForSiteProfile,
+	siteProfileConfigForPreset,
 	validateCloneBootstrap,
 } from "./clone-preset.mjs";
 
@@ -36,7 +32,9 @@ const git = (...gitArgs) => {
 };
 const presetFile = args.get("--preset-file");
 if (!presetFile || presetFile === true) {
-	throw new Error("clone:prepare requires --preset-file=<approved JSON preset>.");
+	throw new Error(
+		"clone:prepare requires --preset-file=<approved JSON preset>.",
+	);
 }
 const preset = readClonePreset(
 	isAbsolute(String(presetFile))
@@ -62,20 +60,28 @@ if (existsSync(provenancePath)) {
 		throw new Error("Clone is already prepared from a different preset.");
 	}
 	validateCloneBootstrap(root);
-	console.log("clone:prepare: already prepared from the same preset; no changes");
+	console.log(
+		"clone:prepare: already prepared from the same preset; no changes",
+	);
 	process.exit(0);
 }
 
 const sourceHead = git("rev-parse", "HEAD");
 const taggedHead = git("rev-list", "-n", "1", sourceTag);
 if (!proofMode) {
-	if (sourceHead === "UNKNOWN" || taggedHead === "UNKNOWN" || sourceHead !== taggedHead) {
+	if (
+		sourceHead === "UNKNOWN" ||
+		taggedHead === "UNKNOWN" ||
+		sourceHead !== taggedHead
+	) {
 		throw new Error(
 			"clone:prepare must run from the exact immutable starter-v2.0.0 tag.",
 		);
 	}
 	if (git("status", "--porcelain")) {
-		throw new Error("clone:prepare requires a clean checkout before preparation.");
+		throw new Error(
+			"clone:prepare requires a clean checkout before preparation.",
+		);
 	}
 }
 const sourceSha = String(args.get("--source-sha") || sourceHead);
@@ -115,7 +121,11 @@ const removed = [];
 for (const relativePath of removalGroups) {
 	const target = resolve(root, relativePath);
 	const rootRelative = relative(root, target);
-	if (!rootRelative || rootRelative.startsWith("..") || isAbsolute(rootRelative)) {
+	if (
+		!rootRelative ||
+		rootRelative.startsWith("..") ||
+		isAbsolute(rootRelative)
+	) {
 		throw new Error(`unsafe cleanup path: ${relativePath}`);
 	}
 	if (!existsSync(target)) continue;
@@ -145,7 +155,8 @@ if (packageJson.scripts?.verify) {
 writeFileSync(packagePath, `${JSON.stringify(packageJson, null, "\t")}\n`);
 
 const replaceLiteral = (source, pattern, replacement, label) => {
-	if (!pattern.test(source)) throw new Error(`site.config.ts ${label} owner is missing.`);
+	if (!pattern.test(source))
+		throw new Error(`site.config.ts ${label} owner is missing.`);
 	return source.replace(pattern, replacement);
 };
 let siteConfig = config;
@@ -179,7 +190,12 @@ writeFileSync(
 	renderSiteProfileConfig(preset),
 );
 
-const readinessPath = join(root, "src", "project", "client-readiness.config.ts");
+const readinessPath = join(
+	root,
+	"src",
+	"project",
+	"client-readiness.config.ts",
+);
 let readiness = readFileSync(readinessPath, "utf8");
 readiness = readiness.replace(
 	/domain:\s*(?:null|["'][^"']+["']),/,
@@ -191,13 +207,9 @@ readiness = readiness.replace(
 );
 writeFileSync(readinessPath, readiness);
 
-const projectConfigSource = readFileSync(
-	join(root, "src", "project", "project.config.ts"),
-	"utf8",
-);
 const bootstrap = buildCloneBootstrap(
 	preset,
-	parseReservedNamespaces(projectConfigSource),
+	reservedRootsForSiteProfile(siteProfileConfigForPreset(preset)),
 	presetSha,
 );
 writeFileSync(bootstrapPath, `${JSON.stringify(bootstrap, null, "\t")}\n`);

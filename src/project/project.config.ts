@@ -14,7 +14,6 @@ export const projectConfig = {
 	staleDataSlaMinutes: 30,
 	cacheInvalidationMode: "http" as const,
 	cacheProofStatus: "http" as const,
-	reservedNamespaces: ["/novostroyki", "/komplex", "/journal"],
 	indexedCatalogFilterKeys: [
 		"category",
 		"dealType",

@@ -165,6 +165,18 @@ assert.equal(autoNoindex.statusCode, 200);
 assert.equal(autoNoindex.indexing, "noindex");
 assert.equal(autoNoindex.overrideAudit?.result, "denied");
 
+const noneTier = evaluateContentGate(
+	profile,
+	{
+		...passingListing,
+		registry: { ...approvedRegistry, tier: "NONE" },
+	},
+	now,
+);
+assert.equal(noneTier.statusCode, 200);
+assert.equal(noneTier.indexing, "noindex");
+assert.ok(noneTier.reasons.includes("registry_tier_none"));
+
 for (const lifecycle of [
 	{ kind: "missing", statusCode: 404 },
 	{ kind: "archived", statusCode: 200, robots: "noindex" },
@@ -262,5 +274,5 @@ assert.throws(
 );
 
 console.log(
-	"verify:content-gate passed (four profiles + listing/property/development/developer/override matrix)",
+	"verify:content-gate passed (five profiles + listing/property/development/developer/override matrix)",
 );

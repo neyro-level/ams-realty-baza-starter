@@ -118,15 +118,21 @@ invalid.
 
 SiteProfile is the explicit input to reusable core and contains:
 
-- `geoMode`, `primaryGeo`;
+- `geoMode`, `primaryGeo` and per-geo `published` + `hubStatus`;
 - `categoryStatus`, `marketCapability`;
 - per-geo `geoCategoryStatus` and `marketStatus`;
-- `defaultNearbyGeoStatus`;
 - root/per-geo `developersSurface`;
 - per-surface `facetWhitelist`;
-- SEO tier thresholds, inventory minima and unmeasured policy;
+- SEO tier metric (`broad39 | wordstat | searchDemand`), descending
+  `P1 > P2 > TEST >= 0`, inventory minima and unmeasured policy;
 - Content Gate thresholds;
+- project static routes and module states/reserved spaces;
 - entity prefixes `zhk-` and `kp-`.
+
+Missing geo lookup is `PREPARED_OFF`. Reserved roots are composed from platform
+roots (`journal`, `legal`, `poisk`, `sotrudniki`, `komplex`, `sitemap*`),
+catalog categories, project static roots and module spaces. The profile is the
+single project owner; `projectConfig.reservedNamespaces` does not exist.
 
 No reusable module discovers project profile by importing `src/project/**`.
 The application layer passes the validated profile explicitly.
@@ -136,7 +142,7 @@ Status semantics:
 | Status | Route | Robots/discovery |
 |---|---|---|
 | `ACTIVE` | eligible for page resolution | final indexability is decided by Content Gate |
-| `NOINDEX_AUTO` | 200 when otherwise valid | `noindex,follow`, self-canonical, absent from sitemap/menu |
+| `NOINDEX_AUTO` | 200 with at least one active object; not tied to SEO tier minima | `noindex,follow`, self-canonical, absent from sitemap/menu |
 | `PREPARED_OFF` | 404 | absent from sitemap/menu/interlinks |
 | `OUT` | 404 | absent from sitemap/menu/interlinks |
 
@@ -155,6 +161,10 @@ into a false 404. Owner override is audited and cannot bypass lifecycle,
 | global entity from another configured geo | lifecycle + Gate; no link to inactive hub | lifecycle + Gate |
 | category/developer roots | 200 `noindex,follow` | registry-driven |
 | GeoSwitcher | hidden | visible |
+
+`SINGLE_GEO` requires exactly one routable hub and that hub is `primaryGeo`.
+Additional configured cities are valid when their `hubStatus` is
+`PREPARED_OFF | OUT`; publication and hub availability are independent fields.
 
 Entity availability may outlive a disabled listing. If an entity is reachable
 but its geo hub/listing is not, breadcrumbs render the geo as text rather than a

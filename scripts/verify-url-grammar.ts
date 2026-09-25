@@ -11,23 +11,11 @@ import { projectStaticRoutes } from "../src/project/static-routes.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
 function keysFor(geo: string): PageKey[] {
-	return [
+	const keys: PageKey[] = [
 		{ kind: "home" },
 		{ kind: "geoHub", geo },
 		{ kind: "categoryRoot", category: "kvartiry" },
 		{ kind: "categoryGeo", geo, category: "kvartiry" },
-		{
-			kind: "categoryGeoDistrict",
-			geo,
-			category: "kvartiry",
-			district: geo === "primorsk" ? "severnyy" : "tsentralnyy",
-		},
-		{
-			kind: "categoryGeoFacet",
-			geo,
-			category: "kvartiry",
-			facet: geo === "primorsk" ? "dvukhkomnatnye" : "odnokomnatnye",
-		},
 		{ kind: "geoDevelopers", geo },
 		{
 			kind: "property",
@@ -49,6 +37,23 @@ function keysFor(geo: string): PageKey[] {
 		{ kind: "developer", slug: "stroy-invest" },
 		{ kind: "static", path: "/uslugi/" },
 	];
+	if (geo === "primorsk" || geo === "zarechnyy") {
+		keys.push(
+			{
+				kind: "categoryGeoDistrict",
+				geo,
+				category: "kvartiry",
+				district: geo === "primorsk" ? "severnyy" : "tsentralnyy",
+			},
+			{
+				kind: "categoryGeoFacet",
+				geo,
+				category: "kvartiry",
+				facet: geo === "primorsk" ? "dvukhkomnatnye" : "odnokomnatnye",
+			},
+		);
+	}
+	return keys;
 }
 
 for (const [profileName, profile] of Object.entries(siteProfileFixtures)) {
@@ -138,6 +143,16 @@ assert.throws(() =>
 	createUrlGrammar({ geoSlugs: ["api"], staticPaths: ["/uslugi/"] }),
 );
 assert.throws(() =>
+	createUrlGrammar({ geoSlugs: ["sitemap-extra"], staticPaths: ["/uslugi/"] }),
+);
+assert.throws(() =>
+	createUrlGrammar({
+		geoSlugs: ["journal"],
+		staticPaths: ["/uslugi/"],
+		moduleRootSlugs: ["journal"],
+	}),
+);
+assert.throws(() =>
 	createUrlGrammar({ geoSlugs: ["primorsk"], staticPaths: ["/kvartiry/"] }),
 );
 assert.throws(() =>
@@ -155,6 +170,9 @@ assert.throws(() =>
 	}),
 );
 assert.throws(() => grammar.buildUrl({ kind: "developer", slug: "api" }));
+assert.throws(() =>
+	grammar.buildUrl({ kind: "developer", slug: "sitemap-extra" }),
+);
 assert.throws(() => grammar.buildUrl({ kind: "geoHub", geo: "unknown" }));
 assert.throws(() =>
 	grammar.buildUrl({
