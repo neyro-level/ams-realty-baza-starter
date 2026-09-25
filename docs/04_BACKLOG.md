@@ -1,10 +1,17 @@
 # Backlog
 
-Статус: `ACTIVE / NO APPROVED EXECUTION PLAN`.
+Статус: `ACTIVE / PLAN 9 V5 APPROVED / UPGRADE HANDOFF`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
 `legacy/`; они не являются очередью к повторному исполнению.
+
+Plan №9 `STARTER v2.1 / CLONE READINESS` прошёл финальный аудит. v4 graph был
+импортирован, S0 implementation закрыт, но delivery остановлен до PR из-за
+whitespace-only findings полного diff. v5 в
+`AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` утверждён владельцем;
+versioned Upgrade разрешён, после CLEAN reconcile delivery возобновляется.
+Production не разрешён.
 
 ## NOW
 
@@ -16,11 +23,11 @@ READY или in-progress задач. Завершённые планы и invent
 
 ## NEXT — только по команде владельца
 
-- Создать immutable tag `starter-v2.0.0` после отдельной финальной проверки
-  текущего canonical `main`.
+- После исполнения и финальной приёмки Plan №9 создать immutable tag
+  `starter-v2.1.0` только по отдельной release-команде владельца.
 - Выполнить release starter demo на `start-baza.ams24.ru`, включая immutable
   artifact, rollout, live smoke и rollback point.
-- Начать client clone только из exact `starter-v2.0.0` и утверждённого preset.
+- Начать client clone только из exact `starter-v2.1.0` и утверждённого preset.
 - Для client production определить реальные `leadRetentionDays`,
   `archiveRetentionDays`, legal/indexing и topology decisions.
 

@@ -13,10 +13,10 @@ Secrets source=Secret Master / self-hosted Infisical
 ```
 
 Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №8 v6
-исполнен полностью; итоговый implementation принят на `bd570ee4`, а docs-only
-reconciliation — на `c5803cf`. GitHub получает только отдельный явный
-fast-forward mirror canonical `main`. Production и target tag
-`starter-v2.0.0` остаются отдельными owner actions.
+исполнен полностью и остаётся evidence. Текущий execution source — Plan №9 v4
+`APPROVED`, импортированный в Task Manager. GitHub получает только отдельный
+явный fast-forward mirror canonical `main`. Production и target tag
+`starter-v2.1.0` остаются отдельными owner actions после исполнения Plan №9.
 
 ## Delivery baseline
 
@@ -43,7 +43,8 @@ fast-forward mirror canonical `main`. Production и target tag
   не использует standalone allowlist; release hardening остаётся отдельной
   RISKY-задачей до первого client production и не выполняется этим inventory.
 - Наблюдаемый SourceCraft tag `starter-freeze` остаётся историческим. Новый
-  target tag `starter-v2.0.0` требует отдельной команды владельца.
+  target tag `starter-v2.1.0` требует завершения Plan №9, финальной приёмки и
+  отдельной release-команды владельца.
 
 ## Stack и ownership
 
@@ -87,6 +88,13 @@ app composition -> project + core + UI
 core/packages -X-> project
 ```
 
+Канонический platform layout зафиксирован в
+`docs/adr/ADR-PLATFORM-LAYOUT.md`: reusable platform surface — `src/core/**` и
+`packages/**`; project composition и клиентские значения принадлежат
+`src/project/**` и app composition. Guards, которые исторически называли
+`src/platform/**`, применяются к фактической reusable surface, а не создают
+новый каталог-владелец.
+
 Profile передаётся в reusable core явно. Project-owned static routes, brand,
 domain, city literals и будущий literal denylist не переходят в core/packages.
 Payload остаётся единственным schema/auth/Admin owner; public reads продолжают
@@ -99,7 +107,7 @@ cleanup PR, без удаления raw geo/source данных.
 ## Client clone boundary
 
 `clone:prepare` принимает только утверждённый preset и exact source tag
-`starter-v2.0.0`; обычный запуск требует clean checkout и совпадение tag с
+`starter-v2.1.0`; обычный запуск требует clean checkout и совпадение tag с
 `HEAD`. Preset определяет project identity, catalog-first режим,
 `SINGLE_GEO | MULTI_GEO`, проверенную морфологию, NAP, indexing, brand/feed и
 development Excel readiness. Генерируемые владельцы —

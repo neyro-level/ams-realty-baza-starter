@@ -1,8 +1,10 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 8 EXECUTION COMPLETE`. SourceCraft — primary, GitHub —
-одностороннее зеркало. Активного мастер-плана и READY-графа нет. Текущие
-приоритеты принадлежат `04_BACKLOG.md`.
+Статус: `ACTIVE / PLAN 9 V5 APPROVED / UPGRADE HANDOFF`. SourceCraft — primary,
+GitHub — одностороннее зеркало. Plan №9 находится в
+`v5 APPROVED`; v4 graph paused перед S0 PR из-за whitespace-only source drift,
+versioned Upgrade разрешён. Текущие приоритеты принадлежат
+`04_BACKLOG.md`.
 
 ## Source of Truth
 
@@ -18,6 +20,15 @@
 | Эксплуатация starter demo | `OPERATIONS.md` |
 | Подготовка коммерческого client clone | `CLONE_ONBOARDING.md` |
 | Geo/catalog URL, status, resolution и lifecycle | `platform/GEO_CATALOG_CONTRACT.md` |
+| Граница reusable platform и project composition | `adr/ADR-PLATFORM-LAYOUT.md` |
+| Кандидаты на отдельный future upstream workstream | `UPSTREAM_CANDIDATES.md` |
+
+## Активное планирование
+
+- `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — единственная текущая
+  основа master plan, `v5 APPROVED / APPROVAL_HANDOFF`.
+- Exact v5 разрешено применить через versioned Task Manager Upgrade;
+  production и S15 не разрешены.
 
 `package.json`, код, migrations и конфигурация остаются runtime truth. Если они
 расходятся с документами, drift фиксируется и исправляется отдельной задачей;
@@ -44,5 +55,6 @@
 - `legacy/` — более ранние планы, архитектура и материалы; не нормативный слой.
 - `research/ATLAS_BASELINE.md` — provenance визуального donor.
 
-Production, tag `starter-v2.0.0` и client clone остаются отдельными owner
-actions. Наличие demo-контура не равно актуальному release proof.
+Production, target tag `starter-v2.1.0` и client clone остаются отдельными owner
+actions после исполнения и приёмки Plan №9. Наличие demo-контура не равно
+актуальному release proof.

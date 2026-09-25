@@ -1,0 +1,2653 @@
+{
+  "schema_version": 2,
+  "beads_prefix": "ams9",
+  "source": {
+    "plan_id": "AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9",
+    "path": "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+    "version": "v5",
+    "status": "APPROVED",
+    "approved_by": "owner",
+    "approved_at": "2026-09-25T14:44:24+03:00",
+    "sha256": "3cc9d1f0e5fc974fb84ed647ace66f796e657735447cc921ca203b1611acd330",
+    "epic_anchors": [
+      "EPIC-S0",
+      "EPIC-S1",
+      "EPIC-S2",
+      "EPIC-S3",
+      "EPIC-S4",
+      "EPIC-S5",
+      "EPIC-S6",
+      "EPIC-S7",
+      "EPIC-S8",
+      "EPIC-S9",
+      "EPIC-S10A",
+      "EPIC-S10B",
+      "EPIC-S11",
+      "EPIC-S12",
+      "EPIC-S13",
+      "EPIC-S14"
+    ]
+  },
+  "repositories": [
+    {
+      "key": "starter",
+      "remote": "https://git.sourcecraft.dev/integrator-p/ams-realty-baza-starter.git",
+      "default_branch": "main"
+    }
+  ],
+  "nodes": [
+    {
+      "key": "S0",
+      "title": "Canon and owner-decision reconciliation",
+      "type": "epic",
+      "source_anchor": "EPIC-S0",
+      "goal": "Active project canon consistently describes Starter v2.1 and Plan 9 without activating production.",
+      "scope": [
+        "Exact EPIC-S0 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S0 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-01",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-S0-IMPLEMENTATION",
+      "title": "Implement EPIC-S0 - Canon and owner-decision reconciliation",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S0",
+      "source_anchor": "EPIC-S0",
+      "goal": "Active project canon consistently describes Starter v2.1 and Plan 9 without activating production.",
+      "scope": [
+        "Implement only the exact EPIC-S0 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S0 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "git diff --check",
+        "pnpm verify:merge-standard"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:serial-01"
+      ]
+    },
+    {
+      "key": "TASK-S0-DELIVERY",
+      "title": "Deliver EPIC-S0 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S0",
+      "source_anchor": "EPIC-S0",
+      "goal": "Deliver completed EPIC-S0 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-standard",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S0-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard",
+        "wave:serial-01"
+      ]
+    },
+    {
+      "key": "S1",
+      "title": "ProjectSiteProfile v2 explicit matrices",
+      "type": "epic",
+      "source_anchor": "EPIC-S1",
+      "goal": "Validated project profile explicitly owns geo, market, category, SEO, module and route matrices.",
+      "scope": [
+        "Exact EPIC-S1 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S1 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S0"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-02",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-S1-IMPLEMENTATION",
+      "title": "Implement EPIC-S1 - ProjectSiteProfile v2 explicit matrices",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S1",
+      "source_anchor": "EPIC-S1",
+      "goal": "Validated project profile explicitly owns geo, market, category, SEO, module and route matrices.",
+      "scope": [
+        "Implement only the exact EPIC-S1 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S1 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm verify:site-profile",
+        "pnpm typecheck",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:dependency-runtime",
+        "wave:serial-02"
+      ]
+    },
+    {
+      "key": "TASK-S1-DELIVERY",
+      "title": "Deliver EPIC-S1 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S1",
+      "source_anchor": "EPIC-S1",
+      "goal": "Deliver completed EPIC-S1 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S1-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime",
+        "wave:serial-02"
+      ]
+    },
+    {
+      "key": "S2",
+      "title": "Data-driven districts and SEO facets",
+      "type": "epic",
+      "source_anchor": "EPIC-S2",
+      "goal": "Published Payload districts and validated project SEO facets resolve without runtime code fixtures.",
+      "scope": [
+        "Exact EPIC-S2 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S2 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S1"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-03",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-S2-IMPLEMENTATION",
+      "title": "Implement EPIC-S2 - Data-driven districts and SEO facets",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S2",
+      "source_anchor": "EPIC-S2",
+      "goal": "Published Payload districts and validated project SEO facets resolve without runtime code fixtures.",
+      "scope": [
+        "Implement only the exact EPIC-S2 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S2 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm verify:schema",
+        "native PostgreSQL integration and collision matrix",
+        "pnpm verify:merge-risky with RISK_SCOPE=schema-data"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:schema-data",
+        "wave:serial-03"
+      ]
+    },
+    {
+      "key": "TASK-S2-DELIVERY",
+      "title": "Deliver EPIC-S2 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S2",
+      "source_anchor": "EPIC-S2",
+      "goal": "Deliver completed EPIC-S2 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=schema-data",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S2-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data",
+        "wave:serial-03"
+      ]
+    },
+    {
+      "key": "S3",
+      "title": "Resolver and redirect semantics",
+      "type": "epic",
+      "source_anchor": "EPIC-S3",
+      "goal": "Resolver returns factual direct-final 200, 301, 308, 404 or 410 decisions without synthetic counts.",
+      "scope": [
+        "Exact EPIC-S3 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S3 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S2"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-04",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-S3-IMPLEMENTATION",
+      "title": "Implement EPIC-S3 - Resolver and redirect semantics",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S3",
+      "source_anchor": "EPIC-S3",
+      "goal": "Resolver returns factual direct-final 200, 301, 308, 404 or 410 decisions without synthetic counts.",
+      "scope": [
+        "Implement only the exact EPIC-S3 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S3 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm verify:resolver",
+        "runtime HTTP matrix",
+        "pnpm typecheck",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:dependency-runtime",
+        "wave:serial-04"
+      ]
+    },
+    {
+      "key": "TASK-S3-DELIVERY",
+      "title": "Deliver EPIC-S3 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S3",
+      "source_anchor": "EPIC-S3",
+      "goal": "Deliver completed EPIC-S3 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S3-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime",
+        "wave:serial-04"
+      ]
+    },
+    {
+      "key": "S4",
+      "title": "One runtime Content Gate decision",
+      "type": "epic",
+      "source_anchor": "EPIC-S4",
+      "goal": "decidePage is the only semantic owner of availability, indexability and discovery decisions.",
+      "scope": [
+        "Exact EPIC-S4 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S4 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S3"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-05",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-S4-IMPLEMENTATION",
+      "title": "Implement EPIC-S4 - One runtime Content Gate decision",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S4",
+      "source_anchor": "EPIC-S4",
+      "goal": "decidePage is the only semantic owner of availability, indexability and discovery decisions.",
+      "scope": [
+        "Implement only the exact EPIC-S4 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S4 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm verify:content-gate",
+        "runtime route and metadata integration tests",
+        "Gate ownership guard",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:dependency-runtime",
+        "wave:serial-05"
+      ]
+    },
+    {
+      "key": "TASK-S4-DELIVERY",
+      "title": "Deliver EPIC-S4 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S4",
+      "source_anchor": "EPIC-S4",
+      "goal": "Deliver completed EPIC-S4 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S4-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime",
+        "wave:serial-05"
+      ]
+    },
+    {
+      "key": "S5",
+      "title": "Project-owned SEO templates and morphology",
+      "type": "epic",
+      "source_anchor": "EPIC-S5",
+      "goal": "Reusable core contains only generic rendering and morphology machinery while project config owns marketing templates.",
+      "scope": [
+        "Exact EPIC-S5 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S5 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S4"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-06",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-S5-IMPLEMENTATION",
+      "title": "Implement EPIC-S5 - Project-owned SEO templates and morphology",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S5",
+      "source_anchor": "EPIC-S5",
+      "goal": "Reusable core contains only generic rendering and morphology machinery while project config owns marketing templates.",
+      "scope": [
+        "Implement only the exact EPIC-S5 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S5 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "SEO template snapshots",
+        "project-literal guard",
+        "runtime metadata proof",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:dependency-runtime",
+        "wave:serial-06"
+      ]
+    },
+    {
+      "key": "TASK-S5-DELIVERY",
+      "title": "Deliver EPIC-S5 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S5",
+      "source_anchor": "EPIC-S5",
+      "goal": "Deliver completed EPIC-S5 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S5-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime",
+        "wave:serial-06"
+      ]
+    },
+    {
+      "key": "S6",
+      "title": "CSV SEO Registry pipeline",
+      "type": "epic",
+      "source_anchor": "EPIC-S6",
+      "goal": "The seed CSV deterministically validates and generates the single typed project SEO registry.",
+      "scope": [
+        "Exact EPIC-S6 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S6 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S5"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-07",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-S6-IMPLEMENTATION",
+      "title": "Implement EPIC-S6 - CSV SEO Registry pipeline",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S6",
+      "source_anchor": "EPIC-S6",
+      "goal": "The seed CSV deterministically validates and generates the single typed project SEO registry.",
+      "scope": [
+        "Implement only the exact EPIC-S6 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S6 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm seo:registry:check",
+        "generation idempotence and negative fixtures",
+        "pnpm verify:merge-standard"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:serial-07"
+      ]
+    },
+    {
+      "key": "TASK-S6-DELIVERY",
+      "title": "Deliver EPIC-S6 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S6",
+      "source_anchor": "EPIC-S6",
+      "goal": "Deliver completed EPIC-S6 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-standard",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S6-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard",
+        "wave:serial-07"
+      ]
+    },
+    {
+      "key": "S7",
+      "title": "Catalog pagination, filters and truthful aggregates",
+      "type": "epic",
+      "source_anchor": "EPIC-S7",
+      "goal": "Catalog behavior is server-validated, index-safe and based on bounded factual queries.",
+      "scope": [
+        "Exact EPIC-S7 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S7 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S6"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-08",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-S7-IMPLEMENTATION",
+      "title": "Implement EPIC-S7 - Catalog pagination, filters and truthful aggregates",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S7",
+      "source_anchor": "EPIC-S7",
+      "goal": "Catalog behavior is server-validated, index-safe and based on bounded factual queries.",
+      "scope": [
+        "Implement only the exact EPIC-S7 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S7 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "native PostgreSQL Gateway integration",
+        "catalog browser or E2E flow",
+        "query-bound proof",
+        "pnpm verify:merge-risky with RISK_SCOPE=schema-data"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:schema-data",
+        "wave:serial-08"
+      ]
+    },
+    {
+      "key": "TASK-S7-DELIVERY",
+      "title": "Deliver EPIC-S7 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S7",
+      "source_anchor": "EPIC-S7",
+      "goal": "Deliver completed EPIC-S7 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=schema-data",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S7-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data",
+        "wave:serial-08"
+      ]
+    },
+    {
+      "key": "S8",
+      "title": "Development model v2",
+      "type": "epic",
+      "source_anchor": "EPIC-S8",
+      "goal": "Development availability, prices, media and completeness are persisted and exposed consistently.",
+      "scope": [
+        "Exact EPIC-S8 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S8 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S7"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-09",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-S8-IMPLEMENTATION",
+      "title": "Implement EPIC-S8 - Development model v2",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S8",
+      "source_anchor": "EPIC-S8",
+      "goal": "Development availability, prices, media and completeness are persisted and exposed consistently.",
+      "scope": [
+        "Implement only the exact EPIC-S8 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S8 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm verify:schema",
+        "clean and non-empty migration integration",
+        "import repeat and DTO/UI tests",
+        "pnpm verify:merge-risky with RISK_SCOPE=schema-data"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:schema-data",
+        "wave:serial-09"
+      ]
+    },
+    {
+      "key": "TASK-S8-DELIVERY",
+      "title": "Deliver EPIC-S8 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S8",
+      "source_anchor": "EPIC-S8",
+      "goal": "Deliver completed EPIC-S8 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=schema-data",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S8-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data",
+        "wave:serial-09"
+      ]
+    },
+    {
+      "key": "S9",
+      "title": "Breadcrumbs, nearby and profile navigation",
+      "type": "epic",
+      "source_anchor": "EPIC-S9",
+      "goal": "Internal navigation is PageKey and Gate derived and never links to redirects or missing pages.",
+      "scope": [
+        "Exact EPIC-S9 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S9 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S8"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-10",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-S9-IMPLEMENTATION",
+      "title": "Implement EPIC-S9 - Breadcrumbs, nearby and profile navigation",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S9",
+      "source_anchor": "EPIC-S9",
+      "goal": "Internal navigation is PageKey and Gate derived and never links to redirects or missing pages.",
+      "scope": [
+        "Implement only the exact EPIC-S9 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S9 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "navigation matrix",
+        "UI state and accessibility proof",
+        "pnpm verify:merge-standard"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:serial-10"
+      ]
+    },
+    {
+      "key": "TASK-S9-DELIVERY",
+      "title": "Deliver EPIC-S9 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S9",
+      "source_anchor": "EPIC-S9",
+      "goal": "Deliver completed EPIC-S9 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-standard",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S9-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard",
+        "wave:serial-10"
+      ]
+    },
+    {
+      "key": "S10A",
+      "title": "Site settings, JSON-LD and sitemap",
+      "type": "epic",
+      "source_anchor": "EPIC-S10A",
+      "goal": "The existing site-settings Global is the sole public brand owner and discovery surfaces use Gateway DTO plus decidePage.",
+      "scope": [
+        "Exact EPIC-S10A contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S10A have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S9"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-11",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:schema-data"
+      ]
+    },
+    {
+      "key": "TASK-S10A-IMPLEMENTATION",
+      "title": "Implement EPIC-S10A - Site settings, JSON-LD and sitemap",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S10A",
+      "source_anchor": "EPIC-S10A",
+      "goal": "The existing site-settings Global is the sole public brand owner and discovery surfaces use Gateway DTO plus decidePage.",
+      "scope": [
+        "Implement only the exact EPIC-S10A local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S10A is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm verify:schema when persisted fields change",
+        "JSON-LD snapshots and sitemap crawl",
+        "pnpm verify:merge-risky with RISK_SCOPE=schema-data"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:schema-data",
+        "wave:serial-11"
+      ]
+    },
+    {
+      "key": "TASK-S10A-DELIVERY",
+      "title": "Deliver EPIC-S10A through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S10A",
+      "source_anchor": "EPIC-S10A",
+      "goal": "Deliver completed EPIC-S10A under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=schema-data",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S10A-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:schema-data",
+        "wave:serial-11"
+      ]
+    },
+    {
+      "key": "S10B",
+      "title": "IndexNow on Gate decision transitions",
+      "type": "epic",
+      "source_anchor": "EPIC-S10B",
+      "goal": "IndexNow enqueues deduplicated same-origin canonical URLs only when Gate decisions materially change.",
+      "scope": [
+        "Exact EPIC-S10B contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S10B have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S10A"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-12",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:ingest-jobs"
+      ]
+    },
+    {
+      "key": "TASK-S10B-IMPLEMENTATION",
+      "title": "Implement EPIC-S10B - IndexNow on Gate decision transitions",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S10B",
+      "source_anchor": "EPIC-S10B",
+      "goal": "IndexNow enqueues deduplicated same-origin canonical URLs only when Gate decisions materially change.",
+      "scope": [
+        "Implement only the exact EPIC-S10B local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S10B is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "jobs integration and queue configuration",
+        "retry and idempotence proof",
+        "pnpm verify:merge-risky with RISK_SCOPE=ingest-jobs"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:ingest-jobs",
+        "wave:serial-12"
+      ]
+    },
+    {
+      "key": "TASK-S10B-DELIVERY",
+      "title": "Deliver EPIC-S10B through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S10B",
+      "source_anchor": "EPIC-S10B",
+      "goal": "Deliver completed EPIC-S10B under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=ingest-jobs",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S10B-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:ingest-jobs",
+        "wave:serial-12"
+      ]
+    },
+    {
+      "key": "S11",
+      "title": "Cache tags and measured budget",
+      "type": "epic",
+      "source_anchor": "EPIC-S11",
+      "goal": "Gateway reads use bounded cache tags and the documented fixture meets measured p95 budgets.",
+      "scope": [
+        "Exact EPIC-S11 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S11 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S10B"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-13",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-S11-IMPLEMENTATION",
+      "title": "Implement EPIC-S11 - Cache tags and measured budget",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S11",
+      "source_anchor": "EPIC-S11",
+      "goal": "Gateway reads use bounded cache tags and the documented fixture meets measured p95 budgets.",
+      "scope": [
+        "Implement only the exact EPIC-S11 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S11 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "installed Next.js 16.3.5 documentation evidence",
+        "cache invalidation integration",
+        "documented 30-request p95 measurements",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:dependency-runtime",
+        "wave:serial-13"
+      ]
+    },
+    {
+      "key": "TASK-S11-DELIVERY",
+      "title": "Deliver EPIC-S11 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S11",
+      "source_anchor": "EPIC-S11",
+      "goal": "Deliver completed EPIC-S11 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S11-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime",
+        "wave:serial-13"
+      ]
+    },
+    {
+      "key": "S12",
+      "title": "Guards and five-profile acceptance matrix",
+      "type": "epic",
+      "source_anchor": "EPIC-S12",
+      "goal": "Architecture and runtime invariants fail closed across all five reference profiles.",
+      "scope": [
+        "Exact EPIC-S12 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S12 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S11"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-14",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-S12-IMPLEMENTATION",
+      "title": "Implement EPIC-S12 - Guards and five-profile acceptance matrix",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S12",
+      "source_anchor": "EPIC-S12",
+      "goal": "Architecture and runtime invariants fail closed across all five reference profiles.",
+      "scope": [
+        "Implement only the exact EPIC-S12 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S12 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "guard negative fixtures",
+        "five-profile acceptance runner",
+        "pnpm verify:merge-standard"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:serial-14"
+      ]
+    },
+    {
+      "key": "TASK-S12-DELIVERY",
+      "title": "Deliver EPIC-S12 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S12",
+      "source_anchor": "EPIC-S12",
+      "goal": "Deliver completed EPIC-S12 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-standard",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S12-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard",
+        "wave:serial-14"
+      ]
+    },
+    {
+      "key": "S13",
+      "title": "Clone preset v2",
+      "type": "epic",
+      "source_anchor": "EPIC-S13",
+      "goal": "Four schemaVersion 2 presets generate complete project-owned clone inputs in a clean checkout.",
+      "scope": [
+        "Exact EPIC-S13 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S13 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S12"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-15",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime"
+      ]
+    },
+    {
+      "key": "TASK-S13-IMPLEMENTATION",
+      "title": "Implement EPIC-S13 - Clone preset v2",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S13",
+      "source_anchor": "EPIC-S13",
+      "goal": "Four schemaVersion 2 presets generate complete project-owned clone inputs in a clean checkout.",
+      "scope": [
+        "Implement only the exact EPIC-S13 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S13 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm verify:clone-bootstrap",
+        "clean-checkout idempotence and protected-path diff",
+        "pnpm verify:daily for every preset",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:dependency-runtime",
+        "wave:serial-15"
+      ]
+    },
+    {
+      "key": "TASK-S13-DELIVERY",
+      "title": "Deliver EPIC-S13 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S13",
+      "source_anchor": "EPIC-S13",
+      "goal": "Deliver completed EPIC-S13 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-risky with RISK_SCOPE=dependency-runtime",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S13-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:dependency-runtime",
+        "wave:serial-15"
+      ]
+    },
+    {
+      "key": "S14",
+      "title": "Canonical UI Core v5 surfaces",
+      "type": "epic",
+      "source_anchor": "EPIC-S14",
+      "goal": "The existing visual system renders final v2.1 routes and states without a second primitive foundation.",
+      "scope": [
+        "Exact EPIC-S14 contract in approved Plan 9 v5",
+        "No work outside the local and default epic contracts"
+      ],
+      "acceptance_criteria": [
+        "All acceptance criteria under EPIC-S14 have observable evidence",
+        "No unresolved deviation from the approved plan"
+      ],
+      "depends_on": [
+        "S13"
+      ],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:serial-16",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "TASK-S14-IMPLEMENTATION",
+      "title": "Implement EPIC-S14 - Canonical UI Core v5 surfaces",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "S14",
+      "source_anchor": "EPIC-S14",
+      "goal": "The existing visual system renders final v2.1 routes and states without a second primitive foundation.",
+      "scope": [
+        "Implement only the exact EPIC-S14 local contract",
+        "Apply the Plan 9 default epic contract and shared-contract freeze rules"
+      ],
+      "acceptance_criteria": [
+        "Every acceptance item under EPIC-S14 is PASS with concrete evidence",
+        "Task-owned diff contains no unrelated change"
+      ],
+      "required_checks": [
+        "pnpm verify:ui-core",
+        "browser responsive matrix and accessibility proof",
+        "read-only UI Drift Audit",
+        "pnpm verify:merge-standard"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:serial-16"
+      ]
+    },
+    {
+      "key": "TASK-S14-DELIVERY",
+      "title": "Deliver EPIC-S14 through exact-head gate and merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "S14",
+      "source_anchor": "EPIC-S14",
+      "goal": "Deliver completed EPIC-S14 under MERGE_AFTER_GATE",
+      "scope": [
+        "Review the full epic diff",
+        "Create SourceCraft Pull Request",
+        "Run exactly one risk-appropriate exact-head gate",
+        "Merge without force and refresh canonical main"
+      ],
+      "acceptance_criteria": [
+        "Pull Request source, target and head SHA are verified",
+        "Required exact-head SourceCraft gate is PASS",
+        "PR is merged and canonical main contains the merged head"
+      ],
+      "required_checks": [
+        "Full diff and acceptance review",
+        "pnpm verify:merge-standard",
+        "Verify SourceCraft run URL and exact head SHA",
+        "Verify merge result and refreshed origin/main"
+      ],
+      "depends_on": [
+        "TASK-S14-IMPLEMENTATION"
+      ],
+      "required_context": [
+        "docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved source or inventory drift",
+        "scope expansion or new architecture decision",
+        "production, release, tag or mirror",
+        "new secret or destructive external action",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "changed PR head after gate",
+        "SourceCraft CI not verified"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard",
+        "wave:serial-16"
+      ]
+    }
+  ]
+}

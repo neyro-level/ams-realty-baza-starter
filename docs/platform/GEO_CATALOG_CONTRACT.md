@@ -96,6 +96,7 @@ Property category mapping:
 
 Transliteration baseline: `й→y`, `ё→e`, `ж→zh`, `х→kh`, `ц→ts`,
 `ч→ch`, `ш→sh`, `щ→shch`, `ы→y`; soft and hard signs are removed.
+Approved room-facet slugs use `dvukhkomnatnye` and `trekhkomnatnye`.
 
 ## 4. Deterministic resolution order
 
@@ -149,7 +150,9 @@ into a false 404. Owner override is audited and cannot bypass lifecycle,
 | Surface | `SINGLE_GEO` | `MULTI_GEO` |
 |---|---|---|
 | primary geo hub | registry + Gate | registry + Gate |
-| other geo hub | status-driven | status-driven |
+| other geo hub | 404 even when the geo entity is published | status-driven |
+| other geo local catalog/listing | 404 | profile + registry + Gate |
+| global entity from another configured geo | lifecycle + Gate; no link to inactive hub | lifecycle + Gate |
 | category/developer roots | 200 `noindex,follow` | registry-driven |
 | GeoSwitcher | hidden | visible |
 
@@ -194,6 +197,10 @@ Canonical 301/410 transport is implemented through bounded preflight in
 `src/proxy.ts` and covered by the accepted P8-23A/P8-23B proof. The former
 proof-only `/http/property-lifecycle/[slug]` boundary is removed and guarded
 against return.
+
+`/nedvizhimost` and `/obekty/*` belong to the declared legacy manifest and use
+one direct `301` to the final canonical URL. A canonical path that differs only
+by trailing slash uses one `308`. Redirect chains and loops are invalid.
 
 ## 9. Discovery, navigation and cache
 

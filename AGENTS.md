@@ -7,13 +7,16 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Последняя программа Plan №8 v6 исполнена полностью и сохранена как evidence:
+- Последняя исполненная программа Plan №8 v6 сохранена как evidence:
   `docs/plan8/S8_25_FINAL_EXECUTION_REPORT.md`. Принятый implementation SHA —
   `bd570ee40db9e25f73a24013be836dd3876282ac`; docs-only reconciliation слит в
   SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
-- Активного execution plan и READY-графа сейчас нет. Текущий приоритет задаёт
-  `docs/04_BACKLOG.md`; завершённые планы и inventories — только historical
-  evidence. `.beads` не коммитится.
+- Единственная текущая planning basis —
+  `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`, Plan №9 v5
+  `APPROVED`. v4 graph импортирован и остановлен перед S0 PR из-за
+  whitespace-only source drift; versioned v5 Upgrade утверждён и ожидает
+  применения перед возобновлением delivery.
+  Production и S15 остаются owner/release gate; `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
@@ -25,17 +28,20 @@
    `04_BACKLOG.md` по scope.
 4. `docs/PROJECT.md` — решения этого starter instance.
 5. `docs/DESIGN.md` или `docs/OPERATIONS.md` по scope.
-6. Профильный ADR/module/research документ, только когда он входит в scope.
-7. `docs/plan8/`, `docs/proofs/` и `docs/legacy/` — только для evidence.
+6. `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — только для
+   approved/approval-bound scope Plan №9.
+7. Профильный ADR/module/research документ, только когда он входит в scope.
+8. `docs/plan8/`, `docs/proofs/` и `docs/legacy/` — только для evidence.
 
 ## Invariants
 
 - Один независимый stream = одна branch/worktree = один Pull Request.
 - Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
 - Планы №6–8 исполнены и не являются очередью работ. Существующий tag
-  `starter-freeze` остаётся историческим. Целевой tag `starter-v2.0.0`
-  создаётся только по отдельной явной команде владельца; production также
-  требует отдельной команды.
+  `starter-freeze` остаётся историческим. Целевой tag `starter-v2.1.0` может
+  создаваться только после исполнения и финальной приёмки Plan №9 и по
+  отдельной явной release-команде владельца; production также требует
+  отдельной команды.
 - Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.
 - Автономность не отменяет COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.
 - Production выполняется только по отдельной явной команде владельца.
