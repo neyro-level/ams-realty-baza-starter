@@ -1,22 +1,22 @@
 # AMS MASTER PLAN №9 — STARTER v2.1 / CLONE READINESS
 
-Plan ID: `AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9`  
-Version: `v3`  
-Status: `APPROVED`  
-Phase: `APPROVAL_HANDOFF`  
+Plan ID: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9
+Version: v4
+Status: READY_FOR_OWNER_APPROVAL
+Phase: FINAL_AUDIT
 Baseline: SourceCraft `main@6671b0f0c2ceaf62749cc3b6b78b591c6fe51ed6`  
 Owner input: `STARTER v2.1 — готовность к клонам`, received 2026-09-25  
-Approved by: `owner`  
-Approved at: `2026-09-25T13:00:23+03:00`  
 Delivery profile: `COMMERCIAL`  
 Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`  
 Production authorization: `NONE`
 
 Этот документ — единственная активная основа нового master plan. Планы №2–8
 остаются историческим evidence в `docs/legacy/` и не являются очередью работ.
-Plan №9 прошёл финальный аудит exact v3 и утверждён владельцем явной фразой
-`План утверждён`. Implementation разрешается только через импортированный и
-reconciled Task Manager graph; production остаётся запрещён.
+Plan №9 прошёл финальный аудит. Owner approval exact v3 зафиксирован историей,
+но importer preflight выявил несовместимое inline-code оформление metadata и
+до Task Manager writes остановился. v4 содержит только machine-readable
+нормализацию header и требует повторного approval exact SHA; implementation и
+production пока запрещены.
 
 ## 1. Primary goal и границы
 
@@ -212,6 +212,7 @@ explicitly approved scope.
 | MP9-A15 | MAJOR | Shared contracts had consumers but no freeze/ownership map | Added owner and downstream matrix; semantic redefinition is plan drift | `RESOLVED` |
 | MP9-A16 | MINOR | Preliminary count mixed implementation graph with release gate | Separated 16 implementation epics S0-S14 from S15 owner/release gate | `RESOLVED` |
 | MP9-A17 | MINOR | Project router still exposed only closed Plan №8 and the old tag target | AGENTS/README/Backlog now point to exact v3 as approval-only planning basis; Plan №8 stays evidence | `RESOLVED` |
+| MP9-A18 | BLOCKER | Approved v3 used inline-code values in Version/Status; canonical importer rejects them before Task Manager writes | v4 normalizes plan metadata to plain machine-readable lines; no epic or requirement changed | `RESOLVED / REAPPROVAL REQUIRED` |
 
 ## 6. Dependency graph и delivery order
 
@@ -547,7 +548,7 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 - Stop: no release command, dirty main, changed SHA,
   missing artifact/rollback or any red/unknown required proof.
 
-## 8. Final four-pass audit of exact v3
+## 8. Final four-pass audit of exact v4
 
 ### Pass 1 — logic and completeness
 
@@ -611,7 +612,7 @@ Owner decisions
 Night Run Readiness: READY_WITH_LIMITS
 ```
 
-`READY_WITH_LIMITS` means the exact v3 graph is executable and has no unresolved
+`READY_WITH_LIMITS` means the exact v4 graph is executable and has no unresolved
 planning blocker, but it cannot skip a blocked epic because the owner explicitly
 required strict sequential merge delivery. Removing that limit would change the
 approved execution policy rather than merely improve the graph.
@@ -664,20 +665,32 @@ approved execution policy rather than merely improve the graph.
 - Resulting version: `v3 READY_FOR_OWNER_APPROVAL`.
 - Owner approval: exact v3 approved on 2026-09-25; approval handoff authorized.
 
+### Revision input `MP9-R4`
+
+- Source: fail-closed inventory validation after exact v3 owner approval.
+- Finding: importer requires plain `Version: vN` and `Status: APPROVED` lines;
+  v3 used inline-code formatting, so no Task Manager mutation occurred.
+- Change: normalized machine-readable header only; product scope, all 16
+  implementation epics, dependencies, risks, acceptance and production boundary
+  are byte-for-byte semantically unchanged.
+- Exact-v4 four-pass audit: `PASS`; blockers/major/open owner decisions = `0/0/0`.
+- Resulting version: `v4 READY_FOR_OWNER_APPROVAL`.
+
 | Version | Date | Status | Input | Result |
 |---|---|---|---|---|
 | v0 | 2026-09-25 | DRAFT | Owner attachment `STARTER v2.1 — готовность к клонам` | Existing plan basis accepted for assembly |
 | v1 | 2026-09-25 | REVIEW | MP9-R1 canon/runtime reconciliation | Executable contracts drafted; four owner decisions registered; final audit not started |
 | v2 | 2026-09-25 | REVIEW | MP9-R2 owner decisions | Self-contained scope; registry path and S10 split fixed; zero before-approval decisions; final audit not started |
 | v3 | 2026-09-25 | APPROVED | MP9-R3 final four-pass audit + explicit owner approval | Exact approved execution source; READY_WITH_LIMITS only because delivery is intentionally serial |
+| v4 | 2026-09-25 | READY_FOR_OWNER_APPROVAL | MP9-R4 importer metadata compatibility | No scope change; clean reapproval required because approved source SHA changed |
 
 ## 10. Current handoff state
 
 ```text
-Plan: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9 v3 APPROVED
-Phase: APPROVAL_HANDOFF
-Task Manager import: PENDING VALIDATE / INIT / IMPORT / RECONCILE
-Developer handoff: PENDING CLEAN RECONCILIATION
+Plan: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9 v4 READY_FOR_OWNER_APPROVAL
+Phase: FINAL_AUDIT
+Task Manager import: NOT ALLOWED; v3 preflight failed before writes
+Developer handoff: NOT ALLOWED
 Production: NOT AUTHORIZED
-Next: docs checkpoint → inventory v2 → Task Manager → Developer goal
+Next: exact owner phrase «План утверждён» or «План утвержден» for v4
 ```

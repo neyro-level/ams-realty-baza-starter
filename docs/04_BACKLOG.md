@@ -1,15 +1,16 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 9 APPROVED / TASK MANAGER HANDOFF`.
+Статус: `ACTIVE / PLAN 9 V4 READY FOR OWNER APPROVAL`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
 `legacy/`; они не являются очередью к повторному исполнению.
 
-Plan №9 `STARTER v2.1 / CLONE READINESS` прошёл финальный аудит и явно утверждён
-владельцем как `v3 APPROVED` в
-`AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`. Implementation выполняется
-только через clean reconciled Task Manager graph; production не разрешён.
+Plan №9 `STARTER v2.1 / CLONE READINESS` прошёл финальный аудит. Exact v3 был
+утверждён, но importer preflight остановился до Task Manager writes из-за
+metadata-format drift. Механическая v4 находится в
+`AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` и требует повторного owner
+approval; implementation и production пока не разрешены.
 
 ## NOW
 

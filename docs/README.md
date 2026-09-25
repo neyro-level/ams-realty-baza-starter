@@ -1,9 +1,9 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 9 APPROVED / HANDOFF`. SourceCraft — primary,
+Статус: `ACTIVE / PLAN 9 V4 READY FOR OWNER APPROVAL`. SourceCraft — primary,
 GitHub — одностороннее зеркало. Plan №9 находится в
-`v3 APPROVED` и становится execution source только через clean reconciled
-Task Manager graph. Текущие приоритеты принадлежат
+`v4 READY_FOR_OWNER_APPROVAL`; importer preflight exact v3 остановился до
+Task Manager writes из-за metadata-format drift. Текущие приоритеты принадлежат
 `04_BACKLOG.md`.
 
 ## Source of Truth
@@ -24,9 +24,9 @@ Task Manager graph. Текущие приоритеты принадлежат
 ## Активное планирование
 
 - `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — единственная текущая
-  основа master plan, `v3 APPROVED / APPROVAL_HANDOFF`.
-- Exact v3 разрешён к импорту в Task Manager и implementation через Developer;
-  production и S15 не разрешены.
+  основа master plan, `v4 READY_FOR_OWNER_APPROVAL / FINAL_AUDIT`.
+- Exact v4 нельзя импортировать до повторного owner approval; production и S15
+  не разрешены.
 
 `package.json`, код, migrations и конфигурация остаются runtime truth. Если они
 расходятся с документами, drift фиксируется и исправляется отдельной задачей;
