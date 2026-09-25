@@ -7,6 +7,7 @@ import { hitInProcessLeadRateLimit } from "@/core/leads/in-process-rate-limit";
 import {
 	accelerateLeadDeliveryJobs,
 	commitLeadOutbox,
+	normalizeCanonicalSourcePage,
 	prepareLeadIntake,
 	type LeadIntakeRejected,
 } from "@/core/leads/index";
@@ -111,7 +112,7 @@ export async function submitPublicLead({
 		});
 		const property = found.docs[0];
 		const canonicalSourcePage = property
-			? toPropertyCardDTO(property).href
+			? normalizeCanonicalSourcePage(toPropertyCardDTO(property).href)
 			: undefined;
 		if (!property || intake.lead.sourcePage !== canonicalSourcePage) {
 			return propertyContextRejected(intake.lead.sourcePage);

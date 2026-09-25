@@ -804,7 +804,8 @@ for (const persisted of persistedPropertyLeads.docs) {
 	);
 	assert.equal(
 		persisted.sourcePage,
-		`/kvartiry/${publishedProperty.slug}-${publishedProperty.publicUrlId}/`,
+		`/kvartiry/${publishedProperty.slug}-${publishedProperty.publicUrlId}`,
+		"property lead source page must use the normalized canonical path",
 	);
 	assert.equal(persisted.consent?.version, "pd-2026-01");
 	assert.equal(persisted.context?.geo, "rostov-na-donu");
@@ -830,6 +831,11 @@ const mismatchedPropertyLead = await submitPublicLead({
 });
 assert.equal(mismatchedPropertyLead.accepted, false);
 assert.equal(mismatchedPropertyLead.code, "lead.invalid_payload");
+assert.equal(mismatchedPropertyLead.safeDiagnostics.rawPiiIncluded, false);
+assert.equal(
+	mismatchedPropertyLead.safeDiagnostics.code,
+	"lead.property_context_invalid",
+);
 
 const priceLeadBody = {
 	name: "Integration Price Lead",

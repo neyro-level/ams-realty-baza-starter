@@ -4,6 +4,7 @@ import {
 	buildFraudFingerprint,
 	evaluateLeadRateLimit,
 	hitInProcessLeadRateLimit,
+	normalizeCanonicalSourcePage,
 	normalizePhoneToE164,
 	prepareLeadIntake as prepareLeadIntakeCore,
 	resolveEnabledLeadChannels,
@@ -36,6 +37,19 @@ const validPayload = {
 assert.equal(normalizePhoneToE164("8 (916) 123-45-67"), "+79161234567");
 assert.equal(normalizePhoneToE164("+44 20 7946 0958"), "+442079460958");
 assert.equal(normalizePhoneToE164("12"), undefined);
+assert.equal(
+	normalizeCanonicalSourcePage("/kvartiry/demo-property-42/"),
+	"/kvartiry/demo-property-42",
+);
+assert.equal(normalizeCanonicalSourcePage("/"), "/");
+assert.equal(
+	normalizeCanonicalSourcePage("/kvartiry/demo-property-42/?source=lead"),
+	undefined,
+);
+assert.equal(
+	normalizeCanonicalSourcePage("https://example.test/kvartiry/demo-property-42"),
+	undefined,
+);
 
 const accepted = prepareLeadIntake(validPayload, {
 	nowIso: "2026-09-16T12:00:01.000Z",

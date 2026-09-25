@@ -61,6 +61,7 @@ export {
 	type LeadIntakeRejected,
 	type LeadIntakeResult,
 	type LeadEntityContext,
+	normalizeCanonicalSourcePage,
 	normalizePhoneToE164,
 	prepareLeadIntake,
 } from "./intake.ts";
