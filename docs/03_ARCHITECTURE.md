@@ -95,9 +95,11 @@ core/packages -X-> project
 Profile передаётся в reusable core явно. Project-owned static routes, brand,
 domain, city literals и будущий literal denylist не переходят в core/packages.
 Payload остаётся единственным schema/auth/Admin owner; public reads продолжают
-идти через explicit Public Gateway и storage-neutral DTO. Legacy
-`/nedvizhimost`, `/obekty/[slug]` и отдельная lifecycle HTTP boundary остаются
-rollback path до P8-23B; один switchback commit восстанавливает старое wiring.
+идти через explicit Public Gateway и storage-neutral DTO. После P8-23B
+`/nedvizhimost` и `/obekty/[slug]` остались только bounded redirect adapters для
+исторических публичных ссылок. Отдельная proof-only lifecycle HTTP boundary и
+старые catalog/property/sitemap presentation owners удалены; rollback — revert
+cleanup PR, без удаления raw geo/source данных.
 
 ## Version-sensitive framework boundaries
 
@@ -105,11 +107,11 @@ rollback path до P8-23B; один switchback commit восстанавлива
   `export function proxy`. The former `src/middleware.ts` convention is
   deprecated in this Next line and is forbidden in this project. Pinned
   reference: [Next.js 16 Proxy](https://nextjs.org/docs/16/app/api-reference/file-conventions/proxy).
-- `src/app/(site)/obekty/[slug]/page.tsx` owns the visual public property page.
-  `src/app/http/property-lifecycle/[slug]/route.ts` is a separate public HTTP
-  status boundary: it returns the real `410`, `404`, `204` or permanent redirect
-  semantics required by crawlers and integrations. It is intentionally not an
-  internal API. Reference: [Next.js 16 Route Handlers](https://nextjs.org/docs/16/app/api-reference/file-conventions/route).
+- Canonical entity pages belong to the catch-all resolver. `src/proxy.ts`
+  returns real `301/410` lifecycle responses before rendering. The legacy
+  `/obekty/[slug]` page is redirect-only and never owns metadata or a visual
+  gone state; the former `/http/property-lifecycle/[slug]` proof route is
+  forbidden by guards after P8-23B.
 - Payload `jobs.autoRun` cron `* * * * *` is only the queue polling/execution
   ticker. It is not a business schedule. Business cadence is owned by the task
   registry: `dispatchDueFeeds` = `*/5 * * * *`; `jobsJanitor`,
@@ -215,8 +217,8 @@ PostgreSQL constraints из migration `20260919_120900`.
   timestamp принадлежат серверу;
 - retry identity лида — `lead:<requestAttemptId>` с browser UUID одной попытки:
   exact retry переиспользует lead, новая осознанная отправка создаёт новый lead;
-- property relation и canonical `/obekty/<slug>` source Public Gateway получает
-  из published property, а не из client title/slug;
+- property relation и canonical PageKey source Public Gateway получает из
+  published property, а не из client title/slug;
 - `clientReadinessConfig.leadRetentionDays` — versioned owner decision,
   `projectConfig` только проецирует его в runtime; второго retention env knob нет.
 

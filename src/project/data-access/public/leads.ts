@@ -18,6 +18,7 @@ import { siteConfig } from "@/project/site.config";
 import { systemOverrideAccess } from "@/core/data-access/system/overrides";
 import { publicGatewayReadAccess } from "./access-mode.ts";
 import { getPublicGatewayPayload } from "./payload.ts";
+import { toPropertyCardDTO } from "./dto.ts";
 
 export type PublicLeadSubmitResult =
 	| { accepted: true; reused: boolean }
@@ -110,7 +111,7 @@ export async function submitPublicLead({
 		});
 		const property = found.docs[0];
 		const canonicalSourcePage = property
-			? `/obekty/${property.slug}`
+			? toPropertyCardDTO(property).href
 			: undefined;
 		if (!property || intake.lead.sourcePage !== canonicalSourcePage) {
 			return propertyContextRejected(intake.lead.sourcePage);

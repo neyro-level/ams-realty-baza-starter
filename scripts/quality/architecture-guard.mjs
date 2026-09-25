@@ -52,17 +52,24 @@ const packageBoundaryEntries = packageBoundaryFiles.map((file) => ({
 	name: relative(file),
 	content: readFileSync(file, "utf8"),
 }));
-for (const violation of findPackageBoundaryViolations(
-	packageBoundaryEntries,
-)) {
+for (const violation of findPackageBoundaryViolations(packageBoundaryEntries)) {
 	violations.push(violation);
 }
 
-const projectLiteralPolicyPath = path.join(root, "src", "project", "project-literals.json");
+const projectLiteralPolicyPath = path.join(
+	root,
+	"src",
+	"project",
+	"project-literals.json",
+);
 if (!existsSync(projectLiteralPolicyPath)) {
-	violations.push("src/project/project-literals.json: project literal policy is missing");
+	violations.push(
+		"src/project/project-literals.json: project literal policy is missing",
+	);
 } else {
-	const projectLiteralPolicy = JSON.parse(readFileSync(projectLiteralPolicyPath, "utf8"));
+	const projectLiteralPolicy = JSON.parse(
+		readFileSync(projectLiteralPolicyPath, "utf8"),
+	);
 	for (const violation of findForbiddenProjectLiteralViolations(
 		packageBoundaryEntries,
 		projectLiteralPolicy.cityBrandDomainDenylist ?? [],
@@ -74,7 +81,10 @@ if (!existsSync(projectLiteralPolicyPath)) {
 			...filesUnder("src"),
 			...filesUnder("packages/ui"),
 			...filesUnder("packages/contracts"),
-		].map((file) => ({ name: relative(file), content: readFileSync(file, "utf8") })),
+		].map((file) => ({
+			name: relative(file),
+			content: readFileSync(file, "utf8"),
+		})),
 	);
 	if (projectLiteralPolicy.hrefLiteralMode === "enforce") {
 		violations.push(...hrefReports);
@@ -84,7 +94,9 @@ if (!existsSync(projectLiteralPolicyPath)) {
 }
 
 if (!existsSync(path.join(root, "src", "project", "static-routes.ts"))) {
-	violations.push("src/project/static-routes.ts: project static route owner is missing");
+	violations.push(
+		"src/project/static-routes.ts: project static route owner is missing",
+	);
 }
 
 for (const file of filesUnder("src")) {
@@ -149,6 +161,7 @@ for (const file of fixtureRuntimeFiles) {
 
 const requiredFixtureRoutes = [
 	"src/app/(site)/page.tsx",
+	"src/app/(site)/[...segments]/page.tsx",
 	"src/app/(site)/nedvizhimost/page.tsx",
 	"src/app/(site)/obekty/[slug]/page.tsx",
 	"src/app/(site)/uslugi/page.tsx",
@@ -259,15 +272,6 @@ if (existsSync(middlewarePath)) {
 	);
 }
 
-const lifecycleRoutePath = path.join(
-	root,
-	"src",
-	"app",
-	"http",
-	"property-lifecycle",
-	"[slug]",
-	"route.ts",
-);
 const propertyPagePath = path.join(
 	root,
 	"src",
@@ -284,20 +288,22 @@ const goneResponsePath = path.join(
 	"http",
 	"property-gone-response.ts",
 );
-if (!existsSync(lifecycleRoutePath)) {
+if (
+	existsSync(
+		path.join(
+			root,
+			"src",
+			"app",
+			"http",
+			"property-lifecycle",
+			"[slug]",
+			"route.ts",
+		),
+	)
+) {
 	violations.push(
-		"src/app/http/property-lifecycle/[slug]/route.ts: public HTTP lifecycle boundary is missing",
+		"src/app/http/property-lifecycle/[slug]/route.ts: superseded proof boundary must stay removed after P8-23B",
 	);
-} else {
-	const lifecycleRoute = readFileSync(lifecycleRoutePath, "utf8");
-	if (
-		!lifecycleRoute.includes("createPropertyGoneResponse") ||
-		!lifecycleRoute.includes("NextResponse.redirect")
-	) {
-		violations.push(
-			"src/app/http/property-lifecycle/[slug]/route.ts: 410 and redirect semantics must remain explicit",
-		);
-	}
 }
 if (
 	!existsSync(goneResponsePath) ||
@@ -307,13 +313,33 @@ if (
 		"src/core/http/property-gone-response.ts: public gone response must keep HTTP 410",
 	);
 }
-if (
-	!existsSync(propertyPagePath) ||
-	!readFileSync(propertyPagePath, "utf8").includes("GonePropertyPage")
-) {
+if (!existsSync(propertyPagePath)) {
 	violations.push(
-		"src/app/(site)/obekty/[slug]/page.tsx: visual gone-property page is missing",
+		"src/app/(site)/obekty/[slug]/page.tsx: direct legacy compatibility redirect is missing",
 	);
+} else {
+	const propertyPage = readFileSync(propertyPagePath, "utf8");
+	if (
+		!propertyPage.includes("resolveLegacyPropertyRoute") ||
+		propertyPage.includes("GonePropertyPage")
+	) {
+		violations.push(
+			"src/app/(site)/obekty/[slug]/page.tsx: legacy route must stay redirect-only without the removed visual runtime",
+		);
+	}
+}
+for (const removedRuntime of [
+	"packages/ui/src/views/catalog/StarterCatalogPageView.tsx",
+	"packages/ui/src/views/property/GonePropertyPageView.tsx",
+	"packages/ui/src/views/shared/HtmlSitemapListingView.tsx",
+	"packages/ui/src/views/shared/HtmlSitemapView.tsx",
+	"src/project/seo/catalog.ts",
+]) {
+	if (existsSync(path.join(root, removedRuntime))) {
+		violations.push(
+			`${removedRuntime}: superseded post-cutover runtime returned`,
+		);
+	}
 }
 if (!existsSync(anonymousRestHelperPath)) {
 	violations.push(
@@ -581,7 +607,9 @@ if (
 	violations.push("src/core/data-access/system/jobs module is missing");
 }
 
-if (existsSync(path.join(root, "src", "project", "data-access", "public", "sql"))) {
+if (
+	existsSync(path.join(root, "src", "project", "data-access", "public", "sql"))
+) {
 	violations.push(
 		"src/project/data-access/public/sql: public raw SQL layer must be removed",
 	);

@@ -1,12 +1,12 @@
 # Product Structure
 
-Статус: `Plan 8 canonical runtime cutover implemented`.
+Статус: `Plan 8 canonical runtime cutover + post-cutover cleanup implemented`.
 
 ## Текущий публичный runtime
 
 P8-23A переключает динамический public runtime на canonical resolver. Статические
-маршруты остаются explicit; legacy donor routes существуют только как прямые
-переходы до P8-23B cleanup.
+маршруты остаются explicit; два реально публичных legacy donor URL сохранены
+как redirect-only compatibility adapters без прежнего presentation/runtime.
 
 | Назначение | Текущий URL |
 |---|---|
@@ -71,7 +71,9 @@ PageKey, URL grammar, resolution order, status/profile model и lifecycle
 Инварианты target-грамматики: не более трёх сегментов, lowercase, canonical
 trailing slash, property URL не содержит geo, parent района не входит в URL.
 Legacy `/nedvizhimost` и `/obekty/[slug]` делают один прямой `308` на canonical
-URL. Lifecycle boundary сохраняется до P8-23B evidence.
+URL. Отдельная proof-only lifecycle HTTP boundary удалена в P8-23B: реальные
+canonical `301/410` обслуживает bounded preflight в `src/proxy.ts`. Raw legacy
+geo/source fields и history redirects не удалялись.
 
 ## Current vs target ownership
 
@@ -82,5 +84,6 @@ URL. Lifecycle boundary сохраняется до P8-23B evidence.
   discovery epics Plan №8.
 - **Cutover owner:** P8-23A; implementation evidence —
   `docs/plan8/S8_23A_RUNTIME_CUTOVER_EVIDENCE.md`.
-- **Cleanup owner:** P8-23B после принятого cutover proof; raw legacy geo/source
-  data не удаляется транзакцией cutover.
+- **Cleanup owner:** P8-23B; evidence —
+  `docs/plan8/S8_23B_POST_CUTOVER_CLEANUP_EVIDENCE.md`. Raw legacy geo/source
+  data сохранены.

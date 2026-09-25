@@ -14,7 +14,7 @@ assert.ok(leadForm.includes("successRef.current?.focus()"));
 const starterHome = read("packages/ui/src/views/home/StarterHomePageView.tsx");
 const starterPages = [
 	starterHome,
-	read("packages/ui/src/views/catalog/StarterCatalogPageView.tsx"),
+	read("packages/ui/src/views/catalog/ListingView.tsx"),
 	read("packages/ui/src/views/property/StarterPropertyPageView.tsx"),
 	read("packages/ui/src/views/marketing/StarterMarketingPageView.tsx"),
 ].join("\n");

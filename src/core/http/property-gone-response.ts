@@ -4,7 +4,7 @@ const goneCacheHeaders = {
 	"Cache-Control": "public, max-age=300, must-revalidate",
 } as const;
 
-export function renderPropertyGoneHtml(slug: string): string {
+export function renderEntityGoneHtml(slug: string): string {
 	const safeSlug = slug.replaceAll(/[^a-z0-9_-]/gi, "");
 	return `<!doctype html>
 <html lang="ru">
@@ -24,11 +24,9 @@ export function renderPropertyGoneHtml(slug: string): string {
 </html>`;
 }
 
-export function createPropertyGoneResponse(slug: string): Response {
-	return new Response(renderPropertyGoneHtml(slug), {
+export function createEntityGoneResponse(slug: string): Response {
+	return new Response(renderEntityGoneHtml(slug), {
 		status: 410,
 		headers: goneCacheHeaders,
 	});
 }
-
-export const createEntityGoneResponse = createPropertyGoneResponse;

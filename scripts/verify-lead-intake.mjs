@@ -182,8 +182,7 @@ assert.equal(formSource.includes("requestAttemptId"), true);
 assert.equal(formSource.includes("consentedAt:"), false);
 for (const file of [
 	"src/project/data-access/public/dto.ts",
-	"src/app/(site)/obekty/[slug]/page.tsx",
-	"packages/ui/src/views/catalog/StarterCatalogPageView.tsx",
+	"src/app/(site)/[...segments]/page.tsx",
 ]) {
 	assert.equal(
 		readFileSync(file, "utf8").includes('consentVersion: "pd-2026-01"'),

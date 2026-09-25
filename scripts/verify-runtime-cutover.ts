@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
-import { createRouteResolver, type PageKey } from "../src/core/routing/index.ts";
+import {
+	createRouteResolver,
+	type PageKey,
+} from "../src/core/routing/index.ts";
 import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
@@ -14,8 +17,14 @@ assert.match(
 );
 assert.match(source("src/proxy.ts"), /\/api\/:path\*/);
 assert.match(source("src/proxy.ts"), /lookupCanonicalEntityLifecyclePreflight/);
-assert.match(source("src/app/(site)/nedvizhimost/page.tsx"), /permanentRedirect\("\/kvartiry\/"\)/);
-assert.match(source("src/app/(site)/obekty/[slug]/page.tsx"), /permanentRedirect\(property\.href\)/);
+assert.match(
+	source("src/app/(site)/nedvizhimost/page.tsx"),
+	/permanentRedirect\("\/kvartiry\/"\)/,
+);
+assert.match(
+	source("src/app/(site)/obekty/[slug]/page.tsx"),
+	/resolveLegacyPropertyRoute[\s\S]+permanentRedirect\(route\.destination\)/,
+);
 
 for (const path of [
 	"src/app/not-found.tsx",
@@ -23,10 +32,12 @@ for (const path of [
 	"src/fixture/provider.ts",
 	"src/project/data-access/public/dto.ts",
 	"packages/ui/src/views/home/StarterHomePageView.tsx",
-	"packages/ui/src/views/property/GonePropertyPageView.tsx",
 	"packages/ui/src/views/property/StarterPropertyPageView.tsx",
 ]) {
-	assert.doesNotMatch(source(path), /href\s*=\s*["']\/nedvizhimost|href:\s*["']\/nedvizhimost/);
+	assert.doesNotMatch(
+		source(path),
+		/href\s*=\s*["']\/nedvizhimost|href:\s*["']\/nedvizhimost/,
+	);
 }
 
 let checked = 0;
@@ -40,14 +51,33 @@ for (const profile of Object.values(siteProfileFixtures)) {
 		{ kind: "geoHub", geo },
 		{ kind: "categoryRoot", category: "kvartiry" },
 		{ kind: "categoryGeo", geo, category: "kvartiry" },
-		{ kind: "categoryGeoDistrict", geo, category: "kvartiry", district: "severnyy" },
-		{ kind: "categoryGeoFacet", geo, category: "kvartiry", facet: "dvukhkomnatnye" },
+		{
+			kind: "categoryGeoDistrict",
+			geo,
+			category: "kvartiry",
+			district: "severnyy",
+		},
+		{
+			kind: "categoryGeoFacet",
+			geo,
+			category: "kvartiry",
+			facet: "dvukhkomnatnye",
+		},
 		{ kind: "geoDevelopers", geo },
 		{ kind: "developerRoot" },
 		{ kind: "developer", slug: "sever-stroy" },
-		{ kind: "development", developmentKind: "residential_complex", slug: "mayak" },
+		{
+			kind: "development",
+			developmentKind: "residential_complex",
+			slug: "mayak",
+		},
 		{ kind: "development", developmentKind: "cottage_village", slug: "bereg" },
-		{ kind: "property", category: "kvartiry", semantic: "test", publicUrlId: 101 },
+		{
+			kind: "property",
+			category: "kvartiry",
+			semantic: "test",
+			publicUrlId: 101,
+		},
 	];
 	const resolver = createRouteResolver({
 		profile,
@@ -59,10 +89,17 @@ for (const profile of Object.values(siteProfileFixtures)) {
 				inventory: 100,
 				record: {
 					lifecycle: "active",
-					...(pageKey.kind === "property" ? { market: "secondary" as const } : {}),
+					...(pageKey.kind === "property"
+						? { market: "secondary" as const }
+						: {}),
 				},
 			})),
-			redirects: { "/old-catalog/": grammar.buildUrl({ kind: "categoryRoot", category: "kvartiry" }) },
+			redirects: {
+				"/old-catalog/": grammar.buildUrl({
+					kind: "categoryRoot",
+					category: "kvartiry",
+				}),
+			},
 		}),
 	});
 	for (const pageKey of pages) {
@@ -76,10 +113,15 @@ for (const profile of Object.values(siteProfileFixtures)) {
 	}
 	assert.equal((await resolver.resolvePath("/old-catalog/")).kind, "redirect");
 	assert.equal((await resolver.resolvePath("/KVARTIRY/")).kind, "redirect");
-	assert.equal((await resolver.resolvePath("/unknown-route/")).kind, "notFound");
+	assert.equal(
+		(await resolver.resolvePath("/unknown-route/")).kind,
+		"notFound",
+	);
 }
 
 timings.sort((left, right) => left - right);
 const p95 = timings[Math.floor(timings.length * 0.95)] ?? 0;
 assert.ok(p95 < 25, `Pure resolver p95 regression: ${p95.toFixed(2)}ms.`);
-console.log(`Runtime cutover verified: ${checked} PageKey/profile cases; pure resolver p95 ${p95.toFixed(2)}ms.`);
+console.log(
+	`Runtime cutover verified: ${checked} PageKey/profile cases; pure resolver p95 ${p95.toFixed(2)}ms.`,
+);

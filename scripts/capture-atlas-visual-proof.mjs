@@ -77,8 +77,8 @@ async function waitForServer(processHandle) {
 
 const scenarios = [
   { name: 'home', route: '/' },
-  { name: 'catalog', route: '/nedvizhimost' },
-  { name: 'property', route: '/obekty/svetlaya-kvartira-v-centre' },
+  { name: 'catalog', route: '/kvartiry/' },
+  { name: 'property', route: '/kvartiry/svetlaya-kvartira-v-centre-1001/' },
   { name: 'commercial-service', route: '/promo/stroitelstvo-domov' },
   { name: 'contacts', route: '/kontakty' },
   { name: 'lead-modal-validation', route: '/', state: 'lead-modal-validation' },

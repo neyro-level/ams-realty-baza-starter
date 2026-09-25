@@ -4,7 +4,7 @@ const viewports = [
 	{ name: "desktop", width: 1280, height: 900 },
 	{ name: "wide", width: 1440, height: 1000 },
 ];
-const routes = ["/", "/nedvizhimost", "/uslugi"];
+const routes = ["/", "/kvartiry/", "/uslugi/"];
 
 console.log(
 	JSON.stringify(

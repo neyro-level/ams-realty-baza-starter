@@ -7,7 +7,8 @@
 Текущий execution source — Plan №8 v6 `APPROVED`. Его target — переносимая
 geo-first catalog platform поверх того же `AMS_PROFILE=REALTY_BASE`. Target
 contract находится в `docs/platform/GEO_CATALOG_CONTRACT.md`; P8-23A canonical
-route cutover реализован, production по-прежнему не входит в Plan №8.
+route cutover и P8-23B cleanup реализованы, production по-прежнему не входит в
+Plan №8.
 
 ## Зафиксировано
 
@@ -55,7 +56,7 @@ route cutover реализован, production по-прежнему не вхо
 | Field ownership | `manual → field override → owning feed`; foreign-feed identity is degenerate for REALTY_BASE |
 | Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
 | Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
-| Geo-catalog runtime | Plan №8 v6 + `docs/platform/GEO_CATALOG_CONTRACT.md`; P8-23A canonical resolver/catch-all cutover implemented, P8-23B owns cleanup |
+| Geo-catalog runtime | Plan №8 v6 + `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover and guarded post-cutover cleanup implemented |
 | Geo modes | Target supports `SINGLE_GEO | MULTI_GEO`; active value will be owned by the future SiteProfile (P8-03), not inferred from current routes |
 | Development model | One future `developments` entity with `kind = residential_complex | cottage_village` and strict kind-specific validation (P8-09) |
 | Plan 8 delivery | Every epic uses `MERGE_AFTER_GATE`; production, mirror and tag remain separate owner actions |
@@ -79,10 +80,10 @@ Next.js `16.3.5` edge: intentional canonical
 with `export function proxy`; `src/middleware.ts` is forbidden. Anonymous
 `/api/{collection}` for deny-list and system-only slugs returns JSON
 `{ error: "notFound" }` 404 unless a Payload session cookie is present. Public
-lead create remains `POST /api/public/leads`. The visual property page stays in
-`src/app/(site)/obekty/[slug]/page.tsx`; the intentional public status boundary
-`src/app/http/property-lifecycle/[slug]/route.ts` owns actual 410/redirect HTTP
-semantics and is not an internal API.
+lead create remains `POST /api/public/leads`. Canonical entity pages use the
+shared catch-all resolver; `src/proxy.ts` owns bounded lifecycle `301/410`.
+Legacy `/obekty/[slug]` remains redirect-only, while the former proof-only
+`/http/property-lifecycle/[slug]` route is removed and guarded against return.
 
 Current URL map and current/target split: `02_PRODUCT_STRUCTURE.md`. Reusable
 target URL/status/profile rules: `docs/platform/GEO_CATALOG_CONTRACT.md`.

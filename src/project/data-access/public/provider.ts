@@ -7,26 +7,14 @@ import {
 	listPublicSitemapPropertiesPage,
 } from "./payload-reads";
 import { projectConfig } from "@/project/project.config";
-import { resolvePropertyPageLifecycle } from "@/core/seo/property";
 import {
 	type PublicUrlEntry,
 	staticPublicUrlEntries,
 } from "@/project/seo/site";
+import { findPublicCatalogProperties } from "./catalog";
 import {
-	type CatalogQueryInput,
-	catalogQuerySchema,
-	findPublicCatalogFacets,
-	findPublicCatalogProperties,
-	findPublicPropertyBySlug,
-	findPublicPropertyLifecycleBySlug,
-	type PublicCatalogResult,
-} from "./catalog";
-import {
-	type PublicPropertyDetailsDTO,
 	toHomePageDTO,
 	toMarketingPageDTO,
-	toPropertyDetailsDTO,
-	toPropertyFilterDTO,
 	toPropertyListDTO,
 	toShellDTO,
 } from "./dto";
@@ -37,50 +25,9 @@ import { propertyCategorySurface } from "@/core/property/taxonomy";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
 import { siteProfile } from "@/project/site-profile";
 
-export type PublicPropertyPageState =
-	| {
-			lifecycle: { kind: "gone"; statusCode: 410; robots: "noindex" };
-	  }
-	| {
-			lifecycle: { kind: "redirect"; statusCode: 308; destination: string };
-	  }
-	| {
-			lifecycle:
-				| { kind: "active"; statusCode: 200 }
-				| { kind: "archived"; statusCode: 200; robots: "noindex" };
-			property: PublicPropertyDetailsDTO;
-	  };
-
 const urlsPerShard = projectConfig.sitemapUrlsPerShard;
 const queryPageSize = projectConfig.sitemapQueryPageSize;
 const urlGrammar = createProjectUrlGrammar(siteProfile);
-
-function emptyCatalog(
-	query: CatalogQueryInput = { limit: 24, page: 1 },
-): PublicCatalogResult {
-	const parsed = catalogQuerySchema.parse(query);
-	return {
-		items: [],
-		total: 0,
-		page: parsed.page,
-		pageSize: parsed.limit,
-		totalPages: 0,
-		applied: {
-			query: parsed.query,
-			category: parsed.category,
-			dealType: parsed.dealType,
-			city: parsed.city,
-			district: parsed.district,
-			rooms: parsed.rooms,
-			priceFromMinor: parsed.priceFromMinor,
-			priceToMinor: parsed.priceToMinor,
-			areaFrom: parsed.areaFrom,
-			areaTo: parsed.areaTo,
-			sort: parsed.sort,
-			view: parsed.view,
-		},
-	};
-}
 
 function indexableStaticEntries(): PublicUrlEntry[] {
 	return staticPublicUrlEntries.filter((entry) => entry.indexable);
@@ -113,28 +60,6 @@ export async function getPublicShell() {
 		findPublicNap(payload),
 	]);
 	return toShellDTO(pages, nap);
-}
-
-export async function getPublicCatalog(
-	query: CatalogQueryInput = { limit: 24, page: 1 },
-) {
-	const payload = await getOptionalPublicGatewayPayload();
-	if (!payload) {
-		const result = emptyCatalog(query);
-		return {
-			list: toPropertyListDTO(result),
-			filters: toPropertyFilterDTO(result),
-		} as const;
-	}
-	const [result, facets] = await Promise.all([
-		findPublicCatalogProperties(payload, query),
-		findPublicCatalogFacets(payload, query),
-	]);
-
-	return {
-		list: toPropertyListDTO(result),
-		filters: toPropertyFilterDTO(result, facets),
-	} as const;
 }
 
 export async function getPublicSitemapTotals() {
@@ -273,43 +198,6 @@ export async function getPublicHomePage() {
 			featuredPropertyId: featured ? String(featured.id) : "",
 		},
 		featured: featured ? toPropertyListDTO(catalog).items[0] : null,
-	} as const;
-}
-
-export async function getPublicProperty(
-	slug: string,
-): Promise<PublicPropertyPageState | null> {
-	const payload = await getOptionalPublicGatewayPayload();
-	if (!payload) {
-		return null;
-	}
-	const lifecycle = resolvePropertyPageLifecycle(
-		await findPublicPropertyLifecycleBySlug(payload, slug),
-	);
-	switch (lifecycle.kind) {
-		case "missing":
-			return null;
-		case "gone":
-			return { lifecycle };
-		case "redirect":
-			return { lifecycle };
-	}
-
-	const property = await findPublicPropertyBySlug(payload, slug);
-	if (!property) return null;
-	const relatedResult = await findPublicCatalogProperties(payload, {
-		limit: 3,
-		page: 1,
-		category: property.category,
-		city: property.locality ?? undefined,
-	});
-	const related = relatedResult.items
-		.filter((item) => item.slug !== property.slug)
-		.slice(0, 3);
-
-	return {
-		lifecycle,
-		property: toPropertyDetailsDTO(property, related),
 	} as const;
 }
 

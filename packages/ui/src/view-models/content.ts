@@ -63,35 +63,3 @@ export type LegalDocumentDTO = {
 	intro: readonly string[];
 	sections: readonly LegalDocumentSectionDTO[];
 };
-
-export type SitemapLinkDTO = {
-	href: string;
-	label: string;
-	countAsPublishedPage?: boolean;
-	emphasis?: boolean;
-};
-
-export type SitemapColumnDTO = {
-	title?: string;
-	items: readonly SitemapLinkDTO[];
-};
-
-export type SitemapSectionDTO = {
-	title: string;
-	columns: readonly SitemapColumnDTO[];
-	count?: number;
-	grouped?: boolean;
-};
-
-export type HtmlSitemapPageDTO = {
-	metrics: { totalPages: number; staticPages: number; objectPages: number };
-	sections: readonly SitemapSectionDTO[];
-};
-
-export type SitemapListingPageDTO = {
-	kind: "objects" | "reserve";
-	page: number;
-	pageSize: number;
-	total: number;
-	items: readonly { id: string; slug: string; title: string }[];
-};

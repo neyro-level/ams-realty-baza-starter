@@ -755,7 +755,7 @@ const propertyLeadBody = {
 	name: "Integration Property Lead",
 	phone: "+79990000009",
 	formKind: "property_request",
-	sourcePage: `/obekty/${publishedProperty.slug}`,
+	sourcePage: `/kvartiry/${publishedProperty.slug}-${publishedProperty.publicUrlId}/`,
 	property: String(publishedProperty.id),
 	context: {
 		geo: "rostov-na-donu",
@@ -802,7 +802,10 @@ for (const persisted of persistedPropertyLeads.docs) {
 			: String(persisted.property),
 		String(publishedProperty.id),
 	);
-	assert.equal(persisted.sourcePage, `/obekty/${publishedProperty.slug}`);
+	assert.equal(
+		persisted.sourcePage,
+		`/kvartiry/${publishedProperty.slug}-${publishedProperty.publicUrlId}/`,
+	);
 	assert.equal(persisted.consent?.version, "pd-2026-01");
 	assert.equal(persisted.context?.geo, "rostov-na-donu");
 	assert.equal(persisted.context?.surface, "apartments");
@@ -820,7 +823,7 @@ for (const persisted of persistedPropertyLeads.docs) {
 const mismatchedPropertyLead = await submitPublicLead({
 	body: {
 		...propertyLeadBody,
-		sourcePage: "/obekty/client-forged-slug",
+		sourcePage: "/kvartiry/client-forged-slug-999999999/",
 		requestAttemptId: "55555555-5555-4555-8555-555555555555",
 	},
 	rateLimitKey: `integration-property-mismatch-${suffix}`,

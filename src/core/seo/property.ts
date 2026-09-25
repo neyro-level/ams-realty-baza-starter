@@ -1,7 +1,3 @@
-export type PublicPropertyLifecycle = {
-	status: "active" | "archived";
-	isArchived: boolean;
-};
 import { sanitizeExplicitRedirectPath } from "./redirect-path.ts";
 
 export { sanitizeExplicitRedirectPath } from "./redirect-path.ts";
@@ -12,16 +8,6 @@ export type PropertyPageLifecycleState =
 	| { kind: "archived"; statusCode: 200; robots: "noindex" }
 	| { kind: "gone"; statusCode: 410; robots: "noindex" }
 	| { kind: "redirect"; statusCode: 308; destination: string };
-
-export function getPropertyRobots(property: {
-	lifecycle: PublicPropertyLifecycle;
-}): { indexing: "index" | "noindex"; following: "follow" } {
-	if (property.lifecycle.status === "archived") {
-		return { indexing: "noindex", following: "follow" };
-	}
-
-	return { indexing: "index", following: "follow" };
-}
 
 export function resolvePropertyPageLifecycle(
 	input:
@@ -39,7 +25,9 @@ export function resolvePropertyPageLifecycle(
 	}
 
 	if (input.contentPurgedAt) {
-		const destination = sanitizeExplicitRedirectPath(input.explicitRedirectPath);
+		const destination = sanitizeExplicitRedirectPath(
+			input.explicitRedirectPath,
+		);
 		if (destination) {
 			return {
 				kind: "redirect",

@@ -1,12 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import {
-	buildCatalogSeoDecision,
-	catalogSeoParamPolicy,
-} from "../src/project/seo/catalog.ts";
 import { serializeJsonLdSafely } from "../src/core/seo/json-ld.ts";
 import {
-	getPropertyRobots,
 	resolvePropertyPageLifecycle,
 	sanitizeExplicitRedirectPath,
 } from "../src/core/seo/property.ts";
@@ -57,7 +52,7 @@ assert.deepEqual(
 );
 assert.ok(
 	readFileSync("src/app/robots.ts", "utf8").includes(
-		"buildRobots(getProjectIndexingPolicy(), getSiteUrl())",
+		"renderDiscoveryRobots({ publicOrigin, indexingEnabled })",
 	),
 );
 assert.ok(
@@ -83,65 +78,15 @@ const structuredDataSource = readFileSync(
 assert.ok(structuredDataSource.includes("serializeJsonLdSafely(data)"));
 assert.equal(structuredDataSource.includes("JSON.stringify(data)"), false);
 
-assert.deepEqual(catalogSeoParamPolicy.indexedFilterKeys, [
-	"category",
-	"dealType",
-	"city",
-	"district",
-	"rooms",
-]);
-
-const base = buildCatalogSeoDecision({});
-assert.equal(base.canonicalPath, "/nedvizhimost");
-assert.equal(base.index, true);
-assert.equal(base.reason, "base");
-
-const whitelisted = buildCatalogSeoDecision({
-	dealType: "sale",
-	category: "apartment",
-	rooms: ["2", "1"],
-});
-assert.equal(
-	whitelisted.canonicalPath,
-	"/nedvizhimost?category=apartment&dealType=sale&rooms=1&rooms=2",
-);
-assert.equal(whitelisted.index, true);
-assert.equal(whitelisted.reason, "whitelisted_filter");
-assert.deepEqual(whitelisted.query.rooms, [1, 2]);
-
-const control = buildCatalogSeoDecision({ page: "2", sort: "priceAsc" });
-assert.equal(control.canonicalPath, "/nedvizhimost");
-assert.equal(control.index, false);
-assert.equal(control.reason, "control_or_nonindex_filter");
-
-const freeText = buildCatalogSeoDecision({ query: "центр" });
-assert.equal(freeText.canonicalPath, "/nedvizhimost");
-assert.equal(freeText.index, false);
-assert.equal(freeText.reason, "control_or_nonindex_filter");
-
-const unknown = buildCatalogSeoDecision({ debug: "1", category: "house" });
-assert.equal(unknown.canonicalPath, "/nedvizhimost?category=house");
-assert.equal(unknown.index, false);
-assert.equal(unknown.reason, "unknown_param");
-
 const sitemapPaths = staticPublicUrlEntries
 	.filter((entry) => entry.indexable)
 	.map((entry) => entry.path);
 assert.ok(sitemapPaths.includes("/"));
-assert.ok(sitemapPaths.includes("/nedvizhimost"));
+assert.equal(sitemapPaths.includes("/nedvizhimost"), false);
 assert.equal(sitemapPaths.includes("/politika-konfidencialnosti"), false);
 assert.equal(
 	sitemapPaths.includes("/soglasie-na-obrabotku-personalnyh-dannyh"),
 	false,
-);
-
-assert.deepEqual(
-	getPropertyRobots({ lifecycle: { status: "active", isArchived: false } }),
-	{ indexing: "index", following: "follow" },
-);
-assert.deepEqual(
-	getPropertyRobots({ lifecycle: { status: "archived", isArchived: true } }),
-	{ indexing: "noindex", following: "follow" },
 );
 
 assert.deepEqual(resolvePropertyPageLifecycle({ found: false }), {
@@ -218,13 +163,9 @@ assert.ok(catalogSource.includes("aggregatePublicCatalogFacets"));
 assert.ok(catalogSource.includes("payload-aggregate"));
 assert.equal(catalogSource.includes("sql-aggregate"), false);
 assert.ok(
-	readFileSync(
-		"src/app/http/property-lifecycle/[slug]/route.ts",
-		"utf8",
-	).includes("status: 410") ||
-		readFileSync("src/core/http/property-gone-response.ts", "utf8").includes(
-			"status: 410",
-		),
+	readFileSync("src/core/http/property-gone-response.ts", "utf8").includes(
+		"status: 410",
+	),
 );
 assert.ok(
 	readFileSync("src/project/collections/Pages.ts", "utf8").includes(
@@ -271,9 +212,9 @@ assert.equal(
 );
 assert.ok(
 	readFileSync("src/app/(site)/nedvizhimost/page.tsx", "utf8").includes(
-		"force-dynamic",
+		'permanentRedirect("/kvartiry/")',
 	),
-	"catalog may stay dynamic",
+	"legacy catalog must remain a direct canonical redirect",
 );
 
 console.log("verify-seo-contracts: ok");

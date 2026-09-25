@@ -52,10 +52,8 @@ export {
 export type { PublicListingInput } from "./geo-catalog";
 export { findPublicNap, toNapDTO } from "./nap";
 export {
-	getPublicCatalog,
 	getPublicHomePage,
 	getPublicMarketingPage,
-	getPublicProperty,
 	getPublicShell,
 	getPublicSitemapEntries,
 	getPublicSitemapShard,

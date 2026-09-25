@@ -215,3 +215,19 @@ for the current immutable head SHA.
 
 P8-00 exit is satisfied when this exact document passes `pnpm typecheck`,
 `pnpm lint`, diff review, one STANDARD exact-head SourceCraft gate and merge.
+
+## 9. P8-23B post-cutover disposition update
+
+The baseline above remains historical evidence. P8-23B reconciles its deferred
+items as follows:
+
+- `/nedvizhimost` and `/obekty/[slug]`: old runtime is removed; minimal direct
+  compatibility redirects are retained because these URLs were public.
+- `/http/property-lifecycle/[slug]`: `REMOVE_LATER` completed after accepted
+  P8-23A proxy/canonical lifecycle proof.
+- old catalog SEO, catalog/gone-property presentation and unrouted HTML sitemap
+  presentation: removed and guarded against return.
+- raw textual geo/source fields, redirect history and assigned public URL IDs:
+  retained; no destructive migration belongs to P8-23B.
+
+Detailed evidence: `S8_23B_POST_CUTOVER_CLEANUP_EVIDENCE.md`.
