@@ -165,5 +165,5 @@ const breadcrumbSource = readFileSync(
 assert.match(breadcrumbSource, /index === breadcrumbs\.items\.length - 1/);
 
 console.log(
-	`verify:navigation passed (4 profiles; ${fixtureLinks.length} fixture links; zero 404/redirect/query links)`,
+	`verify:navigation passed (5 profiles; ${fixtureLinks.length} fixture links; zero 404/redirect/query links)`,
 );

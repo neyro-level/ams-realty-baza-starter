@@ -11,7 +11,8 @@ the existing frozen journal DTO contract.
 
 ## Enabled flag owner
 
-The `journal` row in `docs/PROJECT.md`.
+The `journal` entry in validated `src/project/site-profile.config.ts`;
+`docs/PROJECT.md` mirrors it for operators.
 
 ## Reserved URLs
 

@@ -24,12 +24,23 @@ export const catalogSurfaceSlugs = [
 	"kottedzhnye-poselki",
 ] as const;
 export const markets = ["newbuild", "secondary"] as const;
+export const seoTierMetrics = ["broad39", "wordstat", "searchDemand"] as const;
+export const moduleStates = ["active", "prepared", "disabled"] as const;
+export const staticRouteFrequencies = [
+	"daily",
+	"weekly",
+	"monthly",
+	"yearly",
+] as const;
 
 export type ProfileStatus = (typeof profileStatuses)[number];
 export type GeoMode = (typeof geoModes)[number];
 export type SitePreset = (typeof sitePresets)[number];
 export type CatalogSurfaceSlug = (typeof catalogSurfaceSlugs)[number];
 export type Market = (typeof markets)[number];
+export type SeoTierMetric = (typeof seoTierMetrics)[number];
+export type ModuleState = (typeof moduleStates)[number];
+export type StaticRouteFrequency = (typeof staticRouteFrequencies)[number];
 
 export const catalogSurfaceMarketMatrix = {
 	kvartiry: ["secondary", "newbuild"],
@@ -53,6 +64,13 @@ const facetSchema = z
 	.min(1)
 	.regex(/^[a-z][a-zA-Z0-9]*$/, "Facet key must be a stable identifier.");
 const isoDateSchema = z.iso.date();
+const staticPathSchema = z
+	.string()
+	.regex(
+		/^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*)?$/,
+		"Static route must be an absolute lowercase ASCII path without a trailing slash.",
+	)
+	.transform((value) => value as `/${string}`);
 
 const surfaceStatusSchema = z.strictObject(
 	Object.fromEntries(
@@ -88,7 +106,7 @@ const siteProfileInputSchema = z.strictObject({
 		geoSlugSchema,
 		z.strictObject({
 			published: z.boolean(),
-			status: statusSchema,
+			hubStatus: statusSchema,
 			agglomerationOf: geoSlugSchema.optional(),
 		}),
 	),
@@ -96,14 +114,13 @@ const siteProfileInputSchema = z.strictObject({
 	marketCapability: marketStatusSchema,
 	geoCategoryStatus: z.record(geoSlugSchema, surfaceStatusSchema),
 	marketStatus: z.record(geoSlugSchema, marketStatusSchema),
-	defaultNearbyGeoStatus: statusSchema,
 	developersSurface: z.strictObject({
 		root: statusSchema,
 		byGeo: z.record(geoSlugSchema, statusSchema),
 	}),
 	facetWhitelist: facetWhitelistSchema,
 	seoTiers: z.strictObject({
-		metric: z.literal("searchDemand"),
+		metric: z.enum(seoTierMetrics),
 		snapshotDate: isoDateSchema,
 		bands: z.strictObject({
 			P1: z.number().nonnegative(),
@@ -127,6 +144,21 @@ const siteProfileInputSchema = z.strictObject({
 		developerGeoMin: z.int().nonnegative(),
 		developerDescMinChars: z.int().nonnegative(),
 	}),
+	staticRoutes: z.array(
+		z.strictObject({
+			path: staticPathSchema,
+			changeFrequency: z.enum(staticRouteFrequencies),
+			priority: z.number().min(0).max(1),
+			indexable: z.boolean(),
+		}),
+	),
+	modules: z.record(
+		geoSlugSchema,
+		z.strictObject({
+			state: z.enum(moduleStates),
+			reservedRoots: z.array(geoSlugSchema).max(20),
+		}),
+	),
 	entityPrefixes: z.strictObject({
 		residentialComplex: z.literal("zhk-"),
 		cottageVillage: z.literal("kp-"),
@@ -153,11 +185,30 @@ export const siteProfileSchema = siteProfileInputSchema.superRefine(
 				message: "primaryGeo must be published.",
 			});
 		}
-		if (profile.geoMode === "SINGLE_GEO" && geoSlugs.length !== 1) {
+		const routableGeoSlugs = geoSlugs.filter((geo) => {
+			const definition = profile.geos[geo];
+			return definition.published && routeCanExist(definition.hubStatus);
+		});
+		if (
+			profile.geos[profile.primaryGeo] &&
+			!routeCanExist(profile.geos[profile.primaryGeo].hubStatus)
+		) {
+			context.addIssue({
+				code: "custom",
+				path: ["geos", profile.primaryGeo, "hubStatus"],
+				message: "primaryGeo must have a routable hubStatus.",
+			});
+		}
+		if (
+			profile.geoMode === "SINGLE_GEO" &&
+			(routableGeoSlugs.length !== 1 ||
+				routableGeoSlugs[0] !== profile.primaryGeo)
+		) {
 			context.addIssue({
 				code: "custom",
 				path: ["geos"],
-				message: "SINGLE_GEO requires exactly one configured geo.",
+				message:
+					"SINGLE_GEO requires exactly one routable hub and it must be primaryGeo.",
 			});
 		}
 		if (profile.geoMode === "MULTI_GEO" && geoSlugs.length < 2) {
@@ -257,18 +308,35 @@ export const siteProfileSchema = siteProfileInputSchema.superRefine(
 			}
 		}
 
-		if (!(profile.seoTiers.bands.P1 > profile.seoTiers.bands.P2)) {
+		if (
+			!(
+				profile.seoTiers.bands.P1 > profile.seoTiers.bands.P2 &&
+				profile.seoTiers.bands.P2 > profile.seoTiers.bands.TEST
+			)
+		) {
 			context.addIssue({
 				code: "custom",
 				path: ["seoTiers", "bands"],
-				message: "SEO tier bands must descend from P1 to P2.",
+				message: "SEO tier bands must descend from P1 to P2 to TEST.",
 			});
 		}
-		if (profile.seoTiers.bands.TEST !== 0) {
+
+		const staticPaths = profile.staticRoutes.map((route) => route.path);
+		if (new Set(staticPaths).size !== staticPaths.length) {
 			context.addIssue({
 				code: "custom",
-				path: ["seoTiers", "bands", "TEST"],
-				message: "TEST tier baseline must be zero.",
+				path: ["staticRoutes"],
+				message: "Static route paths must be unique.",
+			});
+		}
+		const moduleRoots = Object.values(profile.modules).flatMap(
+			(module) => module.reservedRoots,
+		);
+		if (new Set(moduleRoots).size !== moduleRoots.length) {
+			context.addIssue({
+				code: "custom",
+				path: ["modules"],
+				message: "Module reserved roots must be globally unique.",
 			});
 		}
 		if (profile.gate.priceFailDays <= profile.gate.priceStaleDays) {
@@ -291,27 +359,29 @@ export function defineSiteProfile(input: SiteProfileInput): SiteProfile {
 export function isConfiguredRouteAvailable(input: {
 	status: ProfileStatus;
 	inventory: number;
-	minimumInventory: number;
 }): boolean {
 	if (input.status === "ACTIVE") return true;
-	if (input.status === "NOINDEX_AUTO") {
-		return input.inventory >= input.minimumInventory;
-	}
+	if (input.status === "NOINDEX_AUTO") return input.inventory >= 1;
 	return false;
+}
+
+export function getGeoHubStatus(
+	profile: SiteProfile,
+	geo: string,
+): ProfileStatus {
+	return profile.geos[geo]?.hubStatus ?? "PREPARED_OFF";
 }
 
 export function isGeoHubAvailable(input: {
 	published: boolean;
-	status: ProfileStatus;
+	hubStatus: ProfileStatus;
 	inventory: number;
-	minimumInventory: number;
 }): boolean {
 	return (
 		input.published &&
 		isConfiguredRouteAvailable({
-			status: input.status,
+			status: input.hubStatus,
 			inventory: input.inventory,
-			minimumInventory: input.minimumInventory,
 		})
 	);
 }

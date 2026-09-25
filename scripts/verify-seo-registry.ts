@@ -75,6 +75,17 @@ rejects(
 	/Unsupported SEO evidence source/,
 );
 rejects(
+	{ ...base, tier: "P3" as SeoRegistryRow["tier"] },
+	/Unsupported SEO tier/,
+);
+assert.doesNotThrow(() =>
+	assertSeoRegistry({
+		rows: [{ ...base, tier: "NONE" }],
+		buildUrl: grammar.buildUrl,
+		now,
+	}),
+);
+rejects(
 	{ ...base, morphologyApproved: false, defaultRobots: "index,follow" },
 	/Unapproved morphology/,
 );

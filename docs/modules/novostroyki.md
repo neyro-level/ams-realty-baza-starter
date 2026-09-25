@@ -15,7 +15,8 @@ must never auto-merge records.
 
 ## Enabled flag owner
 
-The `novostroyki` row in `docs/PROJECT.md`.
+The `novostroyki` entry in validated `src/project/site-profile.config.ts`;
+`docs/PROJECT.md` mirrors it for operators.
 
 ## Reserved URLs
 

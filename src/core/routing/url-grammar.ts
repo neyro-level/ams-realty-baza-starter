@@ -16,12 +16,24 @@ export const platformReservedRoots = [
 	"_next",
 	"admin",
 	"api",
+	"journal",
+	"legal",
 	"media",
+	"poisk",
 	"robots.txt",
+	"sotrudniki",
+	"komplex",
 	"sitemap.xml",
 	"sitemap",
 	"search",
 ] as const;
+
+export function isPlatformReservedRoot(value: string): boolean {
+	return (
+		(platformReservedRoots as readonly string[]).includes(value) ||
+		value.startsWith("sitemap")
+	);
+}
 
 export type PropertySurfaceSlug = (typeof propertySurfaceSlugs)[number];
 export type DevelopmentKind = "residential_complex" | "cottage_village";
@@ -58,6 +70,7 @@ export type PageKey =
 export type UrlGrammarInput = {
 	geoSlugs: readonly string[];
 	staticPaths: readonly string[];
+	moduleRootSlugs?: readonly string[];
 	districtSlugsByGeo?: Readonly<Record<string, readonly string[]>>;
 	facetSlugsByGeoCategory?: Readonly<
 		Record<string, Partial<Record<CatalogSurfaceSlug, readonly string[]>>>
@@ -171,10 +184,11 @@ export function createUrlGrammar(input: UrlGrammarInput) {
 		...catalogSurfaceSlugs,
 		"zastroyshchiki",
 		...staticPaths.map((path) => path.split("/").filter(Boolean)[0]),
+		...(input.moduleRootSlugs ?? []),
 	]);
 	for (const geo of geoSlugs) {
 		assertCanonicalSlug(geo, "Geo");
-		if (reservedRoots.has(geo)) {
+		if (reservedRoots.has(geo) || isPlatformReservedRoot(geo)) {
 			throw new Error(`Geo slug collides with a reserved root: ${geo}`);
 		}
 	}
@@ -221,7 +235,7 @@ export function createUrlGrammar(input: UrlGrammarInput) {
 			catalogSurfaceSet.has(segments[0]) ||
 			geoSet.has(segments[0]) ||
 			segments[0] === "zastroyshchiki" ||
-			(platformReservedRoots as readonly string[]).includes(segments[0])
+			isPlatformReservedRoot(segments[0])
 		) {
 			throw new Error(`Static path collides with canonical grammar: ${path}`);
 		}
@@ -255,14 +269,18 @@ export function createUrlGrammar(input: UrlGrammarInput) {
 
 	function assertEntitySlug(slug: string, label: string): string {
 		assertCanonicalSlug(slug, label);
-		if (reservedRoots.has(slug)) {
+		if (reservedRoots.has(slug) || isPlatformReservedRoot(slug)) {
 			throw new Error(`${label} collides with a reserved root: ${slug}`);
 		}
 		return slug;
 	}
 
 	function isAllowedEntitySlug(slug: string): boolean {
-		return canonicalSlugPattern.test(slug) && !reservedRoots.has(slug);
+		return (
+			canonicalSlugPattern.test(slug) &&
+			!reservedRoots.has(slug) &&
+			!isPlatformReservedRoot(slug)
+		);
 	}
 
 	function buildUrl(key: PageKey): string {

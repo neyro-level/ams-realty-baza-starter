@@ -186,9 +186,10 @@ function contentReasons(
 			if (row?.status !== "approved" || row.synthetic) {
 				reasons.push("registry_metadata_not_approved");
 			} else {
+				if (row.tier === "NONE") reasons.push("registry_tier_none");
 				const minimum = Math.max(
 					row.minimumObjects,
-					profile.seoTiers.minInventory[row.tier],
+					row.tier === "NONE" ? 0 : profile.seoTiers.minInventory[row.tier],
 				);
 				if (input.inventory < minimum)
 					reasons.push("listing_inventory_below_tier");

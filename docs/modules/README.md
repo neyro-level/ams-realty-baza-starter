@@ -1,12 +1,14 @@
 # Optional module activation
 
-`docs/PROJECT.md` owns the activation state. A module manifest is a dormant
-contract: its presence does not create collections, routes, relations or
-infrastructure.
+Validated `src/project/site-profile.config.ts` owns the activation state and
+reserved module spaces. `docs/PROJECT.md` mirrors it for operators. A module
+manifest is a dormant contract: its presence does not create collections,
+routes, relations or infrastructure.
 
 ## Canonical workflow
 
-1. The owner changes the module state in `docs/PROJECT.md` to `enabled`.
+1. The owner changes the module state in SiteProfile to `active` and updates
+   the mirrored row in `docs/PROJECT.md`.
 2. Add an expand-only migration.
 3. Backfill only when real client data requires it.
 4. Verify schema and data before enabling reads.

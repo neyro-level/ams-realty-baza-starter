@@ -84,6 +84,7 @@ assert.deepEqual(profileSnapshots, {
 	multiGeo: ["https://example.test/kvartiry/multiGeo/"],
 	newbuildFirst: [],
 	secondaryFirst: ["https://example.test/kvartiry/secondaryFirst/"],
+	singleGeoThreeCities: ["https://example.test/kvartiry/singleGeoThreeCities/"],
 });
 
 const passingGate = {
@@ -163,5 +164,5 @@ assert.match(publicRobots, /Disallow: \/admin\//);
 assert.match(publicRobots, /Sitemap: https:\/\/example\.test\/sitemap\.xml/);
 
 console.log(
-	"Discovery feeds verified: four profiles, groups, shards, lastmod, XML and robots.",
+	"Discovery feeds verified: five profiles, groups, shards, lastmod, XML and robots.",
 );

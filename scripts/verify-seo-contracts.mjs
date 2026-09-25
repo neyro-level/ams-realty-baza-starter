@@ -169,7 +169,7 @@ assert.ok(
 );
 assert.ok(
 	readFileSync("src/project/collections/Pages.ts", "utf8").includes(
-		"reservedNamespaces",
+		"reservedGeoRootSlugs",
 	),
 );
 

@@ -153,13 +153,12 @@ function routeDecision(
 	record: ResolverPageRecord,
 	inventory: number,
 ): RouteDecision {
-	const minimumInventory = profile.seoTiers.minInventory.TEST;
 	const statuses: ProfileStatus[] = [];
 
 	const addGeo = (geo: string): boolean => {
 		const definition = profile.geos[geo];
 		if (!definition?.published) return false;
-		statuses.push(definition.status);
+		statuses.push(definition.hubStatus);
 		return true;
 	};
 	const addSurface = (surface: CatalogSurfaceSlug, geo?: string): boolean => {
@@ -180,7 +179,7 @@ function routeDecision(
 		);
 		const availableMarkets = marketCandidates.filter((candidate) =>
 			candidate.every((status) =>
-				isConfiguredRouteAvailable({ status, inventory, minimumInventory }),
+				isConfiguredRouteAvailable({ status, inventory }),
 			),
 		);
 		if (availableMarkets.length === 0) return false;
@@ -243,8 +242,7 @@ function routeDecision(
 
 	if (
 		statuses.some(
-			(status) =>
-				!isConfiguredRouteAvailable({ status, inventory, minimumInventory }),
+			(status) => !isConfiguredRouteAvailable({ status, inventory }),
 		)
 	) {
 		return unavailable();
