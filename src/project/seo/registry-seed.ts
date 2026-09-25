@@ -6,23 +6,26 @@ import {
 	type SeoTemplateContext,
 	type SeoTemplateKey,
 } from "../../core/seo/registry.ts";
+import { starterFixtureDataset } from "../fixture-data/starter-dataset.ts";
 import { siteProfileFixtures } from "../site-profile.ts";
 import { createProjectUrlGrammar } from "../url-grammar.ts";
 
 const grammar = createProjectUrlGrammar(siteProfileFixtures.multiGeo);
-const snapshotDate = "2026-09-24";
+const snapshotDate = starterFixtureDataset.identity.snapshotAt.slice(0, 10);
+const primaryCity = starterFixtureDataset.cities[0];
+const primaryDistrict = primaryCity.districts[0];
 const approvedCity = {
 	approved: true,
-	nominative: "Приморск",
-	genitive: "Приморска",
-	prepositional: "Приморске",
+	nominative: primaryCity.morphology.nominative,
+	genitive: primaryCity.morphology.genitive,
+	prepositional: primaryCity.morphology.prepositional,
 	preposition: "в" as const,
 };
 const approvedDistrict = {
 	approved: true,
-	nominative: "Северный район",
-	genitive: "Северного района",
-	prepositional: "Северном районе",
+	nominative: primaryDistrict.morphology.nominative,
+	genitive: primaryDistrict.morphology.genitive,
+	prepositional: primaryDistrict.morphology.prepositional,
 };
 
 type SeedInput = {

@@ -15,6 +15,7 @@ import {
 	type NavigationCandidate,
 } from "../core/navigation/index.ts";
 import type { ContentGateDecision } from "../core/seo/content-gate.ts";
+import { starterFixtureDataset } from "../project/fixture-data/starter-dataset.ts";
 import { siteProfileFixtures } from "../project/site-profile.ts";
 import { createProjectUrlGrammar } from "../project/url-grammar.ts";
 import { fixtureProperties } from "./provider.ts";
@@ -78,19 +79,24 @@ function seo(
 	};
 }
 
+const canonicalCity = starterFixtureDataset.cities[0];
+const canonicalDistrict = canonicalCity.districts[0];
+const canonicalDeveloper = starterFixtureDataset.developers[0];
+const canonicalDevelopment = starterFixtureDataset.developments[0];
+
 export const fixtureRegion = {
 	id: "region-fixture-1",
-	slug: "primorskiy-region",
-	name: "Приморский регион",
-	shortName: "Приморье",
+	slug: starterFixtureDataset.region.slug,
+	name: starterFixtureDataset.region.title,
+	shortName: starterFixtureDataset.region.shortName,
 } satisfies RegionDTO;
 
 export const fixtureCity = {
 	id: "city-fixture-1",
-	slug: "primorsk",
-	name: "Приморск",
-	nameGenitive: "Приморска",
-	nameLocative: "Приморске",
+	slug: canonicalCity.slug,
+	name: canonicalCity.title,
+	nameGenitive: canonicalCity.morphology.genitive,
+	nameLocative: canonicalCity.morphology.prepositional,
 	preposition: "в",
 	type: "city",
 	region: fixtureRegion,
@@ -99,36 +105,39 @@ export const fixtureCity = {
 
 export const fixtureDistrict = {
 	id: "district-fixture-1",
-	slug: "severnyy",
-	name: "Северный",
+	slug: canonicalDistrict.slug,
+	name: canonicalDistrict.title,
 	type: "microdistrict",
 	citySlug: fixtureCity.slug,
-	nameLocative: "Северном",
+	nameLocative: canonicalDistrict.morphology.prepositional,
 	preposition: "в",
 } satisfies DistrictDTO;
 
-const developerKey = { kind: "developer", slug: "demo-developer" } as const;
+const developerKey = {
+	kind: "developer",
+	slug: canonicalDeveloper.slug,
+} as const;
 
 export const fixtureDeveloper = {
 	id: "developer-fixture-1",
-	slug: "demo-developer",
+	slug: canonicalDeveloper.slug,
 	pageKey: developerKey,
 	href: href(developerKey),
-	name: "Демо Девелопмент",
+	name: canonicalDeveloper.name,
 	developmentsCount: 1,
 	geoNames: [fixtureCity.name],
-	description: "Проверяемое описание демонстрационного застройщика.",
+	description: `Синтетическое описание ${canonicalDeveloper.name}.`,
 	breadcrumbs: {
 		...navigation.breadcrumbs({
 			ancestors: [
 				candidate({ kind: "home" }, "Главная"),
 				candidate({ kind: "developerRoot" }, "Застройщики"),
 			],
-			currentLabel: "Демо Девелопмент",
+			currentLabel: canonicalDeveloper.name,
 		}),
 	},
 	seo: seo(
-		"Демо Девелопмент",
+		canonicalDeveloper.name,
 		"Демонстрационная карточка застройщика.",
 		developerKey,
 	),
@@ -137,19 +146,19 @@ export const fixtureDeveloper = {
 const developmentKey = {
 	kind: "development",
 	developmentKind: "residential_complex",
-	slug: "severnyy-park",
+	slug: canonicalDevelopment.slug,
 } as const;
 
 export const fixtureDevelopment = {
 	id: "development-fixture-1",
-	slug: "severnyy-park",
+	slug: canonicalDevelopment.slug,
 	pageKey: developmentKey,
 	href: href(developmentKey),
-	name: "Северный парк",
+	name: canonicalDevelopment.name,
 	kind: "residential_complex",
 	cityName: fixtureCity.name,
 	districtName: fixtureDistrict.name,
-	address: "Приморск, Северный микрорайон",
+	address: canonicalDevelopment.address,
 	developer: {
 		id: fixtureDeveloper.id,
 		name: fixtureDeveloper.name,
@@ -158,16 +167,16 @@ export const fixtureDevelopment = {
 	},
 	availability: "available",
 	completionLabel: "Сдан",
-	description: "Демонстрационный жилой комплекс для contract fixture.",
+	description: `Синтетическое описание ${canonicalDevelopment.name}.`,
 	gallery: [],
 	priceRows: [
 		{
 			label: "Квартиры",
 			price: {
-				priceMinor: 900_000_000,
+				priceMinor: canonicalDevelopment.priceMinor,
 				currency: "RUB",
 				period: "total",
-				label: "от 9 000 000 ₽",
+				label: "от 6 200 000 ₽",
 			},
 			checkedAt: "2026-09-24T00:00:00.000Z",
 		},
@@ -181,10 +190,10 @@ export const fixtureDevelopment = {
 				"Новостройки",
 			),
 		],
-		currentLabel: "Северный парк",
+		currentLabel: canonicalDevelopment.name,
 	}),
 	seo: seo(
-		"ЖК Северный парк",
+		canonicalDevelopment.name,
 		"Демонстрационная карточка жилого комплекса.",
 		developmentKey,
 	),
