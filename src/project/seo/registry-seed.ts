@@ -2,14 +2,16 @@ import type { PageKey } from "../../core/routing/index.ts";
 import { fixtureDistrictRouteRegistryFor } from "../../fixture/route-registries.ts";
 import {
 	assertSeoRegistry,
-	renderSeoTemplate,
 	type SeoRegistryRow,
-	type SeoTemplateContext,
-	type SeoTemplateKey,
 } from "../../core/seo/registry.ts";
 import { starterFixtureDataset } from "../fixture-data/starter-dataset.ts";
 import { siteProfileFixtures } from "../site-profile.ts";
 import { createProjectUrlGrammar } from "../url-grammar.ts";
+import {
+	renderProjectSeoTemplate,
+	type ProjectSeoTemplateContext,
+	type ProjectSeoTemplateKey,
+} from "./templates.ts";
 
 const grammar = createProjectUrlGrammar(
 	siteProfileFixtures.multiGeo,
@@ -30,19 +32,22 @@ const approvedDistrict = {
 	nominative: primaryDistrict.morphology.nominative,
 	genitive: primaryDistrict.morphology.genitive,
 	prepositional: primaryDistrict.morphology.prepositional,
+	preposition: (primaryDistrict.preposition === "na" ? "на" : "в") as
+		| "на"
+		| "в",
 };
 
 type SeedInput = {
 	pageKey: PageKey;
 	entityRef: string | null;
 	targetPhrase: string;
-	templateKey: SeoTemplateKey;
-	context: Omit<SeoTemplateContext, "brand">;
+	templateKey: ProjectSeoTemplateKey;
+	context: Omit<ProjectSeoTemplateContext, "brand">;
 };
 
-function seedRow(input: SeedInput): SeoRegistryRow {
+function seedRow(input: SeedInput): SeoRegistryRow<ProjectSeoTemplateKey> {
 	const url = grammar.buildUrl(input.pageKey);
-	const metadata = renderSeoTemplate(input.templateKey, {
+	const metadata = renderProjectSeoTemplate(input.templateKey, {
 		brand: "AMS Realty",
 		...input.context,
 	});
@@ -109,6 +114,7 @@ export const projectSeoRegistrySeed: readonly SeoRegistryRow[] = [
 			category: "Квартиры",
 			city: approvedCity,
 			district: approvedDistrict,
+			districtType: primaryDistrict.districtType,
 			inventory: 12,
 		},
 	}),

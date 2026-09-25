@@ -122,6 +122,14 @@ Metadata и discovery используют уже принятое решени�
 из фактических inventory, media, prices, layouts, progress и source timestamps;
 schema и persisted data этим этапом не меняются.
 
+SEO template ownership разделён жёстко: `src/core/seo/registry.ts` содержит
+только универсальный renderer optional fragments, morphology helpers и русский
+plural formatter, а ключи и маркетинговые формулировки принадлежат
+`src/project/seo/templates.ts`. Runtime brand читается через публичный
+`site-settings` Gateway. Неутверждённая morphology города/района fail-closed
+понижает итоговое решение `decidePage` до `noindex,follow` и исключает страницу
+из discovery; ручной SEO fallback `safeSeo` в geo-catalog запрещён.
+
 ## Client clone boundary
 
 `clone:prepare` принимает только утверждённый preset и exact source tag

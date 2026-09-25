@@ -14,6 +14,7 @@ import {
 } from "@/core/routing";
 import type { ContentGateInput } from "@/core/seo/content-gate";
 import { projectSeoRegistrySeed } from "@/project/seo/registry-seed";
+import { isSeoMetaMorphologyApproved } from "@/project/seo/templates";
 import { siteProfile } from "@/project/site-profile";
 
 export type RuntimeGateData =
@@ -143,11 +144,34 @@ export function decidePage(
 	data: RuntimeGateData,
 	now = new Date(),
 ): PageDecision {
-	return decideResolvedPage(
+	const decision = decideResolvedPage(
 		siteProfile,
 		resolved.pageKey,
 		resolved,
 		inputFor(resolved, data),
 		now,
 	);
+	const seo =
+		"value" in data &&
+		data.value &&
+		typeof data.value === "object" &&
+		"seo" in data.value
+			? data.value.seo
+			: null;
+	if (!seo || isSeoMetaMorphologyApproved(seo)) return decision;
+	const gate = {
+		...decision.gate,
+		indexing: "noindex" as const,
+		includeInSitemap: false,
+		reasons: [...decision.gate.reasons, "runtime_morphology_unapproved"],
+	};
+	return {
+		...decision,
+		robots: { indexing: "noindex", following: "follow" },
+		inSitemap: false,
+		indexNowEligible: false,
+		visibleInMenu: false,
+		visibleInInterlinks: false,
+		gate,
+	};
 }

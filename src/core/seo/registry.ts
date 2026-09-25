@@ -7,23 +7,9 @@ export const seoEvidenceSources = [
 	"fallback_no_data",
 ] as const;
 
-export const seoTemplateKeys = [
-	"home",
-	"geoHub",
-	"categoryRoot",
-	"categoryGeo",
-	"categoryGeoDistrict",
-	"categoryGeoFacet",
-	"geoDevelopers",
-	"developmentNormal",
-	"developmentCollision",
-	"developer",
-	"property",
-] as const;
 export const seoTiers = ["P1", "P2", "TEST", "NONE"] as const;
 
 export type SeoEvidenceSource = (typeof seoEvidenceSources)[number];
-export type SeoTemplateKey = (typeof seoTemplateKeys)[number];
 export type SeoTier = (typeof seoTiers)[number];
 export type SeoRobots = "index,follow" | "noindex,follow";
 export type SeoRegistryStatus = "draft" | "approved" | "retired";
@@ -33,22 +19,13 @@ export type ApprovedMorphology = {
 	nominative: string;
 	genitive?: string;
 	prepositional?: string;
-	preposition?: "в" | "во";
+	preposition?: "в" | "во" | "на";
 };
 
-export type SeoTemplateContext = {
-	brand: string;
-	category?: string;
-	city?: ApprovedMorphology;
-	region?: ApprovedMorphology;
-	district?: ApprovedMorphology;
-	facet?: string;
-	entityName?: string;
-	inventory?: number;
-	freshPrice?: {
-		label: string;
-		fresh: boolean;
-	};
+export type SeoTemplateDefinition = {
+	title: string;
+	h1: string;
+	description: string;
 };
 
 export type RenderedSeoTemplate = {
@@ -58,7 +35,7 @@ export type RenderedSeoTemplate = {
 	morphologyApproved: boolean;
 };
 
-export type SeoRegistryRow = {
+export type SeoRegistryRow<TemplateKey extends string = string> = {
 	pageKey: PageKey;
 	url: string;
 	canonical: string;
@@ -72,7 +49,7 @@ export type SeoRegistryRow = {
 	tier: SeoTier;
 	minimumObjects: number;
 	defaultRobots: SeoRobots;
-	templateKey: SeoTemplateKey;
+	templateKey: TemplateKey;
 	title: string;
 	h1: string;
 	description: string;
@@ -86,158 +63,87 @@ export type SeoRegistryGuardInput = {
 	now?: Date;
 };
 
-function compact(
-	parts: readonly (string | null | undefined | false)[],
-): string {
-	return parts.filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+type TemplateValues = Readonly<Record<string, string | number | null | undefined>>;
+
+function normalizeRenderedText(value: string): string {
+	return value
+		.replace(/\s+/g, " ")
+		.replace(/\s+([,.;:!?])/g, "$1")
+		.trim();
 }
 
-function requireText(value: string | undefined, label: string): string {
-	const normalized = value?.trim();
-	if (!normalized) throw new Error(`SEO template requires ${label}.`);
-	return normalized;
-}
-
-function morphologyValues(context: SeoTemplateContext): ApprovedMorphology[] {
-	return [context.city, context.region, context.district].filter(
-		(value): value is ApprovedMorphology => Boolean(value),
+function interpolate(pattern: string, values: TemplateValues): string {
+	const withoutMissingOptionals = pattern.replace(/\[(.*?)\]/g, (_, part) => {
+		const names = [...part.matchAll(/\{([a-zA-Z0-9_]+)\}/g)].map(
+			(match) => match[1],
+		);
+		return names.every((name) => values[name] !== null && values[name] !== undefined && String(values[name]).trim())
+			? part
+			: "";
+	});
+	return normalizeRenderedText(
+		withoutMissingOptionals.replace(/\{([a-zA-Z0-9_]+)\}/g, (_, name) => {
+			const value = values[name];
+			if (value === null || value === undefined || !String(value).trim()) {
+				throw new Error(`SEO template requires ${name}.`);
+			}
+			return String(value).trim();
+		}),
 	);
 }
 
-function cityPhrase(context: SeoTemplateContext): string | null {
-	if (!context.city) return null;
-	const city = context.city.prepositional ?? context.city.nominative;
-	return `${context.city.preposition ?? "в"} ${city}`;
-}
-
-function geoPossessive(context: SeoTemplateContext): string | null {
-	const geo = context.city ?? context.region;
-	if (!geo) return null;
-	return geo.genitive ?? geo.nominative;
-}
-
-function districtPhrase(context: SeoTemplateContext): string | null {
-	if (!context.district) return null;
-	return `в ${context.district.prepositional ?? context.district.nominative}`;
-}
-
-function inventoryFragment(inventory: number | undefined): string | null {
-	if (inventory === undefined) return null;
-	if (!Number.isSafeInteger(inventory) || inventory < 0) {
-		throw new Error("SEO inventory must be a non-negative safe integer.");
-	}
-	return `${inventory} объектов`;
-}
-
-function priceFragment(price: SeoTemplateContext["freshPrice"]): string | null {
-	if (!price) return null;
-	if (!price.fresh) return null;
-	return requireText(price.label, "freshPrice.label");
-}
-
-export function renderSeoTemplate(
-	templateKey: SeoTemplateKey,
-	context: SeoTemplateContext,
+export function renderSeoDefinition(
+	definition: SeoTemplateDefinition,
+	values: TemplateValues,
+	morphologyApproved: boolean,
 ): RenderedSeoTemplate {
-	const brand = requireText(context.brand, "brand");
-	const category = context.category?.trim();
-	const city = cityPhrase(context);
-	const possessiveGeo = geoPossessive(context);
-	const district = districtPhrase(context);
-	const inventory = inventoryFragment(context.inventory);
-	const price = priceFragment(context.freshPrice);
-	const entity = context.entityName?.trim();
-	const facet = context.facet?.trim();
-	let h1: string;
-	let description: string;
-
-	switch (templateKey) {
-		case "home":
-			h1 = compact(["Недвижимость", possessiveGeo]);
-			description = compact([
-				"Подбор недвижимости",
-				city,
-				inventory ? `— ${inventory}.` : null,
-			]);
-			break;
-		case "geoHub":
-			h1 = compact(["Недвижимость", possessiveGeo]);
-			description = compact([
-				"Квартиры, дома и новостройки",
-				city,
-				inventory ? `— ${inventory}.` : null,
-			]);
-			break;
-		case "categoryRoot":
-			h1 = requireText(category, "category");
-			description = compact([
-				`${h1} — актуальные предложения`,
-				inventory ? `${inventory}.` : null,
-			]);
-			break;
-		case "categoryGeo":
-			h1 = compact([requireText(category, "category"), city]);
-			description = compact([
-				`${h1} — актуальные предложения`,
-				inventory ? `${inventory}.` : null,
-			]);
-			break;
-		case "categoryGeoDistrict":
-			h1 = compact([requireText(category, "category"), district, city]);
-			description = compact([
-				`${h1} — актуальные предложения`,
-				inventory ? `${inventory}.` : null,
-			]);
-			break;
-		case "categoryGeoFacet":
-			h1 = compact([
-				requireText(facet, "facet"),
-				requireText(category, "category"),
-				city,
-			]);
-			description = compact([
-				`${h1} — актуальные предложения`,
-				inventory ? `${inventory}.` : null,
-			]);
-			break;
-		case "geoDevelopers":
-			h1 = compact(["Застройщики", city]);
-			description = compact([
-				"Застройщики и проверенные жилые комплексы",
-				city,
-				inventory ? `— ${inventory}.` : null,
-			]);
-			break;
-		case "developmentNormal":
-			h1 = requireText(entity, "entityName");
-			description = compact([h1, city, price ? `— ${price}.` : null]);
-			break;
-		case "developmentCollision":
-			h1 = compact([requireText(entity, "entityName"), city]);
-			description = compact([h1, price ? `— ${price}.` : null]);
-			break;
-		case "developer":
-			h1 = requireText(entity, "entityName");
-			description = compact([
-				`Объекты застройщика ${h1}`,
-				city,
-				inventory ? `— ${inventory}.` : null,
-			]);
-			break;
-		case "property":
-			h1 = requireText(entity, "entityName");
-			description = compact([h1, city, price ? `— ${price}.` : null]);
-			break;
-	}
-
 	return {
-		title: compact([h1, `— ${brand}`]),
-		h1,
-		description,
-		morphologyApproved: morphologyValues(context).every(
-			(value) => value.approved,
-		),
+		title: interpolate(definition.title, values),
+		h1: interpolate(definition.h1, values),
+		description: interpolate(definition.description, values),
+		morphologyApproved,
 	};
+}
+
+export function morphologyPhrase(
+	value: ApprovedMorphology | undefined,
+	form: "nominative" | "genitive" | "prepositional",
+	withPreposition = false,
+): string | undefined {
+	if (!value) return undefined;
+	const inflected = value[form]?.trim();
+	if (!inflected) return undefined;
+	if (!withPreposition) return inflected;
+	const preposition = value.preposition?.trim();
+	return preposition ? `${preposition} ${inflected}` : undefined;
+}
+
+export function isApprovedMorphology(
+	...values: readonly (ApprovedMorphology | undefined)[]
+): boolean {
+	return values.every(
+		(value) => Boolean(value?.approved && value.preposition?.trim()),
+	);
+}
+
+export function formatRussianPlural(
+	value: number,
+	forms: readonly [string, string, string],
+): string {
+	if (!Number.isSafeInteger(value) || value < 0) {
+		throw new Error("Plural value must be a non-negative safe integer.");
+	}
+	const mod100 = value % 100;
+	const mod10 = value % 10;
+	const form =
+		mod100 >= 11 && mod100 <= 14
+			? forms[2]
+			: mod10 === 1
+				? forms[0]
+				: mod10 >= 2 && mod10 <= 4
+					? forms[1]
+					: forms[2];
+	return `${value} ${form}`;
 }
 
 function normalizeIntent(phrase: string): string {

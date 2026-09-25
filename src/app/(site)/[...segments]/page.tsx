@@ -12,6 +12,7 @@ import type { PageSEOContract } from "@ams/realtbase-contracts";
 import { toMetadata } from "@/core/seo/page-metadata";
 import { leadConsentContext } from "@/project/legal.config";
 import { resolveRuntimeRoute } from "@/project/routing/runtime-route";
+import { projectSeoMeta } from "@/project/seo/templates";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -22,7 +23,10 @@ function pathname(segments: readonly string[]) {
 
 type CanonicalRouteProps = { params: Promise<{ segments: string[] }> };
 
-function routeSeo(data: NonNullable<Awaited<ReturnType<typeof resolveRuntimeRoute>>["data"]>): PageSEOContract {
+function routeSeo(
+	data: NonNullable<Awaited<ReturnType<typeof resolveRuntimeRoute>>["data"]>,
+	brandName: string,
+): PageSEOContract {
 	if (data.kind === "developers") {
 		return {
 			title: "Застройщики",
@@ -33,13 +37,17 @@ function routeSeo(data: NonNullable<Awaited<ReturnType<typeof resolveRuntimeRout
 		};
 	}
 	if (data.kind === "property") {
-		return {
-			title: data.value.title,
-			description: data.value.description,
-			canonicalPath: data.value.href,
-			indexing: "noindex",
-			following: "follow",
-		};
+		return projectSeoMeta(
+			"property",
+			{
+				brand: brandName,
+				entityName: data.value.title,
+				freshPrice: data.value.price
+					? { label: data.value.price.label, fresh: true }
+					: undefined,
+			},
+			data.value.href,
+		);
 	}
 	return data.value.seo;
 }
@@ -49,8 +57,10 @@ export async function generateMetadata({
 }: CanonicalRouteProps): Promise<Metadata> {
 	const { segments } = await params;
 	const result = await resolveRuntimeRoute(pathname(segments));
-	if (result.decision.kind !== "page" || !result.data) return {};
-	const seo = routeSeo(result.data);
+	if (result.decision.kind !== "page" || !result.data || !result.brandName) {
+		return {};
+	}
+	const seo = routeSeo(result.data, result.brandName);
 	return toMetadata({
 		...seo,
 		canonicalPath: result.decision.canonicalPath,

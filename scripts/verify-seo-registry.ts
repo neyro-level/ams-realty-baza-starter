@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import {
 	assertSeoRegistry,
-	renderSeoTemplate,
+	formatRussianPlural,
 	type SeoRegistryRow,
-	seoTemplateKeys,
 } from "../src/core/seo/registry.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
 import { projectSeoRegistrySeed } from "../src/project/seo/registry-seed.ts";
+import {
+	projectSeoTemplateKeys,
+	renderProjectSeoTemplate,
+} from "../src/project/seo/templates.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
@@ -23,7 +26,7 @@ assertSeoRegistry({
 });
 assert.deepEqual(
 	new Set(projectSeoRegistrySeed.map((row) => row.templateKey)),
-	new Set(seoTemplateKeys),
+	new Set(projectSeoTemplateKeys),
 );
 assert.ok(
 	projectSeoRegistrySeed.every(
@@ -36,7 +39,7 @@ assert.ok(
 	),
 );
 
-const withoutOptionals = renderSeoTemplate("property", {
+const withoutOptionals = renderProjectSeoTemplate("property", {
 	brand: "AMS Realty",
 	entityName: "Квартира",
 });
@@ -45,19 +48,76 @@ assert.equal(withoutOptionals.description, "Квартира");
 assert.ok(!withoutOptionals.description.includes("undefined"));
 assert.ok(!withoutOptionals.description.includes("—"));
 
-const stalePrice = renderSeoTemplate("developmentNormal", {
+const stalePrice = renderProjectSeoTemplate("developmentNormal", {
 	brand: "AMS Realty",
 	entityName: "ЖК «Тест»",
 	freshPrice: { label: "от 1 млн ₽", fresh: false },
 });
 assert.equal(stalePrice.description, "ЖК «Тест»");
 
-const unapproved = renderSeoTemplate("categoryGeo", {
+const unapproved = renderProjectSeoTemplate("categoryGeo", {
 	brand: "AMS Realty",
 	category: "Квартиры",
-	city: { approved: false, nominative: "Тестоград" },
+	city: {
+		approved: false,
+		nominative: "Тестоград",
+		genitive: "Тестограда",
+		prepositional: "Тестограде",
+		preposition: "в",
+	},
 });
 assert.equal(unapproved.morphologyApproved, false);
+
+const geoHubSnapshot = renderProjectSeoTemplate("geoHub", {
+	brand: "AMS Realty",
+	city: {
+		approved: true,
+		nominative: "Ростов-на-Дону",
+		genitive: "Ростова-на-Дону",
+		prepositional: "Ростове-на-Дону",
+		preposition: "в",
+	},
+	inventory: 21,
+});
+assert.equal(
+	geoHubSnapshot.description,
+	"Квартиры, дома и новостройки в Ростове-на-Дону — 21 объект.",
+);
+
+const districtSnapshot = renderProjectSeoTemplate("categoryGeoDistrict", {
+	brand: "AMS Realty",
+	category: "Квартиры",
+	city: {
+		approved: true,
+		nominative: "Ростов-на-Дону",
+		genitive: "Ростова-на-Дону",
+		prepositional: "Ростове-на-Дону",
+		preposition: "в",
+	},
+	district: {
+		approved: true,
+		nominative: "Северный",
+		genitive: "Северного",
+		prepositional: "Северном",
+		preposition: "на",
+	},
+	districtType: "microdistrict",
+	inventory: 22,
+});
+assert.equal(
+	districtSnapshot.h1,
+	"Квартиры на Северном в Ростове-на-Дону",
+);
+assert.equal(
+	districtSnapshot.description,
+	"Квартиры на Северном в Ростове-на-Дону — актуальные предложения. 22 объекта.",
+);
+assert.deepEqual(
+	[1, 2, 5, 11, 21, 24].map((value) =>
+		formatRussianPlural(value, ["объект", "объекта", "объектов"]),
+	),
+	["1 объект", "2 объекта", "5 объектов", "11 объектов", "21 объект", "24 объекта"],
+);
 
 const base = projectSeoRegistrySeed[0];
 assert.ok(base);

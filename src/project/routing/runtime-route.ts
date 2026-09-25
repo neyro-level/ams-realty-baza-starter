@@ -24,6 +24,7 @@ import { fixtureProperties, getFixtureProperty } from "@/fixture/provider";
 import { createFixtureResolverDataPort } from "@/fixture/resolver";
 import { fixtureDistrictRouteRegistryFor } from "@/fixture/route-registries";
 import { findPublicEntityLifecycle } from "@/project/data-access/public/entity-lifecycle";
+import { findPublicBrandName } from "@/project/data-access/public/nap";
 import {
 	countGeoInventory,
 	countInventory,
@@ -45,6 +46,11 @@ import { siteConfig } from "@/project/site.config";
 import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
 import { decidePage } from "@/project/routing/content-gate";
+import {
+	projectSeoCategoryLabel,
+	projectSeoMeta,
+	renderProjectSeoTemplate,
+} from "@/project/seo/templates";
 
 export type RuntimeRouteData =
 	| { kind: "geoHub"; value: GeoHubDTO }
@@ -77,6 +83,7 @@ type RuntimeRouteDecision =
 export type RuntimeRouteResolution = {
 	decision: RuntimeRouteDecision;
 	data?: RuntimeRouteData;
+	brandName?: string;
 };
 
 async function resolveFixtureRuntimeRoute(
@@ -129,13 +136,41 @@ async function resolveFixtureRuntimeRoute(
 	}).resolvePath(pathname);
 	if (decision.kind !== "page") return { decision };
 	const pageKey = decision.pageKey;
+	const city = geoCatalogContractFixtures.geoHub.city;
+	const cityMorphology = {
+		approved: true,
+		nominative: city.name,
+		genitive: city.nameGenitive ?? city.name,
+		prepositional: city.nameLocative ?? city.name,
+		preposition: city.preposition ?? ("в" as const),
+	};
 	let data: RuntimeRouteData | undefined;
 	if (pageKey.kind === "geoHub") {
-		data = { kind: "geoHub", value: geoCatalogContractFixtures.geoHub };
+		const context = { brand: siteConfig.brandName, city: cityMorphology };
+		data = {
+			kind: "geoHub",
+			value: {
+				...geoCatalogContractFixtures.geoHub,
+				title: renderProjectSeoTemplate("geoHub", context).h1,
+				seo: projectSeoMeta(
+					"geoHub",
+					context,
+					decision.canonicalPath,
+				),
+			},
+		};
 	} else if (
 		pageKey.kind === "categoryRoot" ||
 		pageKey.kind === "categoryGeo"
 	) {
+		const context = {
+			brand: siteConfig.brandName,
+			category: projectSeoCategoryLabel(pageKey.category),
+			city: cityMorphology,
+			inventory: geoCatalogContractFixtures.listing.total,
+		};
+		const templateKey =
+			pageKey.kind === "categoryRoot" ? "categoryRoot" : "categoryGeo";
 		data = {
 			kind: "listing",
 			value: {
@@ -143,10 +178,12 @@ async function resolveFixtureRuntimeRoute(
 				pageKey,
 				href: decision.canonicalPath,
 				canonical: decision.canonicalPath,
-				seo: {
-					...geoCatalogContractFixtures.listing.seo,
-					canonicalPath: decision.canonicalPath,
-				},
+				h1: renderProjectSeoTemplate(templateKey, context).h1,
+				seo: projectSeoMeta(
+					templateKey,
+					context,
+					decision.canonicalPath,
+				),
 			},
 		};
 	} else if (
@@ -182,7 +219,11 @@ async function resolveFixtureRuntimeRoute(
 		if (details) data = { kind: "property", value: details };
 	}
 	if (!data) return { decision: { kind: "notFound", statusCode: 404 } };
-	return { decision: decidePage(decision, data), data };
+	return {
+		decision: decidePage(decision, data),
+		data,
+		brandName: siteConfig.brandName,
+	};
 }
 
 async function resolveEmptyClientRuntimeRoute(
@@ -262,6 +303,7 @@ export const resolveRuntimeRoute = cache(
 				: resolveFixtureRuntimeRoute(pathname);
 		}
 		const publicPayload = payload;
+		const brandName = await findPublicBrandName(publicPayload);
 
 		const grammar = createProjectUrlGrammar(
 			siteProfile,
@@ -276,7 +318,7 @@ export const resolveRuntimeRoute = cache(
 			const decisions = await Promise.all(
 				developments.map(async (card) => {
 					const [details, facts] = await Promise.all([
-						getDevelopment(publicPayload, card.slug),
+						getDevelopment(publicPayload, card.slug, brandName),
 						getDevelopmentRouteFacts(publicPayload, card.slug),
 					]);
 					if (!details || !facts || !card.developer) return null;
@@ -357,7 +399,7 @@ export const resolveRuntimeRoute = cache(
 					};
 				}
 				if (pageKey.kind === "geoHub") {
-					const hub = await getGeoHub(payload, pageKey.geo, grammar);
+					const hub = await getGeoHub(payload, pageKey.geo, grammar, brandName);
 					if (!hub) return null;
 					data.set(key, { kind: "geoHub", value: hub });
 					inventory.set(key, await countGeoInventory(payload, pageKey.geo));
@@ -378,6 +420,8 @@ export const resolveRuntimeRoute = cache(
 						payload,
 						listingInput(pageKey),
 						grammar,
+						siteProfile,
+						brandName,
 					);
 					if (!listing) return null;
 					data.set(key, {
@@ -452,7 +496,7 @@ export const resolveRuntimeRoute = cache(
 					facts = { ...propertyFacts, dataTier: null };
 				} else if (pageKey.kind === "development") {
 					const [development, developmentFacts] = await Promise.all([
-						getDevelopment(payload, pageKey.slug),
+						getDevelopment(payload, pageKey.slug, brandName),
 						getDevelopmentRouteFacts(payload, pageKey.slug),
 					]);
 					if (!development || !developmentFacts) return null;
@@ -470,7 +514,7 @@ export const resolveRuntimeRoute = cache(
 					};
 				} else {
 					const [developer, developerFacts, developments] = await Promise.all([
-						getDeveloper(payload, pageKey.slug),
+						getDeveloper(payload, pageKey.slug, brandName),
 						getDeveloperRouteFacts(payload, pageKey.slug),
 						listDevelopments(payload, {
 							geo: siteProfile.primaryGeo,
@@ -521,6 +565,10 @@ export const resolveRuntimeRoute = cache(
 		if (!routeData) {
 			return { decision: { kind: "notFound", statusCode: 404 } };
 		}
-		return { decision: decidePage(decision, routeData), data: routeData };
+		return {
+			decision: decidePage(decision, routeData),
+			data: routeData,
+			brandName,
+		};
 	},
 );

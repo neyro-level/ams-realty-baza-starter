@@ -13,7 +13,6 @@ import type {
 	PageLinkDTO,
 	PropertyCardDTO,
 	PropertyDetailsDTO,
-	SeoMetaDTO,
 } from "@ams/realtbase-contracts";
 import type { Payload, Where } from "payload";
 import { z } from "zod";
@@ -32,7 +31,14 @@ import type {
 	Property,
 	Region,
 } from "@/project/payload-types";
+import { siteConfig } from "@/project/site.config";
 import { siteProfile } from "@/project/site-profile";
+import {
+	projectSeoCategoryLabel,
+	projectSeoFacetLabel,
+	projectSeoMeta,
+	renderProjectSeoTemplate,
+} from "@/project/seo/templates";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
 import {
 	type CatalogQueryInput,
@@ -134,6 +140,7 @@ export async function getGeoHub(
 	payload: Payload,
 	slug: string,
 	grammar: UrlGrammar = urlGrammar,
+	brandName: string = siteConfig.brandName,
 ): Promise<GeoHubDTO | null> {
 	const geo = slugSchema.parse(slug);
 	if (!isRoutableGeo(geo)) return null;
@@ -145,9 +152,14 @@ export async function getGeoHub(
 	]);
 	const pageKey = { kind: "geoHub", geo } as const;
 	const href = safeBuildUrl(pageKey, grammar);
+	const seoContext = {
+		brand: brandName,
+		city: cityMorphology(city),
+	};
+	const renderedSeo = renderProjectSeoTemplate("geoHub", seoContext);
 	return {
 		city: toCityDTO(city),
-		title: `Недвижимость ${city.preposition === "na" ? "на" : "в"} ${city.morphology.prepositional}`,
+		title: renderedSeo.h1,
 		intro: `Каталог объектов и проектов: ${city.title}.`,
 		breadcrumbs: {
 			items: [
@@ -155,11 +167,7 @@ export async function getGeoHub(
 				{ label: city.title },
 			],
 		},
-		seo: safeSeo(
-			`Недвижимость — ${city.title}`,
-			`Каталог недвижимости: ${city.title}.`,
-			href,
-		),
+		seo: projectSeoMeta("geoHub", seoContext, href),
 		categoryLinks: activeSurfaces(siteProfile).map((surface) =>
 			pageLink(
 				{ kind: "categoryGeo", geo, category: surface },
@@ -192,6 +200,7 @@ export async function getListing(
 	input: PublicListingInput,
 	grammar: UrlGrammar = urlGrammar,
 	profile: SiteProfile = siteProfile,
+	brandName: string = siteConfig.brandName,
 ): Promise<ListingPageDTO | null> {
 	const parsed = z
 		.object({
@@ -275,12 +284,14 @@ export async function getListing(
 		return listingDTO(
 			pageKey,
 			href,
-			city.title,
+			city,
+			district,
 			parsed.surface,
 			(result.docs as Development[]).map(toDevelopmentCardDTO),
 			result.totalDocs,
 			page,
 			pageSize,
+			brandName,
 		);
 	}
 
@@ -303,12 +314,14 @@ export async function getListing(
 	return listingDTO(
 		pageKey,
 		href,
-		city.title,
+		city,
+		district,
 		parsed.surface,
 		result.items.map(toPropertyCardDTO),
 		result.total,
 		result.page,
 		result.pageSize,
+		brandName,
 	);
 }
 
@@ -348,6 +361,7 @@ export async function getPropertyRouteFacts(
 export async function getDevelopment(
 	payload: Payload,
 	slug: string,
+	brandName: string = siteConfig.brandName,
 ): Promise<DevelopmentDetailsDTO | null> {
 	const result = await payload.find({
 		collection: "developments",
@@ -359,7 +373,7 @@ export async function getDevelopment(
 		...gatewayAccess,
 	});
 	const development = result.docs[0] as Development | undefined;
-	return development ? toDevelopmentDetailsDTO(development) : null;
+	return development ? toDevelopmentDetailsDTO(development, brandName) : null;
 }
 
 export async function getDevelopmentRouteFacts(
@@ -447,6 +461,7 @@ export async function listDevelopments(
 export async function getDeveloper(
 	payload: Payload,
 	slug: string,
+	brandName: string = siteConfig.brandName,
 ): Promise<DeveloperDetailsDTO | null> {
 	const result = await payload.find({
 		collection: "developers",
@@ -479,6 +494,7 @@ export async function getDeveloper(
 		developer,
 		developments.docs as Development[],
 		developmentCount.totalDocs,
+		brandName,
 	);
 }
 
@@ -831,8 +847,24 @@ function toDevelopmentCardDTO(development: Development): DevelopmentCardDTO {
 
 function toDevelopmentDetailsDTO(
 	development: Development,
+	brandName: string,
 ): DevelopmentDetailsDTO {
 	const card = toDevelopmentCardDTO(development);
+	const city = objectRelation<City>(development.city, "city", development.id);
+	const price = freshestPrice(development);
+	const seoContext = {
+		brand: brandName,
+		entityName: development.name,
+		city: cityMorphology(city),
+		freshPrice: price
+			? {
+					label: rub(price.amountMinor),
+					fresh:
+						Date.now() - Date.parse(price.checkedAt) <=
+						siteProfile.gate.priceStaleDays * 86_400_000,
+				}
+			: undefined,
+	};
 	return {
 		...card,
 		description:
@@ -884,11 +916,7 @@ function toDevelopmentDetailsDTO(
 				{ label: development.name },
 			],
 		},
-		seo: safeSeo(
-			development.name,
-			card.address ?? `Проект ${development.name}`,
-			card.href,
-		),
+		seo: projectSeoMeta("developmentNormal", seoContext, card.href),
 	};
 }
 
@@ -922,6 +950,7 @@ function toDeveloperDetailsDTO(
 	developer: Developer,
 	developments: readonly Development[],
 	developmentsCount = developments.length,
+	brandName: string = siteConfig.brandName,
 ): DeveloperDetailsDTO {
 	const card = {
 		...toDeveloperCardDTO(developer, developments),
@@ -943,9 +972,13 @@ function toDeveloperDetailsDTO(
 				{ label: developer.name },
 			],
 		},
-		seo: safeSeo(
-			developer.name,
-			developer.description ?? `Проекты застройщика ${developer.name}.`,
+		seo: projectSeoMeta(
+			"developer",
+			{
+				brand: brandName,
+				entityName: developer.name,
+				inventory: developmentsCount,
+			},
 			card.href,
 		),
 	};
@@ -954,19 +987,40 @@ function toDeveloperDetailsDTO(
 function listingDTO(
 	pageKey: PageKeyDTO,
 	href: string,
-	cityName: string,
+	city: City,
+	district: District | null,
 	surface: CatalogSurfaceSlug,
 	items: readonly (PropertyCardDTO | DevelopmentCardDTO)[],
 	total: number,
 	page: number,
 	pageSize: number,
+	brandName: string,
 ): ListingPageDTO {
 	const totalPages = Math.ceil(total / pageSize);
+	const templateKey =
+		pageKey.kind === "categoryGeoDistrict"
+			? "categoryGeoDistrict"
+			: pageKey.kind === "categoryGeoFacet"
+				? "categoryGeoFacet"
+				: "categoryGeo";
+	const seoContext = {
+		brand: brandName,
+		category: projectSeoCategoryLabel(surface),
+		city: cityMorphology(city),
+		district: district ? districtMorphology(district) : undefined,
+		districtType: district?.districtType,
+		facet:
+			pageKey.kind === "categoryGeoFacet"
+				? projectSeoFacetLabel(pageKey.facet)
+				: undefined,
+		inventory: total,
+	};
+	const renderedSeo = renderProjectSeoTemplate(templateKey, seoContext);
 	return {
 		pageKey,
 		href,
-		h1: `${surfaceLabel(surface)} — ${cityName}`,
-		intro: `Актуальные предложения: ${cityName}.`,
+		h1: renderedSeo.h1,
+		intro: `Актуальные предложения: ${city.title}.`,
 		items: items.map(
 			(item) =>
 				({
@@ -987,13 +1041,13 @@ function listingDTO(
 		},
 		subLinks: [],
 		nearby: [],
-		robots: { indexing: "noindex", following: "nofollow" },
+		robots: { indexing: "noindex", following: "follow" },
 		canonical: href,
 		breadcrumbs: {
 			items: [
 				{ label: "Главная", pageKey: { kind: "home" }, href: "/" },
 				{
-					label: cityName,
+					label: city.title,
 					pageKey: {
 						kind: "geoHub",
 						geo:
@@ -1013,11 +1067,7 @@ function listingDTO(
 				{ label: surfaceLabel(surface) },
 			],
 		},
-		seo: safeSeo(
-			`${surfaceLabel(surface)} — ${cityName}`,
-			`Каталог: ${surfaceLabel(surface).toLowerCase()}, ${cityName}.`,
-			href,
-		),
+		seo: projectSeoMeta(templateKey, seoContext, href),
 	};
 }
 
@@ -1115,17 +1165,24 @@ function safeBuildUrl(
 	return grammar.buildUrl(pageKey as Parameters<typeof grammar.buildUrl>[0]);
 }
 
-function safeSeo(
-	title: string,
-	description: string,
-	canonicalPath: string,
-): SeoMetaDTO {
+function cityMorphology(city: City) {
 	return {
-		title,
-		description,
-		canonicalPath,
-		indexing: "noindex",
-		following: "nofollow",
+		approved: city.morphologyApproved,
+		nominative: city.morphology.nominative,
+		genitive: city.morphology.genitive,
+		prepositional: city.morphology.prepositional,
+		preposition: city.preposition === "na" ? ("на" as const) : ("в" as const),
+	};
+}
+
+function districtMorphology(district: District) {
+	return {
+		approved: district.morphologyApproved,
+		nominative: district.morphology.nominative,
+		genitive: district.morphology.genitive,
+		prepositional: district.morphology.prepositional,
+		preposition:
+			district.preposition === "na" ? ("на" as const) : ("в" as const),
 	};
 }
 

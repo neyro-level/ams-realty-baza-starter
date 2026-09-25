@@ -105,3 +105,15 @@ export async function findPublicNap(payload: Payload): Promise<NapDTO> {
 	});
 	return toNapDTO(settings as SiteSettingsRecord);
 }
+
+export async function findPublicBrandName(payload: Payload): Promise<string> {
+	const settings = await payload.findGlobal({
+		slug: "site-settings",
+		depth: 0,
+		select: { brandName: true },
+		...publicGatewayReadAccess(),
+	});
+	const brandName = (settings as Pick<SiteSettingsRecord, "brandName">).brandName.trim();
+	if (!brandName) throw new Error("Public site settings require brandName.");
+	return brandName;
+}
