@@ -14,6 +14,7 @@ import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
 import {
 	createRouteResolver,
 	type PageKey,
+	type PageDecision,
 	type ResolverDataPort,
 	type ResolverPageRecord,
 	type ResolverResult,
@@ -27,6 +28,7 @@ import {
 	countGeoInventory,
 	countInventory,
 	getDeveloper,
+	getDeveloperRouteFacts,
 	getDevelopment,
 	getDevelopmentRouteFacts,
 	getGeoHub,
@@ -42,21 +44,38 @@ import { getCachedDistrictRouteRegistry } from "@/project/routing/district-regis
 import { siteConfig } from "@/project/site.config";
 import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
+import { decidePage } from "@/project/routing/content-gate";
 
 export type RuntimeRouteData =
 	| { kind: "geoHub"; value: GeoHubDTO }
 	| { kind: "listing"; value: ListingPageDTO }
-	| { kind: "developers"; value: readonly DeveloperCardDTO[] }
+	| {
+			kind: "developers";
+			value: readonly DeveloperCardDTO[];
+			developersWithPassingDevelopment: number;
+	  }
 	| {
 			kind: "developer";
 			value: DeveloperDetailsDTO;
 			developments: readonly DevelopmentCardDTO[];
+			hasPassingDevelopment: boolean;
+			descriptionSource: string | null;
+			descriptionCheckedAt: string | null;
 	  }
-	| { kind: "development"; value: DevelopmentDetailsDTO }
+	| {
+			kind: "development";
+			value: DevelopmentDetailsDTO;
+			layoutCount: number;
+			progressPresent: boolean;
+	  }
 	| { kind: "property"; value: PropertyDetailsDTO };
 
+type RuntimeRouteDecision =
+	| Exclude<ResolverResult, { kind: "page" }>
+	| PageDecision;
+
 export type RuntimeRouteResolution = {
-	decision: ResolverResult;
+	decision: RuntimeRouteDecision;
 	data?: RuntimeRouteData;
 };
 
@@ -137,17 +156,23 @@ async function resolveFixtureRuntimeRoute(
 		data = {
 			kind: "developers",
 			value: [geoCatalogContractFixtures.developer],
+			developersWithPassingDevelopment: 1,
 		};
 	} else if (pageKey.kind === "developer") {
 		data = {
 			kind: "developer",
 			value: geoCatalogContractFixtures.developer,
 			developments: [geoCatalogContractFixtures.development],
+			hasPassingDevelopment: true,
+			descriptionSource: "fixture-owner-specification",
+			descriptionCheckedAt: "2026-09-24T12:00:00.000Z",
 		};
 	} else if (pageKey.kind === "development") {
 		data = {
 			kind: "development",
 			value: geoCatalogContractFixtures.development,
+			layoutCount: 1,
+			progressPresent: true,
 		};
 	} else if (pageKey.kind === "property") {
 		const property = fixtureProperties.find(
@@ -156,7 +181,8 @@ async function resolveFixtureRuntimeRoute(
 		const details = property ? await getFixtureProperty(property.slug) : null;
 		if (details) data = { kind: "property", value: details };
 	}
-	return { decision, ...(data ? { data } : {}) };
+	if (!data) return { decision: { kind: "notFound", statusCode: 404 } };
+	return { decision: decidePage(decision, data), data };
 }
 
 async function resolveEmptyClientRuntimeRoute(
@@ -164,12 +190,16 @@ async function resolveEmptyClientRuntimeRoute(
 ): Promise<RuntimeRouteResolution> {
 	const grammar = createProjectUrlGrammar(siteProfile);
 	const port = createFixtureResolverDataPort({ grammar, pages: [] });
+	const decision = await createRouteResolver({
+		profile: siteProfile,
+		grammar,
+		port,
+	}).resolvePath(pathname);
 	return {
-		decision: await createRouteResolver({
-			profile: siteProfile,
-			grammar,
-			port,
-		}).resolvePath(pathname),
+		decision:
+			decision.kind === "page"
+				? { kind: "notFound", statusCode: 404 }
+				: decision,
 	};
 }
 
@@ -231,6 +261,7 @@ export const resolveRuntimeRoute = cache(
 				? resolveEmptyClientRuntimeRoute(pathname)
 				: resolveFixtureRuntimeRoute(pathname);
 		}
+		const publicPayload = payload;
 
 		const grammar = createProjectUrlGrammar(
 			siteProfile,
@@ -239,6 +270,53 @@ export const resolveRuntimeRoute = cache(
 		const data = new Map<string, RuntimeRouteData>();
 		const inventory = new Map<string, number>();
 		const keyOf = (pageKey: PageKey) => grammar.buildUrl(pageKey);
+		async function passingDevelopmentDeveloperIds(
+			developments: readonly DevelopmentCardDTO[],
+		): Promise<Set<string>> {
+			const decisions = await Promise.all(
+				developments.map(async (card) => {
+					const [details, facts] = await Promise.all([
+						getDevelopment(publicPayload, card.slug),
+						getDevelopmentRouteFacts(publicPayload, card.slug),
+					]);
+					if (!details || !facts || !card.developer) return null;
+					const pageKey = details.pageKey as PageKey;
+					const resolved = await createRouteResolver({
+						profile: siteProfile,
+						grammar,
+						port: createFixtureResolverDataPort({
+							grammar,
+							pages: [
+								{
+									pageKey,
+									inventory: 1,
+									record: {
+										lifecycle: "active",
+										geo: facts.geo,
+										market: "newbuild",
+										dataTier: facts.dataTier,
+									},
+								},
+							],
+						}),
+					}).resolvePath(details.href);
+					if (resolved.kind !== "page") return null;
+					const decision = decidePage(
+						resolved,
+						{
+							kind: "development",
+							value: details,
+							layoutCount: facts.layoutCount,
+							progressPresent: facts.progressPresent,
+						},
+					);
+					return decision.robots.indexing === "index"
+						? card.developer.id
+						: null;
+				}),
+			);
+			return new Set(decisions.filter((id): id is string => id !== null));
+		}
 
 		const port: ResolverDataPort = {
 			async findRedirect(path) {
@@ -322,8 +400,17 @@ export const resolveRuntimeRoute = cache(
 						pageKey.kind === "geoDevelopers"
 							? pageKey.geo
 							: siteProfile.primaryGeo;
-					const developers = await listGeoDevelopers(payload, geo);
-					data.set(key, { kind: "developers", value: developers });
+					const [developers, developments] = await Promise.all([
+						listGeoDevelopers(payload, geo),
+						listDevelopments(payload, { geo, limit: 48 }),
+					]);
+					const passingDeveloperIds =
+						await passingDevelopmentDeveloperIds(developments);
+					data.set(key, {
+						kind: "developers",
+						value: developers,
+						developersWithPassingDevelopment: passingDeveloperIds.size,
+					});
 					inventory.set(key, developers.length);
 					return {
 						lifecycle: "active",
@@ -370,23 +457,40 @@ export const resolveRuntimeRoute = cache(
 					]);
 					if (!development || !developmentFacts) return null;
 					canonicalPageKey = development.pageKey as PageKey;
-					routeData = { kind: "development", value: development };
+					routeData = {
+						kind: "development",
+						value: development,
+						layoutCount: developmentFacts.layoutCount,
+						progressPresent: developmentFacts.progressPresent,
+					};
 					facts = {
 						geo: developmentFacts.geo,
 						market: "newbuild",
 						dataTier: developmentFacts.dataTier,
 					};
 				} else {
-					const developer = await getDeveloper(payload, pageKey.slug);
-					if (!developer) return null;
+					const [developer, developerFacts, developments] = await Promise.all([
+						getDeveloper(payload, pageKey.slug),
+						getDeveloperRouteFacts(payload, pageKey.slug),
+						listDevelopments(payload, {
+							geo: siteProfile.primaryGeo,
+							limit: 48,
+						}),
+					]);
+					if (!developer || !developerFacts) return null;
+					const ownDevelopments = developments.filter(
+						(item) => item.developer?.id === developer.id,
+					);
+					const passingDeveloperIds =
+						await passingDevelopmentDeveloperIds(ownDevelopments);
 					canonicalPageKey = developer.pageKey as PageKey;
 					routeData = {
 						kind: "developer",
 						value: developer,
-						developments: await listDevelopments(payload, {
-							geo: siteProfile.primaryGeo,
-							limit: 48,
-						}),
+						developments,
+						hasPassingDevelopment: passingDeveloperIds.has(developer.id),
+						descriptionSource: developerFacts.descriptionSource,
+						descriptionCheckedAt: developerFacts.descriptionCheckedAt,
 					};
 					facts = { geo: null, market: null, dataTier: null };
 				}
@@ -412,11 +516,11 @@ export const resolveRuntimeRoute = cache(
 			grammar,
 			port,
 		}).resolvePath(pathname);
-		return {
-			decision,
-			...(decision.kind === "page"
-				? { data: data.get(decision.canonicalPath) }
-				: {}),
-		};
+		if (decision.kind !== "page") return { decision };
+		const routeData = data.get(decision.canonicalPath);
+		if (!routeData) {
+			return { decision: { kind: "notFound", statusCode: 404 } };
+		}
+		return { decision: decidePage(decision, routeData), data: routeData };
 	},
 );

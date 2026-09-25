@@ -37,7 +37,7 @@ function routeSeo(data: NonNullable<Awaited<ReturnType<typeof resolveRuntimeRout
 			title: data.value.title,
 			description: data.value.description,
 			canonicalPath: data.value.href,
-			indexing: "index",
+			indexing: "noindex",
 			following: "follow",
 		};
 	}

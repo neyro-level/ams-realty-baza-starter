@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import type { EntityPageLifecycleState } from "../src/core/lifecycle/entity-lifecycle.ts";
 import {
+	decidePage,
+	type PageKey,
+	type ResolverPageResult,
+} from "../src/core/routing/index.ts";
+import {
 	type ContentGateInput,
 	evaluateContentGate,
 } from "../src/core/seo/content-gate.ts";
@@ -30,6 +35,34 @@ const approvedRegistry: SeoRegistryRow = {
 	minimumObjects: 5,
 	tier: "P1",
 };
+
+function approvedRow(index: number): SeoRegistryRow {
+	const row = projectSeoRegistrySeed[index];
+	assert.ok(row);
+	return {
+		...row,
+		synthetic: false,
+		status: "approved",
+		defaultRobots: "index,follow",
+		source: "wordstat",
+		value: 100,
+		minimumObjects: 5,
+		tier: "P1",
+	};
+}
+
+function resolved(pageKey: PageKey, canonicalPath: string): ResolverPageResult {
+	return {
+		kind: "page",
+		pageKey,
+		canonicalPath,
+		profileStatus: "ACTIVE",
+		lifecycle: "active",
+		market: pageKey.kind === "property" ? "secondary" : null,
+		dataTier: pageKey.kind === "development" ? "A" : null,
+		inventory: 1,
+	};
+}
 
 const common = {
 	url: approvedRegistry.url,
@@ -112,6 +145,114 @@ for (const [profileName, profile] of Object.entries(siteProfileFixtures)) {
 			`${profileName}:${input.kind}`,
 		);
 	}
+}
+
+const requiredDecisionCases = [
+	{
+		name: "district with one object",
+		row: approvedRow(4),
+		input(row: SeoRegistryRow): ContentGateInput {
+			return {
+				url: row.url,
+				canonical: row.canonical,
+				profileStatus: "ACTIVE",
+				kind: "listing",
+				registry: row,
+				inventory: 1,
+				intro: "Полезное описание каталога. ".repeat(30),
+				ssrLinkCount: 1,
+			};
+		},
+		reason: "listing_inventory_below_tier",
+	},
+	{
+		name: "development tier C",
+		row: approvedRow(7),
+		input(row: SeoRegistryRow): ContentGateInput {
+			return {
+				url: row.url,
+				canonical: row.canonical,
+				profileStatus: "ACTIVE",
+				lifecycle: activeLifecycle,
+				kind: "development",
+				dataTier: "C",
+				description: "Описание проекта. ".repeat(100),
+				mediaCount: 12,
+				layoutCount: 4,
+				progressPresent: true,
+				priceRows: [{ checkedAt: "2026-09-20T00:00:00.000Z" }],
+			};
+		},
+		reason: "development_tier_c",
+	},
+	{
+		name: "development A with stale prices",
+		row: approvedRow(7),
+		input(row: SeoRegistryRow): ContentGateInput {
+			return {
+				url: row.url,
+				canonical: row.canonical,
+				profileStatus: "ACTIVE",
+				lifecycle: activeLifecycle,
+				kind: "development",
+				dataTier: "A",
+				description: "Описание проекта. ".repeat(100),
+				mediaCount: 12,
+				layoutCount: 4,
+				progressPresent: true,
+				priceRows: [
+					{ checkedAt: "2026-08-01T00:00:00.000Z" },
+					{ checkedAt: "2026-08-02T00:00:00.000Z" },
+				],
+			};
+		},
+		reason: "development_prices_below_tier",
+	},
+	{
+		name: "secondary property with fewer than three owned photos",
+		row: approvedRow(10),
+		input(row: SeoRegistryRow): ContentGateInput {
+			return {
+				url: row.url,
+				canonical: row.canonical,
+				profileStatus: "ACTIVE",
+				lifecycle: activeLifecycle,
+				kind: "secondary",
+				priceMinor: 7_000_000_00,
+				area: 54,
+				category: "apartment",
+				rooms: 2,
+				district: "Северный",
+				rawDistrictRef: null,
+				ownedPhotoCount: 2,
+				description: "Проверенное описание объекта.",
+			};
+		},
+		reason: "secondary_photos_missing",
+	},
+] as const;
+
+for (const testCase of requiredDecisionCases) {
+	const input = testCase.input(testCase.row);
+	const page = decidePage(
+		siteProfileFixtures.multiGeo,
+		testCase.row.pageKey,
+		resolved(testCase.row.pageKey, testCase.row.url),
+		input,
+		now,
+	);
+	assert.equal(page.statusCode, 200, `${testCase.name}: status`);
+	assert.deepEqual(
+		page.robots,
+		{ indexing: "noindex", following: "follow" },
+		testCase.name,
+	);
+	assert.equal(page.canonicalPath, testCase.row.url, testCase.name);
+	assert.equal(page.inSitemap, false, testCase.name);
+	assert.equal(page.indexNowEligible, false, testCase.name);
+	assert.equal(page.visibleInMenu, false, testCase.name);
+	assert.equal(page.visibleInInterlinks, false, testCase.name);
+	assert.ok(page.gate.reasons.includes(testCase.reason), testCase.name);
 }
 
 const profile = siteProfileFixtures.multiGeo;

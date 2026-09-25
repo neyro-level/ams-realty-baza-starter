@@ -197,6 +197,15 @@ registry evidence, inventory/content quality and lifecycle. Newbuild lots are
 always `noindex,follow` and absent from sitemap; listing, secondary property,
 development and developer thresholds are profile-owned.
 
+Runtime composition follows one path: resolver returns structural route facts,
+then `decidePage` builds factual Gate input and owns HTTP page status, robots,
+canonical, sitemap, IndexNow, menu and interlink eligibility. Resolver and
+public DTO builders do not emit a positive indexing decision. Weak but valid
+content remains `200 noindex,follow` with a self-canonical URL and is absent
+from every discovery surface. Developer eligibility counts only developments
+that pass the same Gate. Owner override is audited and cannot bypass profile
+`OUT | PREPARED_OFF`, lifecycle or hard-noindex rules.
+
 ## 8. Lifecycle and HTTP semantics
 
 | Entity state | Canonical response |

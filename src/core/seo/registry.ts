@@ -1,4 +1,4 @@
-import type { PageKey } from "../routing/index.ts";
+import type { PageKey } from "../routing/url-grammar.ts";
 
 export const seoEvidenceSources = [
 	"wordstat",

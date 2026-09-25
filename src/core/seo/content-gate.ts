@@ -20,6 +20,7 @@ type PriceRow = { checkedAt: string };
 
 export type ContentGateInput = ContentGateCommon &
 	(
+		| { kind: "static" }
 		| {
 				kind: "listing";
 				registry: SeoRegistryRow | null;
@@ -179,6 +180,8 @@ function contentReasons(
 	let visiblePriceRows: number | undefined;
 
 	switch (input.kind) {
+		case "static":
+			break;
 		case "listing": {
 			validCount(input.inventory, "inventory");
 			validCount(input.ssrLinkCount, "ssrLinkCount");

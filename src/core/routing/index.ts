@@ -13,8 +13,10 @@ export {
 export {
 	createRouteResolver,
 	type ResolverDataPort,
+	type ResolverPageResult,
 	type ResolverPageRecord,
 	type ResolverRedirectRecord,
 	type ResolverResult,
 	type RouteResolver,
 } from "./resolver.ts";
+export { decidePage, type PageDecision } from "./page-decision.ts";

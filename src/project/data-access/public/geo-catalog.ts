@@ -91,6 +91,8 @@ const developmentSelect = {
 	availability: true,
 	prices: true,
 	mediaItems: true,
+	layouts: true,
+	progress: true,
 	descriptions: true,
 	status: true,
 	publishedAt: true,
@@ -104,6 +106,8 @@ const developerSelect = {
 	logo: true,
 	siteUrl: true,
 	description: true,
+	source: true,
+	checkedAt: true,
 	status: true,
 	publishedAt: true,
 	contentPurgedAt: true,
@@ -361,24 +365,62 @@ export async function getDevelopment(
 export async function getDevelopmentRouteFacts(
 	payload: Payload,
 	slug: string,
-): Promise<{ geo: string; dataTier: Development["dataTier"] } | null> {
+): Promise<{
+	geo: string;
+	dataTier: Development["dataTier"];
+	layoutCount: number;
+	progressPresent: boolean;
+} | null> {
 	const result = await payload.find({
 		collection: "developments",
 		where: { slug: { equals: slugSchema.parse(slug) } },
 		depth: 1,
 		limit: 1,
 		page: 1,
-		select: { city: true, dataTier: true },
+		select: { city: true, dataTier: true, layouts: true, progress: true },
 		...gatewayAccess,
 	});
 	const development = result.docs[0] as
-		| Pick<Development, "city" | "dataTier">
+		| Pick<Development, "city" | "dataTier" | "layouts" | "progress">
 		| undefined;
 	if (!development) return null;
 	const city = isObjectRelation<City>(development.city)
 		? development.city
 		: null;
-	return city ? { geo: city.slug, dataTier: development.dataTier } : null;
+	return city
+		? {
+				geo: city.slug,
+				dataTier: development.dataTier,
+				layoutCount: development.layouts?.length ?? 0,
+				progressPresent: (development.progress?.length ?? 0) > 0,
+			}
+		: null;
+}
+
+export async function getDeveloperRouteFacts(
+	payload: Payload,
+	slug: string,
+): Promise<{
+	descriptionSource: string | null;
+	descriptionCheckedAt: string | null;
+} | null> {
+	const developerResult = await payload.find({
+		collection: "developers",
+		where: { slug: { equals: slugSchema.parse(slug) } },
+		depth: 0,
+		limit: 1,
+		page: 1,
+		select: { source: true, checkedAt: true },
+		...gatewayAccess,
+	});
+	const developer = developerResult.docs[0] as
+		| Pick<Developer, "id" | "source" | "checkedAt">
+		| undefined;
+	if (!developer) return null;
+	return {
+		descriptionSource: developer.source || null,
+		descriptionCheckedAt: developer.checkedAt || null,
+	};
 }
 
 export async function listDevelopments(

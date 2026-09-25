@@ -82,7 +82,7 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 		assert.equal(result.kind, "page", `${name}: ${link.href}`);
 		if (result.kind === "page") {
 			assert.equal(result.canonicalPath, link.href, `${name}: canonical`);
-			assert.equal(result.robots.indexing, "index", `${name}: indexable`);
+			assert.equal(result.profileStatus, "ACTIVE", `${name}: active`);
 		}
 	}
 }

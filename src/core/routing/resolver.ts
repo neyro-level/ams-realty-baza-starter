@@ -32,8 +32,11 @@ export type ResolverPageResult = {
 	kind: "page";
 	pageKey: PageKey;
 	canonicalPath: string;
-	robots: { indexing: "index" | "noindex"; following: "follow" };
-	inSitemap: boolean;
+	profileStatus: ProfileStatus;
+	lifecycle: "active" | "archived";
+	market: Market | null;
+	dataTier: "A" | "B" | "C" | null;
+	inventory: number;
 };
 
 export type ResolverResult =
@@ -46,7 +49,7 @@ export type RouteResolver = ReturnType<typeof createRouteResolver>;
 
 type RouteDecision = {
 	available: boolean;
-	noindex: boolean;
+	profileStatus: ProfileStatus;
 };
 
 export function createRouteResolver(input: {
@@ -139,16 +142,15 @@ export function createRouteResolver(input: {
 		const inventory = await port.countInventory(pageKey);
 		const route = routeDecision(profile, pageKey, record, inventory);
 		if (!route.available) return notFound();
-		const noindex = route.noindex || record.lifecycle === "archived";
 		return {
 			kind: "page",
 			pageKey,
 			canonicalPath,
-			robots: {
-				indexing: noindex ? "noindex" : "index",
-				following: "follow",
-			},
-			inSitemap: !noindex,
+			profileStatus: route.profileStatus,
+			lifecycle: record.lifecycle,
+			market: record.market,
+			dataTier: record.dataTier,
+			inventory,
 		};
 	}
 
@@ -214,7 +216,7 @@ function routeDecision(
 	switch (pageKey.kind) {
 		case "home":
 		case "static":
-			return { available: true, noindex: false };
+			return { available: true, profileStatus: "ACTIVE" };
 		case "geoHub":
 			if (!addGeo(pageKey.geo)) return unavailable();
 			break;
@@ -266,12 +268,15 @@ function routeDecision(
 		pageKey.kind === "property" && record.market === "newbuild";
 	return {
 		available: true,
-		noindex: statusNoindex || singleGeoRootNoindex || newbuildLotNoindex,
+		profileStatus:
+			statusNoindex || singleGeoRootNoindex || newbuildLotNoindex
+				? "NOINDEX_AUTO"
+				: "ACTIVE",
 	};
 }
 
 function unavailable(): RouteDecision {
-	return { available: false, noindex: true };
+	return { available: false, profileStatus: "OUT" };
 }
 
 function normalizeRequestPath(value: string): string | null {

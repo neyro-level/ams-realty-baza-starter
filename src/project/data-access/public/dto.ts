@@ -407,7 +407,7 @@ export function toHomePageDTO(page: PublicPageRecord | null): HomePageDTO {
 			title: `${brandName} — недвижимость`,
 			description: "Подбор недвижимости и сопровождение сделки.",
 			canonicalPath: "/",
-			indexing: "index",
+			indexing: "noindex",
 			following: "follow",
 		},
 		breadcrumbs: { items: [{ label: "Главная" }] },

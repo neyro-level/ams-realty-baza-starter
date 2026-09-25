@@ -113,6 +113,15 @@ proof-only lifecycle HTTP boundary и старые catalog/property/sitemap
 presentation owners удалены; rollback — revert cleanup PR, без удаления raw
 geo/source данных.
 
+`src/core/routing/page-decision.ts` и project composition
+`src/project/routing/content-gate.ts` образуют единый runtime Content Gate:
+resolver отдаёт только структурные факты, а `decidePage` единолично формирует
+robots, canonical и eligibility для sitemap, IndexNow, menu и interlinks.
+Metadata и discovery используют уже принятое решение; прямой положительный
+`index` в app/public data-access блокируется guard. Runtime Gate inputs берутся
+из фактических inventory, media, prices, layouts, progress и source timestamps;
+schema и persisted data этим этапом не меняются.
+
 ## Client clone boundary
 
 `clone:prepare` принимает только утверждённый preset и exact source tag
@@ -173,10 +182,12 @@ public UI
 
 Reusable UI не импортирует Payload, DB clients или persistence types. Configurable outbound HTTP проходит через Safe Outbound Client; raw anonymous business REST закрывается на edge и Payload boundary. Project-aware Public Gateway composition: `src/project/data-access/public`. Reusable rules stay in `src/core`; System Gateway: `src/core/data-access/system`. Dependency direction is `project -> core`, while `core/packages -> project` is forbidden by architecture and Dependency Cruiser guards.
 
-Indexing имеет один semantic source `src/project/indexing-policy.ts`. Starter
-fail-closed возвращает `noindex`; client использует явное owner decision
-`public | noindex` из client-readiness config. Эта политика определяет root
-metadata robots и `/robots.txt`; starter Nginx фиксирует matching
+`src/project/indexing-policy.ts` остаётся глобальным разрешением публикации:
+Starter fail-closed возвращает `noindex`, а client использует явное owner
+decision `public | noindex` из client-readiness config. Для canonical runtime
+страниц единственный semantic owner индексируемости — `decidePage`; глобальная
+политика не повышает его решение. Она определяет root metadata robots и
+`/robots.txt`; starter Nginx фиксирует matching
 `X-Robots-Tag: noindex, nofollow`, а client blueprint требует явной подстановки
 соответствующего header/его отсутствия.
 

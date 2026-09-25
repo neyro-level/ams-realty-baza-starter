@@ -68,8 +68,7 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 	const root = await resolver.resolvePath("/kvartiry/");
 	assert.equal(root.kind, "page", name);
 	if (root.kind === "page" && profile.geoMode === "SINGLE_GEO") {
-		assert.equal(root.robots.indexing, "noindex");
-		assert.equal(root.inSitemap, false);
+		assert.equal(root.profileStatus, "NOINDEX_AUTO");
 	}
 }
 
@@ -213,9 +212,8 @@ assert.deepEqual(await resolver.resolvePath(grammar.buildUrl(movedProperty)), {
 const archived = await resolver.resolvePath(grammar.buildUrl(archivedProperty));
 assert.equal(archived.kind, "page");
 if (archived.kind === "page") {
-	assert.equal(archived.robots.indexing, "noindex");
-	assert.equal(archived.robots.following, "follow");
-	assert.equal(archived.inSitemap, false);
+	assert.equal(archived.lifecycle, "archived");
+	assert.equal(archived.profileStatus, "ACTIVE");
 }
 for (const path of [
 	"/kvartiry/primorsk/",
