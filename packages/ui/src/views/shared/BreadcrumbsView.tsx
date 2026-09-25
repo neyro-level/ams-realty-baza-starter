@@ -22,7 +22,13 @@ export function BreadcrumbsView({
 								{item.label}
 							</a>
 						) : (
-							<span aria-current="page">{item.label}</span>
+							<span
+								aria-current={
+									index === breadcrumbs.items.length - 1 ? "page" : undefined
+								}
+							>
+								{item.label}
+							</span>
 						)}
 					</li>
 				))}

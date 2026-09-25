@@ -10,21 +10,65 @@ import type {
 	RegionDTO,
 	SeoMetaDTO,
 } from "@ams/realtbase-contracts";
+import {
+	createSafeNavigationBuilder,
+	type NavigationCandidate,
+} from "../core/navigation/index.ts";
+import type { ContentGateDecision } from "../core/seo/content-gate.ts";
 import { siteProfileFixtures } from "../project/site-profile.ts";
 import { createProjectUrlGrammar } from "../project/url-grammar.ts";
 import { fixtureProperties } from "./provider.ts";
 
 const grammar = createProjectUrlGrammar(siteProfileFixtures.multiGeo);
+const navigation = createSafeNavigationBuilder({
+	profile: siteProfileFixtures.multiGeo,
+	grammar,
+});
 
 function href(pageKey: PageKeyDTO): string {
 	return grammar.buildUrl(pageKey);
 }
 
-function link(pageKey: PageKeyDTO, label: string, count?: number): PageLinkDTO {
-	return { pageKey, href: href(pageKey), label, count };
+function gate(
+	pageKey: PageKeyDTO,
+	indexing: "index" | "noindex" = "index",
+): ContentGateDecision {
+	return {
+		statusCode: 200,
+		indexing,
+		following: "follow",
+		canonical: href(pageKey),
+		includeInSitemap: indexing === "index",
+		reasons: indexing === "index" ? [] : ["fixture_noindex"],
+	};
 }
 
-function seo(title: string, description: string, pageKey: PageKeyDTO): SeoMetaDTO {
+function candidate(
+	pageKey: PageKeyDTO,
+	label: string,
+	count?: number,
+	indexing: "index" | "noindex" = "index",
+): NavigationCandidate {
+	return { pageKey, label, count, gate: gate(pageKey, indexing) };
+}
+
+function links(
+	candidates: readonly NavigationCandidate[],
+): readonly PageLinkDTO[] {
+	return navigation.links(candidates);
+}
+
+function link(pageKey: PageKeyDTO, label: string, count?: number): PageLinkDTO {
+	const result = links([candidate(pageKey, label, count)])[0];
+	if (!result) throw new Error(`Fixture link is not safe: ${label}`);
+	return result;
+}
+
+function seo(
+	title: string,
+	description: string,
+	pageKey: PageKeyDTO,
+): SeoMetaDTO {
 	return {
 		title,
 		description,
@@ -75,15 +119,13 @@ export const fixtureDeveloper = {
 	geoNames: [fixtureCity.name],
 	description: "Проверяемое описание демонстрационного застройщика.",
 	breadcrumbs: {
-		items: [
-			{ label: "Главная", pageKey: { kind: "home" }, href: href({ kind: "home" }) },
-			{
-				label: "Застройщики",
-				pageKey: { kind: "developerRoot" },
-				href: href({ kind: "developerRoot" }),
-			},
-			{ label: "Демо Девелопмент" },
-		],
+		...navigation.breadcrumbs({
+			ancestors: [
+				candidate({ kind: "home" }, "Главная"),
+				candidate({ kind: "developerRoot" }, "Застройщики"),
+			],
+			currentLabel: "Демо Девелопмент",
+		}),
 	},
 	seo: seo(
 		"Демо Девелопмент",
@@ -131,17 +173,16 @@ export const fixtureDevelopment = {
 		},
 	],
 	characteristics: [{ label: "Класс", value: "Комфорт" }],
-	breadcrumbs: {
-		items: [
-			{ label: "Главная", pageKey: { kind: "home" }, href: href({ kind: "home" }) },
-			{
-				label: "Новостройки",
-				pageKey: { kind: "categoryRoot", category: "novostroyki" },
-				href: href({ kind: "categoryRoot", category: "novostroyki" }),
-			},
-			{ label: "Северный парк" },
+	breadcrumbs: navigation.breadcrumbs({
+		ancestors: [
+			candidate({ kind: "home" }, "Главная"),
+			candidate(
+				{ kind: "categoryRoot", category: "novostroyki" },
+				"Новостройки",
+			),
 		],
-	},
+		currentLabel: "Северный парк",
+	}),
 	seo: seo(
 		"ЖК Северный парк",
 		"Демонстрационная карточка жилого комплекса.",
@@ -155,26 +196,24 @@ export const fixtureGeoHub = {
 	city: fixtureCity,
 	title: "Недвижимость в Приморске",
 	intro: "Демонстрационная географическая витрина каталога недвижимости.",
-	breadcrumbs: {
-		items: [
-			{ label: "Главная", pageKey: { kind: "home" }, href: href({ kind: "home" }) },
-			{ label: fixtureCity.name },
-		],
-	},
+	breadcrumbs: navigation.breadcrumbs({
+		ancestors: [candidate({ kind: "home" }, "Главная")],
+		currentLabel: fixtureCity.name,
+	}),
 	seo: seo(
 		"Недвижимость в Приморске",
 		"Каталог недвижимости в Приморске.",
 		geoHubKey,
 	),
-	categoryLinks: [
-		link(
+	categoryLinks: links([
+		candidate(
 			{ kind: "categoryGeo", geo: fixtureCity.slug, category: "kvartiry" },
 			"Квартиры",
 			3,
 		),
-	],
-	districtLinks: [
-		link(
+	]),
+	districtLinks: links([
+		candidate(
 			{
 				kind: "categoryGeoDistrict",
 				geo: fixtureCity.slug,
@@ -184,13 +223,20 @@ export const fixtureGeoHub = {
 			fixtureDistrict.name,
 			3,
 		),
-	],
+	]),
 	developerLink: link(
 		{ kind: "geoDevelopers", geo: fixtureCity.slug },
 		"Застройщики Приморска",
 		1,
 	),
-	nearby: [link({ kind: "geoHub", geo: "zarechnyy" }, "Заречный")],
+	nearby: links([
+		candidate(
+			{ kind: "geoHub", geo: "zarechnyy" },
+			"Заречный",
+			undefined,
+			"noindex",
+		),
+	]),
 } satisfies GeoHubDTO;
 
 const listingKey = {
@@ -203,12 +249,13 @@ export const fixtureListing = {
 	pageKey: listingKey,
 	href: href(listingKey),
 	h1: "Квартиры в Приморске",
-	intro: "Демонстрационная выдача квартир с проверяемой канонической навигацией.",
+	intro:
+		"Демонстрационная выдача квартир с проверяемой канонической навигацией.",
 	items: fixtureProperties.map((item) => ({ kind: "property" as const, item })),
 	total: fixtureProperties.length,
 	pagination: { page: 1, pageSize: 12, totalPages: 1 },
-	subLinks: [
-		link(
+	subLinks: links([
+		candidate(
 			{
 				kind: "categoryGeoDistrict",
 				geo: fixtureCity.slug,
@@ -218,13 +265,15 @@ export const fixtureListing = {
 			"Северный микрорайон",
 			3,
 		),
-	],
-	nearby: [
-		link(
+	]),
+	nearby: links([
+		candidate(
 			{ kind: "categoryGeo", geo: "zarechnyy", category: "kvartiry" },
 			"Квартиры в Заречном",
+			undefined,
+			"noindex",
 		),
-	],
+	]),
 	robots: { indexing: "noindex", following: "follow" },
 	canonical: href(listingKey),
 	breadcrumbs: fixtureGeoHub.breadcrumbs,
@@ -234,6 +283,16 @@ export const fixtureListing = {
 		listingKey,
 	),
 } satisfies ListingPageDTO;
+
+export const fixtureGeoSwitcherOptions = links([
+	candidate({ kind: "geoHub", geo: "primorsk" }, "Приморск"),
+	candidate(
+		{ kind: "geoHub", geo: "zarechnyy" },
+		"Заречный",
+		undefined,
+		"noindex",
+	),
+]);
 
 export const geoCatalogContractFixtures = {
 	region: fixtureRegion,

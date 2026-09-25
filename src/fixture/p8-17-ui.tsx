@@ -14,6 +14,7 @@ import {
 	fixtureDeveloper,
 	fixtureDevelopment,
 	fixtureGeoHub,
+	fixtureGeoSwitcherOptions,
 	fixtureListing,
 } from "./geo-catalog";
 import { fixtureProperties } from "./provider";
@@ -112,18 +113,7 @@ export function P817FixtureView({
 					<GeoSwitcherView
 						mode="MULTI_GEO"
 						activeGeo="primorsk"
-						options={[
-							{
-								pageKey: { kind: "geoHub", geo: "primorsk" },
-								href: "/primorsk/",
-								label: "Приморск",
-							},
-							{
-								pageKey: { kind: "geoHub", geo: "zarechnyy" },
-								href: "/zarechnyy/",
-								label: "Заречный",
-							},
-						]}
+						options={fixtureGeoSwitcherOptions}
 					/>
 				</div>
 			</div>
