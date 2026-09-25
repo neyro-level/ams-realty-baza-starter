@@ -43,6 +43,10 @@ const expectedQueues = new Map([
 		"lead-deliveries",
 		{ limit: 10, disableScheduling: true, programmaticTasks: ["deliverLead"] },
 	],
+	[
+		"index-now",
+		{ limit: 2, disableScheduling: true, programmaticTasks: ["submitIndexNow"] },
+	],
 ]);
 const expectedTaskSlugs = new Set(
 	[...expectedQueues.values()].flatMap((queue) => [

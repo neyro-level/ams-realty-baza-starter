@@ -3,6 +3,7 @@ export const payloadJobQueues = {
 	imports: "imports",
 	maintenance: "maintenance",
 	leadDeliveries: "lead-deliveries",
+	indexNow: "index-now",
 } as const;
 
 export const payloadJobTaskSlugs = {
@@ -13,6 +14,7 @@ export const payloadJobTaskSlugs = {
 	catalogLifecycle: "catalogLifecycle",
 	recoverLeadDeliveries: "recoverLeadDeliveries",
 	deliverLead: "deliverLead",
+	submitIndexNow: "submitIndexNow",
 } as const;
 
 export type PayloadJobQueue = (typeof payloadJobQueues)[keyof typeof payloadJobQueues];
@@ -75,6 +77,12 @@ export const payloadJobRegistry = [
 		queue: payloadJobQueues.leadDeliveries,
 		trigger: "programmatic",
 		responsibility: "Claim one delivery, call adapter, record result, backoff, or requeue.",
+	},
+	{
+		slug: payloadJobTaskSlugs.submitIndexNow,
+		queue: payloadJobQueues.indexNow,
+		trigger: "programmatic",
+		responsibility: "Submit only change-driven canonical URLs to IndexNow.",
 	},
 ] as const satisfies readonly PayloadJobRegistryEntry[];
 

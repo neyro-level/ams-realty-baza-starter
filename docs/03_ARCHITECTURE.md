@@ -193,10 +193,13 @@ PostgreSQL constraints из migration `20260919_120900`.
 - schema любого deployed contour меняется только migrations;
 - деньги хранятся integer minor units, площади — в квадратных метрах;
 - один mutating import на feed source;
-- queue registry: `system`, `imports`, `maintenance`, `lead-deliveries`;
+- queue registry: `system`, `imports`, `maintenance`, `lead-deliveries`, `index-now`;
 - static tasks: `dispatchDueFeeds`, `jobsJanitor`, `leadRetentionCleanup`,
   `catalogLifecycle`, `recoverLeadDeliveries`; programmatic tasks:
-  `importFeed`, `deliverLead`;
+  `importFeed`, `deliverLead`, `submitIndexNow`;
+- `index-now` is programmatic and remains unwired until P8-23A cutover. Its jobs
+  contain only event ID, same-origin URLs and attempt number; the runtime key is
+  read only from environment and never enters a job payload or diagnostic output;
 - imports queue имеет `limit: 1`; один application runtime является jobs owner;
 - `REALTY_BASE`: один application runtime с `JOBS_AUTORUN=true`;
 - jobs `autoRun` every-minute cron is an execution ticker; task registry cron is

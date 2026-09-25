@@ -52,6 +52,8 @@ const runtimeEnvSchema = z.object({
 	CUSTOM_WEBHOOK_URL: optionalString,
 	CUSTOM_WEBHOOK_HMAC_SECRET: optionalString,
 	LEAD_RATE_LIMIT_PER_MINUTE: optionalInteger.default(30),
+	INDEXNOW_KEY: optionalString,
+	INDEXNOW_KEY_LOCATION: optionalUrl,
 
 	ARCHIVE_RETENTION_DAYS: optionalInteger,
 	ALERT_WEBHOOK_URL: optionalUrl,
@@ -212,6 +214,19 @@ export function evaluateRuntimeEnv(
 		if (channels?.includes("custom-webhook")) {
 			const url = env.CUSTOM_WEBHOOK_URL?.trim();
 			if (url && !isHttpsUrl(url)) addInvalid(missing, "CUSTOM_WEBHOOK_URL");
+		}
+		if (env.INDEXNOW_KEY_LOCATION?.trim()) {
+			const siteUrl = env.NEXT_PUBLIC_SERVER_URL?.trim();
+			try {
+				if (
+					!siteUrl ||
+					new URL(env.INDEXNOW_KEY_LOCATION).origin !== new URL(siteUrl).origin
+				) {
+					addInvalid(missing, "INDEXNOW_KEY_LOCATION");
+				}
+			} catch {
+				addInvalid(missing, "INDEXNOW_KEY_LOCATION");
+			}
 		}
 	}
 	return { ok: missing.length === 0, mode, missing };

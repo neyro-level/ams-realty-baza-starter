@@ -26,4 +26,10 @@ export const payloadJobsAutoRun = [
 		limit: 10,
 		disableScheduling: true,
 	},
+	{
+		cron: "* * * * *",
+		queue: payloadJobQueues.indexNow,
+		limit: 2,
+		disableScheduling: true,
+	},
 ] satisfies NonNullable<JobsConfig["autoRun"]>;

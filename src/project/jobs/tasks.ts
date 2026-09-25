@@ -47,6 +47,7 @@ import { parseTestApprovedOrigins } from "../../core/security/test-destinations.
 import { getRuntimeClock } from "../../core/time/clock.ts";
 import { projectConfig } from "../project.config.ts";
 import { runtimeEnv } from "../env.ts";
+import { runIndexNowTask } from "./indexnow-task.ts";
 import {
 	type PayloadJobTaskSlug,
 	payloadJobQueues,
@@ -717,6 +718,48 @@ export const payloadJobTasks: GenericPayloadJobTask[] = [
 				},
 			});
 			return result;
+		},
+	},
+	{
+		slug: payloadJobTaskSlugs.submitIndexNow,
+		label: "Submit changed URLs to IndexNow",
+		inputSchema: [
+			{ name: "eventId", type: "text", required: true },
+			{ name: "urls", type: "json", required: true },
+			{ name: "attempt", type: "number", required: true },
+		],
+		retries: 0,
+		concurrency: {
+			key: ({ input }) => `index-now:${input.eventId}`,
+			exclusive: true,
+			supersedes: false,
+		},
+		handler: async ({ input, req }) => {
+			const urls = Array.isArray(input.urls)
+				? input.urls.map((url) => String(url))
+				: [];
+			return runIndexNowTask({
+				job: {
+					eventId: String(input.eventId),
+					urls,
+					attempt: Number(input.attempt),
+				},
+				env: {
+					NEXT_PUBLIC_SERVER_URL: runtimeEnv.NEXT_PUBLIC_SERVER_URL,
+					INDEXNOW_KEY: runtimeEnv.INDEXNOW_KEY,
+					INDEXNOW_KEY_LOCATION: runtimeEnv.INDEXNOW_KEY_LOCATION,
+				},
+				now: nowDate(),
+				queueRetry: async ({ waitUntil, ...retryInput }) => {
+					await queueTask({
+						req,
+						task: payloadJobTaskSlugs.submitIndexNow,
+						queue: payloadJobQueues.indexNow,
+						input: retryInput,
+						waitUntil,
+					});
+				},
+			});
 		},
 	},
 ];
