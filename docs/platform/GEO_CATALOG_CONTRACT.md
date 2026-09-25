@@ -105,8 +105,8 @@ Approved room-facet slugs use `dvukhkomnatnye` and `trekhkomnatnye`.
 2. `/{geo}/{x}/`: enabled category → geo developers when enabled → not found.
 3. `/{category}/{x}/`: entity grammar `zhk-*`, `kp-*` or
    `*-{publicUrlId}` → not found.
-4. `/{geo}/{category}/{x}/`: district of this geo → facet whitelist → not
-   found.
+4. `/{geo}/{category}/{x}/`: published Payload district enabled for this
+   category → project `seoFacets` registry → not found.
 5. `/zastroyshchiki/{x}/`: developer → not found.
 6. Four or more segments → not found.
 
@@ -122,7 +122,8 @@ SiteProfile is the explicit input to reusable core and contains:
 - `categoryStatus`, `marketCapability`;
 - per-geo `geoCategoryStatus` and `marketStatus`;
 - root/per-geo `developersSurface`;
-- per-surface `facetWhitelist`;
+- per-surface `filterKeys` and project-owned
+  `seoFacets: slug → {geo, category, filter}`;
 - SEO tier metric (`broad39 | wordstat | searchDemand`), descending
   `P1 > P2 > TEST >= 0`, inventory minima and unmeasured policy;
 - Content Gate thresholds;
@@ -224,6 +225,9 @@ by trailing slash uses one `308`. Redirect chains and loops are invalid.
 - Query URLs are not linked when a canonical path owner exists.
 - Cache identity is bounded by geo, geo+surface, district, development,
   developer, property public ID and registry targets.
+- Published district routes are read from the bounded cached Payload registry
+  per geo×category. Admin changes invalidate the `registry` cache tag; the
+  security proxy never queries this registry or Payload districts.
 - Runtime invalidation continues through the authenticated HTTP facade.
 - IndexNow is event-driven for publish, canonical move, archive and gone; key
   material is runtime-only and never enters payloads or logs.

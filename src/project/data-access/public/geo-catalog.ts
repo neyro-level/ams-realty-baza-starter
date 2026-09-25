@@ -17,6 +17,7 @@ import type {
 } from "@ams/realtbase-contracts";
 import type { Payload, Where } from "payload";
 import { z } from "zod";
+import type { UrlGrammar } from "@/core/routing";
 import type {
 	City,
 	Developer,
@@ -68,6 +69,7 @@ const districtSelect = {
 	preposition: true,
 	status: true,
 	publishedAt: true,
+	categories: true,
 } as const;
 
 const developmentSelect = {
@@ -122,6 +124,7 @@ export async function getGeoBySlug(
 export async function getGeoHub(
 	payload: Payload,
 	slug: string,
+	grammar: UrlGrammar = urlGrammar,
 ): Promise<GeoHubDTO | null> {
 	const geo = slugSchema.parse(slug);
 	if (!isRoutableGeo(geo)) return null;
@@ -132,7 +135,7 @@ export async function getGeoHub(
 		findNearbyCities(payload, city),
 	]);
 	const pageKey = { kind: "geoHub", geo } as const;
-	const href = safeBuildUrl(pageKey);
+	const href = safeBuildUrl(pageKey, grammar);
 	return {
 		city: toCityDTO(city),
 		title: `Недвижимость ${city.preposition === "na" ? "на" : "в"} ${city.morphology.prepositional}`,
@@ -154,17 +157,20 @@ export async function getGeoHub(
 				surfaceLabel(surface),
 			),
 		),
-		districtLinks: districts.map((district) =>
-			pageLink(
-				{
-					kind: "categoryGeoDistrict",
-					geo,
-					category: "kvartiry",
-					district: district.slug,
-				},
-				district.title,
+		districtLinks: districts
+			.filter((district) => district.categories?.includes("kvartiry"))
+			.map((district) =>
+				pageLink(
+					{
+						kind: "categoryGeoDistrict",
+						geo,
+						category: "kvartiry",
+						district: district.slug,
+					},
+					district.title,
+					grammar,
+				),
 			),
-		),
 		developerLink: pageLink({ kind: "geoDevelopers", geo }, "Застройщики"),
 		nearby: nearby.map((item) =>
 			pageLink({ kind: "geoHub", geo: item.slug }, item.title),
@@ -175,6 +181,7 @@ export async function getGeoHub(
 export async function getListing(
 	payload: Payload,
 	input: PublicListingInput,
+	grammar: UrlGrammar = urlGrammar,
 ): Promise<ListingPageDTO | null> {
 	const parsed = z
 		.object({
@@ -201,7 +208,12 @@ export async function getListing(
 	const city = await findGeoRecord(payload, parsed.geo);
 	if (!city) return null;
 	const district = parsed.district
-		? await findDistrict(payload, Number(city.id), parsed.district)
+		? await findDistrict(
+				payload,
+				Number(city.id),
+				parsed.district,
+				parsed.surface,
+			)
 		: null;
 	if (parsed.district && !district) return null;
 
@@ -220,7 +232,7 @@ export async function getListing(
 					facet: parsed.facet,
 				}
 			: { kind: "categoryGeo", geo: parsed.geo, category: parsed.surface };
-	const href = safeBuildUrl(pageKey);
+	const href = safeBuildUrl(pageKey, grammar);
 	const page = parsed.page ?? 1;
 	const pageSize = pageSizeSchema.parse(
 		(parsed.query as { limit?: number } | undefined)?.limit ?? 24,
@@ -423,6 +435,7 @@ export async function countInventory(
 				payload,
 				Number(city.id),
 				slugSchema.parse(input.district),
+				input.surface,
 			)
 		: null;
 	if (input.district && !district) return 0;
@@ -502,6 +515,7 @@ async function findDistrict(
 	payload: Payload,
 	cityId: number,
 	slug: string,
+	category?: CatalogSurfaceSlug,
 ): Promise<District | null> {
 	const result = await payload.find({
 		collection: "districts",
@@ -512,7 +526,11 @@ async function findDistrict(
 		select: districtSelect,
 		...gatewayAccess,
 	});
-	return (result.docs[0] as District | undefined) ?? null;
+	const district = (result.docs[0] as District | undefined) ?? null;
+	if (district && category && !district.categories?.includes(category)) {
+		return null;
+	}
+	return district;
 }
 
 async function findNearbyCities(payload: Payload, city: City): Promise<City[]> {
@@ -890,14 +908,19 @@ function surfaceLabel(surface: CatalogSurfaceSlug): string {
 	)[surface];
 }
 
-function pageLink(pageKey: PageKeyDTO, label: string): PageLinkDTO {
-	return { pageKey, href: safeBuildUrl(pageKey), label };
+function pageLink(
+	pageKey: PageKeyDTO,
+	label: string,
+	grammar: UrlGrammar = urlGrammar,
+): PageLinkDTO {
+	return { pageKey, href: safeBuildUrl(pageKey, grammar), label };
 }
 
-function safeBuildUrl(pageKey: PageKeyDTO): string {
-	return urlGrammar.buildUrl(
-		pageKey as Parameters<typeof urlGrammar.buildUrl>[0],
-	);
+function safeBuildUrl(
+	pageKey: PageKeyDTO,
+	grammar: UrlGrammar = urlGrammar,
+): string {
+	return grammar.buildUrl(pageKey as Parameters<typeof grammar.buildUrl>[0]);
 }
 
 function safeSeo(

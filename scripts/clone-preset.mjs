@@ -121,7 +121,7 @@ const modules = {
 	agents: { state: "disabled", reservedRoots: ["sotrudniki"] },
 };
 
-const facetWhitelist = {
+const filterKeys = {
 	kvartiry: ["rooms", "district", "price", "area"],
 	doma: ["district", "price", "area"],
 	uchastki: ["district", "price", "area"],
@@ -132,6 +132,16 @@ const facetWhitelist = {
 	novostroyki: ["district", "developer", "completionYear"],
 	"kottedzhnye-poselki": ["district", "developer"],
 };
+
+function seoFacetsForPreset(preset) {
+	return {
+		dvukhkomnatnye: {
+			geo: preset.primaryGeo,
+			category: "kvartiry",
+			filter: { key: "rooms", value: [2] },
+		},
+	};
+}
 
 function surfaceStatusesForPreset(preset) {
 	return Object.fromEntries(
@@ -199,7 +209,8 @@ export function siteProfileConfigForPreset(preset) {
 				preset.geos.map((geo) => [geo.slug, developerStatus]),
 			),
 		},
-		facetWhitelist,
+		filterKeys,
+		seoFacets: seoFacetsForPreset(preset),
 		seoTiers: {
 			metric: "searchDemand",
 			snapshotDate: "2026-09-24",

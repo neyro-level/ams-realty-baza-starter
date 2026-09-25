@@ -6,7 +6,7 @@
 
 Plan №8 v6 исполнен. Переносимая geo-first catalog platform, P8-23A canonical
 route cutover и P8-23B cleanup находятся в текущем runtime. Канонический
-контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Plan №9 v4 `APPROVED` —
+контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Plan №9 v5 `APPROVED` —
 текущий execution source для Starter v2.1; production не выполнялся.
 
 ## Зафиксировано
@@ -57,6 +57,7 @@ route cutover и P8-23B cleanup находятся в текущем runtime. К
 | Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
 | Geo-catalog runtime | `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover и guarded cleanup реализованы |
 | Geo modes | `SINGLE_GEO | MULTI_GEO`; validated SiteProfile separates geo `published` from `hubStatus`; SINGLE_GEO owns exactly one routable primary hub |
+| District/facet routes | Published Payload districts are cached per `geo×category`; project `seoFacets` owns clean facet slugs and filters; registry invalidation uses the authenticated `registry` tag |
 | Clone preset | `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`; `clone:prepare` generates the complete explicit SiteProfile matrix plus `docs/CLIENT_BOOTSTRAP.json` |
 | Client fixture boundary | `projectKind=client` never falls back to starter demo properties when Payload data is absent; empty client data produces an empty/not-found runtime result |
 | Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |

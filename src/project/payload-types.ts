@@ -139,6 +139,7 @@ export interface Config {
       catalogLifecycle: TaskCatalogLifecycle;
       recoverLeadDeliveries: TaskRecoverLeadDeliveries;
       deliverLead: TaskDeliverLead;
+      submitIndexNow: TaskSubmitIndexNow;
       inline: {
         input: unknown;
         output: unknown;
@@ -291,6 +292,20 @@ export interface District {
   };
   districtType: 'administrative' | 'microdistrict';
   city: number | City;
+  /**
+   * Public category routes where this published district may resolve.
+   */
+  categories: (
+    | 'kvartiry'
+    | 'doma'
+    | 'uchastki'
+    | 'kommercheskaya-nedvizhimost'
+    | 'komnaty'
+    | 'garazhi'
+    | 'arenda'
+    | 'novostroyki'
+    | 'kottedzhnye-poselki'
+  )[];
   /**
    * Optional parent district in the same city.
    */
@@ -975,7 +990,8 @@ export interface PayloadJob {
           | 'leadRetentionCleanup'
           | 'catalogLifecycle'
           | 'recoverLeadDeliveries'
-          | 'deliverLead';
+          | 'deliverLead'
+          | 'submitIndexNow';
         taskID: string;
         input?:
           | {
@@ -1018,6 +1034,7 @@ export interface PayloadJob {
         | 'catalogLifecycle'
         | 'recoverLeadDeliveries'
         | 'deliverLead'
+        | 'submitIndexNow'
       )
     | null;
   queue?: string | null;
@@ -1263,6 +1280,7 @@ export interface DistrictsSelect<T extends boolean = true> {
       };
   districtType?: T;
   city?: T;
+  categories?: T;
   parent?: T;
   synonyms?:
     | T
@@ -1968,6 +1986,26 @@ export interface TaskRecoverLeadDeliveries {
 export interface TaskDeliverLead {
   input: {
     leadDeliveryId: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSubmitIndexNow".
+ */
+export interface TaskSubmitIndexNow {
+  input: {
+    eventId: string;
+    urls:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    attempt: number;
   };
   output?: unknown;
 }

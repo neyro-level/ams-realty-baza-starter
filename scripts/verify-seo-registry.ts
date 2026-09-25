@@ -5,11 +5,15 @@ import {
 	type SeoRegistryRow,
 	seoTemplateKeys,
 } from "../src/core/seo/registry.ts";
+import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
 import { projectSeoRegistrySeed } from "../src/project/seo/registry-seed.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
-const grammar = createProjectUrlGrammar(siteProfileFixtures.multiGeo);
+const grammar = createProjectUrlGrammar(
+	siteProfileFixtures.multiGeo,
+	fixtureDistrictRouteRegistryFor(siteProfileFixtures.multiGeo),
+);
 const now = new Date("2026-09-24T12:00:00.000Z");
 
 assertSeoRegistry({

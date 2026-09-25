@@ -25,6 +25,10 @@ import {
 	leadContextDownSql,
 	leadContextUpSql,
 } from "../../migrations/20260924_233000_lead_context.ts";
+import {
+	districtRouteCategoriesDownSql,
+	districtRouteCategoriesUpSql,
+} from "../../migrations/20260925_140000_district_route_categories.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -438,11 +442,14 @@ export function provePropertyIdentityMigration(testUri) {
 		"SELECT string_agg(public_url_id::text, ',' ORDER BY id) FROM properties",
 	);
 	if (existingIds !== "1,2") {
-		throw new Error(`Identity migration did not deterministically retain assigned IDs: ${existingIds}`);
+		throw new Error(
+			`Identity migration did not deterministically retain assigned IDs: ${existingIds}`,
+		);
 	}
 	psql(testUri, "INSERT INTO properties (slug) VALUES ('new-c'), ('new-d')");
 	if (
-		psql(testUri, "SELECT count(DISTINCT public_url_id) FROM properties") !== "4"
+		psql(testUri, "SELECT count(DISTINCT public_url_id) FROM properties") !==
+		"4"
 	) {
 		throw new Error("Identity sequence reused a public URL ID.");
 	}
@@ -452,7 +459,10 @@ export function provePropertyIdentityMigration(testUri) {
 		/immutable/i,
 	);
 	if (
-		psql(testUri, "SELECT public_url_id FROM properties WHERE slug='existing-a'") !== "1"
+		psql(
+			testUri,
+			"SELECT public_url_id FROM properties WHERE slug='existing-a'",
+		) !== "1"
 	) {
 		throw new Error("Rejected identity update changed an assigned ID.");
 	}
@@ -539,10 +549,67 @@ export function proveLeadContextMigration(testUri) {
 		testUri,
 		"INSERT INTO leads (form_kind, context_geo) VALUES ('legal', 'rostov-na-donu')",
 	);
-	expectPsqlFailure(testUri, leadContextDownSql, /extended lead context exists/i);
-	if (psql(testUri, "SELECT count(*) FROM leads WHERE form_kind='legal'") !== "1") {
-		throw new Error("Rejected lead context down migration changed retained leads.");
+	expectPsqlFailure(
+		testUri,
+		leadContextDownSql,
+		/extended lead context exists/i,
+	);
+	if (
+		psql(testUri, "SELECT count(*) FROM leads WHERE form_kind='legal'") !== "1"
+	) {
+		throw new Error(
+			"Rejected lead context down migration changed retained leads.",
+		);
 	}
+}
+
+export function proveDistrictRouteCategoriesMigration(testUri) {
+	psql(
+		testUri,
+		`CREATE TABLE districts (id serial PRIMARY KEY, slug varchar NOT NULL);
+		 CREATE TABLE p9_s2_migration_sentinel (id integer PRIMARY KEY, note text NOT NULL);
+		 CREATE OR REPLACE FUNCTION district_slug_guard() RETURNS trigger AS $$
+		 BEGIN RETURN NEW; END;
+		 $$ LANGUAGE plpgsql;
+		 CREATE TRIGGER districts_slug_guard BEFORE INSERT OR UPDATE OF slug ON districts
+		 FOR EACH ROW EXECUTE FUNCTION district_slug_guard();
+		 INSERT INTO districts (slug) VALUES ('severnyy'), ('tsentralnyy');
+		 INSERT INTO p9_s2_migration_sentinel VALUES (1, 'preserve-me');`,
+	);
+	psql(testUri, districtRouteCategoriesUpSql);
+	if (psql(testUri, "SELECT count(*) FROM districts_categories") !== "18") {
+		throw new Error(
+			"District category migration did not backfill all existing rows.",
+		);
+	}
+	expectPsqlFailure(
+		testUri,
+		"INSERT INTO districts_categories (\"order\", parent_id, value) VALUES (0, 1, 'kvartiry')",
+		/districts_categories_parent_value_unique_idx/i,
+	);
+	expectPsqlFailure(
+		testUri,
+		"INSERT INTO districts (slug) VALUES ('api')",
+		/reserved public subslug/i,
+	);
+	psql(testUri, districtRouteCategoriesDownSql);
+	if (
+		psql(testUri, "SELECT note FROM p9_s2_migration_sentinel WHERE id=1") !==
+		"preserve-me"
+	) {
+		throw new Error("District category down migration changed unrelated data.");
+	}
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_name='districts_categories'",
+		) !== "0"
+	) {
+		throw new Error(
+			"District category down migration left its join table behind.",
+		);
+	}
+	psql(testUri, districtRouteCategoriesUpSql);
 }
 
 export function psqlOnTest(testUri, sql) {

@@ -81,7 +81,7 @@ const marketStatusSchema = z.strictObject({
 	newbuild: statusSchema,
 	secondary: statusSchema,
 });
-const facetWhitelistSchema = z.strictObject(
+const filterKeysSchema = z.strictObject(
 	Object.fromEntries(
 		catalogSurfaceSlugs.map((surface) => [
 			surface,
@@ -89,6 +89,23 @@ const facetWhitelistSchema = z.strictObject(
 		]),
 	) as Record<CatalogSurfaceSlug, z.ZodArray<typeof facetSchema>>,
 );
+const seoFacetValueSchema = z.union([
+	z.string().min(1).max(120),
+	z.number().finite(),
+	z.boolean(),
+	z
+		.array(z.union([z.string().min(1).max(120), z.number().finite()]))
+		.min(1)
+		.max(20),
+]);
+const seoFacetSchema = z.strictObject({
+	geo: geoSlugSchema,
+	category: z.enum(catalogSurfaceSlugs),
+	filter: z.strictObject({
+		key: facetSchema,
+		value: seoFacetValueSchema,
+	}),
+});
 
 const developmentGateSchema = z.strictObject({
 	priceRowsMin: z.int().nonnegative(),
@@ -118,7 +135,8 @@ const siteProfileInputSchema = z.strictObject({
 		root: statusSchema,
 		byGeo: z.record(geoSlugSchema, statusSchema),
 	}),
-	facetWhitelist: facetWhitelistSchema,
+	filterKeys: filterKeysSchema,
+	seoFacets: z.record(geoSlugSchema, seoFacetSchema),
 	seoTiers: z.strictObject({
 		metric: z.enum(seoTierMetrics),
 		snapshotDate: isoDateSchema,
@@ -304,6 +322,22 @@ export const siteProfileSchema = siteProfileInputSchema.superRefine(
 					code: "custom",
 					path: ["developersSurface", "byGeo", geo],
 					message: "Developer statuses cannot contain an unknown geo.",
+				});
+			}
+		}
+		for (const [slug, facet] of Object.entries(profile.seoFacets)) {
+			if (!profile.geos[facet.geo]) {
+				context.addIssue({
+					code: "custom",
+					path: ["seoFacets", slug, "geo"],
+					message: "SEO facet must reference a configured geo.",
+				});
+			}
+			if (!profile.filterKeys[facet.category].includes(facet.filter.key)) {
+				context.addIssue({
+					code: "custom",
+					path: ["seoFacets", slug, "filter", "key"],
+					message: "SEO facet filter key must be enabled for its category.",
 				});
 			}
 		}

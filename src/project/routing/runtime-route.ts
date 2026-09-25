@@ -19,6 +19,7 @@ import {
 } from "@/core/routing";
 import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
+import { getCachedDistrictRouteRegistry } from "@/project/routing/district-registry";
 import { siteProfile } from "@/project/site-profile";
 import { siteConfig } from "@/project/site.config";
 import { getOptionalPublicGatewayPayload } from "@/project/data-access/public/payload";
@@ -36,10 +37,8 @@ import { findPublicEntityLifecycle } from "@/project/data-access/public/entity-l
 import { findPublicRedirectByFromPath } from "@/project/data-access/public/payload-reads";
 import { createFixtureResolverDataPort } from "@/fixture/resolver";
 import { geoCatalogContractFixtures } from "@/fixture/geo-catalog";
-import {
-	fixtureProperties,
-	getFixtureProperty,
-} from "@/fixture/provider";
+import { fixtureDistrictRouteRegistryFor } from "@/fixture/route-registries";
+import { fixtureProperties, getFixtureProperty } from "@/fixture/provider";
 
 export type RuntimeRouteData =
 	| { kind: "geoHub"; value: GeoHubDTO }
@@ -58,11 +57,13 @@ export type RuntimeRouteResolution = {
 	data?: RuntimeRouteData;
 };
 
-const grammar = createProjectUrlGrammar(siteProfile);
-
 async function resolveFixtureRuntimeRoute(
 	pathname: string,
 ): Promise<RuntimeRouteResolution> {
+	const grammar = createProjectUrlGrammar(
+		siteProfile,
+		fixtureDistrictRouteRegistryFor(siteProfile),
+	);
 	const catalogRoot = { kind: "categoryRoot", category: "kvartiry" } as const;
 	const geoListing = geoCatalogContractFixtures.listing.pageKey as PageKey;
 	const pages: PageKey[] = [
@@ -147,6 +148,7 @@ async function resolveFixtureRuntimeRoute(
 async function resolveEmptyClientRuntimeRoute(
 	pathname: string,
 ): Promise<RuntimeRouteResolution> {
+	const grammar = createProjectUrlGrammar(siteProfile);
 	const port = createFixtureResolverDataPort({ grammar, pages: [] });
 	return {
 		decision: await createRouteResolver({
@@ -166,6 +168,7 @@ function entityType(pageKey: PageKey) {
 
 function lifecycleRecord(
 	lifecycle: ReturnType<typeof resolveEntityPageLifecycle>,
+	grammar: ReturnType<typeof createProjectUrlGrammar>,
 	canonicalPageKey?: PageKey,
 ): ResolverPageRecord | null {
 	switch (lifecycle.kind) {
@@ -177,7 +180,8 @@ function lifecycleRecord(
 			return {
 				lifecycle: "purged",
 				canonicalPageKey,
-				replacementPageKey: grammar.parseUrl(lifecycle.destination) ?? undefined,
+				replacementPageKey:
+					grammar.parseUrl(lifecycle.destination) ?? undefined,
 			};
 		case "archived":
 			return { lifecycle: "archived", canonicalPageKey };
@@ -186,7 +190,9 @@ function lifecycleRecord(
 	}
 }
 
-function listingInput(pageKey: Extract<PageKey, { kind: `category${string}` }>) {
+function listingInput(
+	pageKey: Extract<PageKey, { kind: `category${string}` }>,
+) {
 	return {
 		geo: "geo" in pageKey ? pageKey.geo : siteProfile.primaryGeo,
 		surface: pageKey.category,
@@ -206,6 +212,10 @@ export const resolveRuntimeRoute = cache(
 				: resolveFixtureRuntimeRoute(pathname);
 		}
 
+		const grammar = createProjectUrlGrammar(
+			siteProfile,
+			await getCachedDistrictRouteRegistry(),
+		);
 		const data = new Map<string, RuntimeRouteData>();
 		const inventory = new Map<string, number>();
 		const keyOf = (pageKey: PageKey) => grammar.buildUrl(pageKey);
@@ -240,7 +250,7 @@ export const resolveRuntimeRoute = cache(
 					return { lifecycle: "active" };
 				}
 				if (pageKey.kind === "geoHub") {
-					const hub = await getGeoHub(payload, pageKey.geo);
+					const hub = await getGeoHub(payload, pageKey.geo, grammar);
 					if (!hub) return null;
 					data.set(key, { kind: "geoHub", value: hub });
 					return { lifecycle: "active", geo: pageKey.geo };
@@ -251,14 +261,27 @@ export const resolveRuntimeRoute = cache(
 					pageKey.kind === "categoryGeoDistrict" ||
 					pageKey.kind === "categoryGeoFacet"
 				) {
-					const listing = await getListing(payload, listingInput(pageKey));
+					const listing = await getListing(
+						payload,
+						listingInput(pageKey),
+						grammar,
+					);
 					if (!listing) return null;
-					data.set(key, { kind: "listing", value: { ...listing, pageKey, href: key } });
+					data.set(key, {
+						kind: "listing",
+						value: { ...listing, pageKey, href: key },
+					});
 					inventory.set(key, listing.total);
 					return { lifecycle: "active", geo: listingInput(pageKey).geo };
 				}
-				if (pageKey.kind === "geoDevelopers" || pageKey.kind === "developerRoot") {
-					const geo = pageKey.kind === "geoDevelopers" ? pageKey.geo : siteProfile.primaryGeo;
+				if (
+					pageKey.kind === "geoDevelopers" ||
+					pageKey.kind === "developerRoot"
+				) {
+					const geo =
+						pageKey.kind === "geoDevelopers"
+							? pageKey.geo
+							: siteProfile.primaryGeo;
 					const developers = await listGeoDevelopers(payload, geo);
 					data.set(key, { kind: "developers", value: developers });
 					inventory.set(key, developers.length);
@@ -280,13 +303,16 @@ export const resolveRuntimeRoute = cache(
 				);
 				if (lifecycle.kind === "missing") return null;
 				if (lifecycle.kind === "gone" || lifecycle.kind === "redirect") {
-					return lifecycleRecord(lifecycle);
+					return lifecycleRecord(lifecycle, grammar);
 				}
 
 				let routeData: RuntimeRouteData;
 				let canonicalPageKey: PageKey;
 				if (pageKey.kind === "property") {
-					const property = await getPropertyByPublicUrlId(payload, pageKey.publicUrlId);
+					const property = await getPropertyByPublicUrlId(
+						payload,
+						pageKey.publicUrlId,
+					);
 					if (!property) return null;
 					canonicalPageKey = property.pageKey as PageKey;
 					routeData = { kind: "property", value: property };
@@ -308,7 +334,7 @@ export const resolveRuntimeRoute = cache(
 						}),
 					};
 				}
-				const record = lifecycleRecord(lifecycle, canonicalPageKey);
+				const record = lifecycleRecord(lifecycle, grammar, canonicalPageKey);
 				if (record) data.set(key, routeData);
 				return record;
 			},
@@ -321,7 +347,9 @@ export const resolveRuntimeRoute = cache(
 		}).resolvePath(pathname);
 		return {
 			decision,
-			...(decision.kind === "page" ? { data: data.get(decision.canonicalPath) } : {}),
+			...(decision.kind === "page"
+				? { data: data.get(decision.canonicalPath) }
+				: {}),
 		};
 	},
 );

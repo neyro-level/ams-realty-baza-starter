@@ -12,6 +12,7 @@ import {
 	fixtureListing,
 } from "../src/fixture/geo-catalog.ts";
 import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
+import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
@@ -66,7 +67,10 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 }
 
 const profile = siteProfileFixtures.multiGeo;
-const grammar = createProjectUrlGrammar(profile);
+const grammar = createProjectUrlGrammar(
+	profile,
+	fixtureDistrictRouteRegistryFor(profile),
+);
 const navigation = createSafeNavigationBuilder({ profile, grammar });
 const inactiveGeo = { kind: "geoHub", geo: "zarechnyy" } as const;
 const inactiveHref = grammar.buildUrl(inactiveGeo);

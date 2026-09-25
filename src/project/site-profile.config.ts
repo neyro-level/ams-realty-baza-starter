@@ -43,7 +43,7 @@ export const projectSiteProfileConfig = {
 		root: "ACTIVE",
 		byGeo: { primorsk: "ACTIVE" },
 	},
-	facetWhitelist: {
+	filterKeys: {
 		kvartiry: ["rooms", "district", "price", "area"],
 		doma: ["district", "price", "area"],
 		uchastki: ["district", "price", "area"],
@@ -53,6 +53,13 @@ export const projectSiteProfileConfig = {
 		arenda: ["rooms", "district", "price"],
 		novostroyki: ["district", "developer", "completionYear"],
 		"kottedzhnye-poselki": ["district", "developer"],
+	},
+	seoFacets: {
+		dvukhkomnatnye: {
+			geo: "primorsk",
+			category: "kvartiry",
+			filter: { key: "rooms", value: [2] },
+		},
 	},
 	seoTiers: {
 		metric: "searchDemand",

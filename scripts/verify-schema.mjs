@@ -53,6 +53,9 @@ DECLARE
 		'districts_parent_idx',
 		'districts_synonyms_order_idx',
 		'districts_synonyms_parent_id_idx',
+		'districts_categories_order_idx',
+		'districts_categories_parent_idx',
+		'districts_categories_parent_value_unique_idx',
 		'payload_locked_documents_rels_regions_id_idx',
 		'payload_locked_documents_rels_cities_id_idx',
 		'payload_locked_documents_rels_districts_id_idx'
@@ -124,6 +127,29 @@ BEGIN
 			AND table_name IN ('regions', 'cities', 'districts')
 	) <> 3 THEN
 		RAISE EXCEPTION 'Missing canonical geo hierarchy tables';
+	END IF;
+
+	IF NOT EXISTS (
+		SELECT 1 FROM information_schema.tables
+		WHERE table_schema = 'public' AND table_name = 'districts_categories'
+	) OR NOT EXISTS (
+		SELECT 1 FROM pg_constraint
+		WHERE conname = 'districts_categories_parent_fk'
+			AND contype = 'f'
+	) OR NOT EXISTS (
+		SELECT 1 FROM information_schema.columns
+		WHERE table_schema = 'public'
+			AND table_name = 'districts_categories'
+			AND column_name = 'id'
+			AND is_nullable = 'NO'
+			AND column_default LIKE 'nextval(%'
+	) OR NOT EXISTS (
+		SELECT 1 FROM pg_constraint
+		WHERE conrelid = 'districts_categories'::regclass
+			AND conname = 'districts_categories_pkey'
+			AND contype = 'p'
+	) THEN
+		RAISE EXCEPTION 'Missing district route category registry schema';
 	END IF;
 
 	IF (

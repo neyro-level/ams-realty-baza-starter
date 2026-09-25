@@ -71,7 +71,9 @@ export type UrlGrammarInput = {
 	geoSlugs: readonly string[];
 	staticPaths: readonly string[];
 	moduleRootSlugs?: readonly string[];
-	districtSlugsByGeo?: Readonly<Record<string, readonly string[]>>;
+	districtSlugsByGeoCategory?: Readonly<
+		Record<string, Partial<Record<CatalogSurfaceSlug, readonly string[]>>>
+	>;
 	facetSlugsByGeoCategory?: Readonly<
 		Record<string, Partial<Record<CatalogSurfaceSlug, readonly string[]>>>
 	>;
@@ -195,12 +197,29 @@ export function createUrlGrammar(input: UrlGrammarInput) {
 
 	const geoSet = new Set(geoSlugs);
 	const districtSets = new Map<string, Set<string>>();
-	for (const [geo, slugs] of Object.entries(input.districtSlugsByGeo ?? {})) {
+	for (const [geo, byCategory] of Object.entries(
+		input.districtSlugsByGeoCategory ?? {},
+	)) {
 		if (!geoSet.has(geo))
 			throw new Error(`District matrix uses unknown geo: ${geo}`);
-		const checked = slugs.map((slug) => assertCanonicalSlug(slug, "District"));
-		assertUnique(checked, `Districts for ${geo}`);
-		districtSets.set(geo, new Set(checked));
+		for (const [category, slugs] of Object.entries(byCategory)) {
+			if (!catalogSurfaceSet.has(category)) {
+				throw new Error(`District matrix uses unknown category: ${category}`);
+			}
+			const checked = (slugs ?? []).map((slug) =>
+				assertCanonicalSlug(slug, "District"),
+			);
+			assertUnique(checked, `Districts for ${geo}/${category}`);
+			const reserved = checked.find(
+				(slug) => reservedRoots.has(slug) || isPlatformReservedRoot(slug),
+			);
+			if (reserved) {
+				throw new Error(
+					`District slug collides with a reserved subslug for ${geo}/${category}: ${reserved}`,
+				);
+			}
+			districtSets.set(`${geo}/${category}`, new Set(checked));
+		}
 	}
 
 	const facetSets = new Map<string, Set<string>>();
@@ -217,7 +236,16 @@ export function createUrlGrammar(input: UrlGrammarInput) {
 				assertCanonicalSlug(slug, "Facet"),
 			);
 			assertUnique(checked, `Facets for ${geo}/${category}`);
-			const districtSet = districtSets.get(geo) ?? new Set<string>();
+			const reserved = checked.find(
+				(slug) => reservedRoots.has(slug) || isPlatformReservedRoot(slug),
+			);
+			if (reserved) {
+				throw new Error(
+					`Facet slug collides with a reserved subslug for ${geo}/${category}: ${reserved}`,
+				);
+			}
+			const districtSet =
+				districtSets.get(`${geo}/${category}`) ?? new Set<string>();
 			const collision = checked.find((slug) => districtSet.has(slug));
 			if (collision) {
 				throw new Error(
@@ -247,10 +275,14 @@ export function createUrlGrammar(input: UrlGrammarInput) {
 		return geo;
 	}
 
-	function assertDistrict(geo: string, value: string): string {
+	function assertDistrict(
+		geo: string,
+		category: CatalogSurfaceSlug,
+		value: string,
+	): string {
 		const district = assertCanonicalSlug(value.toLowerCase(), "District");
-		if (!districtSets.get(geo)?.has(district)) {
-			throw new Error(`Unknown district for ${geo}: ${district}`);
+		if (!districtSets.get(`${geo}/${category}`)?.has(district)) {
+			throw new Error(`Unknown district for ${geo}/${category}: ${district}`);
 		}
 		return district;
 	}
@@ -295,7 +327,7 @@ export function createUrlGrammar(input: UrlGrammarInput) {
 				return `/${assertConfiguredGeo(key.geo)}/${key.category}/`;
 			case "categoryGeoDistrict": {
 				const geo = assertConfiguredGeo(key.geo);
-				return `/${geo}/${key.category}/${assertDistrict(geo, key.district)}/`;
+				return `/${geo}/${key.category}/${assertDistrict(geo, key.category, key.district)}/`;
 			}
 			case "categoryGeoFacet": {
 				const geo = assertConfiguredGeo(key.geo);
@@ -416,7 +448,7 @@ export function createUrlGrammar(input: UrlGrammarInput) {
 			catalogSurfaceSet.has(second) &&
 			third
 		) {
-			if (districtSets.get(first)?.has(third)) {
+			if (districtSets.get(`${first}/${second}`)?.has(third)) {
 				return {
 					kind: "categoryGeoDistrict",
 					geo: first,

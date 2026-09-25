@@ -8,7 +8,7 @@ import {
 import { projectSiteProfileConfig } from "./site-profile.config.ts";
 import type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";
 
-const defaultFacetWhitelist: ProjectSiteProfileConfig["facetWhitelist"] = {
+const defaultFilterKeys: ProjectSiteProfileConfig["filterKeys"] = {
 	kvartiry: ["rooms", "district", "price", "area"],
 	doma: ["district", "price", "area"],
 	uchastki: ["district", "price", "area"],
@@ -19,6 +19,31 @@ const defaultFacetWhitelist: ProjectSiteProfileConfig["facetWhitelist"] = {
 	novostroyki: ["district", "developer", "completionYear"],
 	"kottedzhnye-poselki": ["district", "developer"],
 };
+
+function defaultSeoFacets(
+	geos: ProjectSiteProfileConfig["geos"],
+): ProjectSiteProfileConfig["seoFacets"] {
+	return {
+		...(geos.primorsk
+			? {
+					dvukhkomnatnye: {
+						geo: "primorsk",
+						category: "kvartiry" as const,
+						filter: { key: "rooms", value: [2] },
+					},
+				}
+			: {}),
+		...(geos.zarechnyy
+			? {
+					odnokomnatnye: {
+						geo: "zarechnyy",
+						category: "kvartiry" as const,
+						filter: { key: "rooms", value: [1] },
+					},
+				}
+			: {}),
+	};
+}
 
 const defaultStaticRoutes: ProjectSiteProfileConfig["staticRoutes"] = [
 	{ path: "/", changeFrequency: "daily", priority: 1, indexable: true },
@@ -169,7 +194,8 @@ export function createPresetSiteProfileConfig(input: {
 			root: input.preset === "SECONDARY_FIRST" ? "NOINDEX_AUTO" : "ACTIVE",
 			byGeo: developersByGeo,
 		},
-		facetWhitelist: defaultFacetWhitelist,
+		filterKeys: defaultFilterKeys,
+		seoFacets: defaultSeoFacets(input.geos),
 		seoTiers: {
 			metric: "searchDemand",
 			snapshotDate: "2026-09-24",

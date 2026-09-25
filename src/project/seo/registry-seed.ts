@@ -1,4 +1,5 @@
 import type { PageKey } from "../../core/routing/index.ts";
+import { fixtureDistrictRouteRegistryFor } from "../../fixture/route-registries.ts";
 import {
 	assertSeoRegistry,
 	renderSeoTemplate,
@@ -10,7 +11,10 @@ import { starterFixtureDataset } from "../fixture-data/starter-dataset.ts";
 import { siteProfileFixtures } from "../site-profile.ts";
 import { createProjectUrlGrammar } from "../url-grammar.ts";
 
-const grammar = createProjectUrlGrammar(siteProfileFixtures.multiGeo);
+const grammar = createProjectUrlGrammar(
+	siteProfileFixtures.multiGeo,
+	fixtureDistrictRouteRegistryFor(siteProfileFixtures.multiGeo),
+);
 const snapshotDate = starterFixtureDataset.identity.snapshotAt.slice(0, 10);
 const primaryCity = starterFixtureDataset.cities[0];
 const primaryDistrict = primaryCity.districts[0];

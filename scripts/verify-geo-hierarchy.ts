@@ -37,11 +37,7 @@ assert.throws(() =>
 	assertSlugOutsideNamespace("novostroyki", reservedGeoRootSlugs, "City"),
 );
 assert.throws(() =>
-	assertSlugOutsideNamespace(
-		"dvukhkomnatnye",
-		reservedDistrictSlugs,
-		"District",
-	),
+	assertSlugOutsideNamespace("api", reservedDistrictSlugs, "District"),
 );
 
 assert.doesNotThrow(() =>

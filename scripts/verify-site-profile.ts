@@ -46,6 +46,8 @@ const ownedFields = [
 	"geoCategoryStatus",
 	"marketStatus",
 	"developersSurface",
+	"filterKeys",
+	"seoFacets",
 	"seoTiers",
 	"gate",
 	"staticRoutes",
@@ -137,6 +139,25 @@ expectInvalid(
 	(profile) => {
 		const geos = profile.geos as Record<string, { agglomerationOf?: string }>;
 		geos.zarechnyy.agglomerationOf = "zarechnyy";
+	},
+);
+expectInvalid(
+	"SEO facet geo must exist",
+	["seoFacets", "dvukhkomnatnye", "geo"],
+	(profile) => {
+		const facets = profile.seoFacets as Record<string, { geo: string }>;
+		facets.dvukhkomnatnye.geo = "missing";
+	},
+);
+expectInvalid(
+	"SEO facet filter key must be enabled",
+	["seoFacets", "dvukhkomnatnye", "filter", "key"],
+	(profile) => {
+		const facets = profile.seoFacets as Record<
+			string,
+			{ filter: { key: string } }
+		>;
+		facets.dvukhkomnatnye.filter.key = "developer";
 	},
 );
 expectInvalid(

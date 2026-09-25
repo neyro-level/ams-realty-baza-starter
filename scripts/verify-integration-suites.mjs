@@ -31,6 +31,7 @@ import {
 	prepareIntegrationDatabase,
 	proveGeoHierarchyMigration,
 	proveDevelopmentsMigration,
+	proveDistrictRouteCategoriesMigration,
 	proveLeadDeliveryRelationalMigration,
 	proveLeadContextMigration,
 	provePayloadAuthSecurityMigration,
@@ -282,6 +283,8 @@ await prepareIntegrationDatabase(preferredUri);
 proveDevelopmentsMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
 proveLeadContextMigration(preferredUri);
+await prepareIntegrationDatabase(preferredUri);
+proveDistrictRouteCategoriesMigration(preferredUri);
 const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {

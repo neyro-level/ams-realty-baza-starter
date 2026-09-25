@@ -18,9 +18,13 @@ import type { ContentGateDecision } from "../core/seo/content-gate.ts";
 import { starterFixtureDataset } from "../project/fixture-data/starter-dataset.ts";
 import { siteProfileFixtures } from "../project/site-profile.ts";
 import { createProjectUrlGrammar } from "../project/url-grammar.ts";
+import { fixtureDistrictRouteRegistry } from "./route-registries.ts";
 import { fixtureProperties } from "./provider.ts";
 
-const grammar = createProjectUrlGrammar(siteProfileFixtures.multiGeo);
+const grammar = createProjectUrlGrammar(
+	siteProfileFixtures.multiGeo,
+	fixtureDistrictRouteRegistry,
+);
 const navigation = createSafeNavigationBuilder({
 	profile: siteProfileFixtures.multiGeo,
 	grammar,

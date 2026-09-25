@@ -1,5 +1,8 @@
 import type { CollectionConfig } from "payload";
 import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
+import { invalidatePublicCache } from "../../core/cache/invalidator.ts";
+import { catalogSurfaceSlugs } from "../../core/profile/index.ts";
+import { runtimeEnv } from "../env.ts";
 import { geoReadAccess } from "../geo/access.ts";
 import { validateDistrictWrite } from "../geo/collection-guards.ts";
 import {
@@ -27,6 +30,26 @@ export const Districts: CollectionConfig = {
 				return validateDistrictWrite({ data, originalDoc, req });
 			},
 		],
+		afterChange: [
+			async () => {
+				await invalidatePublicCache({
+					baseUrl: runtimeEnv.INTERNAL_REVALIDATE_BASE_URL,
+					secret: runtimeEnv.REVALIDATE_SECRET,
+					targets: [{ type: "tag", tag: "registry" }],
+					reason: "district-registry-change",
+				});
+			},
+		],
+		afterDelete: [
+			async () => {
+				await invalidatePublicCache({
+					baseUrl: runtimeEnv.INTERNAL_REVALIDATE_BASE_URL,
+					secret: runtimeEnv.REVALIDATE_SECRET,
+					targets: [{ type: "tag", tag: "registry" }],
+					reason: "district-registry-delete",
+				});
+			},
+		],
 	},
 	fields: [
 		...createGeoIdentityFields(),
@@ -45,6 +68,18 @@ export const Districts: CollectionConfig = {
 			relationTo: "cities",
 			required: true,
 			index: true,
+		},
+		{
+			name: "categories",
+			type: "select",
+			hasMany: true,
+			required: true,
+			defaultValue: [...catalogSurfaceSlugs],
+			options: catalogSurfaceSlugs.map((value) => ({ label: value, value })),
+			admin: {
+				description:
+					"Public category routes where this published district may resolve.",
+			},
 		},
 		{
 			name: "parent",

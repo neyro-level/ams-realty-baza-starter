@@ -4,6 +4,10 @@ import config from "../../payload.config.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
 import { requirePayloadRuntime } from "../../src/project/env.ts";
 import { geoHierarchyFixtures } from "../../src/project/geo/fixtures.ts";
+import type { District } from "../../src/project/payload-types.ts";
+import { siteProfileFixtures } from "../../src/project/site-profile.ts";
+import { createProjectUrlGrammar } from "../../src/project/url-grammar.ts";
+import { readPublishedDistrictRouteRegistry } from "../../src/project/routing/district-registry.ts";
 
 requirePayloadRuntime();
 
@@ -76,6 +80,17 @@ const primaryDistrictFixture = primaryFixture.districts[0];
 const siblingDistrictFixture = primaryFixture.districts[1];
 const childDistrictFixture = primaryFixture.districts[2];
 const nearbyDistrictFixture = nearbyFixture.districts[0];
+const districtCategories: District["categories"] = [
+	"kvartiry",
+	"doma",
+	"uchastki",
+	"kommercheskaya-nedvizhimost",
+	"komnaty",
+	"garazhi",
+	"arenda",
+	"novostroyki",
+	"kottedzhnye-poselki",
+];
 const mutableDistrictFixture = <
 	T extends { synonyms: readonly { value: string }[] },
 >(
@@ -83,6 +98,7 @@ const mutableDistrictFixture = <
 ) => ({
 	...fixture,
 	synonyms: fixture.synonyms.map(({ value }) => ({ value })),
+	categories: [...districtCategories],
 });
 const primaryDistrict = await payload.create({
 	collection: "districts",
@@ -130,6 +146,58 @@ assert.equal(relationId(nearbyDistrict.city), String(nearby.id));
 assert.equal(relationId(childDistrict.parent), String(siblingDistrict.id));
 assert.equal(primaryDistrict.parent, null);
 assert.equal(primaryDistrict.preposition, "na");
+
+const draftRouteDistrict = await payload.create({
+	collection: "districts",
+	data: {
+		...mutableDistrictFixture(primaryDistrictFixture),
+		slug: "novyy",
+		title: "Новый район",
+		synonyms: [{ value: "Новый" }],
+		morphology: {
+			nominative: "Новый район",
+			genitive: "Нового района",
+			prepositional: "Новом районе",
+		},
+		city: primary.id,
+		categories: ["doma"],
+		status: "draft",
+		publishedAt: null,
+	},
+	...access,
+});
+const beforePublication = await readPublishedDistrictRouteRegistry(
+	payload,
+	siteProfileFixtures.multiGeo,
+);
+assert.ok(!beforePublication.primorsk?.doma?.includes("novyy"));
+await payload.update({
+	collection: "districts",
+	id: draftRouteDistrict.id,
+	data: { status: "published", publishedAt: now },
+	...access,
+});
+const afterInvalidation = await readPublishedDistrictRouteRegistry(
+	payload,
+	siteProfileFixtures.multiGeo,
+);
+assert.ok(afterInvalidation.primorsk?.doma?.includes("novyy"));
+assert.ok(!afterInvalidation.primorsk?.kvartiry?.includes("novyy"));
+const dataDrivenGrammar = createProjectUrlGrammar(
+	siteProfileFixtures.multiGeo,
+	afterInvalidation,
+);
+assert.deepEqual(dataDrivenGrammar.parseUrl("/primorsk/doma/novyy/"), {
+	kind: "categoryGeoDistrict",
+	geo: "primorsk",
+	category: "doma",
+	district: "novyy",
+});
+assert.equal(dataDrivenGrammar.parseUrl("/primorsk/kvartiry/novyy/"), null);
+assert.equal(
+	dataDrivenGrammar.parseUrl("/primorsk/kvartiry/unknown-facet/"),
+	null,
+);
 
 await payload.update({
 	collection: "districts",
@@ -213,11 +281,12 @@ await assert.rejects(
 				morphologyApproved: true,
 				sortOrder: 99,
 				city: primary.id,
+				categories: ["kvartiry"],
 				status: "draft",
 			},
 			...access,
 		}),
-	/reserved namespace/i,
+	/SEO facet/i,
 );
 await assert.rejects(
 	() =>
@@ -292,7 +361,7 @@ const districtCount = await payload.count({
 	...access,
 });
 assert.equal(cityCount.totalDocs, 3);
-assert.equal(districtCount.totalDocs, 4);
+assert.equal(districtCount.totalDocs, 5);
 
 await payload.destroy();
 console.log("geo integration suites: ok");

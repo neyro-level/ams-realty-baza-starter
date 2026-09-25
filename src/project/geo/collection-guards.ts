@@ -11,7 +11,6 @@ import {
 } from "../../core/geo/hierarchy.ts";
 import {
 	catalogSurfaceSlugs,
-	type SiteProfile,
 } from "../../core/profile/index.ts";
 import {
 	isPlatformReservedRoot,
@@ -19,7 +18,6 @@ import {
 } from "../../core/routing/url-grammar.ts";
 import { siteProfile } from "../site-profile.ts";
 import { projectStaticRoutes } from "../static-routes.ts";
-import { projectFacetSlugFixtures } from "../url-grammar.ts";
 import { geoValidationContext } from "./access.ts";
 
 type GeoData = Record<string, unknown>;
@@ -50,20 +48,7 @@ export const reservedGeoRootSlugs = new Set<string>([
 	...configuredReservedRoots,
 ]);
 
-function profileFacetSlugs(profile: SiteProfile): Set<string> {
-	return new Set(
-		Object.values(profile.facetWhitelist)
-			.flat()
-			.map((slug) => slug.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()),
-	);
-}
-
-export const reservedDistrictSlugs = profileFacetSlugs(siteProfile);
-for (const byCategory of Object.values(projectFacetSlugFixtures)) {
-	for (const slugs of Object.values(byCategory)) {
-		for (const slug of slugs) reservedDistrictSlugs.add(slug);
-	}
-}
+export const reservedDistrictSlugs = new Set<string>(reservedGeoRootSlugs);
 
 function mergedValue(
 	data: GeoData,
@@ -219,6 +204,39 @@ export async function validateDistrictWrite(input: {
 	assertSlugOutsideNamespace(slug, reservedDistrictSlugs, "District");
 	const cityId = relationId(mergedValue(input.data, input.originalDoc, "city"));
 	if (!cityId) throw new Error("District city is required.");
+	const categories = mergedValue(input.data, input.originalDoc, "categories");
+	if (
+		!Array.isArray(categories) ||
+		categories.length === 0 ||
+		categories.some(
+			(category) =>
+				typeof category !== "string" ||
+				!(catalogSurfaceSlugs as readonly string[]).includes(category),
+		)
+	) {
+		throw new Error(
+			"District categories must contain configured catalog surfaces.",
+		);
+	}
+	const city = await input.req.payload.findByID({
+		collection: "cities",
+		id: cityId,
+		depth: 0,
+		overrideAccess: false,
+		req: input.req,
+		context: geoValidationContext(input.req),
+	});
+	const facetCollision = Object.entries(siteProfile.seoFacets).find(
+		([facetSlug, facet]) =>
+			facetSlug === slug &&
+			facet.geo === city.slug &&
+			categories.includes(facet.category),
+	);
+	if (facetCollision) {
+		throw new Error(
+			`District slug collides with an SEO facet in this geo/category: ${slug}.`,
+		);
+	}
 	const currentId =
 		input.originalDoc?.id == null ? null : String(input.originalDoc.id);
 	const parentId = relationId(

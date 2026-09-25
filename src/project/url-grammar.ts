@@ -5,38 +5,24 @@ import {
 import type { SiteProfile } from "../core/profile/index.ts";
 import { projectStaticRoutes } from "./static-routes.ts";
 
-export const projectDistrictSlugFixtures = {
-	primorsk: ["severnyy"],
-	zarechnyy: ["tsentralnyy"],
-} as const;
+export type ProjectDistrictRouteRegistry = NonNullable<
+	UrlGrammarInput["districtSlugsByGeoCategory"]
+>;
 
-export const projectFacetSlugFixtures = {
-	primorsk: {
-		kvartiry: ["dvukhkomnatnye"],
-		doma: ["s-gazom"],
-	},
-	zarechnyy: {
-		kvartiry: ["odnokomnatnye"],
-	},
-} as const;
-
-export function createProjectUrlGrammar(profile: SiteProfile) {
+export function createProjectUrlGrammar(
+	profile: SiteProfile,
+	districtSlugsByGeoCategory: ProjectDistrictRouteRegistry = {},
+) {
 	const geoSlugs = Object.keys(profile.geos);
-	const districtSlugsByGeo = Object.fromEntries(
-		geoSlugs.map((geo) => [
-			geo,
-			projectDistrictSlugFixtures[
-				geo as keyof typeof projectDistrictSlugFixtures
-			] ?? [],
-		]),
-	) as UrlGrammarInput["districtSlugsByGeo"];
-	const facetSlugsByGeoCategory = Object.fromEntries(
-		geoSlugs.map((geo) => [
-			geo,
-			projectFacetSlugFixtures[geo as keyof typeof projectFacetSlugFixtures] ??
-				{},
-		]),
-	) as UrlGrammarInput["facetSlugsByGeoCategory"];
+	const facetSlugsByGeoCategory: Record<string, Record<string, string[]>> = {};
+	for (const [slug, facet] of Object.entries(profile.seoFacets)) {
+		if (!facetSlugsByGeoCategory[facet.geo]) {
+			facetSlugsByGeoCategory[facet.geo] = {};
+		}
+		const byCategory = facetSlugsByGeoCategory[facet.geo];
+		if (!byCategory[facet.category]) byCategory[facet.category] = [];
+		byCategory[facet.category].push(slug);
+	}
 
 	return createUrlGrammar({
 		geoSlugs,
@@ -46,7 +32,7 @@ export function createProjectUrlGrammar(profile: SiteProfile) {
 		moduleRootSlugs: Object.values(profile.modules).flatMap(
 			(module) => module.reservedRoots,
 		),
-		districtSlugsByGeo,
+		districtSlugsByGeoCategory,
 		facetSlugsByGeoCategory,
 	});
 }

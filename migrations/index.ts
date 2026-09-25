@@ -17,6 +17,7 @@ import * as migration_20260924_203000_lifecycle_cache from "./20260924_203000_li
 import * as migration_20260924_213000_feed_media_mirror from "./20260924_213000_feed_media_mirror";
 import * as migration_20260924_223000_development_excel from "./20260924_223000_development_excel";
 import * as migration_20260924_233000_lead_context from "./20260924_233000_lead_context";
+import * as migration_20260925_140000_district_route_categories from "./20260925_140000_district_route_categories";
 
 export const migrations = [
 	{
@@ -113,5 +114,10 @@ export const migrations = [
 		up: migration_20260924_233000_lead_context.up,
 		down: migration_20260924_233000_lead_context.down,
 		name: "20260924_233000_lead_context",
+	},
+	{
+		up: migration_20260925_140000_district_route_categories.up,
+		down: migration_20260925_140000_district_route_categories.down,
+		name: "20260925_140000_district_route_categories",
 	},
 ];

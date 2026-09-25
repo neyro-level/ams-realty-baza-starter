@@ -2,10 +2,14 @@ import assert from "node:assert/strict";
 import type { PageKeyDTO, PageLinkDTO } from "@ams/realtbase-contracts";
 import { geoCatalogContractFixtures } from "../src/fixture/geo-catalog.ts";
 import { fixtureProperties } from "../src/fixture/provider.ts";
+import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
-const grammar = createProjectUrlGrammar(siteProfileFixtures.multiGeo);
+const grammar = createProjectUrlGrammar(
+	siteProfileFixtures.multiGeo,
+	fixtureDistrictRouteRegistryFor(siteProfileFixtures.multiGeo),
+);
 const expectedHref = (pageKey: PageKeyDTO) => grammar.buildUrl(pageKey);
 const assertLink = (value: PageLinkDTO) => {
 	assert.equal(value.href, expectedHref(value.pageKey));

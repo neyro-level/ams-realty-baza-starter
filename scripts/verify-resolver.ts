@@ -8,9 +8,13 @@ import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { defineSiteProfile } from "../src/core/profile/index.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
+import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
 
 for (const [name, profile] of Object.entries(siteProfileFixtures)) {
-	const grammar = createProjectUrlGrammar(profile);
+	const grammar = createProjectUrlGrammar(
+		profile,
+		fixtureDistrictRouteRegistryFor(profile),
+	);
 	const primaryGeo = profile.primaryGeo;
 	const pages: { pageKey: PageKey; inventory?: number }[] = [
 		{ pageKey: { kind: "home" } },
@@ -44,7 +48,10 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 }
 
 const profile = siteProfileFixtures.multiGeo;
-const grammar = createProjectUrlGrammar(profile);
+const grammar = createProjectUrlGrammar(
+	profile,
+	fixtureDistrictRouteRegistryFor(profile),
+);
 const canonicalProperty = {
 	kind: "property",
 	category: "kvartiry",
@@ -160,7 +167,10 @@ assert.deepEqual(await resolver.resolvePath(grammar.buildUrl(lowInventory)), {
 const inactiveInput = structuredClone(siteProfileFixtures.multiGeo);
 inactiveInput.geos.zarechnyy.hubStatus = "OUT";
 const inactiveProfile = defineSiteProfile(inactiveInput);
-const inactiveGrammar = createProjectUrlGrammar(inactiveProfile);
+const inactiveGrammar = createProjectUrlGrammar(
+	inactiveProfile,
+	fixtureDistrictRouteRegistryFor(inactiveProfile),
+);
 const inactiveGeoKey = { kind: "geoHub", geo: "zarechnyy" } as const;
 const inactiveResolver = createRouteResolver({
 	profile: inactiveProfile,
@@ -176,7 +186,10 @@ assert.deepEqual(
 );
 
 const secondaryProfile = siteProfileFixtures.secondaryFirst;
-const secondaryGrammar = createProjectUrlGrammar(secondaryProfile);
+const secondaryGrammar = createProjectUrlGrammar(
+	secondaryProfile,
+	fixtureDistrictRouteRegistryFor(secondaryProfile),
+);
 const preparedOffKey = {
 	kind: "categoryGeo",
 	geo: "primorsk",
@@ -208,6 +221,15 @@ for (const forbidden of [
 		!resolverSource.includes(forbidden),
 		`resolver imports ${forbidden}`,
 	);
+}
+
+const proxySource = readFileSync("src/proxy.ts", "utf8");
+for (const forbidden of [
+	"district-registry",
+	'collection: "districts"',
+	"getCachedDistrictRouteRegistry",
+]) {
+	assert.ok(!proxySource.includes(forbidden), `proxy contains ${forbidden}`);
 }
 
 console.log(

@@ -6,6 +6,7 @@ import {
 	type PageKey,
 } from "../src/core/routing/index.ts";
 import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
+import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
@@ -43,7 +44,10 @@ for (const path of [
 let checked = 0;
 const timings: number[] = [];
 for (const profile of Object.values(siteProfileFixtures)) {
-	const grammar = createProjectUrlGrammar(profile);
+	const grammar = createProjectUrlGrammar(
+		profile,
+		fixtureDistrictRouteRegistryFor(profile),
+	);
 	const geo = profile.primaryGeo;
 	const pages: PageKey[] = [
 		{ kind: "home" },

@@ -9,6 +9,10 @@ import { catalogSurfaceSlugs } from "../src/core/profile/index.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { projectStaticRoutes } from "../src/project/static-routes.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
+import {
+	fixtureDistrictRouteRegistry,
+	fixtureDistrictRouteRegistryFor,
+} from "../src/fixture/route-registries.ts";
 
 function keysFor(geo: string): PageKey[] {
 	const keys: PageKey[] = [
@@ -57,7 +61,10 @@ function keysFor(geo: string): PageKey[] {
 }
 
 for (const [profileName, profile] of Object.entries(siteProfileFixtures)) {
-	const grammar = createProjectUrlGrammar(profile);
+	const grammar = createProjectUrlGrammar(
+		profile,
+		fixtureDistrictRouteRegistryFor(profile),
+	);
 	for (const geo of Object.keys(profile.geos)) {
 		for (const key of keysFor(geo)) {
 			const url = grammar.buildUrl(key);
@@ -98,7 +105,10 @@ for (const [profileName, profile] of Object.entries(siteProfileFixtures)) {
 	}
 }
 
-const grammar = createProjectUrlGrammar(siteProfileFixtures.multiGeo);
+const grammar = createProjectUrlGrammar(
+	siteProfileFixtures.multiGeo,
+	fixtureDistrictRouteRegistry,
+);
 const uppercase = grammar.parseUrl("/PRIMORSK/KVARTIRY");
 assert.deepEqual(uppercase, {
 	kind: "categoryGeo",
@@ -153,6 +163,29 @@ assert.throws(() =>
 	}),
 );
 assert.throws(() =>
+	createUrlGrammar({
+		geoSlugs: ["primorsk"],
+		staticPaths: ["/uslugi/"],
+		districtSlugsByGeoCategory: {
+			primorsk: { kvartiry: ["severnyy", "severnyy"] },
+		},
+	}),
+);
+assert.throws(() =>
+	createUrlGrammar({
+		geoSlugs: ["primorsk"],
+		staticPaths: ["/uslugi/"],
+		districtSlugsByGeoCategory: { primorsk: { kvartiry: ["api"] } },
+	}),
+);
+assert.throws(() =>
+	createUrlGrammar({
+		geoSlugs: ["primorsk"],
+		staticPaths: ["/uslugi/"],
+		facetSlugsByGeoCategory: { primorsk: { kvartiry: ["api"] } },
+	}),
+);
+assert.throws(() =>
 	createUrlGrammar({ geoSlugs: ["primorsk"], staticPaths: ["/kvartiry/"] }),
 );
 assert.throws(() =>
@@ -165,7 +198,9 @@ assert.throws(() =>
 	createUrlGrammar({
 		geoSlugs: ["primorsk"],
 		staticPaths: ["/uslugi/"],
-		districtSlugsByGeo: { primorsk: ["severnyy"] },
+		districtSlugsByGeoCategory: {
+			primorsk: { kvartiry: ["severnyy"] },
+		},
 		facetSlugsByGeoCategory: { primorsk: { kvartiry: ["severnyy"] } },
 	}),
 );

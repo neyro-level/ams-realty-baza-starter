@@ -13,7 +13,7 @@ Secrets source=Secret Master / self-hosted Infisical
 ```
 
 Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №8 v6
-исполнен полностью и остаётся evidence. Текущий execution source — Plan №9 v4
+исполнен полностью и остаётся evidence. Текущий execution source — Plan №9 v5
 `APPROVED`, импортированный в Task Manager. GitHub получает только отдельный
 явный fast-forward mirror canonical `main`. Production и target tag
 `starter-v2.1.0` остаются отдельными owner actions после исполнения Plan №9.
@@ -96,8 +96,11 @@ core/packages -X-> project
 новый каталог-владелец.
 
 Profile передаётся в reusable core явно. Validated project config полностью
-владеет geo/category/market/developer matrices, SEO tiers, Gate, static routes
-и module spaces; reusable core не подставляет client-specific defaults.
+владеет geo/category/market/developer matrices, `filterKeys`, `seoFacets`, SEO
+tiers, Gate, static routes и module spaces; reusable core не подставляет
+client-specific defaults. Опубликованные Payload districts формируют
+кэшируемый registry по `geo×category`; invalidation идёт через tag `registry`,
+а `proxy.ts` не выполняет district DB reads.
 Project-owned static routes, brand, domain, city literals и будущий literal
 denylist не переходят в core/packages.
 Payload остаётся единственным schema/auth/Admin owner; public reads продолжают
