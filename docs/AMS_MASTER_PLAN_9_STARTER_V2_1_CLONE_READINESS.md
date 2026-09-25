@@ -2,8 +2,10 @@
 
 Plan ID: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9
 Version: v5
-Status: READY_FOR_OWNER_APPROVAL
-Phase: FINAL_AUDIT
+Status: APPROVED
+Phase: APPROVAL_HANDOFF
+Approved by: owner
+Approved at: 2026-09-25T14:44:24+03:00
 Baseline: SourceCraft `main@6671b0f0c2ceaf62749cc3b6b78b591c6fe51ed6`
 Owner input: `STARTER v2.1 — готовность к клонам`, received 2026-09-25
 Delivery profile: `COMMERCIAL`
@@ -15,8 +17,8 @@ Production authorization: `NONE`
 Plan №9 прошёл финальный аудит. Exact v4 был утверждён и импортирован, S0
 implementation закрыт с evidence, но delivery preflight остановился до PR на
 whitespace findings полного branch diff. v5 нормализует только whitespace
-source/inventory и требует approval перед versioned Task Manager Upgrade;
-production остаётся запрещён.
+source/inventory. Exact v5 утверждён владельцем; versioned Task Manager Upgrade
+разрешён, production остаётся запрещён.
 
 ## 1. Primary goal и границы
 
@@ -689,7 +691,8 @@ approved execution policy rather than merely improve the graph.
 - Delivery state: no PR, Gate or merge was started; v4 graph pauses at
   `ams9-task-s0-delivery` until an approved v5 Upgrade reconciles cleanly.
 - Exact-v5 four-pass audit: `PASS`; blockers/major/open owner decisions = `0/0/0`.
-- Resulting version: `v5 READY_FOR_OWNER_APPROVAL`.
+- Owner approval: exact v5 approved on 2026-09-25; versioned Upgrade authorized.
+- Resulting version: `v5 APPROVED`.
 
 | Version | Date | Status | Input | Result |
 |---|---|---|---|---|
@@ -698,15 +701,15 @@ approved execution policy rather than merely improve the graph.
 | v2 | 2026-09-25 | REVIEW | MP9-R2 owner decisions | Self-contained scope; registry path and S10 split fixed; zero before-approval decisions; final audit not started |
 | v3 | 2026-09-25 | APPROVED | MP9-R3 final four-pass audit + explicit owner approval | Exact approved execution source; READY_WITH_LIMITS only because delivery is intentionally serial |
 | v4 | 2026-09-25 | APPROVED | MP9-R4 importer metadata compatibility + explicit owner approval | Exact approved execution source; handoff authorized |
-| v5 | 2026-09-25 | READY_FOR_OWNER_APPROVAL | MP9-R5 whitespace-only delivery correction | No scope change; versioned Upgrade requires exact owner approval |
+| v5 | 2026-09-25 | APPROVED | MP9-R5 whitespace-only delivery correction + explicit owner approval | No scope change; versioned Upgrade authorized |
 
 ## 10. Current handoff state
 
 ```text
-Plan: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9 v5 READY_FOR_OWNER_APPROVAL
-Phase: FINAL_AUDIT
-Task Manager: v4 graph paused at ams9-task-s0-delivery; v5 Upgrade NOT ALLOWED
-Developer handoff: PAUSED BEFORE PR/GATE
+Plan: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9 v5 APPROVED
+Phase: APPROVAL_HANDOFF
+Task Manager: v4 graph paused at ams9-task-s0-delivery; v5 Upgrade AUTHORIZED
+Developer handoff: RESUME AFTER CLEAN UPGRADE
 Production: NOT AUTHORIZED
-Next: exact owner phrase «План утверждён» or «План утвержден» for v5
+Next: apply versioned v4 -> v5 Upgrade, reconcile CLEAN, resume S0 delivery
 ```

@@ -1,9 +1,9 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 9 V5 READY FOR OWNER APPROVAL`. SourceCraft — primary,
+Статус: `ACTIVE / PLAN 9 V5 APPROVED / UPGRADE HANDOFF`. SourceCraft — primary,
 GitHub — одностороннее зеркало. Plan №9 находится в
-`v5 READY_FOR_OWNER_APPROVAL`; v4 graph paused перед S0 PR из-за whitespace-only
-source drift. Текущие приоритеты принадлежат
+`v5 APPROVED`; v4 graph paused перед S0 PR из-за whitespace-only source drift,
+versioned Upgrade разрешён. Текущие приоритеты принадлежат
 `04_BACKLOG.md`.
 
 ## Source of Truth
@@ -26,9 +26,9 @@ source drift. Текущие приоритеты принадлежат
 ## Активное планирование
 
 - `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — единственная текущая
-  основа master plan, `v5 READY_FOR_OWNER_APPROVAL / FINAL_AUDIT`.
-- Exact v5 нельзя применять через Task Manager Upgrade до повторного owner
-  approval; production и S15 не разрешены.
+  основа master plan, `v5 APPROVED / APPROVAL_HANDOFF`.
+- Exact v5 разрешено применить через versioned Task Manager Upgrade;
+  production и S15 не разрешены.
 
 `package.json`, код, migrations и конфигурация остаются runtime truth. Если они
 расходятся с документами, drift фиксируется и исправляется отдельной задачей;

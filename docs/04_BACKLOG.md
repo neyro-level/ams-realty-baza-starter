@@ -1,6 +1,6 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 9 V5 READY FOR OWNER APPROVAL / EXECUTION PAUSED`.
+Статус: `ACTIVE / PLAN 9 V5 APPROVED / UPGRADE HANDOFF`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
@@ -9,8 +9,9 @@ READY или in-progress задач. Завершённые планы и invent
 Plan №9 `STARTER v2.1 / CLONE READINESS` прошёл финальный аудит. v4 graph был
 импортирован, S0 implementation закрыт, но delivery остановлен до PR из-за
 whitespace-only findings полного diff. v5 в
-`AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` требует повторного owner
-approval и versioned Upgrade; production не разрешён.
+`AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` утверждён владельцем;
+versioned Upgrade разрешён, после CLEAN reconcile delivery возобновляется.
+Production не разрешён.
 
 ## NOW
 
