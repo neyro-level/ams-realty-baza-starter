@@ -1,10 +1,11 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 9 V6 APPROVED / UPGRADE HANDOFF`. SourceCraft — primary,
-GitHub — одностороннее зеркало. Approved v5 исполнен до S6; graph остановлен
-перед S7 code writes. v6 пересобирает S7-S14 в пять delivery batches и не
-передаётся в Developer после CLEAN versioned Upgrade. Текущие
-приоритеты принадлежат `04_BACKLOG.md`.
+Статус: `ACTIVE / PLAN 9 V6 S0-S14 EXECUTION COMPLETE / PRE-S15 OWNER GATE`.
+SourceCraft — primary, GitHub — одностороннее зеркало. Exact v6 исполнен через
+пять approved delivery batches; canonical result —
+`main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`. Task Manager закрыт `48/48`,
+без READY/open/in-progress задач. Текущие owner gates принадлежат
+`04_BACKLOG.md`.
 
 ## Source of Truth
 
@@ -25,10 +26,10 @@ GitHub — одностороннее зеркало. Approved v5 исполне
 
 ## Активное планирование
 
-- `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — единственная текущая
-  основа master plan, `v6 APPROVED / APPROVAL_HANDOFF`.
-- Exact-v6 разрешает stable-ID Task Manager Upgrade и Developer implementation;
-  production и S15 не разрешены.
+- `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — exact approved source
+  исполненного scope S0-S14, `v6 APPROVED / EXECUTION_COMPLETE`.
+- S15, tag, mirror и production не входят в завершённый Developer graph и
+  требуют отдельной явной команды владельца.
 
 `package.json`, код, migrations и конфигурация остаются runtime truth. Если они
 расходятся с документами, drift фиксируется и исправляется отдельной задачей;
@@ -48,6 +49,9 @@ GitHub — одностороннее зеркало. Approved v5 исполне
   implementation: `bd570ee40db9e25f73a24013be836dd3876282ac`; docs-only
   reconciliation: SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
 - `plan8/` — evidence задач Plan №8; не очередь к повторному исполнению.
+- `evidence/plan9/` и локальные Task Manager ledger — evidence Plan №9;
+  canonical delivery result — SourceCraft
+  `main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`.
 - `proofs/` — проверки и аудиты на конкретных исторических SHA. Они не
   доказывают текущее production-состояние без нового запуска.
 - `legacy/plans/` и `legacy/orchestration/` — завершённые планы №6–8 и их
@@ -55,6 +59,6 @@ GitHub — одностороннее зеркало. Approved v5 исполне
 - `legacy/` — более ранние планы, архитектура и материалы; не нормативный слой.
 - `research/ATLAS_BASELINE.md` — provenance визуального donor.
 
-Production, target tag `starter-v2.1.0` и client clone остаются отдельными owner
-actions после исполнения и приёмки Plan №9. Наличие demo-контура не равно
-актуальному release proof.
+Production, target tag `starter-v2.1.0`, mirror и client clone остаются
+отдельными owner actions S15. Наличие завершённого implementation scope или
+demo-контура не равно актуальному release proof.

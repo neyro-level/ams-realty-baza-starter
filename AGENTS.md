@@ -7,16 +7,17 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Последняя исполненная программа Plan №8 v6 сохранена как evidence:
+- Plan №8 v6 сохранён как historical evidence:
   `docs/plan8/S8_25_FINAL_EXECUTION_REPORT.md`. Принятый implementation SHA —
   `bd570ee40db9e25f73a24013be836dd3876282ac`; docs-only reconciliation слит в
   SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
-- Единственная текущая planning basis —
+- Текущий execution source —
   `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`, Plan №9 v6
-  `APPROVED`. Approved v5 исполнен до S6; его graph остановлен
-  перед S7 code writes. v6 объединяет оставшиеся S7-S14 в пять delivery batches
-  и передаётся в Developer только после CLEAN versioned Upgrade.
-  Production и S15 остаются owner/release gate; `.beads` не коммитится.
+  `APPROVED`. S0-S14 исполнены через 12 SourceCraft PR/Gate/merge cycles;
+  canonical result —
+  `main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`. Локальный Task Manager
+  закрыт `48/48`, без READY/open/in-progress задач. Production, tag, mirror и
+  S15 остаются отдельным owner/release gate; `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
@@ -39,7 +40,8 @@
   №9 v6 один stream равен approved delivery batch; constituent epic tasks внутри
   batch используют тот же worktree и сохраняют отдельные evidence checkpoints.
 - Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
-- Планы №6–8 исполнены и не являются очередью работ. Существующий tag
+- Планы №6–8 и implementation scope Plan №9 S0-S14 исполнены и не являются
+  очередью работ. Существующий tag
   `starter-freeze` остаётся историческим. Целевой tag `starter-v2.1.0` может
   создаваться только после исполнения и финальной приёмки Plan №9 и по
   отдельной явной release-команде владельца; production также требует

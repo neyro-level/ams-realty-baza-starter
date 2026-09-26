@@ -6,9 +6,10 @@
 
 Plan №8 v6 исполнен. Переносимая geo-first catalog platform, P8-23A canonical
 route cutover и P8-23B cleanup находятся в текущем runtime. Канонический
-контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Approved Plan №9 v5 исполнен
-до S6; Plan №9 v6 `APPROVED` пересобирает S7-S14 в пять delivery batches и
-передаётся в Developer после CLEAN Upgrade. Production не выполнялся.
+контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Plan №9 v6 S0-S14 исполнен
+через approved delivery batches; canonical result — SourceCraft
+`main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, Task Manager `48/48` closed.
+S15, tag, mirror и production не выполнялись и остаются owner gates.
 
 ## Зафиксировано
 
@@ -67,6 +68,7 @@ route cutover и P8-23B cleanup находятся в текущем runtime. К
 | Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |
 | Development model | Одна `developments` entity с `kind = residential_complex | cottage_village` и strict kind-specific validation |
 | Plan 8 delivery | `EXECUTION_COMPLETE`; production, mirror и tag остаются отдельными owner actions |
+| Plan 9 delivery | S0-S14 `EXECUTION_COMPLETE` at SourceCraft `main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`; S15 excluded |
 | Target release tag | `starter-v2.1.0`; only after Plan №9 acceptance and a separate owner release command |
 
 ## Optional modules

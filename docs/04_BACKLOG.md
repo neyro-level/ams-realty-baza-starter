@@ -1,16 +1,15 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 9 V6 APPROVED / UPGRADE HANDOFF`.
+Статус: `ACTIVE / PLAN 9 V6 S0-S14 EXECUTION COMPLETE / PRE-S15 OWNER GATE`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
 `legacy/`; они не являются очередью к повторному исполнению.
 
-Approved Plan №9 v5 исполнен до S6 на canonical SourceCraft main. Перед S7 code
-writes владелец разрешил сократить оставшиеся delivery cycles. v6 в
-`AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` прошёл финальный audit и
-утверждён владельцем; S7-S14 сгруппированы в пять совместимых batches.
-Versioned Upgrade и Developer handoff разрешены; production не разрешён.
+Plan №9 v6 S0-S14 исполнен через approved delivery batches. Canonical result —
+SourceCraft `main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`; Task Manager закрыт
+`48/48`, без READY/open/in-progress задач. S15, tag, mirror и production не
+входили в Developer graph и не разрешены без отдельной команды владельца.
 
 ## NOW
 
@@ -22,8 +21,8 @@ Versioned Upgrade и Developer handoff разрешены; production не ра�
 
 ## NEXT — только по команде владельца
 
-- После исполнения и финальной приёмки Plan №9 создать immutable tag
-  `starter-v2.1.0` только по отдельной release-команде владельца.
+- Выполнить S15 preflight и создать immutable tag `starter-v2.1.0` только по
+  отдельной release-команде владельца.
 - Выполнить release starter demo на `start-baza.ams24.ru`, включая immutable
   artifact, rollout, live smoke и rollback point.
 - Начать client clone только из exact `starter-v2.1.0` и утверждённого preset.
@@ -44,6 +43,8 @@ Versioned Upgrade и Developer handoff разрешены; production не ра�
 - Plan №8: implementation `bd570ee40db9e25f73a24013be836dd3876282ac`,
   docs-only reconciliation `c5803cfbac5d2c1817451fdee6aa96e3b975934e`,
   итоговый отчёт `plan8/S8_25_FINAL_EXECUTION_REPORT.md`.
+- Plan №9: S0-S14 `EXECUTION_COMPLETE`; 12 SourceCraft PR/Gate/merge cycles;
+  canonical result `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`; S15 excluded.
 - Plan №7: завершённый исторический execution record.
 - Plans №2–6: закрытая история; не исполнять повторно без нового approved scope.
 
