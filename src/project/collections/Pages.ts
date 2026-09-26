@@ -1,8 +1,9 @@
 import type { CollectionConfig } from "payload";
-import { publicPageReadAccess } from "../data-access/public/access-mode.ts";
 import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
 import { isPlatformReservedRoot } from "../../core/routing/index.ts";
+import { publicPageReadAccess } from "../data-access/public/access-mode.ts";
 import { reservedGeoRootSlugs } from "../geo/collection-guards.ts";
+import { queuePageIndexNowTransition } from "../seo/page-indexnow-transition.ts";
 
 export const Pages: CollectionConfig = {
 	slug: "pages",
@@ -31,6 +32,12 @@ export const Pages: CollectionConfig = {
 				}
 				data.slug = slug;
 				return data;
+			},
+		],
+		afterChange: [
+			async ({ doc, previousDoc, req }) => {
+				await queuePageIndexNowTransition({ doc, previousDoc, req });
+				return doc;
 			},
 		],
 	},

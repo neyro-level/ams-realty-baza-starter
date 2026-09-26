@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import {
 	buildIndexNowKeyFile,
 	buildIndexNowRequest,
+	planIndexNowGateTransition,
 	planIndexNowJob,
 	planIndexNowRetry,
 } from "../src/core/seo/indexnow.ts";
+import { enqueueIndexNowGateTransition } from "../src/core/seo/indexnow-enqueue.ts";
 import { runIndexNowTask } from "../src/project/jobs/indexnow-task.ts";
 
 const origin = "https://example.test";
@@ -73,6 +75,121 @@ assert.throws(
 		}),
 	/belong/i,
 );
+
+const indexable = (canonical: string) => ({
+	canonical,
+	statusCode: 200 as const,
+	indexing: "index" as const,
+	indexNowEligible: true,
+});
+const hidden = (canonical: string, statusCode: 200 | 404 | 410 = 200) => ({
+	canonical,
+	statusCode,
+	indexing: "noindex" as const,
+	indexNowEligible: false,
+});
+const transitionMatrix = [
+	{
+		name: "publish",
+		previous: hidden("/page/", 404),
+		next: indexable("/page/"),
+		expected: ["https://example.test/page/"],
+	},
+	{
+		name: "archive",
+		previous: indexable("/page/"),
+		next: hidden("/page/"),
+		expected: ["https://example.test/page/"],
+	},
+	{
+		name: "canonical-move",
+		previous: indexable("/old/"),
+		next: indexable("/new/"),
+		expected: ["https://example.test/old/", "https://example.test/new/"],
+	},
+	{
+		name: "indexability-change",
+		previous: hidden("/page/"),
+		next: indexable("/page/"),
+		expected: ["https://example.test/page/"],
+	},
+] as const;
+for (const testCase of transitionMatrix) {
+	assert.deepEqual(
+		planIndexNowGateTransition(
+			{
+				eventId: testCase.name,
+				previous: testCase.previous,
+				next: testCase.next,
+			},
+			origin,
+		)?.urls,
+		[...testCase.expected],
+		testCase.name,
+	);
+}
+assert.equal(
+	planIndexNowGateTransition(
+		{
+			eventId: "unchanged",
+			previous: indexable("/page/"),
+			next: indexable("/page/"),
+		},
+		origin,
+	),
+	null,
+);
+assert.equal(
+	planIndexNowGateTransition(
+		{
+			eventId: "draft-create",
+			previous: null,
+			next: hidden("/draft/", 404),
+		},
+		origin,
+	),
+	null,
+);
+assert.throws(
+	() =>
+		planIndexNowGateTransition(
+			{
+				eventId: "foreign-transition",
+				previous: indexable("/old/"),
+				next: indexable("https://evil.test/new/"),
+			},
+			origin,
+		),
+	/belong/i,
+);
+
+const queuedKeys = new Set<string>();
+const queuedJobs: unknown[] = [];
+const enqueueInput = {
+	transition: {
+		eventId: "dedupe-1",
+		previous: hidden("/dedupe/", 404),
+		next: indexable("/dedupe/"),
+	},
+	publicOrigin: origin,
+	findExisting: async (concurrencyKey: string) =>
+		queuedKeys.has(concurrencyKey),
+	queue: async (job: unknown, concurrencyKey: string) => {
+		queuedKeys.add(concurrencyKey);
+		queuedJobs.push(job);
+		return { id: "job-1" };
+	},
+};
+assert.equal(
+	(await enqueueIndexNowGateTransition(enqueueInput)).status,
+	"queued",
+);
+assert.equal(
+	(await enqueueIndexNowGateTransition(enqueueInput)).status,
+	"duplicate",
+);
+assert.equal(queuedJobs.length, 1);
+assert.equal(JSON.stringify(queuedJobs).includes(fixtureKey), false);
 assert.deepEqual(
 	buildIndexNowKeyFile({ key: fixtureKey, pathname: `/${fixtureKey}.txt` }),
 	{

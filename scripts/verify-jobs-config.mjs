@@ -16,6 +16,18 @@ const tasksSource = readFileSync(
 	join(root, "src/project/jobs/tasks.ts"),
 	"utf8",
 );
+const lifecycleEventsSource = readFileSync(
+	join(root, "src/project/collections/LifecycleEvents.ts"),
+	"utf8",
+);
+const pagesSource = readFileSync(
+	join(root, "src/project/collections/Pages.ts"),
+	"utf8",
+);
+const indexNowEnqueueSource = readFileSync(
+	join(root, "src/project/jobs/indexnow-enqueue.ts"),
+	"utf8",
+);
 
 const expectedQueues = new Map([
 	[
@@ -45,7 +57,11 @@ const expectedQueues = new Map([
 	],
 	[
 		"index-now",
-		{ limit: 2, disableScheduling: true, programmaticTasks: ["submitIndexNow"] },
+		{
+			limit: 2,
+			disableScheduling: true,
+			programmaticTasks: ["submitIndexNow"],
+		},
 	],
 ]);
 const expectedTaskSlugs = new Set(
@@ -97,7 +113,9 @@ for (const [queue, expected] of expectedQueues) {
 
 	const triggers = new Set(registryEntries.map((item) => item.trigger));
 	if (triggers.size !== 1) {
-		throw new Error(`Queue "${queue}" must not mix static and programmatic tasks.`);
+		throw new Error(
+			`Queue "${queue}" must not mix static and programmatic tasks.`,
+		);
 	}
 	const expectedDisableScheduling = triggers.has("programmatic");
 	if (entry.disableScheduling !== expectedDisableScheduling) {
@@ -228,7 +246,10 @@ if (!payloadConfig.includes("enableConcurrencyControl: true")) {
 	throw new Error("Payload jobs must enable concurrency control.");
 }
 
-const architecture = readFileSync(join(root, "docs/03_ARCHITECTURE.md"), "utf8");
+const architecture = readFileSync(
+	join(root, "docs/03_ARCHITECTURE.md"),
+	"utf8",
+);
 for (const marker of [
 	"queue polling/execution",
 	`autoRun\` cron \`${expectedAutoRunTicker}`,
@@ -248,7 +269,9 @@ if (
 			"`",
 	).test(architecture)
 ) {
-	throw new Error("Architecture maintenance schedule contract marker is missing.");
+	throw new Error(
+		"Architecture maintenance schedule contract marker is missing.",
+	);
 }
 
 if (
@@ -291,6 +314,26 @@ if (!tasksSource.includes("runDeliverLeadTask")) {
 	throw new Error("deliverLead must call runDeliverLeadTask.");
 }
 
+if (!tasksSource.includes("runIndexNowTask")) {
+	throw new Error("submitIndexNow must call the isolated IndexNow worker.");
+}
+if (!lifecycleEventsSource.includes("queueLifecycleIndexNowEvent")) {
+	throw new Error("Lifecycle events must enqueue Gate-driven IndexNow work.");
+}
+if (!pagesSource.includes("queuePageIndexNowTransition")) {
+	throw new Error("CMS page indexability changes must enqueue IndexNow work.");
+}
+if (!indexNowEnqueueSource.includes("findPayloadJobByConcurrencyKey")) {
+	throw new Error("IndexNow enqueue must use durable event deduplication.");
+}
+if (
+	/fetch\s*\(/.test(lifecycleEventsSource + pagesSource + indexNowEnqueueSource)
+) {
+	throw new Error(
+		"IndexNow producers must not make external requests in hooks.",
+	);
+}
+
 if (!tasksSource.includes("retries: 0")) {
 	throw new Error("deliverLead platform retries must be 0.");
 }
@@ -299,7 +342,9 @@ if (!tasksSource.includes("invalidatePublicCache")) {
 	throw new Error("import-feed must use the canonical public cache facade.");
 }
 if (tasksSource.includes("postBatchedHttpRevalidate")) {
-	throw new Error("import-feed must not bypass the canonical public cache facade.");
+	throw new Error(
+		"import-feed must not bypass the canonical public cache facade.",
+	);
 }
 
 const revalidateRoute = readFileSync(
@@ -312,7 +357,9 @@ if (!revalidateRoute.includes("invalidateInProcessCacheTargets")) {
 	);
 }
 if (revalidateRoute.includes("invalidatePublicCache")) {
-	throw new Error("HTTP revalidate route must not recursively call the public HTTP facade.");
+	throw new Error(
+		"HTTP revalidate route must not recursively call the public HTTP facade.",
+	);
 }
 if (!revalidateRoute.includes("executeInternalRevalidation")) {
 	throw new Error(
@@ -353,7 +400,9 @@ if (!publicInvalidator.includes("postBatchedHttpRevalidate")) {
 	throw new Error("canonical public cache facade must use the HTTP adapter.");
 }
 if (publicInvalidator.includes("invalidateInProcessCacheTargets")) {
-	throw new Error("canonical public cache facade must not silently fall back in-process.");
+	throw new Error(
+		"canonical public cache facade must not silently fall back in-process.",
+	);
 }
 
 const routeExecutor = readFileSync(

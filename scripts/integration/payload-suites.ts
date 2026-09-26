@@ -896,6 +896,20 @@ await payload.create({
 	...access,
 });
 
+const titleOnlyPage = await payload.update({
+	collection: "pages",
+	id: publishedPage.id,
+	data: { title: "Published integration page, updated title" },
+	...access,
+});
+
+await payload.update({
+	collection: "pages",
+	id: publishedPage.id,
+	data: { seo: { ...titleOnlyPage.seo, noindex: true } },
+	...access,
+});
+
 const publicPage = await findPublicPage(
 	payload,
 	publishedPage.slug,

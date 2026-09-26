@@ -12,6 +12,19 @@ export type IndexNowJobInput = {
 	attempt: number;
 };
 
+export type IndexNowGateSnapshot = {
+	canonical: string;
+	statusCode: 200 | 301 | 404 | 410;
+	indexing: "index" | "noindex";
+	indexNowEligible: boolean;
+};
+
+export type IndexNowGateTransition = {
+	eventId: string;
+	previous?: IndexNowGateSnapshot | null;
+	next?: IndexNowGateSnapshot | null;
+};
+
 function publicOrigin(value: string): URL {
 	const parsed = new URL(value);
 	if (
@@ -69,6 +82,61 @@ export function planIndexNowJob(
 			: [event.url];
 	const urls = [...new Set(rawUrls.map((url) => sameOriginUrl(url, origin)))];
 	return { eventId: event.id, urls, attempt: 1 };
+}
+
+function gateSignature(snapshot: IndexNowGateSnapshot | null | undefined) {
+	return snapshot
+		? [
+				snapshot.canonical,
+				snapshot.statusCode,
+				snapshot.indexing,
+				snapshot.indexNowEligible,
+			].join("|")
+		: "missing";
+}
+
+export function planIndexNowGateTransition(
+	transition: IndexNowGateTransition,
+	publicOrigin: string,
+): IndexNowJobInput | null {
+	if (!transition.eventId.trim())
+		throw new Error("IndexNow event id is required.");
+	if (gateSignature(transition.previous) === gateSignature(transition.next)) {
+		return null;
+	}
+	const statusChangedOnKnownPage = Boolean(
+		transition.previous &&
+			transition.next &&
+			transition.previous.statusCode !== transition.next.statusCode &&
+			transition.previous.statusCode !== 404,
+	);
+	if (
+		!transition.previous?.indexNowEligible &&
+		!transition.next?.indexNowEligible &&
+		!statusChangedOnKnownPage
+	) {
+		return null;
+	}
+	const canonicals = [
+		transition.previous?.canonical,
+		transition.next?.canonical,
+	].filter((value): value is string => Boolean(value?.trim()));
+	if (canonicals.length === 0) return null;
+	return planIndexNowJob(
+		canonicals.length > 1
+			? {
+					id: transition.eventId,
+					kind: "canonical_move",
+					oldUrl: canonicals[0],
+					newUrl: canonicals[1],
+				}
+			: {
+					id: transition.eventId,
+					kind: "publish",
+					url: canonicals[0],
+				},
+		publicOrigin,
+	);
 }
 
 export function buildIndexNowRequest(input: {

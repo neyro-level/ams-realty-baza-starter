@@ -1,4 +1,5 @@
 export {
+	findPayloadJobByConcurrencyKey,
 	inspectPayloadJob,
 	listPayloadJobsByConcurrencyKey,
 } from "./inspect.ts";

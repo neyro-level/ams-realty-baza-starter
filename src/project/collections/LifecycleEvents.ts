@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { hasRole } from "../../core/access/roles.ts";
+import { queueLifecycleIndexNowEvent } from "../lifecycle/indexnow-transition.ts";
 
 function isLifecycleWriter(context: unknown): boolean {
 	return (
@@ -20,6 +21,14 @@ export const LifecycleEvents: CollectionConfig = {
 		read: ({ req }) => hasRole(req.user, ["owner", "admin"]),
 		update: () => false,
 		delete: () => false,
+	},
+	hooks: {
+		afterChange: [
+			async ({ doc, req }) => {
+				await queueLifecycleIndexNowEvent({ event: doc, req });
+				return doc;
+			},
+		],
 	},
 	fields: [
 		{

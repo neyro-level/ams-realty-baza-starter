@@ -19,6 +19,7 @@ import * as migration_20260924_223000_development_excel from "./20260924_223000_
 import * as migration_20260924_233000_lead_context from "./20260924_233000_lead_context";
 import * as migration_20260925_140000_district_route_categories from "./20260925_140000_district_route_categories";
 import * as migration_20260925_230000_development_model_v2 from "./20260925_230000_development_model_v2";
+import * as migration_20260926_092324_plan9_s10b_indexnow_jobs from "./20260926_092324_plan9_s10b_indexnow_jobs";
 
 export const migrations = [
 	{
@@ -125,5 +126,10 @@ export const migrations = [
 		up: migration_20260925_230000_development_model_v2.up,
 		down: migration_20260925_230000_development_model_v2.down,
 		name: "20260925_230000_development_model_v2",
+	},
+	{
+		up: migration_20260926_092324_plan9_s10b_indexnow_jobs.up,
+		down: migration_20260926_092324_plan9_s10b_indexnow_jobs.down,
+		name: "20260926_092324_plan9_s10b_indexnow_jobs",
 	},
 ];

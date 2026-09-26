@@ -29,11 +29,11 @@ import { startFixtureHttpServer } from "./integration/fixture-http-server.mjs";
 import { createMemoryFeedRepository } from "./integration/memory-feed-repository.mjs";
 import {
 	prepareIntegrationDatabase,
-	proveGeoHierarchyMigration,
 	proveDevelopmentsMigration,
 	proveDistrictRouteCategoriesMigration,
-	proveLeadDeliveryRelationalMigration,
+	proveGeoHierarchyMigration,
 	proveLeadContextMigration,
+	proveLeadDeliveryRelationalMigration,
 	provePayloadAuthSecurityMigration,
 	provePropertyGeoRefsMigration,
 	provePropertyIdentityMigration,
@@ -300,6 +300,7 @@ const childEnv = {
 	...process.env,
 	DATABASE_URI: testUri,
 	PAYLOAD_SECRET: testSecret,
+	NEXT_PUBLIC_SERVER_URL: "https://example.test",
 	PAYLOAD_DB_PUSH: "false",
 	JOBS_AUTORUN: "false",
 	AMS_ALLOW_TEST_DESTINATIONS: "true",
@@ -333,6 +334,34 @@ execFileSync(
 				.join(" "),
 		},
 	},
+);
+
+const pageIndexNowProof = psqlOnTest(
+	testUri,
+	`SELECT count(*) || '|' || count(DISTINCT j.concurrency_key) || '|' || count(*) FILTER (WHERE j.input->'urls'->>0 = 'https://example.test/' || p.slug || '/') FROM payload_jobs j JOIN pages p ON j.input->>'eventId' LIKE 'page:' || p.id || ':%' WHERE j.task_slug = 'submitIndexNow' AND p.slug LIKE 'integration-public-page-%'`,
+);
+assert.equal(
+	pageIndexNowProof,
+	"2|2|2",
+	"publish and indexability transitions must enqueue exactly two distinct same-origin IndexNow jobs while a title-only update stays silent",
+);
+const draftPageIndexNowJobs = psqlOnTest(
+	testUri,
+	`SELECT count(*) FROM payload_jobs j JOIN pages p ON j.input->>'eventId' LIKE 'page:' || p.id || ':%' WHERE j.task_slug = 'submitIndexNow' AND p.slug LIKE 'integration-draft-page-%'`,
+);
+assert.equal(
+	draftPageIndexNowJobs,
+	"0",
+	"draft page creation must not enqueue IndexNow",
+);
+const indexNowSecretLeakCount = psqlOnTest(
+	testUri,
+	`SELECT count(*) FROM payload_jobs WHERE task_slug = 'submitIndexNow' AND input::text LIKE '%Fixture-Key-2026%'`,
+);
+assert.equal(
+	indexNowSecretLeakCount,
+	"0",
+	"IndexNow job payloads must not persist the secret key",
 );
 
 execFileSync(
