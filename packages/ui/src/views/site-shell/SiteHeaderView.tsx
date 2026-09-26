@@ -27,6 +27,9 @@ type SiteHeaderViewProps = {
 	favoritesAction: ReactNode;
 	stickyCollectionAction: ReactNode;
 	catalogHref: string;
+	homeHref: string;
+	contactHref: string;
+	sellHref: string;
 	docked: boolean;
 	compactSticky: boolean;
 	propertyObjectPage: boolean;
@@ -64,6 +67,9 @@ export function SiteHeaderView(props: SiteHeaderViewProps) {
 		favoritesAction,
 		stickyCollectionAction,
 		catalogHref,
+		homeHref,
+		contactHref,
+		sellHref,
 		docked,
 		compactSticky,
 		propertyObjectPage,
@@ -139,7 +145,7 @@ export function SiteHeaderView(props: SiteHeaderViewProps) {
 					<div className={compactSticky ? "hidden h-full lg:block" : "h-full"}>
 						<div className="flex h-full items-center gap-3 lg:h-14 xl:gap-4">
 							<LinkRenderer
-								href="/"
+								href={homeHref}
 								ariaLabel={`${brandLabel} — на главную`}
 								className="flex shrink-0 items-center"
 								onClick={onCloseMobile}
@@ -164,7 +170,7 @@ export function SiteHeaderView(props: SiteHeaderViewProps) {
 									onReveal={onRevealPhone}
 								/>
 								<LinkRenderer
-									href="/kontakty"
+									href={contactHref}
 									className="inline-flex min-h-10 items-center gap-2 rounded-md px-2.5 transition hover:bg-[var(--background)] hover:text-[var(--accent)]"
 								>
 									<Building2
@@ -179,7 +185,7 @@ export function SiteHeaderView(props: SiteHeaderViewProps) {
 									{compareAction}
 									{favoritesAction}
 									<Button asChild className="ml-2 min-h-10 px-4 text-body">
-										<LinkRenderer href="/prodazha-nedvizhimosti">
+										<LinkRenderer href={sellHref}>
 											Продать квартиру
 										</LinkRenderer>
 									</Button>

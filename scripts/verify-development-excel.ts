@@ -85,6 +85,7 @@ const repository: DevelopmentExcelRepository = {
 	async recordIssue() {},
 	async finishImportRun() {},
 };
+const invalidations: string[][] = [];
 
 const dryRun = await importDevelopmentExcel({
 	buffer: fixture,
@@ -104,10 +105,14 @@ const applied = await importDevelopmentExcel({
 	mode: "apply",
 	now: new Date("2026-09-24T19:01:00.000Z"),
 	repository,
+	invalidateCache: async (targets) => {
+		invalidations.push(targets.map((target) => target.tag));
+	},
 });
 assert.equal(applied.created, 5);
 assert.equal(developers.size, 2);
 assert.equal(developments.size, 3);
+assert.deepEqual(invalidations, [["developments", "developers", "properties"]]);
 
 const repeated = await importDevelopmentExcel({
 	buffer: fixture,

@@ -10,6 +10,7 @@ import type {
 	PropertyDetailsDTO,
 } from "@ams/realtbase-contracts";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
 import {
 	createRouteResolver,
@@ -52,6 +53,7 @@ import {
 } from "@/project/routing/catalog-search-params";
 import { decidePage } from "@/project/routing/content-gate";
 import { getCachedDistrictRouteRegistry } from "@/project/routing/district-registry";
+import { publicGatewayCacheTags } from "@/project/routing/public-gateway-cache";
 import {
 	projectSeoCategoryLabel,
 	projectSeoMeta,
@@ -378,11 +380,10 @@ function listingInput(
 	};
 }
 
-export const resolveRuntimeRoute = cache(
-	async (
+async function resolveRuntimeRouteUncached(
 		pathname: string,
 		queryString = "",
-	): Promise<RuntimeRouteResolution> => {
+): Promise<RuntimeRouteResolution> {
 		const payload = await getOptionalPublicGatewayPayload();
 		if (!payload) {
 			return (siteConfig.projectKind as "starter-demo" | "client") === "client"
@@ -725,5 +726,26 @@ export const resolveRuntimeRoute = cache(
 					),
 				}
 			: resolution;
-	},
-);
+	}
+
+async function resolveRuntimeRoutePersisted(
+	pathname: string,
+	queryString = "",
+): Promise<RuntimeRouteResolution> {
+	const grammar = createProjectUrlGrammar(
+		siteProfile,
+		await getCachedDistrictRouteRegistry(),
+	);
+	const pageKey = grammar.parseUrl(pathname);
+	const cached = unstable_cache(
+		() => resolveRuntimeRouteUncached(pathname, queryString),
+		["public-gateway-route", pathname, queryString],
+		{
+			tags: publicGatewayCacheTags(pageKey),
+			revalidate: 3600,
+		},
+	);
+	return cached();
+}
+
+export const resolveRuntimeRoute = cache(resolveRuntimeRoutePersisted);

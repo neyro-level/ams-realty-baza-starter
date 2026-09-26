@@ -5,6 +5,10 @@ import {
 	findForbiddenProjectLiteralViolations,
 	findHrefLiteralReports,
 	findPackageBoundaryViolations,
+	configuredStaticRoutePaths,
+	configuredProjectGeoSlugs,
+	findStaticRouteParityViolations,
+	projectLiteralDenylist,
 	findUiPersistenceViolations,
 } from "./architecture-rules.mjs";
 import {
@@ -70,9 +74,17 @@ if (!existsSync(projectLiteralPolicyPath)) {
 	const projectLiteralPolicy = JSON.parse(
 		readFileSync(projectLiteralPolicyPath, "utf8"),
 	);
+	const siteProfileSource = readFileSync(
+		path.join(root, "src", "project", "site-profile.config.ts"),
+		"utf8",
+	);
+	const generatedDenylist = [
+		...projectLiteralDenylist(projectLiteralPolicy),
+		...configuredProjectGeoSlugs("src/project/site-profile.config.ts", siteProfileSource),
+	];
 	for (const violation of findForbiddenProjectLiteralViolations(
 		packageBoundaryEntries,
-		projectLiteralPolicy.cityBrandDomainDenylist ?? [],
+		generatedDenylist,
 	)) {
 		violations.push(violation);
 	}
@@ -86,16 +98,28 @@ if (!existsSync(projectLiteralPolicyPath)) {
 			content: readFileSync(file, "utf8"),
 		})),
 	);
-	if (projectLiteralPolicy.hrefLiteralMode === "enforce") {
-		violations.push(...hrefReports);
-	} else {
-		console.log(`architecture href literal report: ${hrefReports.length}`);
+	if (projectLiteralPolicy.hrefLiteralMode !== "enforce") {
+		violations.push("src/project/project-literals.json: hrefLiteralMode must be enforce");
 	}
+	violations.push(...hrefReports);
 }
 
 if (!existsSync(path.join(root, "src", "project", "static-routes.ts"))) {
 	violations.push(
 		"src/project/static-routes.ts: project static route owner is missing",
+	);
+}
+
+const siteProfileConfigPath = path.join(root, "src", "project", "site-profile.config.ts");
+if (existsSync(siteProfileConfigPath)) {
+	violations.push(
+		...findStaticRouteParityViolations(
+			filesUnder("src/app/(site)").map(relative),
+			configuredStaticRoutePaths(
+				"src/project/site-profile.config.ts",
+				readFileSync(siteProfileConfigPath, "utf8"),
+			),
+		),
 	);
 }
 

@@ -117,11 +117,32 @@ export function findForbiddenProjectLiteralViolations(entries, denylist) {
 	});
 }
 
+export function projectLiteralDenylist(policy) {
+	const identity = policy?.projectIdentity;
+	if (!identity || typeof identity !== "object") {
+		throw new Error("project literal policy must declare projectIdentity");
+	}
+	const groups = ["brands", "domains", "cities"];
+	const values = groups.flatMap((group) => {
+		const items = identity[group];
+		if (!Array.isArray(items) || items.some((item) => typeof item !== "string")) {
+			throw new Error(`project literal policy ${group} must be a string array`);
+		}
+		return items.map((item) => item.trim()).filter(Boolean);
+	});
+	return [...new Set(values)];
+}
+
 export function findHrefLiteralReports(entries) {
 	const reports = [];
 	for (const { name, content } of entries) {
 		const file = normalize(name);
+		if (!file.startsWith("packages/ui/")) continue;
 		const visit = (node) => {
+			const reportValue = (value) => {
+				if (value.startsWith("#") || /^(?:mailto|tel|https?):/.test(value)) return;
+				reports.push(`${file}: JSX/object href literal`);
+			};
 			if (
 				ts.isJsxAttribute(node) &&
 				node.name.text === "href" &&
@@ -131,7 +152,11 @@ export function findHrefLiteralReports(entries) {
 							node.initializer.expression &&
 							ts.isStringLiteralLike(node.initializer.expression))))
 			) {
-				reports.push(`${file}: JSX href literal`);
+				const initializer = node.initializer;
+				const value = ts.isStringLiteral(initializer)
+					? initializer.text
+					: initializer.expression.text;
+				reportValue(value);
 			}
 			if (
 				ts.isPropertyAssignment(node) &&
@@ -139,13 +164,98 @@ export function findHrefLiteralReports(entries) {
 					(ts.isStringLiteral(node.name) && node.name.text === "href")) &&
 				ts.isStringLiteralLike(node.initializer)
 			) {
-				reports.push(`${file}: object href literal`);
+				reportValue(node.initializer.text);
 			}
 			ts.forEachChild(node, visit);
 		};
 		visit(sourceFile(file, content));
 	}
 	return reports;
+}
+
+export function configuredStaticRoutePaths(name, content) {
+	const paths = [];
+	const visit = (node) => {
+		if (
+			ts.isPropertyAssignment(node) &&
+			((ts.isIdentifier(node.name) && node.name.text === "staticRoutes") ||
+				(ts.isStringLiteral(node.name) && node.name.text === "staticRoutes")) &&
+			ts.isArrayLiteralExpression(node.initializer)
+		) {
+			for (const element of node.initializer.elements) {
+				if (!ts.isObjectLiteralExpression(element)) continue;
+				const pathProperty = element.properties.find(
+					(property) =>
+						ts.isPropertyAssignment(property) &&
+						((ts.isIdentifier(property.name) && property.name.text === "path") ||
+							(ts.isStringLiteral(property.name) && property.name.text === "path")),
+				);
+				if (
+					pathProperty &&
+					ts.isPropertyAssignment(pathProperty) &&
+					ts.isStringLiteralLike(pathProperty.initializer)
+				) {
+					paths.push(pathProperty.initializer.text);
+				}
+			}
+		}
+		ts.forEachChild(node, visit);
+	};
+	visit(sourceFile(name, content));
+	return [...new Set(paths)];
+}
+
+export function configuredProjectGeoSlugs(name, content) {
+	const values = [];
+	const visit = (node) => {
+		if (
+			ts.isPropertyAssignment(node) &&
+			((ts.isIdentifier(node.name) && node.name.text === "geos") ||
+				(ts.isStringLiteral(node.name) && node.name.text === "geos")) &&
+			ts.isObjectLiteralExpression(node.initializer)
+		) {
+			for (const property of node.initializer.properties) {
+				if (ts.isPropertyAssignment(property)) {
+					const value = ts.isIdentifier(property.name)
+						? property.name.text
+						: ts.isStringLiteral(property.name)
+							? property.name.text
+							: null;
+					if (value) values.push(value);
+				}
+			}
+		}
+		ts.forEachChild(node, visit);
+	};
+	visit(sourceFile(name, content));
+	return [...new Set(values)];
+}
+
+export function findStaticRouteParityViolations(routeFiles, configuredPaths) {
+	const normalizedConfigured = new Set(
+		configuredPaths.map((value) =>
+			value === "/" ? "/" : `/${value.replace(/^\/+|\/+$/g, "")}`,
+		),
+	);
+	const folderPaths = new Set(
+		routeFiles.flatMap((name) => {
+			const file = normalize(name);
+			const prefix = "src/app/(site)/";
+			if (file === "src/app/(site)/page.tsx") return ["/"];
+			if (!file.startsWith(prefix) || !file.endsWith("/page.tsx")) return [];
+			const segments = file.slice(prefix.length, -"/page.tsx".length).split("/");
+			if (segments.some((segment) => segment.startsWith("["))) return [];
+			return [`/${segments.join("/")}`];
+		}),
+	);
+	return [
+		...[...folderPaths]
+			.filter((pathValue) => !normalizedConfigured.has(pathValue))
+			.map((pathValue) => `static route folder missing from registry: ${pathValue}`),
+		...[...normalizedConfigured]
+			.filter((pathValue) => !folderPaths.has(pathValue))
+			.map((pathValue) => `static route registry missing folder: ${pathValue}`),
+	];
 }
 
 function isCacheGraph(file) {

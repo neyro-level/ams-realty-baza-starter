@@ -17,6 +17,7 @@ import { publicPropertyReadAccess } from "../data-access/public/access-mode.ts";
 import { allocatePropertyPublicUrlId } from "../../core/data-access/system/property-public-url-id.ts";
 import { assertCategoryFieldOwnership } from "../../core/property/taxonomy.ts";
 import { recordEntityLifecycleTransition } from "../lifecycle/record-transition.ts";
+import { invalidatePublicEntityChange } from "../cache/entity-change-invalidation.ts";
 
 const fieldAdminsAndOwners: FieldAccess = ({ req }) =>
 	hasRole(req.user, ["owner", "admin"]);
@@ -175,13 +176,20 @@ export const Properties: CollectionConfig = {
 			},
 		],
 		afterChange: [
-			({ doc, previousDoc, req }) =>
-				recordEntityLifecycleTransition({
+			async ({ doc, previousDoc, req }) => {
+				await recordEntityLifecycleTransition({
 					entityType: "property",
 					doc,
 					previousDoc,
 					req,
-				}),
+				});
+				await invalidatePublicEntityChange({
+					entityType: "property",
+					doc,
+					previousDoc,
+					req,
+				});
+			},
 		],
 	},
 	fields: [

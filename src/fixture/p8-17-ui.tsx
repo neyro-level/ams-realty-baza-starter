@@ -93,6 +93,8 @@ export function P817FixtureView({
 		return (
 			<PropertyPageView
 				property={propertyDetails}
+				homeHref="/"
+				catalogHref="/kvartiry/"
 				leadContext={{
 					...leadContext,
 					formKind: "property",

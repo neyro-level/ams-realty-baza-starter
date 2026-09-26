@@ -7,6 +7,10 @@ import {
 	findForbiddenProjectLiteralViolations,
 	findHrefLiteralReports,
 	findPackageBoundaryViolations,
+	configuredStaticRoutePaths,
+	configuredProjectGeoSlugs,
+	findStaticRouteParityViolations,
+	projectLiteralDenylist,
 	findUiPersistenceViolations,
 } from "./architecture-rules.mjs";
 import { findMissingLocalApiModes } from "./local-api-mode-rule.mjs";
@@ -110,6 +114,40 @@ assert.equal(
 	]).length,
 	1,
 	"href literals must remain visible in report mode",
+);
+assert.deepEqual(
+	projectLiteralDenylist({
+		projectIdentity: { brands: ["Brand"], domains: ["example.test"], cities: ["City"] },
+	}),
+	["Brand", "example.test", "City"],
+);
+assert.throws(() => projectLiteralDenylist({}), /projectIdentity/);
+const staticProfileFixture = `export const config = { staticRoutes: [{ path: "/" }, { path: "/kontakty" }] }`;
+assert.deepEqual(
+	configuredStaticRoutePaths("site-profile.config.ts", staticProfileFixture),
+	["/", "/kontakty"],
+);
+assert.deepEqual(
+	configuredProjectGeoSlugs(
+		"site-profile.config.ts",
+		`export const config = { geos: { primorsk: {}, "zarechnyy": {} } }`,
+	),
+	["primorsk", "zarechnyy"],
+);
+assert.deepEqual(
+	findStaticRouteParityViolations(
+		["src/app/(site)/page.tsx", "src/app/(site)/kontakty/page.tsx"],
+		["/", "/kontakty"],
+	),
+	[],
+);
+assert.equal(
+	findStaticRouteParityViolations(
+		["src/app/(site)/page.tsx", "src/app/(site)/missing/page.tsx"],
+		["/"],
+	).length,
+	1,
+	"unregistered static route folder must fail",
 );
 
 assert.equal(

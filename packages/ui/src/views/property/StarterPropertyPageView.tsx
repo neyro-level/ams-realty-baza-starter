@@ -18,10 +18,14 @@ export function PropertyPageView({
 	property,
 	leadContext,
 	legalCheck,
+	homeHref,
+	catalogHref,
 }: {
 	property: PropertyDetailsDTO;
 	leadContext: MarketingPageDTO["leadContext"];
 	legalCheck?: { href: string; evidenceLabel: string };
+	homeHref: string;
+	catalogHref: string;
 }) {
 	const categoryTitle = {
 		apartment: "О квартире",
@@ -37,7 +41,7 @@ export function PropertyPageView({
 				<Section space="hero">
 					<Container>
 						<nav className="mb-6 text-caption text-content-default">
-							<a href="/">Главная</a> / <a href="/kvartiry/">Недвижимость</a>{" "}
+							<a href={homeHref}>Главная</a> / <a href={catalogHref}>Недвижимость</a>{" "}
 							/ {property.title}
 						</nav>
 						<div className="grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">

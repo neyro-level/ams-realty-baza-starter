@@ -3,6 +3,7 @@ import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
 import { publicPreparedEntityLifecycleReadAccess } from "../data-access/public/access-mode.ts";
 import { validateDevelopmentWrite } from "../developments/collection-guards.ts";
 import { recordEntityLifecycleTransition } from "../lifecycle/record-transition.ts";
+import { invalidatePublicEntityChange } from "../cache/entity-change-invalidation.ts";
 
 const sourceFields = [
 	{ name: "source", type: "text" as const, required: true },
@@ -28,13 +29,20 @@ export const Developments: CollectionConfig = {
 				data ? validateDevelopmentWrite({ data, originalDoc, req }) : data,
 		],
 		afterChange: [
-			({ doc, previousDoc, req }) =>
-				recordEntityLifecycleTransition({
+			async ({ doc, previousDoc, req }) => {
+				await recordEntityLifecycleTransition({
 					entityType: "development",
 					doc,
 					previousDoc,
 					req,
-				}),
+				});
+				await invalidatePublicEntityChange({
+					entityType: "development",
+					doc,
+					previousDoc,
+					req,
+				});
+			},
 		],
 	},
 	fields: [

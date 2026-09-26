@@ -1,0 +1,106 @@
+{
+  "profiles": [
+    {
+      "profile": "singleGeo",
+      "geoMode": "SINGLE_GEO",
+      "menuLinks": 6,
+      "switcherLinks": 0,
+      "sitemapUrls": 23,
+      "categoryFirst": 404,
+      "ownerKeys": [
+        "categoryStatus",
+        "marketCapability",
+        "geoCategoryStatus",
+        "marketStatus",
+        "developersSurface",
+        "seoTiers",
+        "gate",
+        "staticRoutes",
+        "modules"
+      ]
+    },
+    {
+      "profile": "multiGeo",
+      "geoMode": "MULTI_GEO",
+      "menuLinks": 7,
+      "switcherLinks": 1,
+      "sitemapUrls": 33,
+      "categoryFirst": 404,
+      "ownerKeys": [
+        "categoryStatus",
+        "marketCapability",
+        "geoCategoryStatus",
+        "marketStatus",
+        "developersSurface",
+        "seoTiers",
+        "gate",
+        "staticRoutes",
+        "modules"
+      ]
+    },
+    {
+      "profile": "newbuildFirst",
+      "geoMode": "MULTI_GEO",
+      "menuLinks": 7,
+      "switcherLinks": 1,
+      "sitemapUrls": 18,
+      "categoryFirst": 404,
+      "ownerKeys": [
+        "categoryStatus",
+        "marketCapability",
+        "geoCategoryStatus",
+        "marketStatus",
+        "developersSurface",
+        "seoTiers",
+        "gate",
+        "staticRoutes",
+        "modules"
+      ]
+    },
+    {
+      "profile": "secondaryFirst",
+      "geoMode": "MULTI_GEO",
+      "menuLinks": 7,
+      "switcherLinks": 1,
+      "sitemapUrls": 25,
+      "categoryFirst": 404,
+      "ownerKeys": [
+        "categoryStatus",
+        "marketCapability",
+        "geoCategoryStatus",
+        "marketStatus",
+        "developersSurface",
+        "seoTiers",
+        "gate",
+        "staticRoutes",
+        "modules"
+      ]
+    },
+    {
+      "profile": "singleGeoThreeCities",
+      "geoMode": "SINGLE_GEO",
+      "menuLinks": 6,
+      "switcherLinks": 0,
+      "sitemapUrls": 23,
+      "categoryFirst": 404,
+      "ownerKeys": [
+        "categoryStatus",
+        "marketCapability",
+        "geoCategoryStatus",
+        "marketStatus",
+        "developersSurface",
+        "seoTiers",
+        "gate",
+        "staticRoutes",
+        "modules"
+      ]
+    }
+  ],
+  "stableEntityUrls": {
+    "property": "/kvartiry/stable-object-42/",
+    "development": "/novostroyki/zhk-stable-development/",
+    "developer": "/zastroyshchiki/stable-developer/"
+  },
+  "d10": "runtime resolver delegates inventory to the Public Gateway countInventory data port",
+  "result": "PASS"
+}

@@ -13,12 +13,14 @@ export function HomeArticlesPreviewView({
 	linkRenderer: LinkRenderer,
 	imageRenderer: ImageRenderer,
 	scrollHint,
+	journalHref,
 }: {
 	articles: readonly JournalArticleCardDTO[];
 	categories: readonly JournalCategoryLinkDTO[];
 	linkRenderer: SiteLinkRenderer;
 	imageRenderer: SiteImageRenderer;
 	scrollHint?: ReactNode;
+	journalHref: string;
 }) {
 	if (!articles.length) return null;
 	return (
@@ -29,7 +31,7 @@ export function HomeArticlesPreviewView({
 		>
 			<div className="home-articles__shell">
 				<div className="home-articles__head">
-					<LinkRenderer href="/journal" className="home-articles__title-link">
+					<LinkRenderer href={journalHref} className="home-articles__title-link">
 						<h2 id="home-articles-title">Журнал агентства</h2>
 						<ArrowRight className="size-4" aria-hidden />
 					</LinkRenderer>

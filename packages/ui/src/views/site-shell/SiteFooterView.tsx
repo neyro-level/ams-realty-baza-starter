@@ -21,6 +21,7 @@ type SiteFooterViewProps = {
 	meta: SiteFooterMetaViewDto;
 	socials: SiteSocialLinkViewDto[];
 	linkRenderer: SiteLinkRenderer;
+	homeHref: string;
 };
 
 export function SiteFooterView({
@@ -32,13 +33,14 @@ export function SiteFooterView({
 	meta,
 	socials,
 	linkRenderer: LinkRenderer,
+	homeHref,
 }: SiteFooterViewProps) {
 	return (
 		<footer id="site-footer" className="site-footer" role="contentinfo">
 			<div className="site-footer__shell">
 				<div className="site-footer__brand">
 					<LinkRenderer
-						href="/"
+						href={homeHref}
 						ariaLabel={`${brandLabel} — на главную`}
 						className="site-footer__brand-mark"
 					>

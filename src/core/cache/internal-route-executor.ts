@@ -22,7 +22,15 @@ const allowedPathPrefixes = [
 	"/sdat",
 	"/kontakty",
 ] as const;
-const allowedTags = new Set(["site", "properties", "property", "media", "registry"]);
+const allowedTags = new Set([
+	"site",
+	"properties",
+	"property",
+	"developments",
+	"developers",
+	"media",
+	"registry",
+]);
 const allowedEntityTag = /^(geo|district|development|developer|property):[a-z0-9_-]+$/;
 const allowedGeoSurfaceTag = /^geo-surface:[a-z0-9_-]+:[a-z0-9_-]+$/;
 

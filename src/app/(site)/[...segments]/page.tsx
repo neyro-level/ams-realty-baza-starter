@@ -21,9 +21,11 @@ import {
 	JsonLdScript,
 } from "@/project/seo/structured-data";
 import { projectSeoMeta } from "@/project/seo/templates";
+import { siteProfile } from "@/project/site-profile";
+import { createProjectUrlGrammar } from "@/project/url-grammar";
 
-export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+const grammar = createProjectUrlGrammar(siteProfile);
 
 function pathname(segments: readonly string[]) {
 	return `/${segments.join("/")}/`;
@@ -188,7 +190,15 @@ export default async function CanonicalRuntimePage({
 				</>
 			);
 		}
-		case "property":
+		case "property": {
+			const propertyPageKey = result.data.value.pageKey;
+			const catalogHref =
+				propertyPageKey.kind === "property"
+					? grammar.buildUrl({
+							kind: "categoryRoot",
+							category: propertyPageKey.category,
+						})
+					: grammar.buildUrl({ kind: "home" });
 			return (
 				<>
 					{breadcrumb([
@@ -198,6 +208,8 @@ export default async function CanonicalRuntimePage({
 					<JsonLdScript data={buildPropertyJsonLd(result.data.value)} />
 					<PropertyPageView
 						property={result.data.value}
+						homeHref={grammar.buildUrl({ kind: "home" })}
+						catalogHref={catalogHref}
 						leadContext={{
 							formKind: "property",
 							sourcePage: result.data.value.href,
@@ -211,5 +223,6 @@ export default async function CanonicalRuntimePage({
 					/>
 				</>
 			);
+		}
 	}
 }

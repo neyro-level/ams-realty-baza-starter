@@ -49,7 +49,11 @@ async function findMany(
 }
 
 export function createPayloadDevelopmentExcelRepository(payload: Payload): DevelopmentExcelRepository {
-	const access = systemOverrideAccess("system-job");
+	const systemAccess = systemOverrideAccess("system-job");
+	const access = {
+		...systemAccess,
+		context: { ...systemAccess.context, source: "import" as const },
+	};
 	return {
 		async inspectDeveloper(input) {
 			const existing = await findOne(payload, "developers", { slug: { equals: input.slug } }, access);

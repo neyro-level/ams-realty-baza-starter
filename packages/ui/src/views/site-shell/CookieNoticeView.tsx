@@ -6,11 +6,13 @@ import type { SiteLinkRenderer } from "../../lib/adapters";
 type CookieNoticeViewProps = {
 	onAccept: () => void;
 	linkRenderer: SiteLinkRenderer;
+	policyHref: string;
 };
 
 export function CookieNoticeView({
 	onAccept,
 	linkRenderer: LinkRenderer,
+	policyHref,
 }: CookieNoticeViewProps) {
 	return (
 		<Card
@@ -37,7 +39,7 @@ export function CookieNoticeView({
 							и помогал быстрее находить подходящую недвижимость,{" "}
 						</span>
 						<LinkRenderer
-							href="/politika-cookie"
+							href={policyHref}
 							className="font-semibold text-[var(--cookie-notice-content-tertiary)] transition hover:text-[var(--cookie-notice-content-subtle)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
 						>
 							<span className="sm:hidden">Подробнее</span>

@@ -20,11 +20,13 @@ import type { SiteLinkRenderer } from "../../lib/adapters";
 type LegalHubViewProps = {
 	documents: readonly LegalDocumentDTO[];
 	linkRenderer: SiteLinkRenderer;
+	homeHref: string;
 };
 
 export function LegalHubView({
 	documents,
 	linkRenderer: LinkRenderer,
+	homeHref,
 }: LegalHubViewProps) {
 	return (
 		<main className="min-h-[var(--viewport-content-below-header)] bg-[var(--legal-hub-surface-primary)] px-4 py-8 text-[var(--legal-hub-content-primary)] sm:px-6 md:py-14 lg:py-16">
@@ -36,7 +38,7 @@ export function LegalHubView({
 								asChild
 								className="shrink-0 whitespace-nowrap font-medium leading-step-body transition hover:text-[var(--accent)]"
 							>
-								<LinkRenderer href="/">Главная</LinkRenderer>
+								<LinkRenderer href={homeHref}>Главная</LinkRenderer>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator className="size-3.5 shrink-0 self-center text-[var(--legal-hub-content-secondary)]" />

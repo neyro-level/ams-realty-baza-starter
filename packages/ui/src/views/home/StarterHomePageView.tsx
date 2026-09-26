@@ -17,6 +17,7 @@ type HomeSectionProps = {
 };
 
 export function HomeHeroSection({ page, featured }: HomeSectionProps) {
+	const catalogHref = page.serviceLinks[0]?.href;
 	return (
 		<section
 			id="section-home-hero"
@@ -38,9 +39,11 @@ export function HomeHeroSection({ page, featured }: HomeSectionProps) {
 						{page.lead}
 					</p>
 					<div className="mt-7 flex flex-wrap gap-3">
-						<Button asChild size="lg">
-							<a href="/kvartiry/">Смотреть объекты</a>
-						</Button>
+						{catalogHref ? (
+							<Button asChild size="lg">
+								<a href={catalogHref}>Смотреть объекты</a>
+							</Button>
+						) : null}
 						<Button asChild size="lg" variant="outline">
 							<a href="#lead-form">Оставить заявку</a>
 						</Button>
@@ -58,9 +61,11 @@ export function HomeHeroSection({ page, featured }: HomeSectionProps) {
 							</CardDescription>
 						</CardHeader>
 						<CardFooter>
-							<Button asChild variant="outline">
-								<a href="/kvartiry/">Открыть каталог</a>
-							</Button>
+							{catalogHref ? (
+								<Button asChild variant="outline">
+									<a href={catalogHref}>Открыть каталог</a>
+								</Button>
+							) : null}
 						</CardFooter>
 					</Card>
 				)}

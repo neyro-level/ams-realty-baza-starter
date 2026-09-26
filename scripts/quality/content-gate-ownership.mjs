@@ -1,11 +1,23 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { relative, resolve } from "node:path";
 
 const root = process.cwd();
+const codeExtension = /\.(?:ts|tsx)$/;
+function filesUnder(directory) {
+	const absolute = resolve(root, directory);
+	if (!existsSync(absolute)) return [];
+	return readdirSync(absolute, { withFileTypes: true }).flatMap((entry) => {
+		const child = resolve(absolute, entry.name);
+		return entry.isDirectory()
+			? filesUnder(relative(root, child))
+			: codeExtension.test(entry.name)
+				? [relative(root, child).replaceAll("\\", "/")]
+				: [];
+	});
+}
 const owned = [
-	"src/app/(site)/[...segments]/page.tsx",
-	"src/project/data-access/public/dto.ts",
-	"src/project/data-access/public/geo-catalog.ts",
+	...filesUnder("src/app/(site)"),
+	...filesUnder("src/project/data-access/public"),
 	"src/project/routing/runtime-route.ts",
 	"src/project/seo/discovery-runtime.ts",
 ];

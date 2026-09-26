@@ -18,6 +18,8 @@ type LegalDocumentViewProps = {
 	legalName: string;
 	email: string;
 	linkRenderer: SiteLinkRenderer;
+	homeHref: string;
+	legalHubHref: string;
 };
 
 export function LegalDocumentView({
@@ -25,6 +27,8 @@ export function LegalDocumentView({
 	legalName,
 	email,
 	linkRenderer: LinkRenderer,
+	homeHref,
+	legalHubHref,
 }: LegalDocumentViewProps) {
 	return (
 		<main className="bg-[var(--legal-document-surface-primary)] text-[var(--legal-document-content-primary)]">
@@ -37,7 +41,7 @@ export function LegalDocumentView({
 									asChild
 									className="shrink-0 whitespace-nowrap font-medium leading-step-body transition hover:text-[var(--accent)]"
 								>
-									<LinkRenderer href="/">Главная</LinkRenderer>
+									<LinkRenderer href={homeHref}>Главная</LinkRenderer>
 								</BreadcrumbLink>
 							</BreadcrumbItem>
 							<BreadcrumbSeparator className="size-3.5 shrink-0 self-center text-[var(--legal-document-content-secondary)]" />
@@ -46,7 +50,7 @@ export function LegalDocumentView({
 									asChild
 									className="shrink-0 whitespace-nowrap font-medium leading-step-body transition hover:text-[var(--accent)]"
 								>
-									<LinkRenderer href="/legal">Правовая информация</LinkRenderer>
+									<LinkRenderer href={legalHubHref}>Правовая информация</LinkRenderer>
 								</BreadcrumbLink>
 							</BreadcrumbItem>
 							<BreadcrumbSeparator className="size-3.5 shrink-0 self-center text-[var(--legal-document-content-secondary)]" />

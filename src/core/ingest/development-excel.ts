@@ -426,6 +426,7 @@ export async function importDevelopmentExcel(input: {
 	mode: "dry-run" | "apply";
 	now: Date;
 	repository: DevelopmentExcelRepository;
+	invalidateCache?: (targets: readonly { type: "tag"; tag: string }[]) => Promise<void>;
 }): Promise<DevelopmentExcelReport> {
 	if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.sourceKey)) {
 		throw new Error("sourceKey must be a canonical lowercase ASCII slug.");
@@ -977,5 +978,12 @@ export async function importDevelopmentExcel(input: {
 		report,
 		now: input.now.toISOString(),
 	});
+	if (report.changed + report.created > 0) {
+		await input.invalidateCache?.([
+			{ type: "tag", tag: "developments" },
+			{ type: "tag", tag: "developers" },
+			{ type: "tag", tag: "properties" },
+		]);
+	}
 	return report;
 }
