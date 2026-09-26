@@ -253,7 +253,7 @@ export interface City {
     genitive: string;
     prepositional: string;
   };
-  preposition: 'v' | 'na';
+  preposition: 'v' | 'vo' | 'na';
   cityType: 'city' | 'urban_settlement' | 'settlement' | 'village';
   region: number | Region;
   /**
@@ -290,7 +290,7 @@ export interface District {
     genitive: string;
     prepositional: string;
   };
-  districtType: 'administrative' | 'microdistrict';
+  districtType: 'admin_district' | 'microdistrict';
   city: number | City;
   /**
    * Public category routes where this published district may resolve.
@@ -316,7 +316,7 @@ export interface District {
         id?: string | null;
       }[]
     | null;
-  preposition: 'v' | 'na';
+  preposition: 'v' | 'vo' | 'na';
   morphologyApproved: boolean;
   sortOrder: number;
   status: 'draft' | 'published' | 'archived';

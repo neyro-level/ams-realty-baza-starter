@@ -33,6 +33,10 @@ import {
 	developmentModelV2DownSql,
 	developmentModelV2UpSql,
 } from "../../migrations/20260925_230000_development_model_v2.ts";
+import {
+	geoTaxonomyV3DownSql,
+	geoTaxonomyV3UpSql,
+} from "../../migrations/20260927_010000_geo_taxonomy_v3.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -683,6 +687,44 @@ export function proveDistrictRouteCategoriesMigration(testUri) {
 		);
 	}
 	psql(testUri, districtRouteCategoriesUpSql);
+}
+
+export function proveGeoTaxonomyV3Migration(testUri) {
+	psql(
+		testUri,
+		`CREATE TYPE enum_cities_preposition AS ENUM('v', 'na');
+		 CREATE TYPE enum_districts_district_type AS ENUM('administrative', 'microdistrict');
+		 CREATE TYPE enum_districts_preposition AS ENUM('v', 'na');
+		 CREATE TABLE cities (id serial PRIMARY KEY, preposition enum_cities_preposition NOT NULL);
+		 CREATE TABLE districts (id serial PRIMARY KEY, district_type enum_districts_district_type NOT NULL, preposition enum_districts_preposition NOT NULL);
+		 INSERT INTO cities (preposition) VALUES ('v');
+		 INSERT INTO districts (district_type, preposition) VALUES ('administrative', 'v');`,
+	);
+	psql(testUri, geoTaxonomyV3UpSql);
+	if (
+		psql(
+			testUri,
+			"SELECT district_type::text || ':' || preposition::text FROM districts WHERE id=1",
+		) !== "admin_district:v"
+	) {
+		throw new Error(
+			"Geo taxonomy v3 did not migrate the non-empty district fixture.",
+		);
+	}
+	psql(
+		testUri,
+		"INSERT INTO cities (preposition) VALUES ('vo'); INSERT INTO districts (district_type, preposition) VALUES ('microdistrict', 'vo');",
+	);
+	psql(testUri, geoTaxonomyV3DownSql);
+	if (
+		psql(
+			testUri,
+			"SELECT string_agg(preposition::text, ',' ORDER BY id) FROM cities",
+		) !== "v,v"
+	) {
+		throw new Error("Geo taxonomy v3 down did not map vo back to v.");
+	}
+	psql(testUri, geoTaxonomyV3UpSql);
 }
 
 export function psqlOnTest(testUri, sql) {

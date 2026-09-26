@@ -71,6 +71,13 @@ const staticPathSchema = z
 		"Static route must be an absolute lowercase ASCII path without a trailing slash.",
 	)
 	.transform((value) => value as `/${string}`);
+const legacyDestinationPathSchema = z
+	.string()
+	.regex(
+		/^\/(?:[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*)?\/?$/,
+		"Legacy destination must be an absolute lowercase ASCII path.",
+	)
+	.transform((value) => value as `/${string}`);
 
 const surfaceStatusSchema = z.strictObject(
 	Object.fromEntries(
@@ -168,6 +175,13 @@ const siteProfileInputSchema = z.strictObject({
 			changeFrequency: z.enum(staticRouteFrequencies),
 			priority: z.number().min(0).max(1),
 			indexable: z.boolean(),
+		}),
+	),
+	legacyRoutes: z.array(
+		z.strictObject({
+			from: staticPathSchema,
+			to: legacyDestinationPathSchema,
+			statusCode: z.union([z.literal(301), z.literal(308)]),
 		}),
 	),
 	modules: z.record(
@@ -362,6 +376,52 @@ export const siteProfileSchema = siteProfileInputSchema.superRefine(
 				path: ["staticRoutes"],
 				message: "Static route paths must be unique.",
 			});
+		}
+		const legacySources = profile.legacyRoutes.map((route) => route.from);
+		if (new Set(legacySources).size !== legacySources.length) {
+			context.addIssue({
+				code: "custom",
+				path: ["legacyRoutes"],
+				message: "Legacy route sources must be unique.",
+			});
+		}
+		const indexableStaticRoots = new Map(
+			profile.staticRoutes
+				.filter((route) => route.indexable)
+				.map((route, index) => [
+					route.path.split("/").filter(Boolean)[0],
+					index,
+				]),
+		);
+		for (const [index, route] of profile.legacyRoutes.entries()) {
+			const legacyRoot = route.from.split("/").filter(Boolean)[0];
+			if (indexableStaticRoots.has(legacyRoot)) {
+				context.addIssue({
+					code: "custom",
+					path: ["legacyRoutes", index, "from"],
+					message:
+						"Legacy route root cannot collide with an indexable static route.",
+				});
+			}
+		}
+		const sdatIndex = profile.staticRoutes.findIndex(
+			(route) => route.path === "/sdat",
+		);
+		if (profile.categoryStatus.arenda === "OUT" && sdatIndex >= 0) {
+			context.addIssue({
+				code: "custom",
+				path: ["staticRoutes", sdatIndex, "path"],
+				message: "/sdat must be absent when arenda is OUT.",
+			});
+		}
+		for (const [index, route] of profile.legacyRoutes.entries()) {
+			if (route.from === route.to || `${route.from}/` === route.to) {
+				context.addIssue({
+					code: "custom",
+					path: ["legacyRoutes", index, "to"],
+					message: "Legacy route destination must differ from its source.",
+				});
+			}
 		}
 		const moduleRoots = Object.values(profile.modules).flatMap(
 			(module) => module.reservedRoots,

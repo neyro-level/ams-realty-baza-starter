@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 2,
-	"contractVersion": "2.1.0",
+	"contractVersion": "2.3.0",
 	"state": "frozen",
 	"algorithm": "sha256-normalized-lf",
 	"files": [
@@ -22,11 +22,11 @@
 		},
 		{
 			"path": "packages/contracts/src/geo.ts",
-			"sha256": "39a234e05d101ee0f8dd874ec59c8e80fd14df72d444e05cc9b59e928dabb32a"
+			"sha256": "c8d3c5cdccaef4acbaa28dc68a8f1129b278851b3b57762ae961473b6fde4a16"
 		},
 		{
 			"path": "packages/contracts/src/index.ts",
-			"sha256": "3e04f12ad18a2c381e227fe4a0f359cb8cc99e841dd9556145b3c03288be2299"
+			"sha256": "4245abd28f3ba094b3013e2eaffc2f0097a109318bfc4f29569ccedee69825c8"
 		},
 		{
 			"path": "packages/contracts/src/lead.ts",
@@ -65,5 +65,5 @@
 			"sha256": "5bf26382c69e7cf88b4ebfc994357b71bb7569a4b1fffb7d8bfa88375c1e6a54"
 		}
 	],
-	"aggregateSha256": "27e8391e20be7045d546b28fd69cd9f005f2d63d81a83043fe0c3656870cc9a9"
+	"aggregateSha256": "2ed8a255a39979b5a9b3735578e5954e33bdff8736e74f895d34b4050cd14fb4"
 }

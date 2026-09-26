@@ -1,6 +1,6 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 9 V6 S0-S14 EXECUTION COMPLETE / PRE-S15 OWNER GATE`.
+Статус: `ACTIVE / PLAN 10 V4 APPROVED HANDOFF / PLAN 9 EXECUTION COMPLETE`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
@@ -14,8 +14,18 @@ tag и production не входили в Developer graph и не разреше�
 команды владельца. Репозиторное зеркало выполняется отдельно и не разрешает
 release.
 
+Plan №10 «Clone-Ready 2.1» собран как
+`docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md`, `v4 APPROVED`.
+Финальный четырёхпроходный аудит завершён: 22/22 узла, циклов 0, открытых
+blocker/major 0, readiness `READY_WITH_LIMITS`. Owner approval exact v4
+получен; разрешены clean Task Manager import и Developer handoff по трём
+`MERGE_AFTER_GATE` batch. Production, tag, mirror и live target execution не
+разрешены.
+
 ## NOW
 
+- Выполнить readiness revalidation, clean import exact Plan №10 v4 в Task
+  Manager и handoff Developer через одну goal на весь approved graph.
 - Поддерживать канонические документы и runtime без скрытого расширения scope.
 - Любая новая реализация начинается approved task contract и batch-owned
   рабочим потоком от актуального SourceCraft `main`.

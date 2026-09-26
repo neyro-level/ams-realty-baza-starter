@@ -1,23 +1,26 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { renderSeoDefinition } from "../src/core/seo/registry.ts";
+import {
+	createPresetSiteProfileConfig,
+	presetCatalogSurfaces,
+	supportedSitePresets,
+} from "../src/project/site-profile-presets.ts";
+import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
+import {
+	renderSeoRegistryCsv,
+	renderSeoRegistryModule,
+	seoRegistryColumns,
+} from "./seo-registry-output.mjs";
 
-export const clonePresets = ["MIXED", "NEWBUILD_FIRST", "SECONDARY_FIRST"];
-
-export const catalogSurfaces = [
-	"kvartiry",
-	"doma",
-	"uchastki",
-	"kommercheskaya-nedvizhimost",
-	"komnaty",
-	"garazhi",
-	"arenda",
-	"novostroyki",
-	"kottedzhnye-poselki",
-];
+export const clonePresets = [...supportedSitePresets];
+export const catalogSurfaces = [...presetCatalogSurfaces];
 
 const requiredNap = ["phone", "email", "address", "workingHours"];
 const requiredMorphology = ["nominative", "genitive", "prepositional"];
+const allowedGeoPrepositions = ["в", "во", "на"];
+const allowedDistrictTypes = ["admin_district", "microdistrict"];
 const seoTemplateKeys = [
 	"home",
 	"geoHub",
@@ -47,6 +50,84 @@ function assertSlug(value, label) {
 		throw new Error(`${label} must be a lowercase URL slug.`);
 	}
 	return slug;
+}
+
+function validateRegion(region) {
+	if (!region || typeof region !== "object" || Array.isArray(region)) {
+		throw new Error("Clone preset requires region.");
+	}
+	region.slug = assertSlug(region.slug, "region.slug");
+	region.name = requiredString(region.name, "region.name");
+	region.genitive = requiredString(region.genitive, "region.genitive");
+	region.locative = requiredString(region.locative, "region.locative");
+	region.shortName = requiredString(region.shortName, "region.shortName");
+	return region;
+}
+
+function validateGeoTaxonomy(geos) {
+	const districtKeys = new Set();
+	for (const geo of geos) {
+		if (!allowedGeoPrepositions.includes(geo.morphology?.preposition)) {
+			throw new Error(
+				`Geo ${geo.slug} morphology.preposition must be в, во or на.`,
+			);
+		}
+		if (!Array.isArray(geo.districts)) {
+			throw new Error(`Geo ${geo.slug} requires districts[].`);
+		}
+		const localSlugs = new Set();
+		for (const district of geo.districts) {
+			district.slug = assertSlug(
+				district.slug,
+				`geo ${geo.slug} district.slug`,
+			);
+			const key = `${geo.slug}/${district.slug}`;
+			if (districtKeys.has(key)) throw new Error(`Duplicate district: ${key}`);
+			districtKeys.add(key);
+			localSlugs.add(district.slug);
+			district.name = requiredString(district.name, `district ${key} name`);
+			district.locative = requiredString(
+				district.locative,
+				`district ${key} locative`,
+			);
+			if (!allowedDistrictTypes.includes(district.type)) {
+				throw new Error(`District ${key} type is invalid.`);
+			}
+			if (!allowedGeoPrepositions.includes(district.preposition)) {
+				throw new Error(`District ${key} preposition must be в, во or на.`);
+			}
+			if (!Array.isArray(district.synonyms)) {
+				throw new Error(`District ${key} synonyms must be an array.`);
+			}
+			district.synonyms = district.synonyms.map((value, index) =>
+				requiredString(value, `district ${key} synonyms[${index}]`),
+			);
+			if (district.parent !== null && typeof district.parent !== "string") {
+				throw new Error(`District ${key} parent must be a local slug or null.`);
+			}
+		}
+		for (const district of geo.districts) {
+			if (district.parent === district.slug) {
+				throw new Error(
+					`District ${geo.slug}/${district.slug} cannot parent itself.`,
+				);
+			}
+			if (district.parent !== null && !localSlugs.has(district.parent)) {
+				throw new Error(
+					`District ${geo.slug}/${district.slug} parent must belong to the same geo.`,
+				);
+			}
+			const visited = new Set([district.slug]);
+			let parent = district.parent;
+			while (parent !== null) {
+				if (visited.has(parent))
+					throw new Error(`District hierarchy cycle in geo ${geo.slug}.`);
+				visited.add(parent);
+				parent =
+					geo.districts.find((item) => item.slug === parent)?.parent ?? null;
+			}
+		}
+	}
 }
 
 function assertNoSecrets(value, path = "preset") {
@@ -134,6 +215,29 @@ function validateClientReadiness(value) {
 	return value;
 }
 
+function validateProfileReadiness(preset) {
+	const feedStatus = preset.feed?.status;
+	if (
+		(preset.preset === "NEWBUILD_FIRST" &&
+			!["ready", "not_required"].includes(feedStatus)) ||
+		(preset.preset !== "NEWBUILD_FIRST" && feedStatus !== "ready")
+	) {
+		throw new Error(
+			"feed.status must be ready unless NEWBUILD_FIRST explicitly uses not_required.",
+		);
+	}
+	const excelStatus = preset.developmentExcel?.status;
+	if (
+		(preset.preset === "SECONDARY_FIRST" &&
+			!["ready", "not_required"].includes(excelStatus)) ||
+		(preset.preset !== "SECONDARY_FIRST" && excelStatus !== "ready")
+	) {
+		throw new Error(
+			"developmentExcel.status must be ready unless SECONDARY_FIRST explicitly uses not_required.",
+		);
+	}
+}
+
 export function activeSurfacesForPreset(preset) {
 	if (preset === "NEWBUILD_FIRST") {
 		return ["novostroyki", "kottedzhnye-poselki"];
@@ -162,117 +266,7 @@ const platformReservedRoots = [
 	"search",
 ];
 
-const staticRoutes = [
-	{ path: "/", changeFrequency: "daily", priority: 1, indexable: true },
-	{
-		path: "/nedvizhimost",
-		changeFrequency: "daily",
-		priority: 0.9,
-		indexable: true,
-	},
-	{
-		path: "/uslugi",
-		changeFrequency: "weekly",
-		priority: 0.7,
-		indexable: true,
-	},
-	{
-		path: "/o-kompanii",
-		changeFrequency: "monthly",
-		priority: 0.6,
-		indexable: true,
-	},
-	{
-		path: "/ipoteka",
-		changeFrequency: "weekly",
-		priority: 0.7,
-		indexable: true,
-	},
-	{
-		path: "/prodat",
-		changeFrequency: "weekly",
-		priority: 0.7,
-		indexable: true,
-	},
-	{ path: "/sdat", changeFrequency: "weekly", priority: 0.7, indexable: true },
-	{
-		path: "/kontakty",
-		changeFrequency: "monthly",
-		priority: 0.6,
-		indexable: true,
-	},
-	{
-		path: "/politika-konfidencialnosti",
-		changeFrequency: "yearly",
-		priority: 0.2,
-		indexable: false,
-	},
-	{
-		path: "/soglasie-na-obrabotku-personalnyh-dannyh",
-		changeFrequency: "yearly",
-		priority: 0.2,
-		indexable: false,
-	},
-];
-
-const modules = {
-	novostroyki: { state: "prepared", reservedRoots: ["komplex"] },
-	journal: { state: "disabled", reservedRoots: ["journal"] },
-	agents: { state: "disabled", reservedRoots: ["sotrudniki"] },
-};
-
-const filterKeys = {
-	kvartiry: ["rooms", "district", "price", "area"],
-	doma: ["district", "price", "area"],
-	uchastki: ["district", "price", "area"],
-	"kommercheskaya-nedvizhimost": ["district", "price", "area"],
-	komnaty: ["rooms", "district", "price"],
-	garazhi: ["district", "price"],
-	arenda: ["rooms", "district", "price"],
-	novostroyki: ["district", "developer", "completionYear"],
-	"kottedzhnye-poselki": ["district", "developer"],
-};
-
-function seoFacetsForPreset(preset) {
-	return {
-		dvukhkomnatnye: {
-			geo: preset.primaryGeo,
-			category: "kvartiry",
-			filter: { key: "rooms", value: [2] },
-		},
-	};
-}
-
-function surfaceStatusesForPreset(preset) {
-	return Object.fromEntries(
-		catalogSurfaces.map((surface) => {
-			if (preset === "NEWBUILD_FIRST") {
-				return [
-					surface,
-					["novostroyki", "kottedzhnye-poselki"].includes(surface)
-						? "ACTIVE"
-						: "NOINDEX_AUTO",
-				];
-			}
-			if (preset === "SECONDARY_FIRST") {
-				return [
-					surface,
-					["novostroyki", "kottedzhnye-poselki"].includes(surface)
-						? "PREPARED_OFF"
-						: "ACTIVE",
-				];
-			}
-			return [surface, "ACTIVE"];
-		}),
-	);
-}
-
 export function siteProfileConfigForPreset(preset) {
-	const categoryStatus = surfaceStatusesForPreset(preset.preset);
-	const marketCapability = {
-		newbuild: preset.preset === "SECONDARY_FIRST" ? "PREPARED_OFF" : "ACTIVE",
-		secondary: preset.preset === "NEWBUILD_FIRST" ? "NOINDEX_AUTO" : "ACTIVE",
-	};
 	const geos = Object.fromEntries(
 		preset.geos.map((geo) => [
 			geo.slug,
@@ -285,83 +279,23 @@ export function siteProfileConfigForPreset(preset) {
 			},
 		]),
 	);
-	const geoCategoryStatus = Object.fromEntries(
-		preset.geos.map((geo) => [
-			geo.slug,
-			Object.fromEntries(
-				catalogSurfaces.map((surface) => [
-					surface,
-					geo.hubStatus === "PREPARED_OFF"
-						? "PREPARED_OFF"
-						: categoryStatus[surface],
-				]),
-			),
-		]),
-	);
-	const marketStatus = Object.fromEntries(
-		preset.geos.map((geo) => [
-			geo.slug,
-			geo.hubStatus === "PREPARED_OFF"
-				? { newbuild: "PREPARED_OFF", secondary: "PREPARED_OFF" }
-				: { ...marketCapability },
-		]),
-	);
-	const developerStatus =
-		preset.preset === "SECONDARY_FIRST" ? "NOINDEX_AUTO" : "ACTIVE";
-
-	return {
+	return createPresetSiteProfileConfig({
 		preset: preset.preset,
 		geoMode: preset.geoMode,
 		primaryGeo: preset.primaryGeo,
 		geos,
-		categoryStatus,
-		marketCapability,
-		geoCategoryStatus,
-		marketStatus,
-		developersSurface: {
-			root: developerStatus,
-			byGeo: Object.fromEntries(
-				preset.geos.map((geo) => [
-					geo.slug,
-					geo.hubStatus === "PREPARED_OFF" ? "PREPARED_OFF" : developerStatus,
-				]),
-			),
-		},
-		filterKeys,
-		seoFacets: seoFacetsForPreset(preset),
-		seoTiers: {
-			metric: "searchDemand",
-			snapshotDate: "2026-09-24",
-			bands: { P1: 100, P2: 50, TEST: 0 },
-			minInventory: { P1: 5, P2: 5, TEST: 10 },
-			unmeasuredPolicy: "TEST",
-		},
-		gate: {
-			listingIntroMinChars: 600,
-			propertyPhotosMin: 3,
-			developmentA: {
-				priceRowsMin: 2,
-				mediaMin: 8,
-				layoutsMin: 1,
-				descriptionMinChars: 1500,
-				progressRequired: true,
-			},
-			developmentB: {
-				priceRowsMin: 1,
-				mediaMin: 3,
-				layoutsMin: 0,
-				descriptionMinChars: 600,
-				progressRequired: false,
-			},
-			priceStaleDays: 45,
-			priceFailDays: 120,
-			developerGeoMin: 5,
-			developerDescMinChars: 600,
-		},
-		staticRoutes,
-		modules,
-		entityPrefixes: { residentialComplex: "zhk-", cottageVillage: "kp-" },
-	};
+		categoryStatus: preset.categoryStatus,
+		marketCapability: preset.marketCapability,
+		geoCategoryStatus: preset.geoCategoryStatus,
+		marketStatus: preset.marketStatus,
+		developersSurface: preset.developersSurface,
+		seoFacets: preset.seoFacets,
+		filterKeys: preset.filterKeys,
+		seoTiers: preset.seoTiers,
+		gate: preset.gate,
+		staticRoutes: preset.staticRoutes,
+		legacyRoutes: preset.legacyRoutes,
+	});
 }
 
 export function reservedRootsForSiteProfile(config) {
@@ -372,6 +306,9 @@ export function reservedRootsForSiteProfile(config) {
 			"zastroyshchiki",
 			...config.staticRoutes
 				.map((route) => route.path.split("/").filter(Boolean)[0])
+				.filter(Boolean),
+			...config.legacyRoutes
+				.map((route) => route.from.split("/").filter(Boolean)[0])
 				.filter(Boolean),
 			...Object.values(config.modules).flatMap(
 				(module) => module.reservedRoots,
@@ -387,11 +324,16 @@ export function readClonePreset(file) {
 	const preset = JSON.parse(readFileSync(path, "utf8"));
 	if (preset.schemaVersion === 1) {
 		throw new Error(
-			"Clone preset schemaVersion 1 is obsolete. Migrate to schemaVersion 2: add explicit geo published/hubStatus, clientReadiness, and seoTemplates or seoTemplateFile.",
+			"Clone preset schemaVersion 1 is obsolete. Migrate through schemaVersion 2, then to schemaVersion 3 with canonical SiteProfile overrides.",
 		);
 	}
-	if (preset.schemaVersion !== 2)
-		throw new Error("Clone preset schemaVersion must be 2.");
+	if (preset.schemaVersion === 2) {
+		throw new Error(
+			"Clone preset schemaVersion 2 is obsolete. Migrate to schemaVersion 3; existing v2 fields stay unchanged and optional SiteProfile override fields may be added.",
+		);
+	}
+	if (preset.schemaVersion !== 3)
+		throw new Error("Clone preset schemaVersion must be 3.");
 	assertNoSecrets(preset);
 	if (!clonePresets.includes(preset.preset))
 		throw new Error("Unsupported clone preset.");
@@ -415,6 +357,7 @@ export function readClonePreset(file) {
 		throw new Error("productionIndexing must be public or noindex.");
 	}
 	preset.primaryGeo = assertSlug(preset.primaryGeo, "primaryGeo");
+	preset.region = validateRegion(preset.region);
 	if (!Array.isArray(preset.geos) || preset.geos.length === 0) {
 		throw new Error("Clone preset requires at least one geo.");
 	}
@@ -451,6 +394,7 @@ export function readClonePreset(file) {
 			throw new Error(`Geo ${geo.slug} has unknown agglomerationOf.`);
 		}
 	}
+	validateGeoTaxonomy(preset.geos);
 	if (!slugs.has(preset.primaryGeo))
 		throw new Error("primaryGeo is absent from geos.");
 	const routableGeos = preset.geos.filter(
@@ -474,11 +418,7 @@ export function readClonePreset(file) {
 	}
 	requiredString(preset.brandAssets.logoPath, "brandAssets.logoPath");
 	requiredString(preset.brandAssets.tokenSource, "brandAssets.tokenSource");
-	if (preset.feed?.status !== "ready")
-		throw new Error("feed.status must be ready.");
-	if (preset.developmentExcel?.status !== "ready") {
-		throw new Error("developmentExcel.status must be ready.");
-	}
+	validateProfileReadiness(preset);
 	preset.clientReadiness = validateClientReadiness(preset.clientReadiness);
 	const hasInlineTemplates = preset.seoTemplates !== undefined;
 	const hasTemplateFile = preset.seoTemplateFile !== undefined;
@@ -500,6 +440,7 @@ export function readClonePreset(file) {
 	}
 	preset.seoTemplates = validateSeoInputs(preset.seoTemplates);
 	assertNoSecrets(preset.seoTemplates, "seoTemplates");
+	siteProfileConfigForPreset(preset);
 	return preset;
 }
 
@@ -541,7 +482,7 @@ export function renderProjectLiterals(preset) {
 					...new Set(
 						preset.geos.flatMap((geo) => [
 							geo.title,
-							...Object.values(geo.morphology),
+							...requiredMorphology.map((key) => geo.morphology[key]),
 						]),
 					),
 				],
@@ -566,14 +507,188 @@ export function renderClientReadinessConfig(preset) {
 	)} as const satisfies ClientReadinessConfig;\n`;
 }
 
-export function buildCloneBootstrap(preset, reservedRoots, presetSha) {
-	const activeSurfaces = activeSurfacesForPreset(preset.preset);
-	const registryGeos = preset.geos.filter(
-		(geo) => geo.published && geo.hubStatus !== "PREPARED_OFF",
-	);
+function approvedGeoMorphology(geo) {
 	return {
-		schemaVersion: 2,
+		approved: geo.morphologyApproved,
+		nominative: geo.morphology.nominative,
+		genitive: geo.morphology.genitive,
+		prepositional: geo.morphology.prepositional,
+		preposition: geo.morphology.preposition,
+	};
+}
+
+export function buildClientSeoSkeleton(preset, profile, preparedAt) {
+	const brandName = preset.brandName ?? preset.nap?.brandName;
+	const districtRegistry = {};
+	for (const geo of preset.geos) {
+		for (const district of geo.districts) {
+			for (const [category, status] of Object.entries(
+				profile.geoCategoryStatus[geo.slug] ?? {},
+			)) {
+				if (status === "PREPARED_OFF" || status === "OUT") continue;
+				districtRegistry[geo.slug] ??= {};
+				districtRegistry[geo.slug][category] ??= [];
+				districtRegistry[geo.slug][category].push(district.slug);
+			}
+		}
+	}
+	const grammar = createProjectUrlGrammar(profile, districtRegistry);
+	const rows = [];
+	const snapshotDate = preparedAt.slice(0, 10);
+	const tier = profile.seoTiers.unmeasuredPolicy;
+	const minimumObjects =
+		tier === "NONE" ? 0 : profile.seoTiers.minInventory[tier];
+	const add = ({
+		pageKey,
+		templateKey,
+		geo,
+		category,
+		facet,
+		entityRef,
+		contentGateRule,
+	}) => {
+		const geoMorphology = geo ? approvedGeoMorphology(geo) : undefined;
+		const rendered = renderSeoDefinition(
+			preset.seoTemplates.templates[templateKey],
+			{
+				brand: brandName,
+				geoGenitive: geoMorphology?.genitive,
+				cityPhrase: geoMorphology
+					? `${geoMorphology.preposition} ${geoMorphology.prepositional}`
+					: undefined,
+				category: category
+					? preset.seoTemplates.categoryLabels[category]
+					: undefined,
+				facet: facet ? preset.seoTemplates.facetLabels[facet] : undefined,
+			},
+			geo ? geo.morphologyApproved : true,
+		);
+		const url = grammar.buildUrl(pageKey);
+		rows.push({
+			pageKey,
+			url,
+			canonical: url,
+			entityRef,
+			targetPhrases: [`client skeleton ${url}`],
+			metric: profile.seoTiers.metric,
+			value: null,
+			source: "fallback_no_data",
+			snapshotDate,
+			synthetic: false,
+			tier,
+			minimumObjects,
+			defaultRobots: "noindex,follow",
+			templateKey,
+			title: rendered.title,
+			h1: rendered.h1,
+			description: rendered.description,
+			status: "draft",
+			morphologyApproved: rendered.morphologyApproved,
+			release: "client-bootstrap",
+			contentGateRule,
+		});
+	};
+	const primary = preset.geos.find((geo) => geo.slug === preset.primaryGeo);
+	add({
+		pageKey: { kind: "home" },
+		templateKey: "home",
+		geo: primary,
+		entityRef: null,
+		contentGateRule: "listing",
+	});
+	for (const geo of preset.geos.filter(
+		(item) => item.published && item.hubStatus !== "PREPARED_OFF",
+	)) {
+		add({
+			pageKey: { kind: "geoHub", geo: geo.slug },
+			templateKey: "geoHub",
+			geo,
+			entityRef: `geo:${geo.slug}`,
+			contentGateRule: "listing",
+		});
+		for (const [category, status] of Object.entries(
+			profile.geoCategoryStatus[geo.slug] ?? {},
+		)) {
+			if (status !== "ACTIVE") continue;
+			add({
+				pageKey: { kind: "categoryGeo", geo: geo.slug, category },
+				templateKey: "categoryGeo",
+				geo,
+				category,
+				entityRef: `geo:${geo.slug}/category:${category}`,
+				contentGateRule: "listing",
+			});
+		}
+		if (profile.developersSurface.byGeo[geo.slug] === "ACTIVE") {
+			add({
+				pageKey: { kind: "geoDevelopers", geo: geo.slug },
+				templateKey: "geoDevelopers",
+				geo,
+				entityRef: `geo:${geo.slug}/developers`,
+				contentGateRule: "developerGeo",
+			});
+		}
+	}
+	for (const [facet, definition] of Object.entries(profile.seoFacets)) {
+		const geo = preset.geos.find((item) => item.slug === definition.geo);
+		if (
+			!geo ||
+			profile.geoCategoryStatus[definition.geo]?.[definition.category] !==
+				"ACTIVE"
+		)
+			continue;
+		add({
+			pageKey: {
+				kind: "categoryGeoFacet",
+				geo: definition.geo,
+				category: definition.category,
+				facet,
+			},
+			templateKey: "categoryGeoFacet",
+			geo,
+			category: definition.category,
+			facet,
+			entityRef: `facet:${facet}`,
+			contentGateRule: "listing",
+		});
+	}
+	return { rows, districtRegistry };
+}
+
+export function renderClientSeoArtifacts(preset, profile, preparedAt) {
+	const skeleton = buildClientSeoSkeleton(preset, profile, preparedAt);
+	const districtRows = ["geo,category,district"];
+	for (const [geo, categories] of Object.entries(skeleton.districtRegistry)) {
+		for (const [category, districts] of Object.entries(categories)) {
+			for (const district of districts)
+				districtRows.push(`${geo},${category},${district}`);
+		}
+	}
+	return {
+		skeleton,
+		districtCsv: `${districtRows.join("\n")}\n`,
+		registryCsv: renderSeoRegistryCsv(seoRegistryColumns, skeleton.rows),
+		registryModule: renderSeoRegistryModule(
+			skeleton.rows,
+			skeleton.districtRegistry,
+			preparedAt,
+		),
+	};
+}
+
+export function buildCloneBootstrap(
+	preset,
+	reservedRoots,
+	presetSha,
+	preparedAt,
+) {
+	const activeSurfaces = activeSurfacesForPreset(preset.preset);
+	const profile = siteProfileConfigForPreset(preset);
+	const skeleton = buildClientSeoSkeleton(preset, profile, preparedAt);
+	return {
+		schemaVersion: 3,
 		presetSha,
+		preparedAt: requiredString(preparedAt, "preparedAt"),
 		projectId: preset.projectId,
 		packageName: preset.packageName,
 		defaultDescription: preset.defaultDescription,
@@ -581,18 +696,23 @@ export function buildCloneBootstrap(preset, reservedRoots, presetSha) {
 		preset: preset.preset,
 		geoMode: preset.geoMode,
 		primaryGeo: preset.primaryGeo,
+		region: preset.region,
 		geos: preset.geos,
+		categoryStatus: preset.categoryStatus,
+		marketCapability: preset.marketCapability,
+		geoCategoryStatus: preset.geoCategoryStatus,
+		marketStatus: preset.marketStatus,
+		developersSurface: preset.developersSurface,
+		seoFacets: preset.seoFacets,
+		filterKeys: preset.filterKeys,
+		seoTiers: preset.seoTiers,
+		gate: preset.gate,
+		staticRoutes: preset.staticRoutes,
+		legacyRoutes: preset.legacyRoutes,
 		nap: { brandName: preset.brandName, ...preset.nap },
 		seoRegistry: {
 			activeSurfaces,
-			rows: activeSurfaces.flatMap((surface) =>
-				registryGeos.map((geo) => ({
-					surface,
-					geo: geo.slug,
-					morphologyApproved: geo.morphologyApproved,
-					status: "draft",
-				})),
-			),
+			rows: skeleton.rows,
 		},
 		brandAssets: preset.brandAssets,
 		feed: preset.feed,
@@ -612,7 +732,7 @@ export function validateCloneBootstrap(root) {
 		throw new Error("docs/CLIENT_BOOTSTRAP.json is missing.");
 	const value = JSON.parse(readFileSync(bootstrapPath, "utf8"));
 	assertNoSecrets(value, "bootstrap");
-	if (value.schemaVersion !== 2 || value.fixtureData !== "cleared") {
+	if (value.schemaVersion !== 3 || value.fixtureData !== "cleared") {
 		throw new Error("Client fixture data is not explicitly cleared.");
 	}
 	if (!clonePresets.includes(value.preset))
@@ -620,6 +740,8 @@ export function validateCloneBootstrap(root) {
 	requiredString(value.packageName, "bootstrap packageName");
 	requiredString(value.defaultDescription, "bootstrap defaultDescription");
 	requiredString(value.domain, "bootstrap domain");
+	requiredString(value.preparedAt, "bootstrap preparedAt");
+	validateRegion(value.region);
 	if (!["public", "noindex"].includes(value.productionIndexing)) {
 		throw new Error("Bootstrap indexing decision is missing.");
 	}
@@ -641,31 +763,22 @@ export function validateCloneBootstrap(root) {
 	) {
 		throw new Error("SEO registry active surfaces do not match the preset.");
 	}
-	for (const surface of expectedSurfaces) {
-		for (const geo of value.geos.filter(
-			(item) => item.published && item.hubStatus !== "PREPARED_OFF",
-		)) {
-			if (
-				!value.seoRegistry.rows.some(
-					(row) =>
-						row.surface === surface &&
-						row.geo === geo.slug &&
-						row.morphologyApproved === true,
-				)
-			) {
-				throw new Error(`SEO registry row missing for ${surface}/${geo.slug}.`);
-			}
-		}
-	}
+	const expectedSkeleton = buildClientSeoSkeleton(
+		value,
+		siteProfileConfigForPreset(value),
+		value.preparedAt,
+	);
 	if (
-		value.brandAssets?.status !== "ready" ||
-		value.feed?.status !== "ready" ||
-		value.developmentExcel?.status !== "ready"
+		JSON.stringify(value.seoRegistry.rows) !==
+		JSON.stringify(expectedSkeleton.rows)
 	) {
-		throw new Error(
-			"Brand, feed and development Excel onboarding must be ready.",
-		);
+		throw new Error("SEO registry skeleton drifted from SiteProfile.");
 	}
+	validateGeoTaxonomy(value.geos ?? []);
+	if (value.brandAssets?.status !== "ready") {
+		throw new Error("Brand onboarding must be ready.");
+	}
+	validateProfileReadiness(value);
 	validateClientReadiness(value.clientReadiness);
 	validateSeoInputs(value.seoTemplates);
 	const reserved = reservedRootsForSiteProfile(

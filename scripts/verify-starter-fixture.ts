@@ -7,6 +7,7 @@ import {
 	resetStarterFixture,
 	type StarterFixtureResetPort,
 	type StarterFixtureSeedPort,
+	seedGeoDataset,
 	seedStarterFixture,
 } from "../src/project/fixture-data/starter-seed.ts";
 import { geoHierarchyFixtures } from "../src/project/geo/fixtures.ts";
@@ -23,7 +24,7 @@ const districts = dataset.cities.flatMap((city) =>
 );
 assert.equal(districts.length, 4);
 assert.equal(
-	districts.filter((district) => district.districtType === "administrative")
+	districts.filter((district) => district.districtType === "admin_district")
 		.length,
 	2,
 );
@@ -77,7 +78,10 @@ const records = new Map<
 let nextId = 1;
 const port: StarterFixtureSeedPort = {
 	async upsert({ collection, identity, data }) {
-		const key = `${collection}:${identity.field}:${identity.value}`;
+		const key =
+			"fields" in identity
+				? `${collection}:${JSON.stringify(identity.fields)}`
+				: `${collection}:${identity.field}:${identity.value}`;
 		const existing = records.get(key);
 		if (!existing) {
 			const created = { id: nextId++, data: structuredClone(data) };
@@ -91,6 +95,51 @@ const port: StarterFixtureSeedPort = {
 		return { id: existing.id, state: "updated" };
 	},
 };
+let rejectedWrites = 0;
+await assert.rejects(
+	seedGeoDataset(
+		{
+			async upsert() {
+				rejectedWrites += 1;
+				return { id: 1, state: "created" };
+			},
+		},
+		{
+			snapshotAt: dataset.identity.snapshotAt,
+			region: dataset.region,
+			cities: [
+				{
+					...dataset.cities[0],
+					districts: [
+						{ ...dataset.cities[0].districts[0], parent: "other-city" },
+					],
+				},
+			],
+		},
+	),
+	/parent crosses city/,
+);
+assert.equal(rejectedWrites, 0);
+await assert.rejects(
+	seedGeoDataset(
+		{
+			async upsert() {
+				rejectedWrites += 1;
+				return { id: 1, state: "created" };
+			},
+		},
+		{
+			snapshotAt: dataset.identity.snapshotAt,
+			region: {
+				...dataset.region,
+				morphology: { ...dataset.region.morphology, prepositional: "" },
+			},
+			cities: dataset.cities,
+		},
+	),
+	/requires region slug and snapshotAt/,
+);
+assert.equal(rejectedWrites, 0);
 const first = await seedStarterFixture(port);
 const second = await seedStarterFixture(port);
 assert.equal(first.created, 17);

@@ -130,6 +130,19 @@ BEGIN
 	END IF;
 
 	IF NOT EXISTS (
+		SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid = e.enumtypid
+		WHERE t.typname = 'enum_cities_preposition' AND e.enumlabel = 'vo'
+	) OR NOT EXISTS (
+		SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid = e.enumtypid
+		WHERE t.typname = 'enum_districts_preposition' AND e.enumlabel = 'vo'
+	) OR NOT EXISTS (
+		SELECT 1 FROM pg_enum e JOIN pg_type t ON t.oid = e.enumtypid
+		WHERE t.typname = 'enum_districts_district_type' AND e.enumlabel = 'admin_district'
+	) THEN
+		RAISE EXCEPTION 'Missing clone-ready geo taxonomy enum values';
+	END IF;
+
+	IF NOT EXISTS (
 		SELECT 1 FROM information_schema.tables
 		WHERE table_schema = 'public' AND table_name = 'districts_categories'
 	) OR NOT EXISTS (

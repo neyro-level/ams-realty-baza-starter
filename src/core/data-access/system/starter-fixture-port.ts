@@ -22,10 +22,9 @@ function projectForComparison(actual: unknown, expected: unknown): unknown {
 				? (actual as Record<string, unknown>)
 				: {};
 		return Object.fromEntries(
-			Object.entries(expected).map(([key, value]) => [
-				key,
-				projectForComparison(source[key], value),
-			]),
+			Object.entries(expected)
+				.filter(([, value]) => value !== undefined)
+				.map(([key, value]) => [key, projectForComparison(source[key], value)]),
 		);
 	}
 	if (actual && typeof actual === "object" && "id" in actual) {
@@ -53,14 +52,24 @@ export function createPayloadStarterFixtureSeedPort(payload: Payload) {
 			data,
 		}: {
 			collection: FixtureCollection;
-			identity: { field: string; value: string };
+			identity:
+				| { field: string; value: string }
+				| { fields: Record<string, string | number> };
 			data: Record<string, unknown>;
 		}) {
+			const where =
+				"fields" in identity
+					? {
+							and: Object.entries(identity.fields).map(([field, value]) => ({
+								[field]: { equals: value },
+							})),
+						}
+					: { [identity.field]: { equals: identity.value } };
 			const result = await payload.find({
 				collection,
 				depth: 0,
 				limit: 1,
-				where: { [identity.field]: { equals: identity.value } },
+				where,
 				...access,
 			} as never);
 			const existing = result.docs[0];

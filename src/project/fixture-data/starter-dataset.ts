@@ -50,7 +50,7 @@ export const starterFixtureDataset = {
 				{
 					slug: "yuzhnyy",
 					title: "Южный район",
-					districtType: "administrative",
+					districtType: "admin_district",
 					parent: null,
 					synonyms: [{ value: "Южный" }],
 					preposition: "v",
@@ -96,7 +96,7 @@ export const starterFixtureDataset = {
 				{
 					slug: "tsentralnyy",
 					title: "Центральный район",
-					districtType: "administrative",
+					districtType: "admin_district",
 					parent: null,
 					synonyms: [{ value: "Центр" }],
 					preposition: "v",

@@ -47,6 +47,7 @@ export const Cities: CollectionConfig = {
 			required: true,
 			options: [
 				{ label: "в", value: "v" },
+				{ label: "во", value: "vo" },
 				{ label: "на", value: "na" },
 			],
 		},

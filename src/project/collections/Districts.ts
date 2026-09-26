@@ -58,7 +58,7 @@ export const Districts: CollectionConfig = {
 			type: "select",
 			required: true,
 			options: [
-				{ label: "Административный район", value: "administrative" },
+				{ label: "Административный район", value: "admin_district" },
 				{ label: "Микрорайон", value: "microdistrict" },
 			],
 		},
@@ -100,6 +100,7 @@ export const Districts: CollectionConfig = {
 			required: true,
 			options: [
 				{ label: "в", value: "v" },
+				{ label: "во", value: "vo" },
 				{ label: "на", value: "na" },
 			],
 		},

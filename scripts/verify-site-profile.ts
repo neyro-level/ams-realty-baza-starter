@@ -9,6 +9,7 @@ import {
 } from "../src/core/profile/index.ts";
 import { projectSiteProfileConfig } from "../src/project/site-profile.config.ts";
 import {
+	createPresetSiteProfileConfig,
 	createProjectSiteProfile,
 	siteProfile,
 	siteProfileFixtures,
@@ -53,6 +54,7 @@ const ownedFields = [
 	"seoTiers",
 	"gate",
 	"staticRoutes",
+	"legacyRoutes",
 	"modules",
 ] as const;
 for (const field of ownedFields) {
@@ -190,6 +192,36 @@ for (const metric of seoTierMetrics) {
 	candidate.seoTiers.metric = metric;
 	assert.equal(siteProfileSchema.safeParse(candidate).success, true, metric);
 }
+
+const overriddenPreset = createPresetSiteProfileConfig({
+	preset: "MIXED",
+	geoMode: "SINGLE_GEO",
+	primaryGeo: "primorsk",
+	geos: { primorsk: { published: true, hubStatus: "ACTIVE" } },
+	seoTiers: {
+		metric: "broad39",
+		snapshotDate: "2026-09-27",
+		bands: { P1: 500, P2: 100, TEST: 50 },
+		minInventory: { P1: 5, P2: 5, TEST: 10 },
+		unmeasuredPolicy: "NONE",
+	},
+	legacyRoutes: [
+		{ from: "/legacy-catalog", to: "/kvartiry/", statusCode: 301 },
+	],
+});
+assert.equal(overriddenPreset.seoTiers.metric, "broad39");
+assert.equal(overriddenPreset.legacyRoutes[0]?.from, "/legacy-catalog");
+assert.throws(
+	() =>
+		createPresetSiteProfileConfig({
+			preset: "MIXED",
+			geoMode: "SINGLE_GEO",
+			primaryGeo: "primorsk",
+			geos: { primorsk: { published: true, hubStatus: "ACTIVE" } },
+			categoryStatus: { kvartiry: "ACTIVE" } as never,
+		}),
+	/categoryStatus/,
+);
 
 assert.equal(
 	isConfiguredRouteAvailable({ status: "NOINDEX_AUTO", inventory: 0 }),

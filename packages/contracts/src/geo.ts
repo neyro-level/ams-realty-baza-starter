@@ -15,7 +15,7 @@ export type CityDTO = {
 	name: string;
 	nameGenitive: string;
 	nameLocative: string;
-	preposition: "в" | "на";
+	preposition: "в" | "во" | "на";
 	type: "city" | "town" | "settlement";
 	region: RegionDTO;
 	agglomerationOf?: string;
@@ -26,11 +26,11 @@ export type DistrictDTO = {
 	id: string;
 	slug: string;
 	name: string;
-	type: "administrative" | "microdistrict";
+	type: "admin_district" | "microdistrict";
 	citySlug: string;
 	parentSlug?: string;
 	nameLocative?: string;
-	preposition?: "в" | "на";
+	preposition?: "в" | "во" | "на";
 };
 
 export type GeoHubDTO = {

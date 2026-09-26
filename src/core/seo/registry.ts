@@ -1,3 +1,8 @@
+import {
+	type SeoTierMetric,
+	type SiteProfile,
+	seoTierMetrics,
+} from "../profile/index.ts";
 import type { PageKey } from "../routing/url-grammar.ts";
 
 export const seoEvidenceSources = [
@@ -15,6 +20,20 @@ export type SeoEvidenceSource = (typeof seoEvidenceSources)[number];
 export type SeoTier = (typeof seoTiers)[number];
 export type SeoRobots = (typeof seoRobots)[number];
 export type SeoRegistryStatus = (typeof seoRegistryStatuses)[number];
+
+export function deriveSeoTier(
+	value: number | null,
+	config: SiteProfile["seoTiers"],
+): SeoTier {
+	if (value === null) return config.unmeasuredPolicy;
+	if (!Number.isFinite(value) || value < 0) {
+		throw new Error("SEO tier value must be a non-negative number or null.");
+	}
+	if (value >= config.bands.P1) return "P1";
+	if (value >= config.bands.P2) return "P2";
+	if (value >= config.bands.TEST) return "TEST";
+	return "NONE";
+}
 
 export type ApprovedMorphology = {
 	approved: boolean;
@@ -43,7 +62,7 @@ export type SeoRegistryRow<TemplateKey extends string = string> = {
 	canonical: string;
 	entityRef: string | null;
 	targetPhrases: readonly string[];
-	metric: "searchDemand";
+	metric: SeoTierMetric;
 	value: number | null;
 	source: SeoEvidenceSource;
 	snapshotDate: string;
@@ -67,7 +86,9 @@ export type SeoRegistryGuardInput = {
 	now?: Date;
 };
 
-type TemplateValues = Readonly<Record<string, string | number | null | undefined>>;
+type TemplateValues = Readonly<
+	Record<string, string | number | null | undefined>
+>;
 
 function normalizeRenderedText(value: string): string {
 	return value
@@ -81,7 +102,12 @@ function interpolate(pattern: string, values: TemplateValues): string {
 		const names = [...part.matchAll(/\{([a-zA-Z0-9_]+)\}/g)].map(
 			(match) => match[1],
 		);
-		return names.every((name) => values[name] !== null && values[name] !== undefined && String(values[name]).trim())
+		return names.every(
+			(name) =>
+				values[name] !== null &&
+				values[name] !== undefined &&
+				String(values[name]).trim(),
+		)
 			? part
 			: "";
 	});
@@ -125,8 +151,8 @@ export function morphologyPhrase(
 export function isApprovedMorphology(
 	...values: readonly (ApprovedMorphology | undefined)[]
 ): boolean {
-	return values.every(
-		(value) => Boolean(value?.approved && value.preposition?.trim()),
+	return values.every((value) =>
+		Boolean(value?.approved && value.preposition?.trim()),
 	);
 }
 
@@ -177,6 +203,9 @@ export function assertSeoRegistry(input: SeoRegistryGuardInput): void {
 	const now = input.now ?? new Date();
 
 	for (const row of input.rows) {
+		if (!(seoTierMetrics as readonly string[]).includes(row.metric)) {
+			throw new Error(`Unsupported SEO tier metric: ${row.metric}`);
+		}
 		if (!(seoEvidenceSources as readonly string[]).includes(row.source)) {
 			throw new Error(`Unsupported SEO evidence source: ${row.source}`);
 		}

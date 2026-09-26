@@ -1,0 +1,69 @@
+import { getPayload } from "payload";
+import config from "../payload.config.ts";
+import { createPayloadStarterFixtureSeedPort } from "../src/core/data-access/system/starter-fixture-port.ts";
+import { requirePayloadRuntime } from "../src/project/env.ts";
+import {
+	type GeoSeedDataset,
+	seedGeoDataset,
+} from "../src/project/fixture-data/starter-seed.ts";
+import { validateCloneBootstrap } from "./clone-preset.mjs";
+
+const preposition = { в: "v", во: "vo", на: "na" } as const;
+const bootstrap = validateCloneBootstrap(process.cwd());
+const dataset: GeoSeedDataset = {
+	snapshotAt: bootstrap.preparedAt,
+	region: {
+		slug: bootstrap.region.slug,
+		title: bootstrap.region.name,
+		morphology: {
+			nominative: bootstrap.region.name,
+			genitive: bootstrap.region.genitive,
+			prepositional: bootstrap.region.locative,
+		},
+		shortName: bootstrap.region.shortName,
+		sortOrder: 10,
+	},
+	cities: bootstrap.geos.map((geo, cityIndex) => ({
+		slug: geo.slug,
+		title: geo.title,
+		morphology: {
+			nominative: geo.morphology.nominative,
+			genitive: geo.morphology.genitive,
+			prepositional: geo.morphology.prepositional,
+		},
+		preposition:
+			preposition[geo.morphology.preposition as keyof typeof preposition],
+		cityType: "city",
+		morphologyApproved: true,
+		sortOrder: (cityIndex + 1) * 10,
+		agglomerationOf: geo.agglomerationOf,
+		districts: geo.districts.map((district, districtIndex) => ({
+			slug: district.slug,
+			title: district.name,
+			morphology: {
+				nominative: district.name,
+				genitive: district.name,
+				prepositional: district.locative,
+			},
+			districtType: district.type,
+			parent: district.parent,
+			synonyms: district.synonyms.map((value: string) => ({ value })),
+			preposition:
+				preposition[district.preposition as keyof typeof preposition],
+			morphologyApproved: true,
+			sortOrder: (districtIndex + 1) * 10,
+		})),
+	})),
+};
+
+requirePayloadRuntime();
+const payload = await getPayload({ config });
+try {
+	const result = await seedGeoDataset(
+		createPayloadStarterFixtureSeedPort(payload),
+		dataset,
+	);
+	payload.logger.info(`clone geo seed: ${JSON.stringify(result.report)}`);
+} finally {
+	await payload.destroy();
+}

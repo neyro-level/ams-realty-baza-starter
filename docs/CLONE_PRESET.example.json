@@ -1,5 +1,5 @@
 {
-	"schemaVersion": 2,
+	"schemaVersion": 3,
 	"projectId": "CLIENT-PROJECT-ID",
 	"packageName": "client-realty-site",
 	"brandName": "Клиент Недвижимость",
@@ -9,6 +9,13 @@
 	"geoMode": "SINGLE_GEO",
 	"primaryGeo": "klientograd",
 	"productionIndexing": "noindex",
+	"region": {
+		"slug": "klientogradskiy-kray",
+		"name": "Клиентоградский край",
+		"genitive": "Клиентоградского края",
+		"locative": "Клиентоградском крае",
+		"shortName": "Клиентоградский край"
+	},
 	"geos": [
 		{
 			"slug": "klientograd",
@@ -19,8 +26,20 @@
 			"morphology": {
 				"nominative": "Клиентоград",
 				"genitive": "Клиентограда",
-				"prepositional": "Клиентограде"
-			}
+				"prepositional": "Клиентограде",
+				"preposition": "в"
+			},
+			"districts": [
+				{
+					"slug": "tsentralnyy",
+					"name": "Центральный район",
+					"type": "admin_district",
+					"locative": "Центральном районе",
+					"preposition": "в",
+					"synonyms": ["Центр"],
+					"parent": null
+				}
+			]
 		}
 	],
 	"nap": {

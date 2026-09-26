@@ -1,6 +1,6 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 9 V6 S0-S14 EXECUTION COMPLETE / PRE-S15 OWNER GATE`.
+Статус: `ACTIVE / PLAN 10 V4 APPROVED HANDOFF / PLAN 9 EXECUTION COMPLETE`.
 SourceCraft — primary, GitHub — одностороннее зеркало. Exact v6 исполнен через
 пять approved delivery batches; принятый implementation baseline —
 `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
@@ -27,6 +27,11 @@ SourceCraft — primary, GitHub — одностороннее зеркало. E
 
 ## Активное планирование
 
+- `AMS_MASTER_PLAN_10_CLONE_READY_2_1.md` — текущая canonical основа нового
+  Plan №10, `v4 APPROVED / APPROVAL_HANDOFF`. Четыре audit-pass завершены,
+  граф 22/22 без циклов; approval разрешает clean Task Manager import и
+  Developer handoff по трём `MERGE_AFTER_GATE` batch, но не production, tag,
+  mirror или live target execution.
 - `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — exact approved source
   исполненного scope S0-S14, `v6 APPROVED / EXECUTION_COMPLETE`.
 - S15, release tag и production не входят в завершённый Developer graph и

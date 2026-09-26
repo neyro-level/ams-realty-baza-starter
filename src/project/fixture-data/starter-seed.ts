@@ -11,13 +11,216 @@ export type StarterFixtureCollection =
 export type StarterFixtureSeedPort = {
 	upsert(input: {
 		collection: StarterFixtureCollection;
-		identity: { field: string; value: string };
+		identity:
+			| { field: string; value: string }
+			| { fields: Record<string, string | number> };
 		data: Record<string, unknown>;
 	}): Promise<{
 		id: string | number;
 		state: "created" | "updated" | "unchanged";
 	}>;
 };
+
+export type GeoSeedDataset = {
+	snapshotAt: string;
+	region: Record<string, unknown> & { slug: string };
+	cities: readonly (Record<string, unknown> & {
+		slug: string;
+		agglomerationOf?: string;
+		districts: readonly (Record<string, unknown> & {
+			slug: string;
+			parent: string | null;
+			districtType: "admin_district" | "microdistrict";
+			preposition: "v" | "vo" | "na";
+		})[];
+	})[];
+};
+
+function hasRequiredMorphology(value: unknown): boolean {
+	if (!value || typeof value !== "object") return false;
+	const morphology = value as Record<string, unknown>;
+	return ["nominative", "genitive", "prepositional"].every(
+		(key) =>
+			typeof morphology[key] === "string" && morphology[key].trim() !== "",
+	);
+}
+
+export function validateGeoSeedDataset(dataset: GeoSeedDataset): void {
+	if (
+		!dataset.region.slug ||
+		!dataset.snapshotAt ||
+		!hasRequiredMorphology(dataset.region.morphology)
+	) {
+		throw new Error("Geo seed requires region slug and snapshotAt.");
+	}
+	const citySlugs = new Set<string>();
+	for (const city of dataset.cities) {
+		if (
+			!city.slug ||
+			citySlugs.has(city.slug) ||
+			!hasRequiredMorphology(city.morphology) ||
+			!["v", "vo", "na"].includes(String(city.preposition))
+		) {
+			throw new Error(
+				`Geo seed city slug is invalid or duplicated: ${city.slug}`,
+			);
+		}
+		citySlugs.add(city.slug);
+		const districts = new Map(city.districts.map((item) => [item.slug, item]));
+		if (districts.size !== city.districts.length) {
+			throw new Error(`Geo seed has duplicate districts in city ${city.slug}.`);
+		}
+		for (const district of city.districts) {
+			if (
+				!district.slug ||
+				!["admin_district", "microdistrict"].includes(district.districtType) ||
+				!hasRequiredMorphology(district.morphology)
+			) {
+				throw new Error(
+					`Geo seed district ${city.slug}/${district.slug} is invalid.`,
+				);
+			}
+			if (!["v", "vo", "na"].includes(district.preposition)) {
+				throw new Error(
+					`Geo seed district ${city.slug}/${district.slug} preposition is invalid.`,
+				);
+			}
+			if (district.parent !== null && !districts.has(district.parent)) {
+				throw new Error(
+					`Geo seed district ${city.slug}/${district.slug} parent crosses city.`,
+				);
+			}
+			const visited = new Set([district.slug]);
+			let parent = district.parent;
+			while (parent !== null) {
+				if (visited.has(parent))
+					throw new Error(`Geo seed district cycle in city ${city.slug}.`);
+				visited.add(parent);
+				parent = districts.get(parent)?.parent ?? null;
+			}
+		}
+	}
+	for (const city of dataset.cities) {
+		if (city.agglomerationOf && !citySlugs.has(city.agglomerationOf)) {
+			throw new Error(
+				`Geo seed city ${city.slug} has unknown agglomerationOf.`,
+			);
+		}
+		const visited = new Set([city.slug]);
+		let parent = city.agglomerationOf;
+		while (parent) {
+			if (visited.has(parent)) {
+				throw new Error(
+					"Geo seed city agglomeration hierarchy contains a cycle.",
+				);
+			}
+			visited.add(parent);
+			parent = dataset.cities.find(
+				(item) => item.slug === parent,
+			)?.agglomerationOf;
+		}
+	}
+}
+
+export async function seedGeoDataset(
+	port: StarterFixtureSeedPort,
+	dataset: GeoSeedDataset,
+): Promise<{
+	report: StarterFixtureSeedReport;
+	regionId: string | number;
+	cityIds: Map<string, string | number>;
+	districtIds: Map<string, string | number>;
+}> {
+	validateGeoSeedDataset(dataset);
+	const report = emptySeedReport();
+	const published = { status: "published", publishedAt: dataset.snapshotAt };
+	const upsert = async (
+		collection: StarterFixtureCollection,
+		identity:
+			| { field: string; value: string }
+			| { fields: Record<string, string | number> },
+		data: Record<string, unknown>,
+	) => {
+		const result = await port.upsert({ collection, identity, data });
+		report[result.state] += 1;
+		report.byCollection[collection] += 1;
+		return result.id;
+	};
+	const regionId = await upsert(
+		"regions",
+		{ field: "slug", value: dataset.region.slug },
+		{ ...dataset.region, ...published },
+	);
+	const cityIds = new Map<string, string | number>();
+	const pendingCities = [...dataset.cities];
+	while (pendingCities.length > 0) {
+		const index = pendingCities.findIndex(
+			(city) => !city.agglomerationOf || cityIds.has(city.agglomerationOf),
+		);
+		if (index < 0) throw new Error("Geo seed cannot resolve city hierarchy.");
+		const city = pendingCities.splice(index, 1)[0];
+		const { districts: _districts, agglomerationOf, ...data } = city;
+		cityIds.set(
+			city.slug,
+			await upsert(
+				"cities",
+				{ field: "slug", value: city.slug },
+				{
+					...data,
+					region: regionId,
+					agglomerationOf: agglomerationOf
+						? requiredReference(
+								cityIds,
+								agglomerationOf,
+								"city.agglomerationOf",
+							)
+						: undefined,
+					...published,
+				},
+			),
+		);
+	}
+	const districtIds = new Map<string, string | number>();
+	for (const city of dataset.cities) {
+		const pendingDistricts = [...city.districts];
+		while (pendingDistricts.length > 0) {
+			const index = pendingDistricts.findIndex(
+				(item) =>
+					item.parent === null ||
+					districtIds.has(`${city.slug}/${item.parent}`),
+			);
+			if (index < 0) {
+				throw new Error(
+					`Geo seed cannot resolve district hierarchy in ${city.slug}.`,
+				);
+			}
+			const district = pendingDistricts.splice(index, 1)[0];
+			const { parent, ...data } = district;
+			const cityId = requiredReference(cityIds, city.slug, "district.city");
+			const key = `${city.slug}/${district.slug}`;
+			districtIds.set(
+				key,
+				await upsert(
+					"districts",
+					{ fields: { slug: district.slug, city: cityId } },
+					{
+						...data,
+						city: cityId,
+						parent: parent
+							? requiredReference(
+									districtIds,
+									`${city.slug}/${parent}`,
+									"district.parent",
+								)
+							: undefined,
+						...published,
+					},
+				),
+			);
+		}
+	}
+	return { report, regionId, cityIds, districtIds };
+}
 
 export type StarterFixtureResetPort = {
 	deleteOwned(input: {
@@ -33,6 +236,22 @@ export type StarterFixtureSeedReport = {
 	unchanged: number;
 	byCollection: Record<StarterFixtureCollection, number>;
 };
+
+function emptySeedReport(): StarterFixtureSeedReport {
+	return {
+		created: 0,
+		updated: 0,
+		unchanged: 0,
+		byCollection: {
+			regions: 0,
+			cities: 0,
+			districts: 0,
+			developers: 0,
+			developments: 0,
+			properties: 0,
+		},
+	};
+}
 
 function requiredReference(
 	map: ReadonlyMap<string, string | number>,
@@ -53,19 +272,12 @@ export async function seedStarterFixture(
 	if (dataset.identity.indexing !== "noindex") {
 		throw new Error("Starter fixture must remain noindex.");
 	}
-	const report: StarterFixtureSeedReport = {
-		created: 0,
-		updated: 0,
-		unchanged: 0,
-		byCollection: {
-			regions: 0,
-			cities: 0,
-			districts: 0,
-			developers: 0,
-			developments: 0,
-			properties: 0,
-		},
-	};
+	const geo = await seedGeoDataset(port, {
+		snapshotAt: dataset.identity.snapshotAt,
+		region: dataset.region,
+		cities: dataset.cities,
+	});
+	const { report, regionId, cityIds, districtIds } = geo;
 	async function upsert(
 		collection: StarterFixtureCollection,
 		identity: { field: string; value: string },
@@ -77,82 +289,6 @@ export async function seedStarterFixture(
 		return result.id;
 	}
 
-	const published = {
-		status: "published",
-		publishedAt: dataset.identity.snapshotAt,
-	};
-	const regionId = await upsert(
-		"regions",
-		{ field: "slug", value: dataset.region.slug },
-		{ ...dataset.region, ...published },
-	);
-	const cityIds = new Map<string, string | number>();
-	for (const city of dataset.cities) {
-		const data = Object.fromEntries(
-			Object.entries(city).filter(
-				([key]) => !["districts", "agglomerationOf"].includes(key),
-			),
-		);
-		const agglomerationOf =
-			"agglomerationOf" in city && city.agglomerationOf
-				? requiredReference(
-						cityIds,
-						city.agglomerationOf,
-						"city.agglomerationOf",
-					)
-				: undefined;
-		cityIds.set(
-			city.slug,
-			await upsert(
-				"cities",
-				{ field: "slug", value: city.slug },
-				{
-					...data,
-					region: regionId,
-					agglomerationOf,
-					...published,
-				},
-			),
-		);
-	}
-	const districtIds = new Map<string, string | number>();
-	for (const city of dataset.cities) {
-		for (const district of city.districts.filter(
-			(item) => item.parent === null,
-		)) {
-			const { parent: _parent, ...data } = district;
-			districtIds.set(
-				district.slug,
-				await upsert(
-					"districts",
-					{ field: "slug", value: district.slug },
-					{
-						...data,
-						city: requiredReference(cityIds, city.slug, "district.city"),
-						...published,
-					},
-				),
-			);
-		}
-		for (const district of city.districts.filter(
-			(item) => item.parent !== null,
-		)) {
-			const { parent, ...data } = district;
-			districtIds.set(
-				district.slug,
-				await upsert(
-					"districts",
-					{ field: "slug", value: district.slug },
-					{
-						...data,
-						city: requiredReference(cityIds, city.slug, "district.city"),
-						parent: requiredReference(districtIds, parent, "district.parent"),
-						...published,
-					},
-				),
-			);
-		}
-	}
 	if (options.through === "geo") return report;
 
 	const developerIds = new Map<string, string | number>();
@@ -191,7 +327,7 @@ export async function seedStarterFixture(
 					),
 					district: requiredReference(
 						districtIds,
-						development.districtSlug,
+						`${development.citySlug}/${development.districtSlug}`,
 						"development.district",
 					),
 					developer: requiredReference(
@@ -259,7 +395,7 @@ export async function seedStarterFixture(
 				cityRef: requiredReference(cityIds, property.citySlug, "property.city"),
 				districtRef: requiredReference(
 					districtIds,
-					property.districtSlug,
+					`${property.citySlug}/${property.districtSlug}`,
 					"property.district",
 				),
 				district: property.districtSlug,

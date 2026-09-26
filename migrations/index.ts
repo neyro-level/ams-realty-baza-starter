@@ -20,6 +20,7 @@ import * as migration_20260924_233000_lead_context from "./20260924_233000_lead_
 import * as migration_20260925_140000_district_route_categories from "./20260925_140000_district_route_categories";
 import * as migration_20260925_230000_development_model_v2 from "./20260925_230000_development_model_v2";
 import * as migration_20260926_092324_plan9_s10b_indexnow_jobs from "./20260926_092324_plan9_s10b_indexnow_jobs";
+import * as migration_20260927_010000_geo_taxonomy_v3 from "./20260927_010000_geo_taxonomy_v3";
 
 export const migrations = [
 	{
@@ -131,5 +132,10 @@ export const migrations = [
 		up: migration_20260926_092324_plan9_s10b_indexnow_jobs.up,
 		down: migration_20260926_092324_plan9_s10b_indexnow_jobs.down,
 		name: "20260926_092324_plan9_s10b_indexnow_jobs",
+	},
+	{
+		up: migration_20260927_010000_geo_taxonomy_v3.up,
+		down: migration_20260927_010000_geo_taxonomy_v3.down,
+		name: "20260927_010000_geo_taxonomy_v3",
 	},
 ];

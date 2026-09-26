@@ -1,4 +1,4 @@
-export const contractVersion = "2.1.0" as const;
+export const contractVersion = "2.3.0" as const;
 
 export type { NapDTO } from "./nap";
 export const contractState = "frozen" as const;

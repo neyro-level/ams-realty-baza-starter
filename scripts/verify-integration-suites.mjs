@@ -32,6 +32,7 @@ import {
 	proveDevelopmentsMigration,
 	proveDistrictRouteCategoriesMigration,
 	proveGeoHierarchyMigration,
+	proveGeoTaxonomyV3Migration,
 	proveLeadContextMigration,
 	proveLeadDeliveryRelationalMigration,
 	provePayloadAuthSecurityMigration,
@@ -285,6 +286,8 @@ await prepareIntegrationDatabase(preferredUri);
 proveLeadContextMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
 proveDistrictRouteCategoriesMigration(preferredUri);
+await prepareIntegrationDatabase(preferredUri);
+proveGeoTaxonomyV3Migration(preferredUri);
 const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {
@@ -367,6 +370,21 @@ assert.equal(
 execFileSync(
 	"pnpm",
 	["exec", "payload", "run", "scripts/integration/geo-suites.ts"],
+	{
+		stdio: "inherit",
+		shell: process.platform === "win32",
+		env: {
+			...childEnv,
+			NODE_OPTIONS: [process.env.NODE_OPTIONS, "--conditions=react-server"]
+				.filter(Boolean)
+				.join(" "),
+		},
+	},
+);
+
+execFileSync(
+	"pnpm",
+	["exec", "payload", "run", "scripts/integration/clone-geo-seed-suites.ts"],
 	{
 		stdio: "inherit",
 		shell: process.platform === "win32",

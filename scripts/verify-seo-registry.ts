@@ -1,34 +1,59 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { validateRegistryCsv } from "./seo-registry.ts";
 import {
 	assertSeoRegistry,
+	deriveSeoTier,
 	formatRussianPlural,
 	type SeoRegistryRow,
 } from "../src/core/seo/registry.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
-import { projectSeoRegistrySeed } from "../src/project/seo/registry-seed.ts";
+import {
+	projectDistrictRouteRegistry,
+	projectSeoRegistrySeed,
+} from "../src/project/seo/registry-seed.ts";
 import {
 	projectSeoTemplateKeys,
 	renderProjectSeoTemplate,
 } from "../src/project/seo/templates.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
+import {
+	siteProfile,
+	siteProfileFixtures,
+} from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
+import {
+	districtRegistryFromBootstrap,
+	parseDistrictRegistryCsv,
+	validateRegistryCsv,
+} from "./seo-registry.ts";
 
 const grammar = createProjectUrlGrammar(
-	siteProfileFixtures.multiGeo,
-	fixtureDistrictRouteRegistryFor(siteProfileFixtures.multiGeo),
+	siteProfile,
+	projectDistrictRouteRegistry,
 );
 const now = new Date("2026-09-24T12:00:00.000Z");
 const csvSource = readFileSync("docs/seo/SEO_REGISTRY_SEED.csv", "utf8");
 const csvRows = validateRegistryCsv(csvSource);
 assert.deepEqual(csvRows, projectSeoRegistrySeed);
+const generatedSource = readFileSync(
+	"src/project/seo/registry-seed.ts",
+	"utf8",
+);
+assert.doesNotMatch(
+	generatedSource,
+	/fixture\/route-registries|siteProfileFixtures/,
+);
+assert.match(generatedSource, /siteProfile/);
 
 const [csvHeader, homeCsvRow] = csvSource.split(/\r?\n/);
 assert.ok(csvHeader && homeCsvRow);
 
 for (const [name, profile] of Object.entries(siteProfileFixtures)) {
-	const [profileRow] = validateRegistryCsv(`${csvHeader}\n${homeCsvRow}\n`);
+	const registry = fixtureDistrictRouteRegistryFor(profile);
+	const [profileRow] = validateRegistryCsv(
+		`${csvHeader}\n${homeCsvRow}\n`,
+		profile,
+		registry,
+	);
 	assert.ok(profileRow);
 	const profileGrammar = createProjectUrlGrammar(
 		profile,
@@ -46,31 +71,118 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 }
 
 const duplicateCsv = `${csvSource.trimEnd()}\n${csvSource.split(/\r?\n/)[1]}\n`;
-assert.throws(() => validateRegistryCsv('"unterminated'), /unterminated quoted field/);
 assert.throws(
-	() => validateRegistryCsv(csvSource.replace("pageKey,url,canonical", "url,pageKey,canonical")),
+	() => validateRegistryCsv('"unterminated'),
+	/unterminated quoted field/,
+);
+assert.throws(
+	() =>
+		validateRegistryCsv(
+			csvSource.replace("pageKey,url,canonical", "url,pageKey,canonical"),
+		),
 	/columns or order differ/,
 );
-assert.throws(() => validateRegistryCsv(duplicateCsv), /Duplicate SEO URL|Duplicate SEO intent/);
 assert.throws(
-	() => validateRegistryCsv(csvSource.replace('"","fallback_no_data"', '"1","fallback_no_data"')),
+	() => validateRegistryCsv(duplicateCsv),
+	/Duplicate SEO URL|Duplicate SEO intent/,
+);
+assert.throws(
+	() =>
+		validateRegistryCsv(
+			csvSource.replace('"","fallback_no_data"', '"1","fallback_no_data"'),
+		),
 	/must keep value null/,
 );
 assert.throws(
-	() => validateRegistryCsv(csvSource.replace('"draft","true","starter-v2.1.0"', '"approved","true","starter-v2.1.0"')),
+	() =>
+		validateRegistryCsv(
+			csvSource.replace(
+				'"draft","true","starter-v2.1.0"',
+				'"approved","true","starter-v2.1.0"',
+			),
+		),
 	/Synthetic SEO row cannot be approved/,
 );
 assert.throws(
-	() => validateRegistryCsv(csvSource.replace('"draft","true","starter-v2.1.0","listing"', '"unknown","true","starter-v2.1.0","listing"')),
+	() =>
+		validateRegistryCsv(
+			csvSource.replace(
+				'"draft","true","starter-v2.1.0","listing"',
+				'"unknown","true","starter-v2.1.0","listing"',
+			),
+		),
 	/Unsupported SEO registry status/,
 );
 assert.throws(
-	() => validateRegistryCsv(csvSource.replace('"noindex,follow","home"', '"unknown","home"')),
+	() =>
+		validateRegistryCsv(
+			csvSource.replace('"noindex,follow","home"', '"unknown","home"'),
+		),
 	/Unsupported SEO robots directive/,
 );
 assert.throws(
-	() => validateRegistryCsv(csvSource.replace('"starter-v2.1.0","listing"', '"starter-v2.1.0","unknown"')),
+	() =>
+		validateRegistryCsv(
+			csvSource.replace(
+				'"starter-v2.1.0","listing"',
+				'"starter-v2.1.0","unknown"',
+			),
+		),
 	/Unsupported contentGateRule/,
+);
+assert.throws(
+	() => validateRegistryCsv(csvSource.replace('"searchDemand"', '"wordstat"')),
+	/differs from SiteProfile metric/,
+);
+assert.throws(
+	() =>
+		validateRegistryCsv(
+			csvSource.replace('"true","TEST","10"', '"true","P1","10"'),
+		),
+	/differs from derived tier/,
+);
+assert.throws(
+	() =>
+		parseDistrictRegistryCsv(
+			"geo,category,district\nunknown,kvartiry,central",
+			siteProfile,
+		),
+	/unknown geo/,
+);
+assert.deepEqual(
+	districtRegistryFromBootstrap(
+		{
+			geos: [
+				{
+					slug: siteProfile.primaryGeo,
+					districts: [{ slug: "bootstrap-district" }],
+				},
+			],
+		},
+		siteProfile,
+	)[siteProfile.primaryGeo]?.kvartiry,
+	["bootstrap-district"],
+);
+assert.equal(deriveSeoTier(null, siteProfile.seoTiers), "TEST");
+assert.equal(
+	deriveSeoTier(siteProfile.seoTiers.bands.P1, siteProfile.seoTiers),
+	"P1",
+);
+assert.equal(
+	deriveSeoTier(siteProfile.seoTiers.bands.P2, siteProfile.seoTiers),
+	"P2",
+);
+const wordstatProfile = {
+	...siteProfile,
+	seoTiers: { ...siteProfile.seoTiers, metric: "wordstat" as const },
+};
+assert.equal(
+	validateRegistryCsv(
+		`${csvHeader}\n${homeCsvRow.replace('"searchDemand"', '"wordstat"')}\n`,
+		wordstatProfile,
+		projectDistrictRouteRegistry,
+	)[0]?.metric,
+	"wordstat",
 );
 
 assertSeoRegistry({
@@ -158,10 +270,7 @@ const districtSnapshot = renderProjectSeoTemplate("categoryGeoDistrict", {
 	districtType: "microdistrict",
 	inventory: 22,
 });
-assert.equal(
-	districtSnapshot.h1,
-	"Квартиры на Северном в Ростове-на-Дону",
-);
+assert.equal(districtSnapshot.h1, "Квартиры на Северном в Ростове-на-Дону");
 assert.equal(
 	districtSnapshot.description,
 	"Квартиры на Северном в Ростове-на-Дону — актуальные предложения. 22 объекта.",
@@ -170,7 +279,14 @@ assert.deepEqual(
 	[1, 2, 5, 11, 21, 24].map((value) =>
 		formatRussianPlural(value, ["объект", "объекта", "объектов"]),
 	),
-	["1 объект", "2 объекта", "5 объектов", "11 объектов", "21 объект", "24 объекта"],
+	[
+		"1 объект",
+		"2 объекта",
+		"5 объектов",
+		"11 объектов",
+		"21 объект",
+		"24 объекта",
+	],
 );
 
 const base = projectSeoRegistrySeed[0];

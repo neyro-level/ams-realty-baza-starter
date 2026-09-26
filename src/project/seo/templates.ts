@@ -29,7 +29,7 @@ export const projectSeoTemplateKeys = [
 ] as const;
 
 export type ProjectSeoTemplateKey = (typeof projectSeoTemplateKeys)[number];
-export type ProjectDistrictType = "administrative" | "microdistrict";
+export type ProjectDistrictType = "admin_district" | "microdistrict";
 
 export type ProjectSeoTemplateContext = {
 	brand: string;
@@ -69,7 +69,7 @@ const templates = projectSeoTemplatesInput satisfies Record<
 >;
 
 const districtTemplateByType = {
-	administrative: templates.categoryGeoDistrict,
+	admin_district: templates.categoryGeoDistrict,
 	microdistrict: templates.categoryGeoDistrict,
 } satisfies Record<ProjectDistrictType, SeoTemplateDefinition>;
 
@@ -90,7 +90,7 @@ export function renderProjectSeoTemplate(
 	const geo = context.city ?? context.region;
 	const definition =
 		templateKey === "categoryGeoDistrict"
-			? districtTemplateByType[context.districtType ?? "administrative"]
+			? districtTemplateByType[context.districtType ?? "admin_district"]
 			: templates[templateKey];
 	const inventory =
 		context.inventory === undefined

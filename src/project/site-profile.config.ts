@@ -152,6 +152,7 @@ export const projectSiteProfileConfig = {
 			indexable: false,
 		},
 	],
+	legacyRoutes: [{ from: "/nedvizhimost", to: "/kvartiry/", statusCode: 301 }],
 	modules: {
 		novostroyki: { state: "prepared", reservedRoots: ["komplex"] },
 		journal: { state: "disabled", reservedRoots: ["journal"] },

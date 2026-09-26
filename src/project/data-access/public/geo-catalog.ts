@@ -980,7 +980,8 @@ function toCityDTO(city: City): CityDTO {
 		name: city.title,
 		nameGenitive: city.morphology.genitive,
 		nameLocative: city.morphology.prepositional,
-		preposition: city.preposition === "na" ? "на" : "в",
+		preposition:
+			city.preposition === "na" ? "на" : city.preposition === "vo" ? "во" : "в",
 		type:
 			city.cityType === "city"
 				? "city"
@@ -1402,7 +1403,12 @@ function cityMorphology(city: City) {
 		nominative: city.morphology.nominative,
 		genitive: city.morphology.genitive,
 		prepositional: city.morphology.prepositional,
-		preposition: city.preposition === "na" ? ("на" as const) : ("в" as const),
+		preposition:
+			city.preposition === "na"
+				? ("на" as const)
+				: city.preposition === "vo"
+					? ("во" as const)
+					: ("в" as const),
 	};
 }
 
@@ -1413,7 +1419,11 @@ function districtMorphology(district: District) {
 		genitive: district.morphology.genitive,
 		prepositional: district.morphology.prepositional,
 		preposition:
-			district.preposition === "na" ? ("на" as const) : ("в" as const),
+			district.preposition === "na"
+				? ("на" as const)
+				: district.preposition === "vo"
+					? ("во" as const)
+					: ("в" as const),
 	};
 }
 

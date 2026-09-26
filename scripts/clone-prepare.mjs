@@ -1,11 +1,18 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import {
 	buildCloneBootstrap,
 	clonePresetHash,
 	readClonePreset,
 	renderClientReadinessConfig,
+	renderClientSeoArtifacts,
 	renderProjectLiterals,
 	renderSeoTemplateInputs,
 	renderSiteProfileConfig,
@@ -144,6 +151,7 @@ packageJson.name = preset.packageName;
 delete packageJson.scripts?.["visual:atlas-css-parity"];
 delete packageJson.scripts?.["verify:starter:clone-readiness"];
 delete packageJson.scripts?.["verify:client-clone-proof"];
+delete packageJson.scripts?.["verify:clone-matrix"];
 delete packageJson.scripts?.["verify:clone-presets"];
 delete packageJson.scripts?.["verify:clone-readiness"];
 delete packageJson.scripts?.["verify:clone-prepare"];
@@ -194,15 +202,34 @@ const readinessPath = join(
 );
 writeFileSync(readinessPath, renderClientReadinessConfig(preset));
 
+const preparedAt = String(args.get("--date") || new Date().toISOString());
 const bootstrap = buildCloneBootstrap(
 	preset,
 	reservedRootsForSiteProfile(siteProfileConfigForPreset(preset)),
 	presetSha,
+	preparedAt,
 );
 writeFileSync(bootstrapPath, `${JSON.stringify(bootstrap, null, "\t")}\n`);
+const seoArtifacts = renderClientSeoArtifacts(
+	preset,
+	siteProfileConfigForPreset(preset),
+	preparedAt,
+);
+mkdirSync(join(root, "docs", "seo"), { recursive: true });
+writeFileSync(
+	join(root, "docs", "seo", "DISTRICTS.csv"),
+	seoArtifacts.districtCsv,
+);
+writeFileSync(
+	join(root, "docs", "seo", "SEO_REGISTRY_SEED.csv"),
+	seoArtifacts.registryCsv,
+);
+writeFileSync(
+	join(root, "src", "project", "seo", "registry-seed.ts"),
+	seoArtifacts.registryModule,
+);
 validateCloneBootstrap(root);
 
-const preparedAt = String(args.get("--date") || new Date().toISOString());
 const provenance = `# Clone provenance\n\n- Client project: ${preset.projectId}\n- Preset: ${preset.preset}\n- Preset SHA-256: ${presetSha}\n- Source starter tag: ${sourceTag}\n- Source starter SHA: ${sourceSha}\n- Prepared at: ${preparedAt}\n- Fixture runtime: cleared for client mode\n- Storage topology: separate explicit clone:activate-* step\n- Retained platform standard: AMS Realty Platform Core 5.5 (repository-pinned)\n- Retained UI contract: project Design System and closed @ams/realtbase-ui public API\n\n## Removed starter-only groups\n\n${removed.length ? removed.map((item) => `- \`${item}\``).join("\n") : "- None (already absent)"}\n\nCore, packages, guards, migrations and shared security/data checks remain unchanged.\n`;
 writeFileSync(provenancePath, provenance);
 console.log(
