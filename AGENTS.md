@@ -14,8 +14,9 @@
 - Текущий execution source —
   `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`, Plan №9 v6
   `APPROVED`. S0-S14 исполнены через 12 SourceCraft PR/Gate/merge cycles;
-  canonical result —
-  `main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`. Локальный Task Manager
+  принятый implementation baseline —
+  `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
+  `main`. Локальный Task Manager
   закрыт `48/48`, без READY/open/in-progress задач. Production, tag, mirror и
   S15 остаются отдельным owner/release gate; `.beads` не коммитится.
 

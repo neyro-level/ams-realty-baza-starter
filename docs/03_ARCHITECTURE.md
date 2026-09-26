@@ -14,8 +14,9 @@ Secrets source=Secret Master / self-hosted Infisical
 
 Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №8 v6
 остаётся historical evidence. Plan №9 v6 S0-S14 исполнен через approved
-stable-ID delivery batches; canonical result — SourceCraft
-`main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, Task Manager `48/48` closed.
+stable-ID delivery batches; принятый implementation baseline —
+`5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
+`main`; Task Manager `48/48` closed.
 GitHub получает только отдельный явный fast-forward mirror canonical `main`.
 S15, production, mirror и target tag `starter-v2.1.0` остаются отдельными owner
 actions после завершённого implementation scope Plan №9.

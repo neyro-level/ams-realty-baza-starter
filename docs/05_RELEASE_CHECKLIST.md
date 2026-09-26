@@ -1,9 +1,10 @@
 # Release Checklist
 
 Статус: `ACTIVE RELEASE CONTRACT / PLAN 9 S0-S14 COMPLETE / NO CURRENT RELEASE
-AUTHORIZATION`. Plan №9 implementation scope завершён на SourceCraft
-`main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, но S15, tag, mirror и
-production не запускались. Owner-operated demo contour существует. PII
+AUTHORIZATION`. Принятый Plan №9 implementation baseline
+`5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` входит в текущий SourceCraft
+`main`, но S15, tag, mirror и production не запускались. Owner-operated demo
+contour существует. PII
 retention days остаются `NEEDS_OWNER`; implementation proof не заменяет
 отдельный release, rollout и live smoke.
 

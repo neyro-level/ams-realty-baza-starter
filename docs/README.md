@@ -2,8 +2,9 @@
 
 Статус: `ACTIVE / PLAN 9 V6 S0-S14 EXECUTION COMPLETE / PRE-S15 OWNER GATE`.
 SourceCraft — primary, GitHub — одностороннее зеркало. Exact v6 исполнен через
-пять approved delivery batches; canonical result —
-`main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`. Task Manager закрыт `48/48`,
+пять approved delivery batches; принятый implementation baseline —
+`5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
+`main`. Task Manager закрыт `48/48`,
 без READY/open/in-progress задач. Текущие owner gates принадлежат
 `04_BACKLOG.md`.
 
@@ -50,8 +51,9 @@ SourceCraft — primary, GitHub — одностороннее зеркало. E
   reconciliation: SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
 - `plan8/` — evidence задач Plan №8; не очередь к повторному исполнению.
 - `evidence/plan9/` и локальные Task Manager ledger — evidence Plan №9;
-  canonical delivery result — SourceCraft
-  `main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`.
+  принятый implementation baseline —
+  `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
+  `main`.
 - `proofs/` — проверки и аудиты на конкретных исторических SHA. Они не
   доказывают текущее production-состояние без нового запуска.
 - `legacy/plans/` и `legacy/orchestration/` — завершённые планы №6–8 и их

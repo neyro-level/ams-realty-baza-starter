@@ -6,8 +6,9 @@
 READY или in-progress задач. Завершённые планы и inventories находятся в
 `legacy/`; они не являются очередью к повторному исполнению.
 
-Plan №9 v6 S0-S14 исполнен через approved delivery batches. Canonical result —
-SourceCraft `main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`; Task Manager закрыт
+Plan №9 v6 S0-S14 исполнен через approved delivery batches. Принятый
+implementation baseline `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` входит в
+текущий SourceCraft `main`; Task Manager закрыт
 `48/48`, без READY/open/in-progress задач. S15, tag, mirror и production не
 входили в Developer graph и не разрешены без отдельной команды владельца.
 
@@ -44,7 +45,9 @@ SourceCraft `main@5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`; Task Manager зак
   docs-only reconciliation `c5803cfbac5d2c1817451fdee6aa96e3b975934e`,
   итоговый отчёт `plan8/S8_25_FINAL_EXECUTION_REPORT.md`.
 - Plan №9: S0-S14 `EXECUTION_COMPLETE`; 12 SourceCraft PR/Gate/merge cycles;
-  canonical result `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`; S15 excluded.
+  accepted implementation baseline
+  `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` входит в текущий SourceCraft
+  `main`; S15 excluded.
 - Plan №7: завершённый исторический execution record.
 - Plans №2–6: закрытая история; не исполнять повторно без нового approved scope.
 
