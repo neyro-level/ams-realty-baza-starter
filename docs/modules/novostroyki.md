@@ -2,8 +2,14 @@
 
 ## Status
 
-`PREPARED`. The private Payload schema exists, but no public route, navigation,
-sitemap, Gateway reader or indexing behavior is active.
+`PREPARED` for the optional extended newbuild module. The base geo-catalog
+platform already owns the unified `developments` / `developers` schema,
+Gateway readers, navigation/discovery and canonical public detail routes
+`/novostroyki/zhk-{slug}/` and `/kottedzhnye-poselki/kp-{slug}/`.
+
+The prepared module means only the not-yet-activated building/layout/chessboard
+extension. It must not be used to disable or duplicate the live base
+development surface.
 
 ## Prerequisites
 
@@ -20,14 +26,17 @@ The `novostroyki` entry in validated `src/project/site-profile.config.ts`;
 
 ## Reserved URLs
 
-Client-specific residential-complex, building, layout and developer namespaces
-are reserved only during activation after the canonical URL map is updated.
+The existing residential-complex, cottage-village and developer detail URLs are
+owned by the base platform. Only deeper building/layout/chessboard namespaces
+are reserved for this optional extension, and their exact grammar must be
+approved in `docs/02_PRODUCT_STRUCTURE.md` before activation.
 
 ## Collections to add
 
-Unified `developments` with `kind = residential_complex | cottage_village`,
-plus `developers`. Layouts remain kind-specific child data; inventory units stay
-in `properties` through an optional `development` relation.
+No duplicate `developments` or `developers` collection: both already exist in
+the base platform, and `properties.development` already links inventory to a
+development. Activation may add only the proven building/layout structures
+needed by the client journey; a layout remains distinct from an inventory unit.
 
 ## Migration contract
 
@@ -41,8 +50,9 @@ not merged by area alone.
 
 ## Gateway/DTO additions
 
-Add explicit Public Gateway selects and project DTOs before public UI access.
-Raw Payload documents remain private.
+Extend the existing development Public Gateway selects and project DTOs only
+for approved building/layout/chessboard data. Existing base detail readers stay
+active. Raw Payload documents remain private.
 
 ## Feed identity requirements
 
@@ -51,18 +61,19 @@ Cross-source ownership and deactivation rules remain unchanged.
 
 ## Cache targets
 
-Register only activated complex, building, layout and developer page/list
-targets in the existing cache registry.
+Keep existing development/developer cache targets unchanged; register only new
+building/layout/chessboard targets activated by this extension.
 
 ## UI composition
 
-Compose pages from the project design system. A layout and an inventory unit
-remain different domain concepts.
+Extend the existing development pages through the project design system. A
+layout and an inventory unit remain different domain concepts.
 
 ## SEO contract
 
-Freeze URLs, canonicals, metadata, sitemap ownership and redirect requirements
-before indexing any new namespace.
+Preserve existing development URL/canonical/discovery ownership. Freeze URLs,
+metadata, sitemap ownership and redirect requirements before indexing any new
+building/layout/chessboard namespace.
 
 ## Verification
 
@@ -71,8 +82,9 @@ SEO contract checks and representative page verification are required.
 
 ## Non-goals
 
-No chessboard module, search service, broker, second backend or speculative
-relations are introduced by this manifest.
+No automatic chessboard activation, duplicate development/developer owner,
+search service, broker, second backend or speculative relation is introduced by
+this manifest.
 
 ## Trigger to REALTY_EXTENDED
 
@@ -81,5 +93,6 @@ profile; collection and page activation alone does not.
 
 ## Rollback/deactivation notes
 
-Disable public routes and readers first, preserve data for review, then revert
-module-specific code. Never use deactivation to destructively drop client data.
+Disable only extension routes/readers first, preserve data for review, then
+revert module-specific code. Base development/developer pages remain platform
+surfaces. Never use deactivation to destructively drop client data.

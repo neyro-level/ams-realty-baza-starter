@@ -25,9 +25,12 @@ P8-23A переключает динамический public runtime на canon
 | Политика конфиденциальности | `/politika-konfidencialnosti` |
 | Согласие на обработку данных | `/soglasie-na-obrabotku-personalnyh-dannyh` |
 
-## Зарезервированные пространства
+## Активные и зарезервированные пространства
 
-- `/novostroyki/**` — новостройки и шахматка;
+- `/novostroyki/zhk-{slug}/` и `/kottedzhnye-poselki/kp-{slug}/` — активные
+  базовые страницы unified development model;
+- более глубокие building/layout/chessboard URL внутри development namespace —
+  зарезервированы до отдельной активации optional-модуля `novostroyki`;
 - `/sotrudniki/**` — сотрудники;
 - `/journal/**` — журнал.
 
@@ -45,7 +48,8 @@ P8-23A переключает динамический public runtime на canon
 
 Для базового профиля выбран режим `filters only`: общий результат и число найденных объектов показываются, per-option facet counts в presentation contract не входят. Если approved UX потребует counts до contract freeze, они добавляются отдельным решением и только через bounded aggregate queries.
 
-Финальные SEO index/canonical/redirect решения добавляются сюда при реализации соответствующих маршрутов.
+Текущие SEO index/canonical/redirect решения зафиксированы ниже и проверяются
+общим Content Gate; новые поверхности добавляются сюда до их индексации.
 
 ## Geo-catalog platform contract
 

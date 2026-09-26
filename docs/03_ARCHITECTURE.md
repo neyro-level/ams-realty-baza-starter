@@ -1,6 +1,6 @@
 # Architecture
 
-Статус: `ACTIVE / PRE-PRODUCTION STARTER`.
+Статус: `ACTIVE / LIVE OWNER-OPERATED DEMO / CLIENT PRE-PRODUCTION`.
 
 ## Профиль
 
@@ -16,10 +16,11 @@ Secrets source=Secret Master / self-hosted Infisical
 остаётся historical evidence. Plan №9 v6 S0-S14 исполнен через approved
 stable-ID delivery batches; принятый implementation baseline —
 `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
-`main`; Task Manager `48/48` closed.
+`main`; execution graph Plan №9 `48/48` closed.
 GitHub получает только отдельный явный fast-forward mirror canonical `main`.
-S15, production, mirror и target tag `starter-v2.1.0` остаются отдельными owner
-actions после завершённого implementation scope Plan №9.
+S15, production и target tag `starter-v2.1.0` остаются отдельными owner actions
+после завершённого implementation scope Plan №9. Репозиторное зеркало —
+отдельная операционная синхронизация и не является S15/release proof.
 
 ## Delivery baseline
 
@@ -29,11 +30,9 @@ actions после завершённого implementation scope Plan №9.
   `DELIVERY_PROFILE=COMMERCIAL`: template/demo требует review и один ручной
   exact-head SourceCraft Gate перед merge.
 - `.sourcecraft/ci.yaml` содержит только manual exact-SHA `merge-standard` и
-  `merge-risky`; explicit `paths: []` sentinel блокирует auto push/PR CI. За период с 2026-08-23
-  зафиксировано 145 runs, все `manual`: 48 STANDARD / 107.16 мин (avg 2.23) и
-  94 RISKY / 270.04 мин (avg 2.87). Поэтому задача оптимизации — убрать
-  неоднозначность trigger contract и сделать RISKY targeted; общий CI image и
-  cache transport без benchmark не добавляются.
+  `merge-risky`; explicit `paths: []` sentinel блокирует auto push/PR CI.
+  Исторические run counts и длительности не являются архитектурным контрактом;
+  действующий принцип — один выбранный Gate на exact head без дублирования.
 - STANDARD сохраняет template-specific contracts/architecture/clone-readiness
   baseline. RISKY принимает ровно один `risk_scope`: `schema-data`,
   `auth-pii-leads`, `ingest-jobs`, `dependency-runtime` или `ci-governance`.
@@ -226,6 +225,7 @@ decision `public | noindex` из client-readiness config. Для canonical runti
 | Public Gateway | `overrideAccess: false`, `user: null`, context marker `public-read`, collection access filters published/public rows, output только DTO |
 | User/Admin | Payload request user и collection access; Local API вызов обязан явно указывать access mode |
 | System Gateway | `systemOverrideAccess(<named operation>)`; whitelist операций находится в `src/core/data-access/system/overrides.ts` |
+| Ingest Gateway | feed-owned mutation через ingest repository; manual field overrides и published slug не перезаписываются |
 
 Lead access следует Core 5.5 и `docs/adr/ADR-LEAD-ACCESS-MODEL.md`: generic
 lead create и delivery create/update доступны только именованным System Gateway;
@@ -233,7 +233,6 @@ lead/PII read-update-delete, delivery read/delete и manual retry доступн
 owner. Роль admin не наследует эти capability. Manual retry после owner auth
 выполняет state transition через `owner-lead-delivery-retry`, а не generic Admin
 mutation.
-| Ingest Gateway | feed-owned mutation через ingest repository; manual field overrides и published slug не перезаписываются |
 
 Anonymous generic Payload REST для deny-list/system-only collections возвращает
 404; публичный приём лида существует только как `POST /api/public/leads`.

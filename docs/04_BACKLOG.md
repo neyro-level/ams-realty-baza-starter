@@ -9,8 +9,10 @@ READY или in-progress задач. Завершённые планы и invent
 Plan №9 v6 S0-S14 исполнен через approved delivery batches. Принятый
 implementation baseline `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` входит в
 текущий SourceCraft `main`; Task Manager закрыт
-`48/48`, без READY/open/in-progress задач. S15, tag, mirror и production не
-входили в Developer graph и не разрешены без отдельной команды владельца.
+`48/48`, без READY/open/in-progress задач внутри execution graph. S15, release
+tag и production не входили в Developer graph и не разрешены без отдельной
+команды владельца. Репозиторное зеркало выполняется отдельно и не разрешает
+release.
 
 ## NOW
 

@@ -76,7 +76,7 @@ Numeric colors, type sizes, weights, radii, shadows and durations live in `globa
 
 ## Representative pages and viewports
 
-Pages: `/`, `/primorsk/kvartiry/`, `/novostroyki/severnyy-bereg/`, `/uslugi/`.
+Pages: `/`, `/primorsk/kvartiry/`, `/novostroyki/zhk-severnyy-bereg/`, `/uslugi/`.
 Viewports: `390×844`, `768×1024`, `1280×900`, `1440×1000`.
 Proof artifacts: `docs/evidence/plan9/S14_UI_CORE_V5_EVIDENCE.md` and the
 machine-readable browser matrix beside it; bulk PNG stays outside the clone.

@@ -4,8 +4,8 @@
 SourceCraft — primary, GitHub — одностороннее зеркало. Exact v6 исполнен через
 пять approved delivery batches; принятый implementation baseline —
 `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
-`main`. Task Manager закрыт `48/48`,
-без READY/open/in-progress задач. Текущие owner gates принадлежат
+`main`. Execution graph Plan №9 закрыт `48/48`,
+без READY/open/in-progress задач внутри этого графа. Текущие owner gates принадлежат
 `04_BACKLOG.md`.
 
 ## Source of Truth
@@ -29,8 +29,10 @@ SourceCraft — primary, GitHub — одностороннее зеркало. E
 
 - `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — exact approved source
   исполненного scope S0-S14, `v6 APPROVED / EXECUTION_COMPLETE`.
-- S15, tag, mirror и production не входят в завершённый Developer graph и
-  требуют отдельной явной команды владельца.
+- S15, release tag и production не входят в завершённый Developer graph и
+  требуют отдельной явной команды владельца. GitHub остаётся только
+  односторонним зеркалом canonical SourceCraft `main`; синхронизация зеркала —
+  отдельная операционная команда, а не release gate.
 
 `package.json`, код, migrations и конфигурация остаются runtime truth. Если они
 расходятся с документами, drift фиксируется и исправляется отдельной задачей;
@@ -61,6 +63,6 @@ SourceCraft — primary, GitHub — одностороннее зеркало. E
 - `legacy/` — более ранние планы, архитектура и материалы; не нормативный слой.
 - `research/ATLAS_BASELINE.md` — provenance визуального donor.
 
-Production, target tag `starter-v2.1.0`, mirror и client clone остаются
-отдельными owner actions S15. Наличие завершённого implementation scope или
+Production, target tag `starter-v2.1.0` и client clone остаются отдельными
+owner actions S15. Репозиторное зеркало не разрешает S15 и production. Наличие завершённого implementation scope или
 demo-контура не равно актуальному release proof.

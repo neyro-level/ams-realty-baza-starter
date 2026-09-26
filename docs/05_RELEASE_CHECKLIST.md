@@ -3,8 +3,9 @@
 Статус: `ACTIVE RELEASE CONTRACT / PLAN 9 S0-S14 COMPLETE / NO CURRENT RELEASE
 AUTHORIZATION`. Принятый Plan №9 implementation baseline
 `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` входит в текущий SourceCraft
-`main`, но S15, tag, mirror и production не запускались. Owner-operated demo
-contour существует. PII
+`main`, но S15, release tag и production не запускались. Репозиторное GitHub-
+зеркало синхронизируется отдельно и не является release proof. Owner-operated
+demo contour существует. PII
 retention days остаются `NEEDS_OWNER`; implementation proof не заменяет
 отдельный release, rollout и live smoke.
 
