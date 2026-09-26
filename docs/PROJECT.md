@@ -9,8 +9,10 @@ route cutover и P8-23B cleanup находятся в текущем runtime. К
 контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Plan №9 v6 S0-S14 исполнен
 через approved delivery batches; принятый implementation baseline —
 `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
-`main`; Task Manager `48/48` closed.
-S15, tag, mirror и production не выполнялись и остаются owner gates.
+`main`; execution graph Plan №9 `48/48` closed.
+S15, release tag и production не выполнялись и остаются owner gates.
+Репозиторное GitHub-зеркало синхронизируется отдельно и не является release
+proof.
 
 ## Зафиксировано
 
@@ -68,7 +70,7 @@ S15, tag, mirror и production не выполнялись и остаются o
 | Client fixture boundary | `projectKind=client` never falls back to starter demo properties when Payload data is absent; empty client data produces an empty/not-found runtime result |
 | Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |
 | Development model | Одна `developments` entity с `kind = residential_complex | cottage_village` и strict kind-specific validation |
-| Plan 8 delivery | `EXECUTION_COMPLETE`; production, mirror и tag остаются отдельными owner actions |
+| Plan 8 delivery | `EXECUTION_COMPLETE`; production и release tag остаются отдельными owner actions; repository mirror — отдельная операционная синхронизация |
 | Plan 9 delivery | S0-S14 `EXECUTION_COMPLETE`; accepted implementation baseline `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` is contained in current SourceCraft `main`; S15 excluded |
 | Target release tag | `starter-v2.1.0`; only after Plan №9 acceptance and a separate owner release command |
 

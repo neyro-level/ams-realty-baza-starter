@@ -17,8 +17,10 @@
   принятый implementation baseline —
   `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
   `main`. Локальный Task Manager
-  закрыт `48/48`, без READY/open/in-progress задач. Production, tag, mirror и
-  S15 остаются отдельным owner/release gate; `.beads` не коммитится.
+  закрыт `48/48`, без READY/open/in-progress задач внутри execution graph.
+  S15, release tag и production остаются отдельным owner/release gate;
+  репозиторное зеркало выполняется только по явной команде владельца и не
+  заменяет release proof. `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
