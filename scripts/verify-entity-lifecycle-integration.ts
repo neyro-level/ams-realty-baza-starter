@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { getPayload } from "payload";
 import config from "../payload.config.ts";
 import { systemOverrideAccess } from "../src/core/data-access/system/overrides.ts";
-import { requirePayloadRuntime } from "../src/project/env.ts";
 import { findPublicEntityLifecycle } from "../src/project/data-access/public/entity-lifecycle.ts";
+import { requirePayloadRuntime } from "../src/project/env.ts";
 
 requirePayloadRuntime();
 const payload = await getPayload({ config });
@@ -76,6 +76,7 @@ try {
 	});
 	const development = await payload.create({
 		collection: "developments",
+		draft: true,
 		data: {
 			name: "Lifecycle Development",
 			slug: `lifecycle-development-${suffix}`,
@@ -83,6 +84,8 @@ try {
 			region: region.id,
 			city: city.id,
 			developer: developer.id,
+			salesStatus: "sales_finished",
+			salesAvailability: "none",
 			dataTier: "B",
 			source: "integration",
 			checkedAt: "2026-09-24T18:00:00.000Z",

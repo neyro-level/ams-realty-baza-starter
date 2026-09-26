@@ -9,7 +9,7 @@ import { projectSiteProfileConfig } from "./site-profile.config.ts";
 import type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";
 
 const defaultFilterKeys: ProjectSiteProfileConfig["filterKeys"] = {
-	kvartiry: ["rooms", "district", "price", "area"],
+	kvartiry: ["rooms", "district", "price", "area", "market"],
 	doma: ["district", "price", "area"],
 	uchastki: ["district", "price", "area"],
 	"kommercheskaya-nedvizhimost": ["district", "price", "area"],
@@ -26,6 +26,11 @@ function defaultSeoFacets(
 	return {
 		...(geos.primorsk
 			? {
+					vtorichka: {
+						geo: "primorsk",
+						category: "kvartiry" as const,
+						filter: { key: "market", value: "secondary" },
+					},
 					dvukhkomnatnye: {
 						geo: "primorsk",
 						category: "kvartiry" as const,

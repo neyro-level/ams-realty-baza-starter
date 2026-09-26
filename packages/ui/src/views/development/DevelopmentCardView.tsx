@@ -11,10 +11,9 @@ import { StarterFeedImage } from "../../lib/starter-image";
 import { MediaFallback } from "../starter/MediaFallback";
 
 const availabilityLabels = {
-	available: "Есть предложения",
-	limited: "Осталось мало",
-	sold_out: "Продажи завершены",
-	unknown: "Наличие уточняется",
+	in_inventory: "Есть в продаже",
+	confirmed: "Наличие подтверждено",
+	none: "Нет предложений",
 } as const;
 
 export function DevelopmentCardView({
@@ -51,7 +50,7 @@ export function DevelopmentCardView({
 							: "Коттеджный посёлок"}
 					</Badge>
 					<Badge variant="outline">
-						{availabilityLabels[development.availability]}
+						{availabilityLabels[development.salesAvailability]}
 					</Badge>
 				</div>
 				<Heading className="text-lead font-semibold leading-tight-copy">

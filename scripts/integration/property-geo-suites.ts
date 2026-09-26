@@ -215,6 +215,12 @@ const primorskListing = await getListing(observedPayload, {
 });
 assert.ok(primorskListing, "primary geo listing must resolve");
 assert.ok(
+	primorskListing.subLinks.some(
+		(link) => link.href === "/primorsk/kvartiry/vtorichka/",
+	),
+	"approved vtorichka facet must be exposed as a clean SSR link",
+);
+assert.ok(
 	primorskListing.items.some(
 		(item) =>
 			item.kind === "property" && item.item.id === String(matchedAfter.id),
@@ -230,6 +236,29 @@ assert.ok(
 );
 assert.ok(observedQueries <= 2, "listing query budget must not grow per item");
 
+const pageTwoListing = await getListing(observedPayload, {
+	geo: "primorsk",
+	surface: "kvartiry",
+	page: 2,
+	query: { limit: 1 },
+});
+assert.ok(pageTwoListing, "catalog page 2 must resolve when inventory exists");
+assert.equal(pageTwoListing.pagination.page, 2);
+const pageTwoProperty = pageTwoListing.items.find(
+	(item) => item.kind === "property",
+);
+assert.ok(pageTwoProperty, "catalog page 2 must expose an SSR entity link");
+assert.equal(
+	(
+		await getPropertyByPublicUrlId(
+			observedPayload,
+			pageTwoProperty.item.publicUrlId,
+		)
+	)?.href,
+	pageTwoProperty.item.href,
+	"catalog page 2 entity link must resolve to the same public entity",
+);
+
 const facetListing = await getListing(observedPayload, {
 	geo: "primorsk",
 	surface: "kvartiry",
@@ -244,6 +273,28 @@ assert.deepEqual(
 	"SEO facet must affect both result rows and total",
 );
 assert.equal(facetListing.total, 1);
+
+const secondaryFacetListing = await getListing(observedPayload, {
+	geo: "primorsk",
+	surface: "kvartiry",
+	facet: "vtorichka",
+});
+assert.ok(secondaryFacetListing, "secondary market SEO facet must resolve");
+assert.ok(
+	!secondaryFacetListing.items.some(
+		(item) => item.kind === "property" && item.item.id === String(newbuild.id),
+	),
+	"vtorichka facet must exclude newbuild properties",
+);
+assert.equal(
+	await countInventory(observedPayload, {
+		geo: "primorsk",
+		surface: "kvartiry",
+		facet: "vtorichka",
+	}),
+	secondaryFacetListing.total,
+	"vtorichka inventory count must use the same secondary market filter",
+);
 
 const secondaryOnlyInput = structuredClone(siteProfile);
 secondaryOnlyInput.marketStatus.primorsk.newbuild = "OUT";

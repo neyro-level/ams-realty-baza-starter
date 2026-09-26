@@ -3,15 +3,24 @@ import type {
 	DevelopmentCardDTO,
 } from "@ams/realtbase-contracts";
 import { Container, Section, SectionHeader } from "../../components/ui/layout";
+import { Button } from "../../components/ui/button";
 import { BreadcrumbsView } from "../shared/BreadcrumbsView";
 import { DevelopmentCardView } from "../development/DevelopmentCardView";
 
 export function DeveloperView({
 	developer,
 	developments,
+	total = developments.length,
+	page = 1,
+	totalPages = 1,
+	pageHref,
 }: {
 	developer: DeveloperDetailsDTO;
 	developments: readonly DevelopmentCardDTO[];
+	total?: number;
+	page?: number;
+	totalPages?: number;
+	pageHref?: (page: number) => string;
 }) {
 	return (
 		<>
@@ -50,7 +59,7 @@ export function DeveloperView({
 					<SectionHeader
 						titleId="developer-projects-title"
 						title="Проекты застройщика"
-						description={`Опубликовано: ${developments.length}`}
+						description={`Опубликовано: ${total}`}
 					/>
 					{developments.length ? (
 						<div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -66,6 +75,34 @@ export function DeveloperView({
 							Опубликованных проектов пока нет.
 						</p>
 					)}
+					{totalPages > 1 ? (
+						<nav
+							aria-label="Страницы проектов застройщика"
+							className="mt-8 flex items-center justify-center gap-3"
+						>
+							{page > 1 && pageHref ? (
+								<Button asChild variant="outline">
+									<a href={pageHref(page - 1)}>Назад</a>
+								</Button>
+							) : (
+								<Button variant="outline" disabled>
+									Назад
+								</Button>
+							)}
+							<span aria-current="page">
+								{page} из {totalPages}
+							</span>
+							{page < totalPages && pageHref ? (
+								<Button asChild variant="outline">
+									<a href={pageHref(page + 1)}>Вперёд</a>
+								</Button>
+							) : (
+								<Button variant="outline" disabled>
+									Вперёд
+								</Button>
+							)}
+						</nav>
+					) : null}
 				</Container>
 			</Section>
 		</>

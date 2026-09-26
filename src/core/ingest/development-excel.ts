@@ -1,6 +1,6 @@
-import type { Workbook } from "@excel.js/exceljs";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
+import type { Workbook } from "@excel.js/exceljs";
 
 const MAX_WORKBOOK_BYTES = 10 * 1024 * 1024;
 const MAX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024;
@@ -38,6 +38,7 @@ const sheetHeaders: Record<SheetName, readonly string[]> = {
 		"regionSlug",
 		"citySlug",
 		"districtSlug",
+		"districtRaw",
 		"address",
 		"latitude",
 		"longitude",
@@ -45,13 +46,27 @@ const sheetHeaders: Record<SheetName, readonly string[]> = {
 		"completion",
 		"deadline",
 		"salesStatus",
-		"availability",
+		"salesAvailability",
 		"dataTier",
 		"status",
 		"checkedAt",
 	],
-	Цены: ["developmentExternalId", "label", "amountMinor", "currency", "checkedAt"],
-	Медиа: ["developmentExternalId", "mediaId", "mediaType", "rights", "checkedAt"],
+	Цены: [
+		"developmentExternalId",
+		"roomsLabel",
+		"priceFromMinor",
+		"priceToMinor",
+		"lotsAvailable",
+		"priceCheckedAt",
+	],
+	Медиа: [
+		"developmentExternalId",
+		"mediaId",
+		"mediaType",
+		"rights",
+		"capturedAt",
+		"checkedAt",
+	],
 	Тексты: ["developmentExternalId", "kind", "text", "checkedAt"],
 };
 
@@ -112,7 +127,14 @@ export type DevelopmentExcelRepository = {
 		regionSlug: string;
 		citySlug: string;
 		districtSlug?: string;
-	}): Promise<{ region: string | number; city: string | number; district?: string | number } | undefined>;
+	}): Promise<
+		| {
+				region: string | number;
+				city: string | number;
+				district?: string | number;
+		  }
+		| undefined
+	>;
 	mediaExists(id: string): Promise<boolean>;
 	createImportRun(input: {
 		sourceKey: string;
@@ -120,8 +142,14 @@ export type DevelopmentExcelRepository = {
 		workbookSha256: string;
 		now: string;
 	}): Promise<number>;
-	upsertDeveloper(id: string | number | undefined, input: DeveloperInput): Promise<string | number>;
-	upsertDevelopment(id: string | number | undefined, input: DevelopmentInput): Promise<string | number>;
+	upsertDeveloper(
+		id: string | number | undefined,
+		input: DeveloperInput,
+	): Promise<string | number>;
+	upsertDevelopment(
+		id: string | number | undefined,
+		input: DevelopmentInput,
+	): Promise<string | number>;
 	recordIssue(importRunId: number, issue: DevelopmentExcelIssue): Promise<void>;
 	finishImportRun(input: {
 		id: number;
@@ -137,7 +165,10 @@ function valueAsString(value: unknown): string {
 	if (typeof value === "object") {
 		if ("formula" in value) throw new Error("Formula cells are not allowed.");
 		if ("richText" in value && Array.isArray(value.richText)) {
-			return value.richText.map((part) => String(part.text ?? "")).join("").trim();
+			return value.richText
+				.map((part) => String(part.text ?? ""))
+				.join("")
+				.trim();
 		}
 		if ("text" in value) return String(value.text).trim();
 	}
@@ -146,14 +177,22 @@ function valueAsString(value: unknown): string {
 
 function assertSafeXlsxArchive(buffer: Buffer): void {
 	let eocd = -1;
-	for (let offset = buffer.length - 22; offset >= Math.max(0, buffer.length - 65_557); offset -= 1) {
+	for (
+		let offset = buffer.length - 22;
+		offset >= Math.max(0, buffer.length - 65_557);
+		offset -= 1
+	) {
 		if (buffer.readUInt32LE(offset) === 0x06054b50) {
 			eocd = offset;
 			break;
 		}
 	}
-	if (eocd < 0) throw new Error("Workbook is not a valid bounded XLSX archive.");
-	if (buffer.readUInt16LE(eocd + 4) !== 0 || buffer.readUInt16LE(eocd + 6) !== 0) {
+	if (eocd < 0)
+		throw new Error("Workbook is not a valid bounded XLSX archive.");
+	if (
+		buffer.readUInt16LE(eocd + 4) !== 0 ||
+		buffer.readUInt16LE(eocd + 6) !== 0
+	) {
 		throw new Error("Multi-disk workbook archives are not accepted.");
 	}
 	const entries = buffer.readUInt16LE(eocd + 10);
@@ -165,20 +204,28 @@ function assertSafeXlsxArchive(buffer: Buffer): void {
 	}
 	let totalUncompressed = 0;
 	for (let index = 0; index < entries; index += 1) {
-		if (offset + 46 > buffer.length || buffer.readUInt32LE(offset) !== 0x02014b50) {
+		if (
+			offset + 46 > buffer.length ||
+			buffer.readUInt32LE(offset) !== 0x02014b50
+		) {
 			throw new Error("Workbook ZIP directory is malformed.");
 		}
 		const flags = buffer.readUInt16LE(offset + 8);
 		const compressed = buffer.readUInt32LE(offset + 20);
 		const uncompressed = buffer.readUInt32LE(offset + 24);
-		if ((flags & 1) !== 0 || compressed === 0xffffffff || uncompressed === 0xffffffff) {
+		if (
+			(flags & 1) !== 0 ||
+			compressed === 0xffffffff ||
+			uncompressed === 0xffffffff
+		) {
 			throw new Error("Encrypted and ZIP64 workbook entries are not accepted.");
 		}
 		totalUncompressed += uncompressed;
 		if (
 			uncompressed > 20 * 1024 * 1024 ||
 			totalUncompressed > MAX_UNCOMPRESSED_BYTES ||
-			(uncompressed > 1024 * 1024 && uncompressed / Math.max(1, compressed) > 200)
+			(uncompressed > 1024 * 1024 &&
+				uncompressed / Math.max(1, compressed) > 200)
 		) {
 			throw new Error("Workbook decompression exceeds safety bounds.");
 		}
@@ -187,14 +234,18 @@ function assertSafeXlsxArchive(buffer: Buffer): void {
 		const commentLength = buffer.readUInt16LE(offset + 32);
 		offset += 46 + fileNameLength + extraLength + commentLength;
 	}
-	if (offset !== centralEnd) throw new Error("Workbook ZIP directory size is inconsistent.");
+	if (offset !== centralEnd)
+		throw new Error("Workbook ZIP directory size is inconsistent.");
 }
 
 export async function createDevelopmentWorkbook(): Promise<Workbook> {
 	const require = createRequire(import.meta.url);
-	const module = require("@excel.js/exceljs") as { default?: { Workbook?: new () => Workbook } };
+	const module = require("@excel.js/exceljs") as {
+		default?: { Workbook?: new () => Workbook };
+	};
 	const Constructor = module.default?.Workbook;
-	if (!Constructor) throw new Error("Excel workbook constructor is unavailable.");
+	if (!Constructor)
+		throw new Error("Excel workbook constructor is unavailable.");
 	return new Constructor();
 }
 
@@ -205,9 +256,13 @@ function parseRows(workbook: Workbook, sheet: SheetName): Row[] {
 		throw new Error(`${sheet} exceeds ${MAX_ROWS_PER_SHEET} data rows.`);
 	}
 	const expected = sheetHeaders[sheet];
-	const actual = expected.map((_, index) => valueAsString(worksheet.getRow(1).getCell(index + 1).value));
+	const actual = expected.map((_, index) =>
+		valueAsString(worksheet.getRow(1).getCell(index + 1).value),
+	);
 	if (actual.join("|") !== expected.join("|")) {
-		throw new Error(`${sheet} header mismatch. Expected: ${expected.join(", ")}`);
+		throw new Error(
+			`${sheet} header mismatch. Expected: ${expected.join(", ")}`,
+		);
 	}
 	const rows: Row[] = [];
 	for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
@@ -224,7 +279,11 @@ function parseRows(workbook: Workbook, sheet: SheetName): Row[] {
 }
 
 function isSlug(value: string): boolean {
-	return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) && !value.startsWith("zhk-") && !value.startsWith("kp-");
+	return (
+		/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) &&
+		!value.startsWith("zhk-") &&
+		!value.startsWith("kp-")
+	);
 }
 
 function isDate(value: string): boolean {
@@ -238,7 +297,10 @@ function numberOrUndefined(value: string): number | undefined {
 }
 
 function splitList(value: string): Array<{ value: string }> | undefined {
-	const values = value.split("|").map((item) => item.trim()).filter(Boolean);
+	const values = value
+		.split("|")
+		.map((item) => item.trim())
+		.filter(Boolean);
 	return values.length ? values.map((item) => ({ value: item })) : undefined;
 }
 
@@ -275,7 +337,9 @@ function required(
 	return valid;
 }
 
-export async function readDevelopmentWorkbook(buffer: Buffer): Promise<Record<SheetName, Row[]>> {
+export async function readDevelopmentWorkbook(
+	buffer: Buffer,
+): Promise<Record<SheetName, Row[]>> {
 	if (buffer.byteLength > MAX_WORKBOOK_BYTES) {
 		throw new Error(`Workbook exceeds ${MAX_WORKBOOK_BYTES} bytes.`);
 	}
@@ -291,22 +355,43 @@ export async function generateDevelopmentExcelTemplate(): Promise<Buffer> {
 	const workbook = await createDevelopmentWorkbook();
 	workbook.creator = "AMS Realty Baza";
 	for (const sheet of developmentExcelSheets) {
-		const worksheet = workbook.addWorksheet(sheet, { views: [{ state: "frozen", ySplit: 1 }] });
+		const worksheet = workbook.addWorksheet(sheet, {
+			views: [{ state: "frozen", ySplit: 1 }],
+		});
 		worksheet.addRow([...sheetHeaders[sheet]]);
 		worksheet.getRow(1).font = { bold: true };
 		worksheet.getRow(1).alignment = { vertical: "middle", wrapText: true };
-		worksheet.columns = sheetHeaders[sheet].map((header) => ({ key: header, width: Math.max(16, header.length + 3) }));
+		worksheet.columns = sheetHeaders[sheet].map((header) => ({
+			key: header,
+			width: Math.max(16, header.length + 3),
+		}));
 		const enumByHeader: Record<string, string[]> = {
 			status: ["draft", "published", "archived"],
 			kind: ["residential_complex", "cottage_village"],
-			salesStatus: ["available", "limited", "sold_out", "paused"],
+			salesStatus: ["on_sale", "sales_finished", "completed"],
+			salesAvailability: ["in_inventory", "confirmed", "none"],
 			dataTier: ["A", "B", "C"],
 			currency: ["RUB"],
-			mediaType: ["image", "plan", "document"],
+			mediaType: [
+				"hero",
+				"gallery",
+				"layout",
+				"construction_progress",
+				"document",
+				"video",
+			],
 		};
 		for (const [index, header] of sheetHeaders[sheet].entries()) {
-			worksheet.getRow(1).getCell(index + 1).note = `Column ${header}. Dates use ISO 8601. aliases use | as separator.`;
-			const values = enumByHeader[header] ?? (sheet === "Тексты" && header === "kind" ? ["short", "full", "location", "infrastructure"] : undefined);
+			worksheet
+				.getRow(1)
+				.getCell(
+					index + 1,
+				).note = `Column ${header}. Dates use ISO 8601. aliases use | as separator.`;
+			const values =
+				enumByHeader[header] ??
+				(sheet === "Тексты" && header === "kind"
+					? ["short", "full", "location", "infrastructure"]
+					: undefined);
 			if (values) {
 				for (let row = 2; row <= 500; row += 1) {
 					worksheet.getRow(row).getCell(index + 1).dataValidation = {
@@ -345,7 +430,9 @@ export async function importDevelopmentExcel(input: {
 	if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.sourceKey)) {
 		throw new Error("sourceKey must be a canonical lowercase ASCII slug.");
 	}
-	const workbookSha256 = createHash("sha256").update(input.buffer).digest("hex");
+	const workbookSha256 = createHash("sha256")
+		.update(input.buffer)
+		.digest("hex");
 	const rows = await readDevelopmentWorkbook(input.buffer);
 	const report: DevelopmentExcelReport = {
 		mode: input.mode,
@@ -358,23 +445,66 @@ export async function importDevelopmentExcel(input: {
 		collisions: 0,
 		issues: [],
 	};
-	const developerInputs = new Map<string, { row: Row; data: DeveloperInput; inspection?: Inspection }>();
+	const developerInputs = new Map<
+		string,
+		{ row: Row; data: DeveloperInput; inspection?: Inspection }
+	>();
 	for (const row of rows.Застройщики) {
-		if (!required(report, row, "Застройщики", ["slug", "name", "status", "checkedAt"])) continue;
+		if (
+			!required(report, row, "Застройщики", [
+				"slug",
+				"name",
+				"status",
+				"checkedAt",
+			])
+		)
+			continue;
 		if (!isSlug(row.slug)) {
-			addIssue(report, { severity: "error", code: "invalid_slug", message: "Developer slug is not canonical.", sheet: "Застройщики", row: Number(row.__row), field: "slug" });
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_slug",
+				message: "Developer slug is not canonical.",
+				sheet: "Застройщики",
+				row: Number(row.__row),
+				field: "slug",
+			});
 			continue;
 		}
 		if (developerInputs.has(row.slug)) {
-			addIssue(report, { severity: "error", code: "duplicate_identity", message: `Duplicate developer slug ${row.slug}.`, sheet: "Застройщики", row: Number(row.__row), field: "slug" });
+			addIssue(report, {
+				severity: "error",
+				code: "duplicate_identity",
+				message: `Duplicate developer slug ${row.slug}.`,
+				sheet: "Застройщики",
+				row: Number(row.__row),
+				field: "slug",
+			});
 			continue;
 		}
-		if (!(["draft", "published", "archived"] as const).includes(row.status as "draft")) {
-			addIssue(report, { severity: "error", code: "invalid_enum", message: "Invalid developer status.", sheet: "Застройщики", row: Number(row.__row), field: "status" });
+		if (
+			!(["draft", "published", "archived"] as const).includes(
+				row.status as "draft",
+			)
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_enum",
+				message: "Invalid developer status.",
+				sheet: "Застройщики",
+				row: Number(row.__row),
+				field: "status",
+			});
 			continue;
 		}
 		if (!isDate(row.checkedAt)) {
-			addIssue(report, { severity: "error", code: "invalid_date", message: "checkedAt must be ISO 8601.", sheet: "Застройщики", row: Number(row.__row), field: "checkedAt" });
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_date",
+				message: "checkedAt must be ISO 8601.",
+				sheet: "Застройщики",
+				row: Number(row.__row),
+				field: "checkedAt",
+			});
 			continue;
 		}
 		developerInputs.set(row.slug, {
@@ -394,25 +524,99 @@ export async function importDevelopmentExcel(input: {
 	}
 
 	const validPrices = rows.Цены.filter((row) => {
-		if (!required(report, row, "Цены", ["developmentExternalId", "label", "amountMinor", "currency", "checkedAt"])) return false;
-		if (row.currency !== "RUB" || !Number.isSafeInteger(Number(row.amountMinor)) || Number(row.amountMinor) < 0 || !isDate(row.checkedAt)) {
-			addIssue(report, { severity: "error", code: "invalid_price", message: "Price requires non-negative integer amountMinor, RUB and ISO checkedAt.", sheet: "Цены", row: Number(row.__row) });
+		if (
+			!required(report, row, "Цены", [
+				"developmentExternalId",
+				"roomsLabel",
+				"priceFromMinor",
+				"priceCheckedAt",
+			])
+		)
+			return false;
+		const from = Number(row.priceFromMinor);
+		const to = row.priceToMinor ? Number(row.priceToMinor) : undefined;
+		const lots = row.lotsAvailable ? Number(row.lotsAvailable) : undefined;
+		if (
+			!Number.isSafeInteger(from) ||
+			from < 0 ||
+			(to !== undefined && (!Number.isSafeInteger(to) || to < from)) ||
+			(lots !== undefined && (!Number.isSafeInteger(lots) || lots < 0)) ||
+			!isDate(row.priceCheckedAt)
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_price",
+				message:
+					"Price requires integer bounds, optional non-negative lotsAvailable and ISO priceCheckedAt.",
+				sheet: "Цены",
+				row: Number(row.__row),
+			});
 			return false;
 		}
 		return true;
 	});
 	const validMedia = rows.Медиа.filter((row) => {
-		if (!required(report, row, "Медиа", ["developmentExternalId", "mediaId", "mediaType", "rights", "checkedAt"])) return false;
-		if (!(["image", "plan", "document"] as const).includes(row.mediaType as "image") || !/^\d+$/.test(row.mediaId) || !isDate(row.checkedAt)) {
-			addIssue(report, { severity: "error", code: "invalid_media", message: "Media requires numeric mediaId, known mediaType and ISO checkedAt.", sheet: "Медиа", row: Number(row.__row) });
+		if (
+			!required(report, row, "Медиа", [
+				"developmentExternalId",
+				"mediaId",
+				"mediaType",
+				"rights",
+				"checkedAt",
+			])
+		)
+			return false;
+		if (
+			!(
+				[
+					"hero",
+					"gallery",
+					"layout",
+					"construction_progress",
+					"document",
+					"video",
+				] as const
+			).includes(row.mediaType as "hero") ||
+			!/^\d+$/.test(row.mediaId) ||
+			!isDate(row.checkedAt) ||
+			(row.capturedAt !== "" && !isDate(row.capturedAt)) ||
+			(row.mediaType === "construction_progress" && !isDate(row.capturedAt))
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_media",
+				message:
+					"Media requires numeric mediaId, known mediaType and ISO checkedAt.",
+				sheet: "Медиа",
+				row: Number(row.__row),
+			});
 			return false;
 		}
 		return true;
 	});
 	const validTexts = rows.Тексты.filter((row) => {
-		if (!required(report, row, "Тексты", ["developmentExternalId", "kind", "text", "checkedAt"])) return false;
-		if (!(["short", "full", "location", "infrastructure"] as const).includes(row.kind as "short") || !isDate(row.checkedAt)) {
-			addIssue(report, { severity: "error", code: "invalid_text", message: "Text requires known kind and ISO checkedAt.", sheet: "Тексты", row: Number(row.__row) });
+		if (
+			!required(report, row, "Тексты", [
+				"developmentExternalId",
+				"kind",
+				"text",
+				"checkedAt",
+			])
+		)
+			return false;
+		if (
+			!(["short", "full", "location", "infrastructure"] as const).includes(
+				row.kind as "short",
+			) ||
+			!isDate(row.checkedAt)
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_text",
+				message: "Text requires known kind and ISO checkedAt.",
+				sheet: "Тексты",
+				row: Number(row.__row),
+			});
 			return false;
 		}
 		return true;
@@ -420,65 +624,224 @@ export async function importDevelopmentExcel(input: {
 	const prices = rowsByExternalId(validPrices, "developmentExternalId");
 	const media = rowsByExternalId(validMedia, "developmentExternalId");
 	const texts = rowsByExternalId(validTexts, "developmentExternalId");
-	const developmentInputs: Array<{ row: Row; externalId: string; data: DevelopmentInput; inspection?: Inspection }> = [];
+	const developmentInputs: Array<{
+		row: Row;
+		externalId: string;
+		data: DevelopmentInput;
+		inspection?: Inspection;
+	}> = [];
 	const seenDevelopmentIds = new Set<string>();
 	for (const row of rows.ЖК) {
-		if (!required(report, row, "ЖК", ["externalId", "developerSlug", "name", "slug", "kind", "regionSlug", "citySlug", "dataTier", "status", "checkedAt"])) continue;
+		if (
+			!required(report, row, "ЖК", [
+				"externalId",
+				"developerSlug",
+				"name",
+				"slug",
+				"kind",
+				"regionSlug",
+				"citySlug",
+				"salesStatus",
+				"salesAvailability",
+				"dataTier",
+				"status",
+				"checkedAt",
+			])
+		)
+			continue;
 		if (seenDevelopmentIds.has(row.externalId)) {
-			addIssue(report, { severity: "error", code: "duplicate_identity", message: `Duplicate development externalId ${row.externalId}.`, sheet: "ЖК", row: Number(row.__row), field: "externalId" });
+			addIssue(report, {
+				severity: "error",
+				code: "duplicate_identity",
+				message: `Duplicate development externalId ${row.externalId}.`,
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "externalId",
+			});
 			continue;
 		}
 		seenDevelopmentIds.add(row.externalId);
 		if (!isSlug(row.slug)) {
-			addIssue(report, { severity: "error", code: "invalid_slug", message: "Development slug is not canonical.", sheet: "ЖК", row: Number(row.__row), field: "slug" });
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_slug",
+				message: "Development slug is not canonical.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "slug",
+			});
 			continue;
 		}
 		if (!developerInputs.has(row.developerSlug)) {
-			addIssue(report, { severity: "error", code: "unknown_developer", message: `Developer ${row.developerSlug} is absent from Застройщики.`, sheet: "ЖК", row: Number(row.__row), field: "developerSlug" });
+			addIssue(report, {
+				severity: "error",
+				code: "unknown_developer",
+				message: `Developer ${row.developerSlug} is absent from Застройщики.`,
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "developerSlug",
+			});
 			continue;
 		}
-		if (!(["residential_complex", "cottage_village"] as const).includes(row.kind as "residential_complex")) {
-			addIssue(report, { severity: "error", code: "invalid_enum", message: "Invalid development kind.", sheet: "ЖК", row: Number(row.__row), field: "kind" });
+		if (
+			!(["residential_complex", "cottage_village"] as const).includes(
+				row.kind as "residential_complex",
+			)
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_enum",
+				message: "Invalid development kind.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "kind",
+			});
 			continue;
 		}
 		if (!(["A", "B", "C"] as const).includes(row.dataTier as "A")) {
-			addIssue(report, { severity: "error", code: "invalid_enum", message: "Invalid dataTier.", sheet: "ЖК", row: Number(row.__row), field: "dataTier" });
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_enum",
+				message: "Invalid dataTier.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "dataTier",
+			});
 			continue;
 		}
-		if (!(["draft", "published", "archived"] as const).includes(row.status as "draft")) {
-			addIssue(report, { severity: "error", code: "invalid_enum", message: "Invalid development status.", sheet: "ЖК", row: Number(row.__row), field: "status" });
+		if (
+			!(["draft", "published", "archived"] as const).includes(
+				row.status as "draft",
+			)
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_enum",
+				message: "Invalid development status.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "status",
+			});
 			continue;
 		}
-		if (row.salesStatus && !(["available", "limited", "sold_out", "paused"] as const).includes(row.salesStatus as "available")) {
-			addIssue(report, { severity: "error", code: "invalid_enum", message: "Invalid salesStatus.", sheet: "ЖК", row: Number(row.__row), field: "salesStatus" });
+		if (
+			!(["on_sale", "sales_finished", "completed"] as const).includes(
+				row.salesStatus as "on_sale",
+			)
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_enum",
+				message: "Invalid salesStatus.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "salesStatus",
+			});
+			continue;
+		}
+		if (
+			!(["in_inventory", "confirmed", "none"] as const).includes(
+				row.salesAvailability as "in_inventory",
+			)
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_enum",
+				message: "Invalid salesAvailability.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "salesAvailability",
+			});
 			continue;
 		}
 		const latitude = numberOrUndefined(row.latitude);
 		const longitude = numberOrUndefined(row.longitude);
-		if ((row.deadline && !isDate(row.deadline)) || (row.latitude && (latitude === undefined || latitude < -90 || latitude > 90)) || (row.longitude && (longitude === undefined || longitude < -180 || longitude > 180))) {
-			addIssue(report, { severity: "error", code: "invalid_value", message: "deadline and coordinates have invalid format.", sheet: "ЖК", row: Number(row.__row) });
+		if (
+			(row.deadline && !isDate(row.deadline)) ||
+			(row.latitude &&
+				(latitude === undefined || latitude < -90 || latitude > 90)) ||
+			(row.longitude &&
+				(longitude === undefined || longitude < -180 || longitude > 180))
+		) {
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_value",
+				message: "deadline and coordinates have invalid format.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+			});
 			continue;
 		}
 		if (!isDate(row.checkedAt)) {
-			addIssue(report, { severity: "error", code: "invalid_date", message: "checkedAt must be ISO 8601.", sheet: "ЖК", row: Number(row.__row), field: "checkedAt" });
+			addIssue(report, {
+				severity: "error",
+				code: "invalid_date",
+				message: "checkedAt must be ISO 8601.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: "checkedAt",
+			});
 			continue;
 		}
-		const geo = await input.repository.resolveGeo({ regionSlug: row.regionSlug, citySlug: row.citySlug, districtSlug: row.districtSlug || undefined });
+		const geo = await input.repository.resolveGeo({
+			regionSlug: row.regionSlug,
+			citySlug: row.citySlug,
+			districtSlug: row.districtSlug || undefined,
+		});
 		if (!geo) {
-			addIssue(report, { severity: "error", code: "unknown_geo", message: "Region/city/district identity is unknown or cross-city.", sheet: "ЖК", row: Number(row.__row), field: row.districtSlug ? "districtSlug" : "citySlug" });
+			addIssue(report, {
+				severity: "error",
+				code: "unknown_geo",
+				message: "Region/city/district identity is unknown or cross-city.",
+				sheet: "ЖК",
+				row: Number(row.__row),
+				field: row.districtSlug ? "districtSlug" : "citySlug",
+			});
 			continue;
 		}
 		const source = `${sourcePrefix}:${input.sourceKey}`;
-		const childPrices = (prices.get(row.externalId) ?? []).map((priceRow) => ({ label: priceRow.label, amountMinor: Number(priceRow.amountMinor), currency: priceRow.currency || "RUB", source, checkedAt: new Date(priceRow.checkedAt).toISOString() }));
+		const childPrices = (prices.get(row.externalId) ?? []).map((priceRow) => ({
+			roomsLabel: priceRow.roomsLabel,
+			priceFromMinor: Number(priceRow.priceFromMinor),
+			priceToMinor: priceRow.priceToMinor
+				? Number(priceRow.priceToMinor)
+				: undefined,
+			lotsAvailable: priceRow.lotsAvailable
+				? Number(priceRow.lotsAvailable)
+				: undefined,
+			priceCheckedAt: new Date(priceRow.priceCheckedAt).toISOString(),
+			source,
+		}));
 		const childMedia: Array<Record<string, unknown>> = [];
 		for (const mediaRow of media.get(row.externalId) ?? []) {
 			if (!(await input.repository.mediaExists(mediaRow.mediaId))) {
-				addIssue(report, { severity: "error", code: "unknown_media", message: `Media ${mediaRow.mediaId} does not exist.`, sheet: "Медиа", row: Number(mediaRow.__row), field: "mediaId" });
+				addIssue(report, {
+					severity: "error",
+					code: "unknown_media",
+					message: `Media ${mediaRow.mediaId} does not exist.`,
+					sheet: "Медиа",
+					row: Number(mediaRow.__row),
+					field: "mediaId",
+				});
 				continue;
 			}
-			childMedia.push({ media: mediaRow.mediaId, mediaType: mediaRow.mediaType, rights: mediaRow.rights, source, checkedAt: new Date(mediaRow.checkedAt).toISOString() });
+			childMedia.push({
+				media: mediaRow.mediaId,
+				mediaType: mediaRow.mediaType,
+				rights: mediaRow.rights,
+				capturedAt: mediaRow.capturedAt
+					? new Date(mediaRow.capturedAt).toISOString()
+					: undefined,
+				source,
+				checkedAt: new Date(mediaRow.checkedAt).toISOString(),
+			});
 		}
-		const descriptions = (texts.get(row.externalId) ?? []).map((textRow) => ({ kind: textRow.kind, text: textRow.text, source, checkedAt: new Date(textRow.checkedAt).toISOString() }));
+		const descriptions = (texts.get(row.externalId) ?? []).map((textRow) => ({
+			kind: textRow.kind,
+			text: textRow.text,
+			source,
+			checkedAt: new Date(textRow.checkedAt).toISOString(),
+		}));
 		const data: DevelopmentInput = {
 			name: row.name,
 			slug: row.slug,
@@ -486,18 +849,20 @@ export async function importDevelopmentExcel(input: {
 			region: geo.region,
 			city: geo.city,
 			district: geo.district,
+			districtRaw: row.districtRaw || row.districtSlug || undefined,
 			developerSlug: row.developerSlug,
 			address: row.address || undefined,
-			coordinates: row.latitude || row.longitude ? { latitude, longitude } : undefined,
+			coordinates:
+				row.latitude || row.longitude ? { latitude, longitude } : undefined,
 			class: row.class || undefined,
 			completion: row.completion || undefined,
 			deadline: row.deadline ? new Date(row.deadline).toISOString() : undefined,
-			salesStatus: row.salesStatus || undefined,
-			availability: row.availability || undefined,
+			salesStatus: row.salesStatus,
+			salesAvailability: row.salesAvailability,
 			dataTier: row.dataTier,
 			source,
 			checkedAt: new Date(row.checkedAt).toISOString(),
-			prices: childPrices,
+			priceByRooms: childPrices,
 			mediaItems: childMedia,
 			descriptions,
 			externalIdentities: [{ source, externalId: row.externalId }],
@@ -505,11 +870,24 @@ export async function importDevelopmentExcel(input: {
 		};
 		developmentInputs.push({ row, externalId: row.externalId, data });
 	}
-	const acceptedDevelopmentIds = new Set(developmentInputs.map((item) => item.externalId));
-	for (const [sheet, childRows] of [["Цены", validPrices], ["Медиа", validMedia], ["Тексты", validTexts]] as const) {
+	const acceptedDevelopmentIds = new Set(
+		developmentInputs.map((item) => item.externalId),
+	);
+	for (const [sheet, childRows] of [
+		["Цены", validPrices],
+		["Медиа", validMedia],
+		["Тексты", validTexts],
+	] as const) {
 		for (const childRow of childRows) {
 			if (!acceptedDevelopmentIds.has(childRow.developmentExternalId)) {
-				addIssue(report, { severity: "error", code: "unknown_development", message: `Development ${childRow.developmentExternalId} is absent from ЖК.`, sheet, row: Number(childRow.__row), field: "developmentExternalId" });
+				addIssue(report, {
+					severity: "error",
+					code: "unknown_development",
+					message: `Development ${childRow.developmentExternalId} is absent from ЖК.`,
+					sheet,
+					row: Number(childRow.__row),
+					field: "developmentExternalId",
+				});
 			}
 		}
 	}
@@ -518,38 +896,86 @@ export async function importDevelopmentExcel(input: {
 		item.inspection = await input.repository.inspectDeveloper(item.data);
 	}
 	for (const item of developmentInputs) {
-		item.inspection = await input.repository.inspectDevelopment({ sourceKey: input.sourceKey, externalId: item.externalId, data: item.data });
-		if (item.inspection.collision) addIssue(report, { severity: "error", code: "slug_collision", message: `Slug ${String(item.data.slug)} belongs to another development.`, sheet: "ЖК", row: Number(item.row.__row), field: "slug" });
-		if (item.inspection.publishedSlugMutation) addIssue(report, { severity: "error", code: "published_slug_mutation", message: "Published development slug mutation is forbidden.", sheet: "ЖК", row: Number(item.row.__row), field: "slug" });
+		item.inspection = await input.repository.inspectDevelopment({
+			sourceKey: input.sourceKey,
+			externalId: item.externalId,
+			data: item.data,
+		});
+		if (item.inspection.collision)
+			addIssue(report, {
+				severity: "error",
+				code: "slug_collision",
+				message: `Slug ${String(item.data.slug)} belongs to another development.`,
+				sheet: "ЖК",
+				row: Number(item.row.__row),
+				field: "slug",
+			});
+		if (item.inspection.publishedSlugMutation)
+			addIssue(report, {
+				severity: "error",
+				code: "published_slug_mutation",
+				message: "Published development slug mutation is forbidden.",
+				sheet: "ЖК",
+				row: Number(item.row.__row),
+				field: "slug",
+			});
 	}
 
-	for (const inspection of [...developerInputs.values(), ...developmentInputs].map((item) => item.inspection).filter(Boolean)) {
+	for (const inspection of [...developerInputs.values(), ...developmentInputs]
+		.map((item) => item.inspection)
+		.filter(Boolean)) {
 		if (inspection?.state === "new") report.created += 1;
 		else if (inspection?.state === "changed") report.changed += 1;
 		else report.unchanged += 1;
 	}
 	if (input.mode === "dry-run") return report;
 
-	const runId = await input.repository.createImportRun({ sourceKey: input.sourceKey, fileName: input.fileName, workbookSha256, now: input.now.toISOString() });
+	const runId = await input.repository.createImportRun({
+		sourceKey: input.sourceKey,
+		fileName: input.fileName,
+		workbookSha256,
+		now: input.now.toISOString(),
+	});
 	if (report.errors > 0) {
-		for (const issue of report.issues) await input.repository.recordIssue(runId, issue);
-		await input.repository.finishImportRun({ id: runId, status: "failed", report, now: input.now.toISOString() });
+		for (const issue of report.issues)
+			await input.repository.recordIssue(runId, issue);
+		await input.repository.finishImportRun({
+			id: runId,
+			status: "failed",
+			report,
+			now: input.now.toISOString(),
+		});
 		return report;
 	}
 	const developerIds = new Map<string, string | number>();
 	for (const [slug, item] of developerInputs) {
-		const id = item.inspection?.state === "unchanged" && item.inspection.id
-			? item.inspection.id
-			: await input.repository.upsertDeveloper(item.inspection?.id, { ...item.data, lastImportRun: runId });
+		const id =
+			item.inspection?.state === "unchanged" && item.inspection.id
+				? item.inspection.id
+				: await input.repository.upsertDeveloper(item.inspection?.id, {
+						...item.data,
+						lastImportRun: runId,
+					});
 		developerIds.set(slug, id);
 	}
 	for (const item of developmentInputs) {
 		const developerId = developerIds.get(String(item.data.developerSlug));
-		const data: DevelopmentInput & { developerSlug?: unknown } = { ...item.data, developer: developerId, lastImportRun: runId };
+		const data: DevelopmentInput & { developerSlug?: unknown } = {
+			...item.data,
+			developer: developerId,
+			lastImportRun: runId,
+		};
 		delete data.developerSlug;
-		if (item.inspection?.state !== "unchanged") await input.repository.upsertDevelopment(item.inspection?.id, data);
+		if (item.inspection?.state !== "unchanged")
+			await input.repository.upsertDevelopment(item.inspection?.id, data);
 	}
-	for (const issue of report.issues) await input.repository.recordIssue(runId, issue);
-	await input.repository.finishImportRun({ id: runId, status: report.changed + report.created === 0 ? "unchanged" : "success", report, now: input.now.toISOString() });
+	for (const issue of report.issues)
+		await input.repository.recordIssue(runId, issue);
+	await input.repository.finishImportRun({
+		id: runId,
+		status: report.changed + report.created === 0 ? "unchanged" : "success",
+		report,
+		now: input.now.toISOString(),
+	});
 	return report;
 }

@@ -46,6 +46,8 @@ export {
 	getListing,
 	getNearby,
 	getPropertyByPublicUrlId,
+	listAllDevelopments,
+	listDeveloperDevelopments,
 	listDevelopments,
 	listGeoDevelopers,
 } from "./geo-catalog";

@@ -1,12 +1,13 @@
 # AMS MASTER PLAN №9 — STARTER v2.1 / CLONE READINESS
 
 Plan ID: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9
-Version: v5
+Version: v6
 Status: APPROVED
 Phase: APPROVAL_HANDOFF
 Approved by: owner
-Approved at: 2026-09-25T14:44:24+03:00
-Baseline: SourceCraft `main@6671b0f0c2ceaf62749cc3b6b78b591c6fe51ed6`
+Approved at: 2026-09-25T22:41:46+03:00
+Previous approved snapshot: v5, approved by owner at 2026-09-25T14:44:24+03:00
+Baseline: SourceCraft `main@c337957e46846d7c8e5d74745866f06c0860d985`
 Owner input: `STARTER v2.1 — готовность к клонам`, received 2026-09-25
 Delivery profile: `COMMERCIAL`
 Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`
@@ -14,11 +15,13 @@ Production authorization: `NONE`
 
 Этот документ — единственная активная основа нового master plan. Планы №2–8
 остаются историческим evidence в `docs/legacy/` и не являются очередью работ.
-Plan №9 прошёл финальный аудит. Exact v4 был утверждён и импортирован, S0
-implementation закрыт с evidence, но delivery preflight остановился до PR на
-whitespace findings полного branch diff. v5 нормализует только whitespace
-source/inventory. Exact v5 утверждён владельцем; versioned Task Manager Upgrade
-разрешён, production остаётся запрещён.
+Plan №9 v5 прошёл финальный аудит, был утверждён владельцем и исполнен до
+включительно S6 на canonical SourceCraft main. До первой записи S7 владелец
+разрешил пересобрать оставшуюся delivery-цепочку, чтобы убрать лишние
+PR/Gate/merge циклы. v6 не меняет девять product contracts S7-S14 (S10A/S10B):
+он заменяет восемь прежних delivery cycles пятью batches с совместимыми risk
+scopes. Exact v6 прошёл финальный audit и утверждён владельцем; v5 graph
+остановлен на S7 до CLEAN versioned Upgrade, production остаётся запрещён.
 
 ## 1. Primary goal и границы
 
@@ -103,12 +106,16 @@ data-driven geo/SEO registries, единым Content Gate, корректной 
 
 ## 3. Global execution contract
 
-1. One epic = one branch/worktree = one SourceCraft PR from current
-   `origin/main`.
-2. Delivery order is sequential. The next epic starts only after the preceding
-   epic is merged and canonical `main` is refreshed.
-3. Default delivery mode for S0–S14: `MERGE_AFTER_GATE`, subject to exact-plan
-   owner approval. Direct push to `main` is forbidden.
+1. S0-S6 preserve their completed v5 evidence: one epic = one
+   branch/worktree/SourceCraft PR. Remaining S7-S14 use one delivery batch = one
+   branch/worktree/SourceCraft PR. A batch may contain multiple named epics,
+   but each epic keeps its own acceptance and evidence checkpoint.
+2. Delivery batches are sequential. Inside a batch, constituent epics are
+   implemented in declared order in the same worktree, with a commit/push
+   checkpoint after each epic; PR/review/Gate/merge happen once after the whole
+   batch is complete.
+3. Default delivery mode for remaining batches B1-B5 is `MERGE_AFTER_GATE`,
+   subject to exact-v6 owner approval. Direct push to `main` is forbidden.
 4. Production, mirror and tag remain owner gates.
 5. Schema changes use Payload migrations only. Applied migrations are never
    rewritten.
@@ -116,41 +123,60 @@ data-driven geo/SEO registries, единым Content Gate, корректной 
    contracts:lock/freeze` where the affected contract surface requires it.
 7. `src/core/**` and `packages/**` contain no client city, brand, domain or
    project marketing literals.
-8. Local WORK checks are scope-specific. Before merge:
+8. Local WORK checks are scope-specific. Before a batch merge:
    - STANDARD → `pnpm verify:merge-standard` and one exact-head STANDARD Gate;
    - RISKY → exactly one canonical `RISK_SCOPE`,
      `pnpm verify:merge-risky`, and one exact-head RISKY Gate;
    - `pnpm verify:schema` is mandatory for schema/data migration scope, not for
      every SEO/runtime change;
+   - a batch declares exactly one canonical RISK_SCOPE; compatible STANDARD
+     epics inherit the batch Gate, while a second incompatible RISK_SCOPE is
+     never hidden inside the same PR;
    - `pnpm verify:daily` may be used as a work checkpoint but does not replace
-     the Merge Gate.
-9. Every epic report uses Core §20 and lists only actually executed checks.
+     the single final Merge Gate.
+9. Every epic checkpoint and batch report use Core §20 and list only actually
+   executed checks.
    `DONE`, `GREEN`, `PASS` and similar claims without evidence are forbidden.
 10. Rollback is per epic: revert code/docs PR for non-persisted work; additive
     forward-fix or tested down/recovery path for persisted schema/data.
+11. Beads stable IDs, node types, roles, work kinds, repository ownership and
+    source anchors from v5 are preserved. Batch names B1-B5 are delivery labels,
+    not replacement epics or a second task store.
+12. In a two-epic batch the final epic delivery task owns the only external
+    PR/review/Gate/merge action. The preceding epic delivery task runs after it,
+    records the same exact evidence and must not create a second PR, Gate or
+    merge. Both parent epics close only after their delivery tasks are closed.
+13. Constituent rollback may revert an internal checkpoint while the batch is
+    still unmerged. After batch merge, the external rollback boundary is the
+    complete batch PR; persisted schema/data still use forward-fix or tested
+    recovery instead of destructive rollback.
 
-### Default Epic Contract for S0-S14
+### Default Work Package Contract for remaining S7-S14
 
-The following clauses apply to every implementation epic and are supplemented,
-not replaced, by its local contract below.
+The following clauses apply to every remaining implementation epic and its
+delivery batch. They are supplemented, not replaced, by the local epic contract
+below.
 
 - Source of Truth: this exact Plan №9 version and the active project documents,
   code, schema, migrations and tests named by the epic scope. Historical plans
   are evidence only and never supply missing requirements.
-- Entry: Plan №9 is `APPROVED` and imported/reconciled cleanly; predecessor is
-  merged; `origin/main` is refreshed; the new task worktree is clean; approved
-  plan hash and runtime versions have not drifted.
-- Exit: every acceptance item has observable evidence; scope-specific local
-  checks pass; one review and exact-head SourceCraft Gate of the declared risk
-  pass; PR is merged; execution ledger records checks, SHA and delivery state.
+- Entry: Plan №9 exact v6 is `APPROVED` and imported/reconciled cleanly;
+  predecessor batch is merged; `origin/main` is refreshed; the batch worktree
+  is clean; approved plan hash and runtime versions have not drifted.
+- Epic checkpoint: every local acceptance item has observable evidence;
+  scope-specific checks pass; commit/push and `EXECUTION_LEDGER_V1` checkpoint
+  are recorded, but PR/Gate/merge wait for the batch exit.
+- Batch exit: every constituent epic is complete; combined diff and scope are
+  reviewed; one exact-head SourceCraft Gate of the declared batch risk passes;
+  one PR is merged; the batch ledger records checks, SHA and delivery state.
 - Allowed actions: read, edit, test, commit, push, create PR, review, run the
   declared Gate and merge under `MERGE_AFTER_GATE`. Production, release/tag,
   mirror, new secrets, destructive external actions and unrelated repository
   changes are forbidden.
 - Scope out: functionality not named by the epic, speculative infrastructure,
   hidden compatibility fallbacks and opportunistic redesign/refactor.
-- Parallel-safe: none by owner delivery policy. A blocked epic pauses the graph;
-  Developer records the blocker and does not skip to a later serial epic.
+- Parallel-safe: none by owner delivery policy. A blocked constituent pauses its
+  batch; Developer records the blocker and does not skip to a later batch.
 - Owner decisions: none before implementation. A new material choice, source
   drift or ambiguous acceptance returns the plan to Architect/owner.
 
@@ -176,10 +202,10 @@ not replaced, by its local contract below.
 | `decidePage` and Gate decision | S4 | after S4 merge | S5-S15 |
 | SEO template keys/morphology contract | S5 | after S5 merge | S6, S10A, S12-S14 |
 | Generated SEO registry | S6 | after S6 merge | S7, S10A, S12-S14 |
-| Development DTO/schema | S8 | after S8 merge | S9-S14 |
-| Site settings/JSON-LD/sitemap | S10A | after S10A merge | S10B-S15 |
-| Cache/tag invalidation contract | S11 | after S11 merge | S12-S15 |
-| Acceptance matrix and guards | S12 | after S12 merge | S13-S15 |
+| Development DTO/schema | S8 | after S8 checkpoint in B1 | S7, S9-S14 |
+| Site settings/JSON-LD/sitemap | S10A | after B2 merge | S10B-S15 |
+| Cache/tag invalidation contract | S11 | after S11 checkpoint in B4 | S12-S15 |
+| Acceptance matrix and guards | S12 | after B4 merge | S13-S15 |
 
 Later epics may consume a frozen surface but may not silently redefine it. A
 required semantic change returns to Architect as plan drift or becomes a new
@@ -192,8 +218,9 @@ explicitly approved scope.
 | D-09-01 | Plan №9 является self-contained: требования задаются этим документом без ссылок на другие master plans | Нет внешнего planning prerequisite; другие repositories вне scope | `DECIDED` |
 | D-09-02 | SEO Registry = `CSV → validated typed registry in code`; CMS не является вторым owner | S6 создаёт один deterministic generation/validation path | `DECIDED` |
 | D-09-03 | Исходный S10 разделён на S10A=`schema-data` и S10B=`ingest-jobs` | Один epic/PR/SHA использует ровно один RISKY scope | `DECIDED` |
+| D-09-04 | После завершения S0-S6 оставшиеся S7-S14 доставляются пятью совместимыми batches, а не восемью отдельными PR | Сохраняются epic acceptance/evidence checkpoints, но PR/review/Gate/merge выполняются один раз на batch | `DECIDED` |
 
-## 5. FINDING REGISTER — final audit v3
+## 5. FINDING REGISTER — through final audit v6
 
 | ID | Severity | Finding / evidence | Resolution or recommendation | Status |
 |---|---|---|---|---|
@@ -216,53 +243,80 @@ explicitly approved scope.
 | MP9-A17 | MINOR | Project router still exposed only closed Plan №8 and the old tag target | AGENTS/README/Backlog now point to exact v3 as approval-only planning basis; Plan №8 stays evidence | `RESOLVED` |
 | MP9-A18 | BLOCKER | Approved v3 used inline-code values in Version/Status; canonical importer rejects them before Task Manager writes | v4 normalizes plan metadata to plain machine-readable lines; no epic or requirement changed | `RESOLVED / REAPPROVAL REQUIRED` |
 | MP9-A19 | BLOCKER | Full v4 branch review found four trailing-space findings in approved plan metadata and one blank-at-EOF finding in inventory | v5 removes only whitespace; S0 PR/Gate were not created, graph upgrade waits for owner approval | `RESOLVED / REAPPROVAL REQUIRED` |
+| MP9-A20 | MAJOR | После S6 восемь отдельных delivery cycles повторяли full review/Gate/PR/merge для тесно связанных scopes | v6 groups S7-S14 into five batches; incompatible `schema-data`, `ingest-jobs` and `dependency-runtime` scopes remain separated | `ACCEPTED / REAPPROVAL REQUIRED` |
+| MP9-A21 | BLOCKER | Project router, docs map, Architecture, Backlog, Project and Release Checklist still described v5/per-task PR delivery and contradicted v6 batching | Synchronized every active delivery source to v6 approval-bound batch semantics without activating execution | `RESOLVED` |
+| MP9-A22 | BLOCKER | A naive B1-B5 graph would replace managed IDs/work kinds, which canonical Beads Upgrade rejects | Preserve all v5 nodes; change only planned topology/contracts; paired delivery tasks reuse one exact batch evidence with one explicit external owner | `RESOLVED` |
 
 ## 6. Dependency graph и delivery order
 
 ```text
-S0
- └─ S1
-     └─ S2
-         └─ S3
-             └─ S4
-                 └─ S5
-                     └─ S6
-                         └─ S7
-                             └─ S8
-                                 └─ S9
-                                     └─ S10A
-                                         └─ S10B
-                                             └─ S11
-                                                 └─ S12
-                                                     └─ S13
-                                                         └─ S14
-                                                             └─ S15 OWNER GATE
+S0-S6 COMPLETE on canonical main
+  └─ B1 [S8 → S7] schema-data
+       └─ B2 [S9 → S10A] schema-data
+            └─ B3 [S10B] ingest-jobs
+                 └─ B4 [S11 → S12] dependency-runtime
+                      └─ B5 [S13 → S14] dependency-runtime
+                           └─ S15 OWNER GATE
 ```
 
-Это delivery serialization policy владельца. Не каждая связь технически HARD:
-после S4 части S8–S11 могли бы выполняться параллельно, но для этого plan принят
-последовательный merge flow. Следствие: blocked epic останавливает программу;
-Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS`, если политика
-не изменится до финального аудита.
+Это ускоренная delivery policy владельца для exact v6. Product epic contracts
+S7-S14 сохраняются: объединяется delivery boundary, а не acceptance. Внутри
+batch последовательность остаётся явной, поэтому schema/DTO, navigation,
+discovery, cache, guards, clone и UI не используют ещё не реализованный
+контракт. Между batches остаётся один serial critical path; blocked batch
+останавливает программу, но число повторных merge cycles сокращается с восьми
+до пяти.
 
-| Epic | Dependency type | Critical reason |
+| Batch | Epics and internal order | Canonical risk | Why compatible | Exit / rollback boundary |
+|---|---|---|---|---|
+| B1 | S8 → S7 | `schema-data` | The final development schema/DTO is frozen first; catalog queries and truthful aggregates then consume it without a second rewrite; both require native PostgreSQL integration | All S8/S7 acceptance, schema/upgrade proof, one RISKY Gate; revert batch before any release, persisted changes use forward-fix/recovery |
+| B2 | S9 → S10A | `schema-data` | Breadcrumb/navigation output is a direct input to JSON-LD and sitemap; optional site-settings migration determines the batch risk | All S9/S10A acceptance, sitemap crawl and schema proof when applicable, one RISKY Gate |
+| B3 | S10B | `ingest-jobs` | IndexNow queue/retry is the only remaining job scope and cannot share a Gate with schema-data or dependency-runtime | S10B event/idempotence evidence and one RISKY Gate; queue can be disabled/reverted |
+| B4 | S11 → S12 | `dependency-runtime` | S12 acceptance matrix and guards must verify the final cache/tag runtime behavior | S11 performance/invalidation plus S12 negative fixtures/matrix, one RISKY Gate |
+| B5 | S13 → S14 | `dependency-runtime` | UI acceptance must run against the final generated clone profiles; both consume the frozen platform and guards | Four clean clone presets plus UI/a11y/visual proof, one RISKY Gate; revert generator/UI batch |
+
+| Transition | Dependency type | Critical reason |
 |---|---|---|
-| S0→S1 | CONTRACT | SoT и baseline должны быть однозначны до нового profile contract |
-| S1→S2 | HARD | Registry ownership зависит от schema Profile v2 |
-| S2→S3 | HARD | Resolver должен получать factual district/facet registries |
-| S3→S4 | HARD | Gate orchestration зависит от factual resolution and lifecycle |
-| S4→S5 | CONTRACT | SEO renderer consumes one Gate/indexability decision |
-| S5→S6 | HARD | CSV registry requires frozen template keys and morphology contract |
-| S6→S7 | CONTRACT | Catalog facet paths and metadata need validated registry |
-| S7→S8 | SOFT / delivery | Development schema technically separable, serialized by owner policy |
-| S8→S9 | CONTRACT | Navigation/nearby consumes final entity DTO shape |
-| S9→S10A | CONTRACT | Breadcrumb/links are inputs to structured data and sitemap |
-| S10A→S10B | HARD | IndexNow events consume final decidePage/discovery model |
-| S10B→S11 | SOFT / delivery | Cache is serialized after discovery event contract |
-| S11→S12 | HARD | Acceptance matrix must verify final cache/runtime behavior |
-| S12→S13 | HARD | Clone preset must run the finalized guards/matrix |
-| S13→S14 | HARD | UI acceptance must cover generated clone profiles |
-| S14→S15 | PRODUCTION | Release/tag only after final product proof and owner command |
+| S6→B1 | CONTRACT | Catalog facet paths and metadata need the validated registry already merged in S6 |
+| B1→B2 | CONTRACT | Navigation, structured data and sitemap consume the final development DTO and catalog behavior |
+| B2→B3 | HARD | IndexNow transition events consume the final decidePage/discovery model |
+| B3→B4 | SOFT / delivery | Cache is technically separable but remains serialized to keep one active writing stream |
+| B4→B5 | HARD | Clone presets and UI acceptance must run the finalized guards and runtime matrix |
+| B5→S15 | PRODUCTION | Release/tag only after final product proof and owner command |
+
+### Beads v5 → v6 stable-ID Upgrade contract
+
+The approved upgrade keeps the complete v5 managed ID set. It changes only
+planned dependencies, card contracts, labels and source metadata. Closed S0-S6
+nodes and their ledgers remain closed and immutable. B1-B5 never become new
+Beads epic IDs.
+
+| Batch | Implementation order | Sole external delivery owner | Shared-evidence closer | Next batch waits for |
+|---|---|---|---|---|
+| B1 | `TASK-S8-IMPLEMENTATION` → `TASK-S7-IMPLEMENTATION` | `TASK-S7-DELIVERY` | `TASK-S8-DELIVERY` | closed `S7` and `S8` |
+| B2 | `TASK-S9-IMPLEMENTATION` → `TASK-S10A-IMPLEMENTATION` | `TASK-S10A-DELIVERY` | `TASK-S9-DELIVERY` | closed `S9` and `S10A` |
+| B3 | `TASK-S10B-IMPLEMENTATION` | `TASK-S10B-DELIVERY` | none | closed `S10B` |
+| B4 | `TASK-S11-IMPLEMENTATION` → `TASK-S12-IMPLEMENTATION` | `TASK-S12-DELIVERY` | `TASK-S11-DELIVERY` | closed `S11` and `S12` |
+| B5 | `TASK-S13-IMPLEMENTATION` → `TASK-S14-IMPLEMENTATION` | `TASK-S14-DELIVERY` | `TASK-S13-DELIVERY` | closed `S13` and `S14` |
+
+For each two-epic batch, both parent epics depend only on the previous completed
+batch. The second implementation task depends on the first implementation task;
+the external delivery owner depends on the second implementation task; the
+shared-evidence closer depends on the external delivery owner. This avoids a
+parent-closure cycle while proving both epic checkpoints before delivery.
+
+Exact parent dependencies are: B1 `S7,S8 ← S6`; B2
+`S9,S10A ← S7+S8`; B3 `S10B ← S9+S10A`; B4 `S11,S12 ← S10B`; B5
+`S13,S14 ← S11+S12`. No parent inside a two-epic batch depends on its sibling;
+internal order belongs to task dependencies above.
+
+Approval handoff must run `Upgrade -DryRun` first and list every topology-changed
+stable ID in `ReopenTaskId`. The actual Upgrade is allowed only when dry-run
+reports the same managed ID set, zero role/work-kind/repository drift and zero
+cycles. After CLEAN Reconcile, the manually paused S7 task/epic may return to
+`open`; the first claimed implementation task must be
+`TASK-S8-IMPLEMENTATION`. Any incompatible-ID result stops handoff and returns
+to Architect; manual rebuild is not an implicit fallback.
 
 ## 7. Epic contracts
 
@@ -400,6 +454,9 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 
 ### EPIC-S7 — Catalog pagination, filters and truthful aggregates
 
+- Batch: B1 checkpoint 2/2. S7 runs after S8 has frozen the development
+  schema/DTO. Completion triggers combined S8+S7 review, `schema-data` Gate,
+  one PR and one merge.
 - Outcome: catalog query behavior is server-validated, index-safe and based on
   bounded factual queries.
 - Scope: Zod `page/sort/priceFrom/priceTo/rooms/district`; page≥2 and all query
@@ -416,6 +473,8 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 
 ### EPIC-S8 — Development model v2
 
+- Batch: B1 checkpoint 1/2. Commit/push and ledger are required; PR/Gate/merge
+  wait until S7 consumes the frozen schema/DTO on the same branch.
 - Outcome: development availability, room prices, media and completeness are
   persisted and exposed consistently across Admin/import/DTO/UI/JSON-LD.
 - Scope: migrate sales status; add salesAvailability, districtRaw,
@@ -433,6 +492,8 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 
 ### EPIC-S9 — Breadcrumbs, nearby and profile navigation
 
+- Batch: B2 checkpoint 1/2. Local verification is STANDARD; delivery waits for
+  S10A and inherits the batch `schema-data` Gate.
 - Outcome: all internal navigation is PageKey/Gate-derived and never links to a
   404 or redirect.
 - Scope: shared breadcrumb builder; inactive geo is text; nearby uses
@@ -441,12 +502,14 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 - Acceptance: crawl guard zero bad links; same breadcrumb semantics in SINGLE
   and MULTI; nearby counts do not pollute current geo.
 - Verification: navigation matrix, UI state/a11y, `verify:merge-standard`.
-- Delivery: STANDARD.
+- Delivery checkpoint: no standalone PR/Gate/merge.
 - Rollback: revert navigation PR.
 - Stop: link owner bypasses PageKey/decidePage.
 
 ### EPIC-S10A — Site settings, JSON-LD and sitemap
 
+- Batch: B2 checkpoint 2/2. Completion triggers combined S9+S10A review,
+  `schema-data` Gate, one PR and one merge.
 - Outcome: existing `site-settings` Global is the only public brand/NAP owner;
   structured data and sitemap consume Gateway DTO + decidePage.
 - Scope: gap inventory existing Global; add only missing fields via migration;
@@ -462,6 +525,8 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 
 ### EPIC-S10B — IndexNow on Gate decision transitions
 
+- Batch: B3 single-epic delivery because `ingest-jobs` is incompatible with
+  adjacent batch risk scopes.
 - Outcome: IndexNow enqueues only same-origin canonical URLs when the Gate
   decision materially changes.
 - Scope: events for publish/archive/canonical move/indexability change;
@@ -475,6 +540,8 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 
 ### EPIC-S11 — Cache tags and measured budget
 
+- Batch: B4 checkpoint 1/2. Commit/push and ledger are required; PR/Gate/merge
+  wait until the S12 guards and acceptance matrix prove this runtime.
 - Outcome: Public Gateway reads use bounded tag identities and invalidation
   graph; warmed fixture meets Core §12.2 budget without speculative infra.
 - Scope: exact tags from owner input; related-entity invalidation;
@@ -491,6 +558,8 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 
 ### EPIC-S12 — Guards and five-profile acceptance matrix
 
+- Batch: B4 checkpoint 2/2. Completion triggers combined S11+S12 review,
+  `dependency-runtime` Gate, one PR and one merge.
 - Outcome: architecture/runtime invariants fail closed before subsequent clone
   and UI work can merge.
 - Scope: block literal href mode; generated project literal denylist over
@@ -502,12 +571,16 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
   visible; entity URLs stable.
 - Verification: guard negative fixtures, acceptance runner,
   `verify:merge-standard`.
-- Delivery: STANDARD. This epic blocks S13/S14 merges, not historical S0–S11.
+- Delivery checkpoint: local guard verification remains STANDARD in character,
+  but there is no standalone PR/Gate/merge; B4 owns delivery. This checkpoint
+  blocks B5, not historical S0-S10B.
 - Rollback: revert guard/matrix PR.
 - Stop: guard suppressions or mutable baseline snapshots.
 
 ### EPIC-S13 — Clone preset v2
 
+- Batch: B5 checkpoint 1/2. Commit/push and ledger are required; PR/Gate/merge
+  wait until S14 validates UI against the generated profiles.
 - Outcome: four schemaVersion 2 presets generate complete project-owned clone
   inputs in a clean checkout without touching protected platform surfaces.
 - Scope: fields from owner input; templates or explicit template-file ref;
@@ -523,6 +596,8 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 
 ### EPIC-S14 — Canonical UI Core v5 surfaces
 
+- Batch: B5 checkpoint 2/2. Completion triggers combined S13+S14 review,
+  `dependency-runtime` Gate, one PR and one merge.
 - Outcome: existing visual system renders final v2.1 routes and states without
   second primitives or silent redesign.
 - Scope: update DESIGN representative routes/viewports; ListingView,
@@ -533,7 +608,8 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
   links; no design-system drift blockers.
 - Verification: `verify:ui-core`, browser matrix, accessibility, visual proof,
   explicit read-only UI Drift Audit, `verify:merge-standard`.
-- Delivery: STANDARD.
+- Delivery checkpoint: local UI verification remains STANDARD in character,
+  but there is no standalone PR/Gate/merge; B5 owns delivery.
 - Rollback: revert UI PR; contracts remain backward-compatible or change via
   approved lock cycle.
 - Stop: redesign, second primitive or new UI dependency without owner decision.
@@ -551,44 +627,62 @@ Night Run Readiness ожидаемо будет не выше `READY_WITH_LIMITS
 - Stop: no release command, dirty main, changed SHA,
   missing artifact/rollback or any red/unknown required proof.
 
-## 8. Final four-pass audit of exact v5
+## 8. Final four-pass audit of exact v6
 
 ### Pass 1 — logic and completeness
 
-- All 16 supplied implementation epics are represented as S0-S14; original S10
-  is deliberately split into S10A/S10B to preserve one RISKY scope per PR.
-- Every implementation epic has outcome, in-scope work, measurable acceptance,
-  verification, rollback and stop conditions through its local plus default
-  contract. S15 is a separate later owner/release gate.
-- Blockers: 0. Major findings open: 0. Ambiguous critical DoD: 0.
+- Approved v5 product scope is preserved: completed S0-S6 stay evidence;
+  S7-S14 retain all outcomes, scope, acceptance, verification, rollback and stop
+  conditions; S15 remains a later owner/release gate.
+- Batching changes only delivery boundaries. Five batches replace eight prior
+  PR/Gate/merge cycles across nine product contracts; constituent epic checkpoints remain independently
+  observable and no requirement is dropped or moved to production.
+- MP9-A21 removed active-doc contradictions. Logic blockers: 0. Open major
+  findings: 0. Ambiguous critical DoD: 0.
 
 ### Pass 2 — architecture, data and security
 
-- Payload/PostgreSQL remain the only backend/data owners; migrations are
-  additive; public reads remain Gateway/DTO-based; project-to-core dependency
-  direction and client-literal boundary are preserved.
-- Content Gate, URL/redirect semantics, registry ownership, PII boundaries and
-  production isolation have named owners and fail-closed verification.
-- Architecture/security blockers: 0. Major findings open: 0.
+- Payload/PostgreSQL remain the sole backend/schema owners; public reads remain
+  Gateway/DTO-based; project→core direction, secrets/PII boundaries and additive
+  migrations are unchanged.
+- B1 and B2 each use only `schema-data`; B3 alone uses `ingest-jobs`; B4 and B5
+  each use only `dependency-runtime`. STANDARD checkpoints inherit their batch
+  Gate; no SHA mixes incompatible canonical RISK_SCOPE values.
+- Persisted B1/B2 changes retain forward-fix/recovery rollback; B3 queue can be
+  disabled; B4/B5 remain code/runtime rollback boundaries. Production, tag,
+  mirror, server and live data stay outside authorization.
+- Architecture/data/security blockers: 0. Open major findings: 0.
 
 ### Pass 3 — dependencies and autonomy
 
-- Cycles: 0. HARD dependencies: 8. CONTRACT dependencies: 5. SOFT delivery
-  dependencies: 2. PRODUCTION dependency: 1.
-- Independent technical work exists after S4, but the owner-mandated delivery
-  policy creates one serialized wave. Shared-contract freeze points prevent
-  downstream redefinition.
-- Single blocking points: every current epic by deliberate serialization. This
-  cannot be safely removed without changing the owner's explicit delivery order.
+- Delivery DAG: `S6 → B1 → B2 → B3 → B4 → B5 → S15`; cycles: 0. HARD
+  transitions: 2; CONTRACT transitions: 2; SOFT delivery transitions: 1;
+  PRODUCTION transition: 1.
+- Inside B1, S8 freezes schema/DTO before S7 consumes it. B2 freezes navigation
+  before structured data/discovery; B4 proves cache through final guards; B5
+  validates UI against generated clone profiles.
+- MP9-A22 is resolved by the explicit stable-ID topology: all v5 IDs,
+  type/role/work_kind/repository/source anchors are retained; paired delivery
+  tasks close from one exact PR/Gate/merge evidence without a second external
+  action. `Upgrade -DryRun` and CLEAN Reconcile remain mandatory post-approval.
+- Independent waves: one intentional serial batch wave. Single blocking point:
+  current batch. This is accepted owner policy; no external service blocks
+  pre-production work and a blocked constituent cannot be bypassed safely
+  inside its shared rollback boundary.
 
-### Pass 4 — execution and evidence
+### Pass 4 — executability and evidence
 
-- Implementation graph: 16 epics (`S0-S9`, `S10A`, `S10B`, `S11-S14`). Every
-  epic has acceptance and verification; wired/live promises name a runtime,
-  browser, DB, HTTP, job, import or generated-clone surface.
-- S15 is not imported as unattended implementation. It remains blocked by a
-  separate owner release command and exact canonical-main proof.
-- Before-approval owner decisions: 0. Later owner decisions: 1 (S15 release).
+- Remaining product epics with deterministic acceptance/verification: 9/9
+  (`S7`, `S8`, `S9`, `S10A`, `S10B`, `S11`, `S12`, `S13`, `S14`). Delivery
+  batches with one risk, owner, exit and rollback boundary: 5/5.
+- Each implementation task records pushed exact-SHA evidence. Each two-epic
+  batch has one external delivery owner and one shared-evidence closer; the next
+  batch waits for both parent epics to close.
+- Wired/live promises name PostgreSQL integration, browser/E2E, HTTP/sitemap,
+  queue/jobs, cache timings, clone generation or UI/a11y/visual surfaces.
+- Approval handoff is fail-closed: exact source hash → inventory → Validate →
+  Upgrade DryRun → Upgrade → Reconcile CLEAN → first ready task S8. No import,
+  implementation, release or production is authorized by readiness alone.
 
 ### MASTER PLAN AUDIT
 
@@ -601,13 +695,15 @@ Architecture/data/security
   major: 0
 Dependency/autonomy
   cycles: 0
-  hard dependencies: 8
-  softened dependencies: 2
-  independent waves: 1 serialized wave by owner policy
-  single blocking points: every current epic by explicit sequential delivery
+  hard dependencies: 2
+  contract dependencies: 2
+  soft delivery dependencies: 1
+  batches: 5
+  single blocking point: current serialized batch by owner policy
 Executability/evidence
-  implementation epics with acceptance: 16/16
-  implementation epics with verification: 16/16
+  remaining epics with acceptance: 9/9
+  remaining epics with verification: 9/9
+  batches with exact risk/exit/rollback: 5/5
   wired/live without reachableVia: 0
 Owner decisions
   before approval open: 0
@@ -615,10 +711,10 @@ Owner decisions
 Night Run Readiness: READY_WITH_LIMITS
 ```
 
-`READY_WITH_LIMITS` means the exact v5 graph is executable and has no unresolved
-planning blocker, but it cannot skip a blocked epic because the owner explicitly
-required strict sequential merge delivery. Removing that limit would change the
-approved execution policy rather than merely improve the graph.
+`READY_WITH_LIMITS` means exact v6 is deterministic and has no unresolved
+planning blocker, but shared batch branches intentionally preserve one serial
+critical path. The limit reduces external delivery overhead without weakening
+proof or silently widening rollback boundaries.
 
 ## 9. Revision packet and history
 
@@ -694,6 +790,54 @@ approved execution policy rather than merely improve the graph.
 - Owner approval: exact v5 approved on 2026-09-25; versioned Upgrade authorized.
 - Resulting version: `v5 APPROVED`.
 
+### Revision input `MP9-R6`
+
+- Source: owner.
+- Request: reduce repeated PR/Gate/merge overhead by combining compatible
+  remaining epics without weakening acceptance or mixing incompatible risks.
+- Accepted: five delivery batches B1=`S8→S7`, B2=`S9→S10A`, B3=`S10B`,
+  B4=`S11+S12`, B5=`S13+S14`; one branch/PR/Gate/merge per batch and one
+  commit/push/ledger checkpoint per constituent epic.
+- Rejected: one giant S7-S14 branch because it couples schema, jobs, cache,
+  clone and UI rollback; combining S10B with another batch because
+  `ingest-jobs` cannot share a canonical Gate with `schema-data` or
+  `dependency-runtime`.
+- Preserved: exact S0-S6 completed evidence, every S7-S14 product contract,
+  production/tag/mirror prohibition and the S15 owner gate.
+- Current execution: v5 S7 task and epic blocked before code changes with
+  `PLAN_REVISION_PENDING`; v6 inventory/import is forbidden before approval.
+- Owner decisions remaining before final audit: 0.
+- Sections changed: header/baseline, execution contract, D-09-04, MP9-A20,
+  dependency graph, epic delivery checkpoints, assembly/readiness state.
+- Resulting version: `v6 REVIEW`.
+
+### Revision input `MP9-R6F`
+
+- Source: explicit owner command `Проверь план финально`.
+- Audit: four independent passes over logic/completeness,
+  architecture/data/security, dependencies/autonomy and
+  executability/evidence/delivery.
+- Findings resolved: MP9-A21 synchronized active project canon with v6 batch
+  delivery; MP9-A22 preserved the v5 managed ID set and defined a fail-closed
+  stable-ID Upgrade topology with one external delivery owner per batch.
+- Exact-v6 result: blockers/major/open before-approval owner decisions =
+  `0/0/0`; cycles = `0`; Night Run Readiness = `READY_WITH_LIMITS` only because
+  the owner-selected batch flow remains serial.
+- No Task Manager inventory/import/upgrade, implementation, PR, Gate, merge,
+  release, tag, mirror or production action was performed by this audit.
+- Resulting version: `v6 READY_FOR_OWNER_APPROVAL`.
+
+### Approval input `MP9-A6`
+
+- Source: explicit owner command `План утверждён` at
+  `2026-09-25T22:41:46+03:00`.
+- Exact approved version: `v6`; final audit result remains
+  `READY_WITH_LIMITS` with `0/0/0` blockers/major/before-approval decisions.
+- Authorization: docs checkpoint, stable-ID inventory v6, fail-closed
+  `Upgrade -DryRun → Upgrade → Reconcile CLEAN` and automatic Developer handoff.
+- Excluded: S15, release, tag, mirror and production.
+- Resulting version: `v6 APPROVED`.
+
 | Version | Date | Status | Input | Result |
 |---|---|---|---|---|
 | v0 | 2026-09-25 | DRAFT | Owner attachment `STARTER v2.1 — готовность к клонам` | Existing plan basis accepted for assembly |
@@ -702,14 +846,15 @@ approved execution policy rather than merely improve the graph.
 | v3 | 2026-09-25 | APPROVED | MP9-R3 final four-pass audit + explicit owner approval | Exact approved execution source; READY_WITH_LIMITS only because delivery is intentionally serial |
 | v4 | 2026-09-25 | APPROVED | MP9-R4 importer metadata compatibility + explicit owner approval | Exact approved execution source; handoff authorized |
 | v5 | 2026-09-25 | APPROVED | MP9-R5 whitespace-only delivery correction + explicit owner approval | No scope change; versioned Upgrade authorized |
+| v6 | 2026-09-25 | APPROVED | MP9-R6/R6F + MP9-A6 explicit owner approval | Five compatible stable-ID batches; stable-ID Upgrade and Developer handoff authorized; production excluded |
 
 ## 10. Current handoff state
 
 ```text
-Plan: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9 v5 APPROVED
+Plan: AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9 v6 APPROVED
 Phase: APPROVAL_HANDOFF
-Task Manager: v4 graph paused at ams9-task-s0-delivery; v5 Upgrade AUTHORIZED
-Developer handoff: RESUME AFTER CLEAN UPGRADE
+Task Manager: v5 graph paused at ams9-task-s7-implementation before code writes
+Developer handoff: AUTHORIZED AFTER CLEAN UPGRADE
 Production: NOT AUTHORIZED
-Next: apply versioned v4 -> v5 Upgrade, reconcile CLEAN, resume S0 delivery
+Next: stable-ID inventory v6 → Upgrade DryRun → Upgrade → Reconcile CLEAN → Developer
 ```

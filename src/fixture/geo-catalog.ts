@@ -18,8 +18,8 @@ import type { ContentGateDecision } from "../core/seo/content-gate.ts";
 import { starterFixtureDataset } from "../project/fixture-data/starter-dataset.ts";
 import { siteProfileFixtures } from "../project/site-profile.ts";
 import { createProjectUrlGrammar } from "../project/url-grammar.ts";
-import { fixtureDistrictRouteRegistry } from "./route-registries.ts";
 import { fixtureProperties } from "./provider.ts";
+import { fixtureDistrictRouteRegistry } from "./route-registries.ts";
 
 const grammar = createProjectUrlGrammar(
 	siteProfileFixtures.multiGeo,
@@ -169,22 +169,25 @@ export const fixtureDevelopment = {
 		pageKey: fixtureDeveloper.pageKey,
 		href: fixtureDeveloper.href,
 	},
-	availability: "available",
+	salesStatus: "on_sale",
+	salesAvailability: "confirmed",
+	completenessScore: 90,
 	completionLabel: "Сдан",
 	description: `Синтетическое описание ${canonicalDevelopment.name}.`,
 	gallery: [],
-	priceRows: [
+	priceByRooms: [
 		{
-			label: "Квартиры",
-			price: {
+			roomsLabel: "Квартиры",
+			priceFrom: {
 				priceMinor: canonicalDevelopment.priceMinor,
 				currency: "RUB",
 				period: "total",
 				label: "от 6 200 000 ₽",
 			},
-			checkedAt: "2026-09-24T00:00:00.000Z",
+			priceCheckedAt: "2026-09-24T00:00:00.000Z",
 		},
 	],
+	mediaItems: [],
 	characteristics: [{ label: "Класс", value: "Комфорт" }],
 	breadcrumbs: navigation.breadcrumbs({
 		ancestors: [

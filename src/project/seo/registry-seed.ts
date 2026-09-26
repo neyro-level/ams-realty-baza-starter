@@ -182,6 +182,36 @@ export const projectSeoRegistrySeed = [
   },
   {
     "pageKey": {
+      "kind": "categoryGeoFacet",
+      "geo": "primorsk",
+      "category": "kvartiry",
+      "facet": "vtorichka"
+    },
+    "url": "/primorsk/kvartiry/vtorichka/",
+    "canonical": "/primorsk/kvartiry/vtorichka/",
+    "entityRef": "facet:vtorichka",
+    "targetPhrases": [
+      "fixture secondary market catalog intent"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeoFacet",
+    "title": "Вторичные квартиры в Приморске — AMS Realty",
+    "h1": "Вторичные квартиры в Приморске",
+    "description": "Вторичные квартиры в Приморске — актуальные предложения. 10 объектов.",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
       "kind": "geoDevelopers",
       "geo": "primorsk"
     },

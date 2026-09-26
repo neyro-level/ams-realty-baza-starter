@@ -29,6 +29,10 @@ import {
 	districtRouteCategoriesDownSql,
 	districtRouteCategoriesUpSql,
 } from "../../migrations/20260925_140000_district_route_categories.ts";
+import {
+	developmentModelV2DownSql,
+	developmentModelV2UpSql,
+} from "../../migrations/20260925_230000_development_model_v2.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -517,6 +521,75 @@ export function proveDevelopmentsMigration(testUri) {
 		throw new Error("Developments down migration left domain tables behind.");
 	}
 	psql(testUri, developmentsUpSql);
+	psql(
+		testUri,
+		`INSERT INTO developers (name, slug, source, checked_at) VALUES ('Upgrade Developer', 'upgrade-developer', 'fixture', now());
+		 INSERT INTO developments (name, slug, kind, region_id, city_id, developer_id, source, checked_at, sales_status, availability)
+		 VALUES
+		   ('Upgrade Available', 'upgrade-available', 'residential_complex', 1, 1, 1, 'fixture', now(), 'available', 'legacy'),
+		   ('Upgrade Limited', 'upgrade-limited', 'residential_complex', 1, 1, 1, 'fixture', now(), 'limited', 'legacy'),
+		   ('Upgrade Sold Out', 'upgrade-sold-out', 'residential_complex', 1, 1, 1, 'fixture', now(), 'sold_out', 'legacy'),
+		   ('Upgrade Paused', 'upgrade-paused', 'residential_complex', 1, 1, 1, 'fixture', now(), 'paused', 'legacy');
+		 INSERT INTO developments_prices (_order, _parent_id, id, label, amount_minor, currency, source, checked_at)
+		 VALUES (1, 1, 'legacy-price', '2-room', 900000000, 'RUB', 'fixture', now());
+		 INSERT INTO developments_media_items (_order, _parent_id, id, media_id, media_type, rights, source, checked_at)
+		 VALUES (1, 1, 'legacy-media', 1, 'image', 'fixture-rights', 'fixture', now());`,
+	);
+	psql(testUri, developmentModelV2UpSql);
+	if (
+		psql(
+			testUri,
+			`SELECT count(*) FROM developments WHERE
+			  (slug='upgrade-available' AND sales_status='on_sale' AND sales_availability='confirmed') OR
+			  (slug='upgrade-limited' AND sales_status='on_sale' AND sales_availability='in_inventory') OR
+			  (slug='upgrade-sold-out' AND sales_status='sales_finished' AND sales_availability='none') OR
+			  (slug='upgrade-paused' AND sales_status='sales_finished' AND sales_availability='none')`,
+		) !== "4"
+	) {
+		throw new Error(
+			"Development v2 migration did not map legacy sales values.",
+		);
+	}
+	if (
+		psql(
+			testUri,
+			"SELECT rooms_label || ':' || price_from_minor::text || ':' || price_to_minor::text FROM developments_price_by_rooms WHERE id='legacy-price'",
+		) !== "2-room:900000000:900000000"
+	) {
+		throw new Error("Development v2 migration did not preserve legacy prices.");
+	}
+	if (
+		psql(
+			testUri,
+			"SELECT media_type::text FROM developments_media_items WHERE id='legacy-media'",
+		) !== "gallery"
+	) {
+		throw new Error("Development v2 migration did not map legacy media types.");
+	}
+	if (
+		Number(
+			psql(
+				testUri,
+				"SELECT completeness_score FROM developments WHERE slug='upgrade-available'",
+			),
+		) <= 0
+	) {
+		throw new Error(
+			"Development v2 migration did not compute completenessScore.",
+		);
+	}
+	psql(testUri, developmentModelV2DownSql);
+	if (
+		psql(
+			testUri,
+			"SELECT sales_status::text FROM developments WHERE slug='upgrade-available'",
+		) !== "available"
+	) {
+		throw new Error(
+			"Development v2 down migration did not apply the documented fallback mapping.",
+		);
+	}
+	psql(testUri, developmentModelV2UpSql);
 }
 
 export function proveLeadContextMigration(testUri) {

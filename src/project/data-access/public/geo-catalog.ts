@@ -22,6 +22,7 @@ import {
 	type SiteProfile,
 } from "@/core/profile";
 import type { UrlGrammar } from "@/core/routing";
+import { getRuntimeClock } from "@/core/time/clock";
 import type {
 	City,
 	Developer,
@@ -31,19 +32,21 @@ import type {
 	Property,
 	Region,
 } from "@/project/payload-types";
-import { siteConfig } from "@/project/site.config";
-import { siteProfile } from "@/project/site-profile";
 import {
 	projectSeoCategoryLabel,
 	projectSeoFacetLabel,
 	projectSeoMeta,
 	renderProjectSeoTemplate,
 } from "@/project/seo/templates";
+import { siteConfig } from "@/project/site.config";
+import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
+import { isFreshDevelopmentPrice } from "../../../core/developments/domain.ts";
 import {
 	type CatalogQueryInput,
 	findPublicCatalogPropertiesByGeo,
 	findPublicPropertyByPublicUrlId,
+	publicPropertyPublicationWhere,
 } from "./catalog";
 import { toPropertyCardDTO, toPropertyDetailsDTO } from "./dto";
 import { publicGatewayPolicy } from "./policy";
@@ -94,8 +97,9 @@ const developmentSelect = {
 	coordinates: true,
 	completion: true,
 	salesStatus: true,
-	availability: true,
-	prices: true,
+	salesAvailability: true,
+	completenessScore: true,
+	priceByRooms: true,
 	mediaItems: true,
 	layouts: true,
 	progress: true,
@@ -226,25 +230,28 @@ export async function getListing(
 	if (!Object.hasOwn(profile.geos, parsed.geo)) return null;
 	const city = await findGeoRecord(payload, parsed.geo);
 	if (!city) return null;
-	const district = parsed.district
-		? await findDistrict(
-				payload,
-				Number(city.id),
-				parsed.district,
-				parsed.surface,
-			)
+	const query = (parsed.query as CatalogQueryInput | undefined) ?? {};
+	const queryDistrict =
+		typeof query.district === "string"
+			? slugSchema.safeParse(query.district)
+			: null;
+	if (queryDistrict && !queryDistrict.success) return null;
+	if (parsed.district && queryDistrict?.success) return null;
+	const districtSlug = parsed.district ?? queryDistrict?.data;
+	const district = districtSlug
+		? await findDistrict(payload, Number(city.id), districtSlug, parsed.surface)
 		: null;
-	if (parsed.district && !district) return null;
-	const markets = availableMarketsForSurface(
-		profile,
-		parsed.geo,
-		parsed.surface,
-	);
+	if (districtSlug && !district) return null;
+	let markets = availableMarketsForSurface(profile, parsed.geo, parsed.surface);
 	if (markets.length === 0) return null;
-	const facetQuery = parsed.facet
+	const facetResolution = parsed.facet
 		? catalogQueryForSeoFacet(profile, parsed.geo, parsed.surface, parsed.facet)
-		: {};
-	if (parsed.facet && !facetQuery) return null;
+		: { query: {} };
+	if (parsed.facet && !facetResolution) return null;
+	if (facetResolution?.market) {
+		markets = markets.filter((market) => market === facetResolution.market);
+		if (markets.length === 0) return null;
+	}
 
 	const pageKey: PageKeyDTO = parsed.district
 		? {
@@ -262,6 +269,23 @@ export async function getListing(
 				}
 			: { kind: "categoryGeo", geo: parsed.geo, category: parsed.surface };
 	const href = safeBuildUrl(pageKey, grammar);
+	const facetLinks = Object.entries(profile.seoFacets).flatMap(
+		([facetSlug, facet]) =>
+			facet.geo === parsed.geo && facet.category === parsed.surface
+				? [
+						pageLink(
+							{
+								kind: "categoryGeoFacet",
+								geo: parsed.geo,
+								category: parsed.surface,
+								facet: facetSlug,
+							},
+							projectSeoFacetLabel(facetSlug),
+							grammar,
+						),
+					]
+				: [],
+	);
 	const page = parsed.page ?? 1;
 	const pageSize = pageSizeSchema.parse(
 		(parsed.query as { limit?: number } | undefined)?.limit ?? 24,
@@ -281,6 +305,7 @@ export async function getListing(
 			page,
 			limit: pageSize,
 		});
+		if (page > Math.max(1, result.totalPages)) return null;
 		return listingDTO(
 			pageKey,
 			href,
@@ -292,15 +317,17 @@ export async function getListing(
 			page,
 			pageSize,
 			brandName,
+			facetLinks,
 		);
 	}
 
 	const propertyFilter = surfacePropertyFilter(parsed.surface);
+	const { district: _queryDistrict, ...catalogQuery } = query;
 	const result = await findPublicCatalogPropertiesByGeo(
 		payload,
 		{
-			...((parsed.query as CatalogQueryInput | undefined) ?? {}),
-			...facetQuery,
+			...catalogQuery,
+			...(facetResolution?.query ?? {}),
 			page,
 			limit: pageSize,
 			...propertyFilter,
@@ -311,6 +338,7 @@ export async function getListing(
 			markets,
 		},
 	);
+	if (page > Math.max(1, result.totalPages)) return null;
 	return listingDTO(
 		pageKey,
 		href,
@@ -322,6 +350,7 @@ export async function getListing(
 		result.page,
 		result.pageSize,
 		brandName,
+		facetLinks,
 	);
 }
 
@@ -365,7 +394,12 @@ export async function getDevelopment(
 ): Promise<DevelopmentDetailsDTO | null> {
 	const result = await payload.find({
 		collection: "developments",
-		where: { slug: { equals: slugSchema.parse(slug) } },
+		where: {
+			and: [
+				{ slug: { equals: slugSchema.parse(slug) } },
+				{ status: { equals: "published" } },
+			],
+		},
 		depth: 1,
 		limit: 1,
 		page: 1,
@@ -387,7 +421,12 @@ export async function getDevelopmentRouteFacts(
 } | null> {
 	const result = await payload.find({
 		collection: "developments",
-		where: { slug: { equals: slugSchema.parse(slug) } },
+		where: {
+			and: [
+				{ slug: { equals: slugSchema.parse(slug) } },
+				{ status: { equals: "published" } },
+			],
+		},
 		depth: 1,
 		limit: 1,
 		page: 1,
@@ -420,7 +459,12 @@ export async function getDeveloperRouteFacts(
 } | null> {
 	const developerResult = await payload.find({
 		collection: "developers",
-		where: { slug: { equals: slugSchema.parse(slug) } },
+		where: {
+			and: [
+				{ slug: { equals: slugSchema.parse(slug) } },
+				{ status: { equals: "published" } },
+			],
+		},
 		depth: 0,
 		limit: 1,
 		page: 1,
@@ -458,6 +502,86 @@ export async function listDevelopments(
 	return (result.docs as Development[]).map(toDevelopmentCardDTO);
 }
 
+export type PublicDevelopmentPage = {
+	items: readonly DevelopmentCardDTO[];
+	total: number;
+	page: number;
+	totalPages: number;
+};
+
+export async function listDeveloperDevelopments(
+	payload: Payload,
+	input: { developerId: number; page?: number; limit?: number },
+): Promise<PublicDevelopmentPage> {
+	const page = pageSchema.parse(input.page ?? 1);
+	const limit = pageSizeSchema.parse(input.limit ?? 24);
+	const result = await payload.find({
+		collection: "developments",
+		where: {
+			and: [
+				{ developer: { equals: input.developerId } },
+				{ status: { equals: "published" } },
+			],
+		},
+		depth: 1,
+		limit,
+		page,
+		sort: "name",
+		select: developmentSelect,
+		...gatewayAccess,
+	});
+	return {
+		items: (result.docs as Development[]).map(toDevelopmentCardDTO),
+		total: result.totalDocs,
+		page: result.page ?? page,
+		totalPages: result.totalPages,
+	};
+}
+
+export async function listAllDevelopments(
+	payload: Payload,
+	input: { geo: string; developerId?: number },
+): Promise<readonly DevelopmentCardDTO[]> {
+	if (input.developerId) {
+		const first = await listDeveloperDevelopments(payload, {
+			developerId: input.developerId,
+			page: 1,
+			limit: 48,
+		});
+		const items = [...first.items];
+		for (let page = 2; page <= first.totalPages; page += 1) {
+			items.push(
+				...(
+					await listDeveloperDevelopments(payload, {
+						developerId: input.developerId,
+						page,
+						limit: 48,
+					})
+				).items,
+			);
+		}
+		return items;
+	}
+	const geo = slugSchema.parse(input.geo);
+	const city = await findGeoRecord(payload, geo);
+	if (!city) return [];
+	const first = await findDevelopments(payload, {
+		cityId: Number(city.id),
+		page: 1,
+		limit: 48,
+	});
+	const rows = [...(first.docs as Development[])];
+	for (let page = 2; page <= first.totalPages; page += 1) {
+		const result = await findDevelopments(payload, {
+			cityId: Number(city.id),
+			page,
+			limit: 48,
+		});
+		rows.push(...(result.docs as Development[]));
+	}
+	return rows.map(toDevelopmentCardDTO);
+}
+
 export async function getDeveloper(
 	payload: Payload,
 	slug: string,
@@ -465,7 +589,12 @@ export async function getDeveloper(
 ): Promise<DeveloperDetailsDTO | null> {
 	const result = await payload.find({
 		collection: "developers",
-		where: { slug: { equals: slugSchema.parse(slug) } },
+		where: {
+			and: [
+				{ slug: { equals: slugSchema.parse(slug) } },
+				{ status: { equals: "published" } },
+			],
+		},
 		depth: 1,
 		limit: 1,
 		page: 1,
@@ -474,26 +603,42 @@ export async function getDeveloper(
 	});
 	const developer = result.docs[0] as Developer | undefined;
 	if (!developer) return null;
-	const [developments, developmentCount] = await Promise.all([
-		payload.find({
+	const firstDevelopmentPage = await payload.find({
+		collection: "developments",
+		where: {
+			and: [
+				{ developer: { equals: Number(developer.id) } },
+				{ status: { equals: "published" } },
+			],
+		},
+		depth: 1,
+		limit: 48,
+		page: 1,
+		select: { city: true },
+		...gatewayAccess,
+	});
+	const developments = [...(firstDevelopmentPage.docs as Development[])];
+	for (let page = 2; page <= firstDevelopmentPage.totalPages; page += 1) {
+		const next = await payload.find({
 			collection: "developments",
-			where: { developer: { equals: Number(developer.id) } },
+			where: {
+				and: [
+					{ developer: { equals: Number(developer.id) } },
+					{ status: { equals: "published" } },
+				],
+			},
 			depth: 1,
 			limit: 48,
-			page: 1,
+			page,
 			select: { city: true },
 			...gatewayAccess,
-		}),
-		payload.count({
-			collection: "developments",
-			where: { developer: { equals: Number(developer.id) } },
-			...gatewayAccess,
-		}),
-	]);
+		});
+		developments.push(...(next.docs as Development[]));
+	}
 	return toDeveloperDetailsDTO(
 		developer,
-		developments.docs as Development[],
-		developmentCount.totalDocs,
+		developments,
+		firstDevelopmentPage.totalDocs,
 		brandName,
 	);
 }
@@ -505,20 +650,43 @@ export async function listGeoDevelopers(
 	const parsedGeo = slugSchema.parse(geo);
 	const city = await findGeoRecord(payload, parsedGeo);
 	if (!city) return [];
-	const developments = await payload.find({
+	const firstPage = await payload.find({
 		collection: "developments",
-		where: { city: { equals: Number(city.id) } },
+		where: {
+			and: [
+				{ city: { equals: Number(city.id) } },
+				{ status: { equals: "published" } },
+			],
+		},
 		depth: 1,
 		limit: 48,
 		page: 1,
 		select: { developer: true, city: true },
 		...gatewayAccess,
 	});
+	const developments = [...(firstPage.docs as Development[])];
+	for (let page = 2; page <= firstPage.totalPages; page += 1) {
+		const next = await payload.find({
+			collection: "developments",
+			where: {
+				and: [
+					{ city: { equals: Number(city.id) } },
+					{ status: { equals: "published" } },
+				],
+			},
+			depth: 1,
+			limit: 48,
+			page,
+			select: { developer: true, city: true },
+			...gatewayAccess,
+		});
+		developments.push(...(next.docs as Development[]));
+	}
 	const groups = new Map<
 		number,
 		{ developer: Developer; developments: Development[] }
 	>();
-	for (const development of developments.docs as Development[]) {
+	for (const development of developments) {
 		if (!isObjectRelation<Developer>(development.developer)) continue;
 		const id = Number(development.developer.id);
 		const group = groups.get(id) ?? {
@@ -569,12 +737,16 @@ export async function countInventory(
 			)
 		: null;
 	if (input.district && !district) return 0;
-	const markets = availableMarketsForSurface(profile, geo, input.surface);
+	let markets = availableMarketsForSurface(profile, geo, input.surface);
 	if (markets.length === 0) return 0;
-	const facetQuery = input.facet
+	const facetResolution = input.facet
 		? catalogQueryForSeoFacet(profile, geo, input.surface, input.facet)
-		: {};
-	if (input.facet && !facetQuery) return 0;
+		: { query: {} };
+	if (input.facet && !facetResolution) return 0;
+	if (facetResolution?.market) {
+		markets = markets.filter((market) => market === facetResolution.market);
+		if (markets.length === 0) return 0;
+	}
 	if (
 		input.surface === "novostroyki" ||
 		input.surface === "kottedzhnye-poselki"
@@ -582,6 +754,7 @@ export async function countInventory(
 		if (!markets.includes("newbuild") || input.facet) return 0;
 		const and: Where[] = [
 			{ city: { equals: Number(city.id) } },
+			{ status: { equals: "published" } },
 			{
 				kind: {
 					equals:
@@ -602,7 +775,7 @@ export async function countInventory(
 	const filter = surfacePropertyFilter(input.surface);
 	const result = await findPublicCatalogPropertiesByGeo(
 		payload,
-		{ ...filter, ...facetQuery, page: 1, limit: 1 },
+		{ ...filter, ...(facetResolution?.query ?? {}), page: 1, limit: 1 },
 		{
 			cityId: Number(city.id),
 			districtId: district ? Number(district.id) : undefined,
@@ -635,6 +808,7 @@ export async function countGeoInventory(
 				collection: "properties",
 				where: {
 					and: [
+						publicPropertyPublicationWhere,
 						{ cityRef: { equals: Number(city.id) } },
 						{ market: { in: markets } },
 					],
@@ -645,7 +819,12 @@ export async function countGeoInventory(
 	const developmentCount = markets.includes("newbuild")
 		? await payload.count({
 				collection: "developments",
-				where: { city: { equals: Number(city.id) } },
+				where: {
+					and: [
+						{ city: { equals: Number(city.id) } },
+						{ status: { equals: "published" } },
+					],
+				},
 				...gatewayAccess,
 			})
 		: { totalDocs: 0 };
@@ -745,7 +924,10 @@ async function findDevelopments(
 		limit: number;
 	},
 ) {
-	const and: Where[] = [{ city: { equals: input.cityId } }];
+	const and: Where[] = [
+		{ city: { equals: input.cityId } },
+		{ status: { equals: "published" } },
+	];
 	if (input.districtId) and.push({ district: { equals: input.districtId } });
 	if (input.kind) and.push({ kind: { equals: input.kind } });
 	return payload.find({
@@ -809,7 +991,7 @@ function toDevelopmentCardDTO(development: Development): DevelopmentCardDTO {
 		developmentKind: development.kind,
 		slug: development.slug,
 	} as const;
-	const price = freshestPrice(development);
+	const price = minimumFreshPrice(development);
 	return {
 		id: String(development.id),
 		slug: development.slug,
@@ -829,18 +1011,15 @@ function toDevelopmentCardDTO(development: Development): DevelopmentCardDTO {
 		primaryMedia: primaryDevelopmentMedia(development),
 		priceFrom: price
 			? {
-					priceMinor: price.amountMinor,
+					priceMinor: price.priceFromMinor,
 					currency: "RUB",
 					period: "total",
-					label: rub(price.amountMinor),
+					label: rub(price.priceFromMinor),
 				}
 			: undefined,
-		availability:
-			development.salesStatus === "available" ||
-			development.salesStatus === "limited" ||
-			development.salesStatus === "sold_out"
-				? development.salesStatus
-				: "unknown",
+		salesStatus: development.salesStatus,
+		salesAvailability: development.salesAvailability,
+		completenessScore: development.completenessScore,
 		completionLabel: development.completion ?? undefined,
 	};
 }
@@ -851,17 +1030,15 @@ function toDevelopmentDetailsDTO(
 ): DevelopmentDetailsDTO {
 	const card = toDevelopmentCardDTO(development);
 	const city = objectRelation<City>(development.city, "city", development.id);
-	const price = freshestPrice(development);
+	const price = minimumFreshPrice(development);
 	const seoContext = {
 		brand: brandName,
 		entityName: development.name,
 		city: cityMorphology(city),
 		freshPrice: price
 			? {
-					label: rub(price.amountMinor),
-					fresh:
-						Date.now() - Date.parse(price.checkedAt) <=
-						siteProfile.gate.priceStaleDays * 86_400_000,
+					label: rub(price.priceFromMinor),
+					fresh: true,
 				}
 			: undefined,
 	};
@@ -873,7 +1050,11 @@ function toDevelopmentDetailsDTO(
 			undefined,
 		gallery:
 			development.mediaItems?.flatMap((item) =>
-				isObjectRelation<Media>(item.media) && item.media.url
+				["hero", "gallery", "layout", "construction_progress"].includes(
+					item.mediaType,
+				) &&
+				isObjectRelation<Media>(item.media) &&
+				item.media.url
 					? [
 							{
 								kind: "managed" as const,
@@ -891,24 +1072,50 @@ function toDevelopmentDetailsDTO(
 						longitude: development.coordinates.longitude,
 					}
 				: undefined,
-		priceRows:
-			development.prices?.map((row) => ({
-				label: row.label,
-				price: {
-					priceMinor: row.amountMinor,
-					currency: "RUB" as const,
-					period: "total" as const,
-					label: rub(row.amountMinor),
-				},
-				checkedAt: row.checkedAt,
-			})) ?? [],
+		priceByRooms: freshDevelopmentPrices(development).map((row) => ({
+			roomsLabel: row.roomsLabel,
+			priceFrom: {
+				priceMinor: row.priceFromMinor,
+				currency: "RUB" as const,
+				period: "total" as const,
+				label: rub(row.priceFromMinor),
+			},
+			priceTo:
+				row.priceToMinor != null
+					? {
+							priceMinor: row.priceToMinor,
+							currency: "RUB" as const,
+							period: "total" as const,
+							label: rub(row.priceToMinor),
+						}
+					: undefined,
+			lotsAvailable: row.lotsAvailable ?? undefined,
+			priceCheckedAt: row.priceCheckedAt,
+		})),
+		mediaItems:
+			development.mediaItems?.flatMap((item) =>
+				isObjectRelation<Media>(item.media) && item.media.url
+					? [
+							{
+								media: {
+									kind: "managed" as const,
+									src: item.media.url,
+									alt: item.media.alt,
+								},
+								mediaType: item.mediaType,
+								capturedAt: item.capturedAt ?? undefined,
+							},
+						]
+					: [],
+			) ?? [],
 		characteristics: [
 			development.completion
 				? { label: "Срок", value: development.completion }
 				: null,
-			development.availability
-				? { label: "Наличие", value: development.availability }
-				: null,
+			{
+				label: "Готовность данных",
+				value: `${development.completenessScore}%`,
+			},
 		].filter((item): item is { label: string; value: string } => item != null),
 		breadcrumbs: {
 			items: [
@@ -995,6 +1202,7 @@ function listingDTO(
 	page: number,
 	pageSize: number,
 	brandName: string,
+	subLinks: readonly PageLinkDTO[] = [],
 ): ListingPageDTO {
 	const totalPages = Math.ceil(total / pageSize);
 	const templateKey =
@@ -1039,7 +1247,7 @@ function listingDTO(
 			previousPage: page > 1 ? page - 1 : undefined,
 			nextPage: page < totalPages ? page + 1 : undefined,
 		},
-		subLinks: [],
+		subLinks,
 		nearby: [],
 		robots: { indexing: "noindex", following: "follow" },
 		canonical: href,
@@ -1091,19 +1299,25 @@ function catalogQueryForSeoFacet(
 	geo: string,
 	surface: CatalogSurfaceSlug,
 	slug: string,
-): Partial<CatalogQueryInput> | null {
+): { query: Partial<CatalogQueryInput>; market?: Market } | null {
 	const facet = profile.seoFacets[slug];
 	if (!facet || facet.geo !== geo || facet.category !== surface) return null;
-	if (facet.filter.key !== "rooms" || !Array.isArray(facet.filter.value)) {
-		return null;
+	if (facet.filter.key === "rooms" && Array.isArray(facet.filter.value)) {
+		const rooms = facet.filter.value.filter(
+			(value): value is number =>
+				typeof value === "number" && Number.isSafeInteger(value) && value >= 0,
+		);
+		return rooms.length === facet.filter.value.length && rooms.length > 0
+			? { query: { rooms } }
+			: null;
 	}
-	const rooms = facet.filter.value.filter(
-		(value): value is number =>
-			typeof value === "number" && Number.isSafeInteger(value) && value > 0,
-	);
-	return rooms.length === facet.filter.value.length && rooms.length > 0
-		? { rooms }
-		: null;
+	if (
+		facet.filter.key === "market" &&
+		(facet.filter.value === "secondary" || facet.filter.value === "newbuild")
+	) {
+		return { query: {}, market: facet.filter.value };
+	}
+	return null;
 }
 
 function surfacePropertyFilter(
@@ -1209,19 +1423,37 @@ function relationId(value: unknown): string | undefined {
 		: undefined;
 }
 
-function freshestPrice(development: Development) {
-	return [...(development.prices ?? [])].sort(
-		(a, b) => Date.parse(b.checkedAt) - Date.parse(a.checkedAt),
-	)[0];
+function freshDevelopmentPrices(development: Development) {
+	const referenceDate = getRuntimeClock().now();
+	return (development.priceByRooms ?? []).filter((row) =>
+		isFreshDevelopmentPrice(row.priceCheckedAt, referenceDate),
+	);
+}
+
+function minimumFreshPrice(development: Development) {
+	return freshDevelopmentPrices(development).reduce<
+		NonNullable<Development["priceByRooms"]>[number] | undefined
+	>(
+		(minimum, row) =>
+			!minimum || row.priceFromMinor < minimum.priceFromMinor ? row : minimum,
+		undefined,
+	);
 }
 
 function primaryDevelopmentMedia(development: Development) {
-	const media = development.mediaItems?.find(
-		(item) =>
-			item.mediaType === "image" &&
-			isObjectRelation<Media>(item.media) &&
-			item.media.url,
-	)?.media;
+	const media =
+		development.mediaItems?.find(
+			(item) =>
+				item.mediaType === "hero" &&
+				isObjectRelation<Media>(item.media) &&
+				item.media.url,
+		)?.media ??
+		development.mediaItems?.find(
+			(item) =>
+				item.mediaType === "gallery" &&
+				isObjectRelation<Media>(item.media) &&
+				item.media.url,
+		)?.media;
 	return isObjectRelation<Media>(media) && media.url
 		? { kind: "managed" as const, src: media.url, alt: media.alt }
 		: undefined;

@@ -18,7 +18,9 @@ export type DevelopmentCardDTO = {
 	developer?: Pick<DeveloperCardDTO, "id" | "name" | "href" | "pageKey">;
 	primaryMedia?: MediaDTO;
 	priceFrom?: PropertyPriceDTO;
-	availability: "available" | "limited" | "sold_out" | "unknown";
+	salesStatus: "on_sale" | "sales_finished" | "completed";
+	salesAvailability: "in_inventory" | "confirmed" | "none";
+	completenessScore: number;
 	completionLabel?: string;
 };
 
@@ -26,10 +28,23 @@ export type DevelopmentDetailsDTO = DevelopmentCardDTO & {
 	description?: string;
 	gallery: readonly MediaDTO[];
 	coordinates?: { latitude: number; longitude: number };
-	priceRows: readonly {
-		label: string;
-		price: PropertyPriceDTO;
-		checkedAt: string;
+	priceByRooms: readonly {
+		roomsLabel: string;
+		priceFrom: PropertyPriceDTO;
+		priceTo?: PropertyPriceDTO;
+		lotsAvailable?: number;
+		priceCheckedAt: string;
+	}[];
+	mediaItems: readonly {
+		media: MediaDTO;
+		mediaType:
+			| "hero"
+			| "gallery"
+			| "layout"
+			| "construction_progress"
+			| "document"
+			| "video";
+		capturedAt?: string;
 	}[];
 	characteristics: readonly { label: string; value: string }[];
 	breadcrumbs: BreadcrumbDTO;

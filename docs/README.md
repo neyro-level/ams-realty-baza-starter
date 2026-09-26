@@ -1,10 +1,10 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 9 V5 APPROVED / UPGRADE HANDOFF`. SourceCraft — primary,
-GitHub — одностороннее зеркало. Plan №9 находится в
-`v5 APPROVED`; v4 graph paused перед S0 PR из-за whitespace-only source drift,
-versioned Upgrade разрешён. Текущие приоритеты принадлежат
-`04_BACKLOG.md`.
+Статус: `ACTIVE / PLAN 9 V6 APPROVED / UPGRADE HANDOFF`. SourceCraft — primary,
+GitHub — одностороннее зеркало. Approved v5 исполнен до S6; graph остановлен
+перед S7 code writes. v6 пересобирает S7-S14 в пять delivery batches и не
+передаётся в Developer после CLEAN versioned Upgrade. Текущие
+приоритеты принадлежат `04_BACKLOG.md`.
 
 ## Source of Truth
 
@@ -26,8 +26,8 @@ versioned Upgrade разрешён. Текущие приоритеты прин
 ## Активное планирование
 
 - `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — единственная текущая
-  основа master plan, `v5 APPROVED / APPROVAL_HANDOFF`.
-- Exact v5 разрешено применить через versioned Task Manager Upgrade;
+  основа master plan, `v6 APPROVED / APPROVAL_HANDOFF`.
+- Exact-v6 разрешает stable-ID Task Manager Upgrade и Developer implementation;
   production и S15 не разрешены.
 
 `package.json`, код, migrations и конфигурация остаются runtime truth. Если они

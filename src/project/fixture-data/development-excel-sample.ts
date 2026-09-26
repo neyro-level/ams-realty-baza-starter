@@ -34,14 +34,15 @@ export async function generateStarterDevelopmentExcelSample(): Promise<Buffer> {
 				starterFixtureDataset.region.slug,
 				development.citySlug,
 				development.districtSlug,
+				development.districtSlug,
 				development.address,
 				"",
 				"",
 				"fixture",
 				"fixture",
 				"2027-12-31T00:00:00.000Z",
-				"available",
-				"synthetic",
+				"on_sale",
+				"confirmed",
 				development.dataTier,
 				"draft",
 				checkedAt,
@@ -50,9 +51,10 @@ export async function generateStarterDevelopmentExcelSample(): Promise<Buffer> {
 			.getWorksheet("Цены")
 			?.addRow([
 				development.externalId,
-				"от",
+				"1-комнатные",
 				String(development.priceMinor),
-				"RUB",
+				String(development.priceMinor),
+				"1",
 				checkedAt,
 			]);
 		workbook

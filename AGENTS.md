@@ -12,10 +12,10 @@
   `bd570ee40db9e25f73a24013be836dd3876282ac`; docs-only reconciliation слит в
   SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
 - Единственная текущая planning basis —
-  `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`, Plan №9 v5
-  `APPROVED`. v4 graph импортирован и остановлен перед S0 PR из-за
-  whitespace-only source drift; versioned v5 Upgrade утверждён и ожидает
-  применения перед возобновлением delivery.
+  `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`, Plan №9 v6
+  `APPROVED`. Approved v5 исполнен до S6; его graph остановлен
+  перед S7 code writes. v6 объединяет оставшиеся S7-S14 в пять delivery batches
+  и передаётся в Developer только после CLEAN versioned Upgrade.
   Production и S15 остаются owner/release gate; `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
@@ -35,7 +35,9 @@
 
 ## Invariants
 
-- Один независимый stream = одна branch/worktree = один Pull Request.
+- Один независимый stream = одна branch/worktree = один Pull Request. Для Plan
+  №9 v6 один stream равен approved delivery batch; constituent epic tasks внутри
+  batch используют тот же worktree и сохраняют отдельные evidence checkpoints.
 - Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
 - Планы №6–8 исполнены и не являются очередью работ. Существующий tag
   `starter-freeze` остаётся историческим. Целевой tag `starter-v2.1.0` может

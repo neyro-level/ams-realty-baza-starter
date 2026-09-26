@@ -6,8 +6,9 @@
 
 Plan №8 v6 исполнен. Переносимая geo-first catalog platform, P8-23A canonical
 route cutover и P8-23B cleanup находятся в текущем runtime. Канонический
-контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Plan №9 v5 `APPROVED` —
-текущий execution source для Starter v2.1; production не выполнялся.
+контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Approved Plan №9 v5 исполнен
+до S6; Plan №9 v6 `APPROVED` пересобирает S7-S14 в пять delivery batches и
+передаётся в Developer после CLEAN Upgrade. Production не выполнялся.
 
 ## Зафиксировано
 

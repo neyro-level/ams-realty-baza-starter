@@ -31,6 +31,7 @@ import {
 	countInventory,
 	getDeveloper,
 	getDevelopment,
+	listDeveloperDevelopments,
 	listDevelopments,
 	listGeoDevelopers,
 } from "../../src/project/data-access/public/geo-catalog.ts";
@@ -264,6 +265,7 @@ const preparedDeveloper = await payload.create({
 });
 const preparedDevelopment = await payload.create({
 	collection: "developments",
+	draft: true,
 	data: {
 		name: "Prepared Residential Complex",
 		slug: `prepared-complex-${identitySuffix}`,
@@ -271,19 +273,55 @@ const preparedDevelopment = await payload.create({
 		region: developmentRegion.id,
 		city: developmentCity.id,
 		developer: preparedDeveloper.id,
+		salesStatus: "on_sale",
+		salesAvailability: "confirmed",
 		dataTier: "B",
 		source: "integration-fixture",
 		checkedAt: clock.nowIso(),
 		layouts: [{ title: "One room", rooms: 1, area: 42 }],
+		priceByRooms: [
+			{
+				roomsLabel: "Студии",
+				priceFromMinor: 8_000_000_00,
+				priceCheckedAt: "2026-09-01T12:00:00.000Z",
+				source: "integration-fixture",
+			},
+			{
+				roomsLabel: "1-комнатные",
+				priceFromMinor: 6_000_000_00,
+				priceCheckedAt: "2026-09-10T12:00:00.000Z",
+				source: "integration-fixture",
+			},
+			{
+				roomsLabel: "Устаревшая цена",
+				priceFromMinor: 1_000_000_00,
+				priceCheckedAt: "2026-07-01T12:00:00.000Z",
+				source: "integration-fixture",
+			},
+		],
 		status: "published",
 		publishedAt: clock.nowIso(),
 	},
 	...access,
 });
+const preparedDevelopmentDetails = await getDevelopment(
+	payload,
+	preparedDevelopment.slug,
+);
 assert.equal(
-	(await getDevelopment(payload, preparedDevelopment.slug))?.id,
+	preparedDevelopmentDetails?.id,
 	String(preparedDevelopment.id),
 	"published development must be reachable only through the public Gateway",
+);
+assert.equal(
+	preparedDevelopmentDetails?.priceFrom?.priceMinor,
+	6_000_000_00,
+	"priceFrom must be the minimum fresh room price",
+);
+assert.deepEqual(
+	preparedDevelopmentDetails?.priceByRooms.map((row) => row.roomsLabel),
+	["Студии", "1-комнатные"],
+	"prices older than 45 days must be absent from the public DTO consumed by UI and SEO",
 );
 assert.ok(
 	(await listDevelopments(payload, { geo: developmentCity.slug })).some(
@@ -298,6 +336,142 @@ assert.equal(
 assert.ok(
 	(await listGeoDevelopers(payload, developmentCity.slug)).some(
 		(item) => item.id === String(preparedDeveloper.id),
+	),
+);
+const paginationDevelopmentIds: (string | number)[] = [];
+for (let index = 1; index <= 49; index += 1) {
+	const paginationDevelopment = await payload.create({
+		collection: "developments",
+		draft: true,
+		data: {
+			name: `Prepared Residential Complex ${index}`,
+			slug: `prepared-complex-${identitySuffix}-${index}`,
+			kind: "residential_complex",
+			region: developmentRegion.id,
+			city: developmentCity.id,
+			developer: preparedDeveloper.id,
+			salesStatus: "on_sale",
+			salesAvailability: "confirmed",
+			dataTier: "B",
+			source: "integration-fixture",
+			checkedAt: clock.nowIso(),
+			layouts: [{ title: "One room", rooms: 1, area: 42 }],
+			status: "published",
+			publishedAt: clock.nowIso(),
+		},
+		...access,
+	});
+	paginationDevelopmentIds.push(paginationDevelopment.id);
+}
+const observedDevelopmentQueries: Array<{
+	limit?: number;
+	page?: number;
+	pagination?: boolean;
+}> = [];
+const boundedPayload = new Proxy(payload, {
+	get(target, property, receiver) {
+		const value = Reflect.get(target, property, receiver);
+		if (property === "find" && typeof value === "function") {
+			return (input: Parameters<typeof payload.find>[0]) => {
+				if (input.collection === "developments") {
+					observedDevelopmentQueries.push({
+						limit: input.limit,
+						page: input.page,
+						pagination: input.pagination,
+					});
+				}
+				return Reflect.apply(value, target, [input]);
+			};
+		}
+		return typeof value === "function" ? value.bind(target) : value;
+	},
+});
+const completeGeoDeveloperAggregate = await listGeoDevelopers(
+	boundedPayload,
+	developmentCity.slug,
+);
+assert.equal(
+	completeGeoDeveloperAggregate.find(
+		(item) => item.id === String(preparedDeveloper.id),
+	)?.developmentsCount,
+	50,
+	"city developer aggregate must not truncate after 48 developments",
+);
+const developerPageThree = await listDeveloperDevelopments(boundedPayload, {
+	developerId: Number(preparedDeveloper.id),
+	page: 3,
+	limit: 24,
+});
+assert.equal(developerPageThree.total, 50);
+assert.equal(developerPageThree.totalPages, 3);
+assert.equal(developerPageThree.items.length, 2);
+assert.ok(
+	developerPageThree.items.every(
+		(item) => item.developer?.id === String(preparedDeveloper.id),
+	),
+	"developer project pagination must query by developer relation",
+);
+assert.ok(
+	observedDevelopmentQueries.length >= 3 &&
+		observedDevelopmentQueries.every(
+			(query) =>
+				query.pagination !== false &&
+				typeof query.limit === "number" &&
+				query.limit >= 1 &&
+				query.limit <= 48 &&
+				typeof query.page === "number" &&
+				query.page >= 1,
+		),
+	"developer aggregates and relation pagination must use bounded paged queries",
+);
+const draftDeveloper = await payload.create({
+	collection: "developers",
+	data: {
+		name: "Draft Developer",
+		slug: `draft-developer-${identitySuffix}`,
+		source: "integration-fixture",
+		checkedAt: clock.nowIso(),
+		status: "draft",
+	},
+	...access,
+});
+const draftDevelopment = await payload.create({
+	collection: "developments",
+	draft: true,
+	data: {
+		name: "Draft Residential Complex",
+		slug: `draft-complex-${identitySuffix}`,
+		kind: "residential_complex",
+		region: developmentRegion.id,
+		city: developmentCity.id,
+		developer: draftDeveloper.id,
+		salesStatus: "on_sale",
+		salesAvailability: "in_inventory",
+		dataTier: "C",
+		source: "integration-fixture",
+		checkedAt: clock.nowIso(),
+		status: "draft",
+	},
+	...access,
+});
+assert.equal(
+	await getDevelopment(payload, draftDevelopment.slug),
+	null,
+	"draft development must be excluded by an explicit Gateway status predicate",
+);
+assert.equal(
+	await getDeveloper(payload, draftDeveloper.slug),
+	null,
+	"draft developer must be excluded by an explicit Gateway status predicate",
+);
+assert.ok(
+	!(await listDevelopments(payload, { geo: developmentCity.slug })).some(
+		(item) => item.id === String(draftDevelopment.id),
+	),
+);
+assert.ok(
+	!(await listGeoDevelopers(payload, developmentCity.slug)).some(
+		(item) => item.id === String(draftDeveloper.id),
 	),
 );
 assert.equal(
@@ -332,7 +506,7 @@ assert.equal(
 		{ geo: developmentCity.slug, surface: "novostroyki" },
 		configuredDevelopmentGeo,
 	),
-	1,
+	50,
 	"configured development inventory aggregate must remain city-scoped",
 );
 await payload.update({
@@ -358,6 +532,7 @@ await assert.rejects(
 	() =>
 		payload.create({
 			collection: "developments",
+			draft: true,
 			data: {
 				name: "Polluted Cottage Village",
 				slug: `polluted-village-${identitySuffix}`,
@@ -365,6 +540,8 @@ await assert.rejects(
 				region: developmentRegion.id,
 				city: developmentCity.id,
 				developer: preparedDeveloper.id,
+				salesStatus: "sales_finished",
+				salesAvailability: "none",
 				dataTier: "C",
 				source: "integration-fixture",
 				checkedAt: clock.nowIso(),
@@ -396,8 +573,23 @@ await payload.delete({
 	...access,
 });
 await payload.delete({
+	collection: "developments",
+	where: { id: { in: paginationDevelopmentIds } },
+	...access,
+});
+await payload.delete({
+	collection: "developments",
+	id: draftDevelopment.id,
+	...access,
+});
+await payload.delete({
 	collection: "developers",
 	id: preparedDeveloper.id,
+	...access,
+});
+await payload.delete({
+	collection: "developers",
+	id: draftDeveloper.id,
 	...access,
 });
 await payload.delete({

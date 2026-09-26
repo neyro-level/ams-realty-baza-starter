@@ -59,7 +59,6 @@ export function P817FixtureView({
 			<DevelopmentDetailsView
 				development={fixtureDevelopment}
 				leadContext={leadContext}
-				referenceDate="2026-09-24T12:00:00.000Z"
 				content={{
 					layouts: [
 						{

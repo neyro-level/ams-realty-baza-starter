@@ -1,23 +1,22 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 9 V5 APPROVED / UPGRADE HANDOFF`.
+Статус: `ACTIVE / PLAN 9 V6 APPROVED / UPGRADE HANDOFF`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
 `legacy/`; они не являются очередью к повторному исполнению.
 
-Plan №9 `STARTER v2.1 / CLONE READINESS` прошёл финальный аудит. v4 graph был
-импортирован, S0 implementation закрыт, но delivery остановлен до PR из-за
-whitespace-only findings полного diff. v5 в
-`AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` утверждён владельцем;
-versioned Upgrade разрешён, после CLEAN reconcile delivery возобновляется.
-Production не разрешён.
+Approved Plan №9 v5 исполнен до S6 на canonical SourceCraft main. Перед S7 code
+writes владелец разрешил сократить оставшиеся delivery cycles. v6 в
+`AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` прошёл финальный audit и
+утверждён владельцем; S7-S14 сгруппированы в пять совместимых batches.
+Versioned Upgrade и Developer handoff разрешены; production не разрешён.
 
 ## NOW
 
 - Поддерживать канонические документы и runtime без скрытого расширения scope.
-- Любая новая реализация начинается отдельным task contract и рабочим потоком
-  от актуального SourceCraft `main`.
+- Любая новая реализация начинается approved task contract и batch-owned
+  рабочим потоком от актуального SourceCraft `main`.
 - Production не выпускался; demo-контур не считается подтверждением актуального
   release SHA.
 
@@ -50,7 +49,8 @@ Production не разрешён.
 
 ## Политика доставки
 
-- Один независимый stream = одна branch/worktree = один Pull Request.
+- Один approved delivery batch = один stream = одна branch/worktree = один Pull
+  Request. Constituent epics сохраняют отдельные commit/push/evidence checkpoints.
 - `DELIVERY_PROFILE=COMMERCIAL`: перед merge обязателен review и один ручной
   exact-head SourceCraft Gate выбранного риска.
 - SourceCraft — primary; GitHub получает только явный fast-forward mirror

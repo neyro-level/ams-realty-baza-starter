@@ -13,6 +13,7 @@ import { toMetadata } from "@/core/seo/page-metadata";
 import { leadConsentContext } from "@/project/legal.config";
 import { resolveRuntimeRoute } from "@/project/routing/runtime-route";
 import { projectSeoMeta } from "@/project/seo/templates";
+import { pageHref } from "@/project/routing/catalog-search-params";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -21,7 +22,25 @@ function pathname(segments: readonly string[]) {
 	return `/${segments.join("/")}/`;
 }
 
-type CanonicalRouteProps = { params: Promise<{ segments: string[] }> };
+type CanonicalRouteProps = {
+	params: Promise<{ segments: string[] }>;
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function queryString(input: Record<string, string | string[] | undefined>) {
+	const params = new URLSearchParams();
+	for (const key of Object.keys(input).sort()) {
+		const value = input[key];
+		for (const item of Array.isArray(value)
+			? value
+			: value === undefined
+				? []
+				: [value]) {
+			params.append(key, item);
+		}
+	}
+	return params.toString();
+}
 
 function routeSeo(
 	data: NonNullable<Awaited<ReturnType<typeof resolveRuntimeRoute>>["data"]>,
@@ -54,9 +73,13 @@ function routeSeo(
 
 export async function generateMetadata({
 	params,
+	searchParams,
 }: CanonicalRouteProps): Promise<Metadata> {
-	const { segments } = await params;
-	const result = await resolveRuntimeRoute(pathname(segments));
+	const [{ segments }, query] = await Promise.all([params, searchParams]);
+	const result = await resolveRuntimeRoute(
+		pathname(segments),
+		queryString(query),
+	);
 	if (result.decision.kind !== "page" || !result.data || !result.brandName) {
 		return {};
 	}
@@ -71,9 +94,11 @@ export async function generateMetadata({
 
 export default async function CanonicalRuntimePage({
 	params,
+	searchParams,
 }: CanonicalRouteProps) {
-	const { segments } = await params;
-	const result = await resolveRuntimeRoute(pathname(segments));
+	const [{ segments }, query] = await Promise.all([params, searchParams]);
+	const routePath = pathname(segments);
+	const result = await resolveRuntimeRoute(routePath, queryString(query));
 	if (result.decision.kind === "redirect") {
 		permanentRedirect(result.decision.destinationPath);
 	}
@@ -82,8 +107,20 @@ export default async function CanonicalRuntimePage({
 	switch (result.data.kind) {
 		case "geoHub":
 			return <GeoHubView hub={result.data.value} />;
-		case "listing":
-			return <ListingView listing={result.data.value} />;
+		case "listing": {
+			const listing = result.data;
+			const listingQuery = listing.query;
+			return (
+				<ListingView
+					listing={listing.value}
+					pageHref={
+						listingQuery
+							? (page) => pageHref(routePath, listingQuery, page)
+							: undefined
+					}
+				/>
+			);
+		}
 		case "developers":
 			return <DevelopersListView developers={result.data.value} />;
 		case "developer": {
@@ -91,9 +128,13 @@ export default async function CanonicalRuntimePage({
 			return (
 				<DeveloperView
 					developer={developer}
-					developments={result.data.developments.filter(
-						(item) => item.developer?.id === developer.id,
-					)}
+					developments={result.data.developments}
+					total={result.data.pagination.total}
+					page={result.data.pagination.page}
+					totalPages={result.data.pagination.totalPages}
+					pageHref={(page) =>
+						page <= 1 ? routePath : `${routePath}?page=${page}`
+					}
 				/>
 			);
 		}

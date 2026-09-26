@@ -44,7 +44,7 @@ export const projectSiteProfileConfig = {
 		byGeo: { primorsk: "ACTIVE" },
 	},
 	filterKeys: {
-		kvartiry: ["rooms", "district", "price", "area"],
+		kvartiry: ["rooms", "district", "price", "area", "market"],
 		doma: ["district", "price", "area"],
 		uchastki: ["district", "price", "area"],
 		"kommercheskaya-nedvizhimost": ["district", "price", "area"],
@@ -55,6 +55,11 @@ export const projectSiteProfileConfig = {
 		"kottedzhnye-poselki": ["district", "developer"],
 	},
 	seoFacets: {
+		vtorichka: {
+			geo: "primorsk",
+			category: "kvartiry",
+			filter: { key: "market", value: "secondary" },
+		},
 		dvukhkomnatnye: {
 			geo: "primorsk",
 			category: "kvartiry",

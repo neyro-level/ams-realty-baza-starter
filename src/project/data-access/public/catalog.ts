@@ -88,7 +88,7 @@ export const catalogQuerySchema = z.object({
 	dealType: propertyDealTypeSchema.optional(),
 	city: z.string().trim().min(1).max(80).optional(),
 	district: z.string().trim().min(1).max(80).optional(),
-	rooms: z.array(optionalPositiveInt.unwrap()).max(8).optional(),
+	rooms: z.array(z.coerce.number().int().min(0).max(100)).max(8).optional(),
 	priceFromMinor: optionalPositiveInt,
 	priceToMinor: optionalPositiveInt,
 	areaFrom: optionalNonNegativeNumber,

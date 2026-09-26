@@ -502,6 +502,7 @@ export interface Development {
   region: number | Region;
   city: number | City;
   district?: (number | null) | District;
+  districtRaw?: string | null;
   developer: number | Developer;
   address?: string | null;
   coordinates?: {
@@ -511,19 +512,21 @@ export interface Development {
   class?: string | null;
   completion?: string | null;
   deadline?: string | null;
-  salesStatus?: ('available' | 'limited' | 'sold_out' | 'paused') | null;
-  availability?: string | null;
+  salesStatus: 'on_sale' | 'sales_finished' | 'completed';
+  salesAvailability: 'in_inventory' | 'confirmed' | 'none';
+  completenessScore: number;
   dataTier: 'A' | 'B' | 'C';
   lastImportRun?: (number | null) | ImportRun;
   source: string;
   checkedAt: string;
-  prices?:
+  priceByRooms?:
     | {
-        label: string;
-        amountMinor: number;
-        currency: 'RUB';
+        roomsLabel: string;
+        priceFromMinor: number;
+        priceToMinor?: number | null;
+        lotsAvailable?: number | null;
+        priceCheckedAt: string;
         source: string;
-        checkedAt: string;
         id?: string | null;
       }[]
     | null;
@@ -531,7 +534,8 @@ export interface Development {
   mediaItems?:
     | {
         media: number | Media;
-        mediaType: 'image' | 'plan' | 'document';
+        mediaType: 'hero' | 'gallery' | 'layout' | 'construction_progress' | 'document' | 'video';
+        capturedAt?: string | null;
         rights: string;
         source: string;
         checkedAt: string;
@@ -1333,6 +1337,7 @@ export interface DevelopmentsSelect<T extends boolean = true> {
   region?: T;
   city?: T;
   district?: T;
+  districtRaw?: T;
   developer?: T;
   address?: T;
   coordinates?:
@@ -1345,19 +1350,21 @@ export interface DevelopmentsSelect<T extends boolean = true> {
   completion?: T;
   deadline?: T;
   salesStatus?: T;
-  availability?: T;
+  salesAvailability?: T;
+  completenessScore?: T;
   dataTier?: T;
   lastImportRun?: T;
   source?: T;
   checkedAt?: T;
-  prices?:
+  priceByRooms?:
     | T
     | {
-        label?: T;
-        amountMinor?: T;
-        currency?: T;
+        roomsLabel?: T;
+        priceFromMinor?: T;
+        priceToMinor?: T;
+        lotsAvailable?: T;
+        priceCheckedAt?: T;
         source?: T;
-        checkedAt?: T;
         id?: T;
       };
   lotsCount?: T;
@@ -1366,6 +1373,7 @@ export interface DevelopmentsSelect<T extends boolean = true> {
     | {
         media?: T;
         mediaType?: T;
+        capturedAt?: T;
         rights?: T;
         source?: T;
         checkedAt?: T;

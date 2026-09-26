@@ -7,7 +7,9 @@ PII retention days остаются `NEEDS_OWNER`; implementation proof не з�
 
 ## Перед Pull Request
 
-- scope соответствует одной claimed-задаче и одному worktree;
+- scope соответствует одному claimed delivery stream и одному worktree; Plan
+  №9 v6 допускает несколько constituent tasks только внутри одного approved
+  batch с общей delivery boundary;
 - source documents и runtime не имеют известного незафиксированного drift;
 - релевантные локальные проверки завершены;
 - секреты, PII и generated artifacts не попали в diff;
@@ -25,6 +27,8 @@ PII retention days остаются `NEEDS_OWNER`; implementation proof не з�
   `schema-data`, `auth-pii-leads` и `ingest-jobs`; build — только для
   `dependency-runtime`;
 - один ручной SourceCraft Merge Gate зелёный на exact head SHA;
+- constituent delivery tasks одного approved batch переиспользуют одно exact
+  PR/Gate/merge evidence и не запускают повторный внешний delivery cycle;
 - все блокеры исправлены, evidence сохранён.
 
 ## Перед production

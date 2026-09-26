@@ -125,6 +125,83 @@ const workbook = await createDevelopmentWorkbook();
 await workbook.xlsx.load(fixture as never);
 const enumCell = workbook.getWorksheet("ЖК")?.getCell("E2");
 assert.equal(enumCell?.dataValidation.type, "list");
+assert.deepEqual(
+	Array.from(workbook.getWorksheet("ЖК")?.getRow(1).values as unknown[]).slice(
+		1,
+	),
+	[
+		"externalId",
+		"developerSlug",
+		"name",
+		"slug",
+		"kind",
+		"regionSlug",
+		"citySlug",
+		"districtSlug",
+		"districtRaw",
+		"address",
+		"latitude",
+		"longitude",
+		"class",
+		"completion",
+		"deadline",
+		"salesStatus",
+		"salesAvailability",
+		"dataTier",
+		"status",
+		"checkedAt",
+	],
+);
+assert.deepEqual(
+	Array.from(
+		workbook.getWorksheet("Цены")?.getRow(1).values as unknown[],
+	).slice(1),
+	[
+		"developmentExternalId",
+		"roomsLabel",
+		"priceFromMinor",
+		"priceToMinor",
+		"lotsAvailable",
+		"priceCheckedAt",
+	],
+);
+assert.deepEqual(
+	Array.from(
+		workbook.getWorksheet("Медиа")?.getRow(1).values as unknown[],
+	).slice(1),
+	[
+		"developmentExternalId",
+		"mediaId",
+		"mediaType",
+		"rights",
+		"capturedAt",
+		"checkedAt",
+	],
+);
+
+workbook
+	.getWorksheet("Медиа")
+	?.addRow([
+		"dev-a",
+		"1",
+		"construction_progress",
+		"licensed",
+		"",
+		"2026-09-24T19:00:00.000Z",
+	]);
+const invalidMedia = await importDevelopmentExcel({
+	buffer: Buffer.from(await workbook.xlsx.writeBuffer()),
+	fileName: "invalid-media.xlsx",
+	sourceKey: "invalid-media",
+	mode: "dry-run",
+	now: new Date("2026-09-24T19:04:00.000Z"),
+	repository,
+});
+assert.ok(
+	invalidMedia.issues.some(
+		(issue) => issue.code === "invalid_media" && issue.sheet === "Медиа",
+	),
+);
 assert.throws(
 	() =>
 		validateImportRunSourceIdentity({

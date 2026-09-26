@@ -10,8 +10,8 @@ import {
 	CardTitle,
 } from "../../components/ui/card";
 import { Container, Section, SectionHeader } from "../../components/ui/layout";
-import { BreadcrumbsView } from "../shared/BreadcrumbsView";
 import { StarterPropertyMediaGallery } from "../property/StarterPropertyMediaGallery";
+import { BreadcrumbsView } from "../shared/BreadcrumbsView";
 import { PriceRequestFormView } from "./PriceRequestFormView";
 
 export type DevelopmentPresentationContent = {
@@ -20,33 +20,16 @@ export type DevelopmentPresentationContent = {
 	faq?: readonly { question: string; answer: string }[];
 };
 
-function freshPriceRows(
-	development: DevelopmentDetailsDTO,
-	referenceDate: string,
-) {
-	const now = new Date(referenceDate).getTime();
-	return development.priceRows.filter((row) => {
-		const checked = new Date(row.checkedAt).getTime();
-		return (
-			Number.isFinite(checked) &&
-			now - checked <= 45 * 86_400_000 &&
-			checked <= now
-		);
-	});
-}
-
 export function DevelopmentDetailsView({
 	development,
 	leadContext,
 	content = {},
-	referenceDate = new Date().toISOString(),
 }: {
 	development: DevelopmentDetailsDTO;
 	leadContext: LeadFormContext;
 	content?: DevelopmentPresentationContent;
-	referenceDate?: string;
 }) {
-	const prices = freshPriceRows(development, referenceDate);
+	const prices = development.priceByRooms;
 	return (
 		<>
 			<Section space="hero">
@@ -83,13 +66,15 @@ export function DevelopmentDetailsView({
 									{prices.length ? (
 										prices.map((row) => (
 											<div
-												key={`${row.label}-${row.checkedAt}`}
+												key={`${row.roomsLabel}-${row.priceCheckedAt}`}
 												className="border-b border-border pb-3"
 											>
 												<p className="text-label text-content-default">
-													{row.label}
+													{row.roomsLabel}
 												</p>
-												<p className="mt-1 font-semibold">{row.price.label}</p>
+												<p className="mt-1 font-semibold">
+													{row.priceFrom.label}
+												</p>
 											</div>
 										))
 									) : (

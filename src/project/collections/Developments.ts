@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { adminsAndOwners, ownersOnly } from "../../core/access/roles.ts";
-import { validateDevelopmentWrite } from "../developments/collection-guards.ts";
 import { publicPreparedEntityLifecycleReadAccess } from "../data-access/public/access-mode.ts";
+import { validateDevelopmentWrite } from "../developments/collection-guards.ts";
 import { recordEntityLifecycleTransition } from "../lifecycle/record-transition.ts";
 
 const sourceFields = [
@@ -47,10 +47,34 @@ export const Developments: CollectionConfig = {
 			index: true,
 			options: ["residential_complex", "cottage_village"],
 		},
-		{ name: "region", type: "relationship", relationTo: "regions", required: true, index: true },
-		{ name: "city", type: "relationship", relationTo: "cities", required: true, index: true },
-		{ name: "district", type: "relationship", relationTo: "districts", index: true },
-		{ name: "developer", type: "relationship", relationTo: "developers", required: true, index: true },
+		{
+			name: "region",
+			type: "relationship",
+			relationTo: "regions",
+			required: true,
+			index: true,
+		},
+		{
+			name: "city",
+			type: "relationship",
+			relationTo: "cities",
+			required: true,
+			index: true,
+		},
+		{
+			name: "district",
+			type: "relationship",
+			relationTo: "districts",
+			index: true,
+		},
+		{ name: "districtRaw", type: "text" },
+		{
+			name: "developer",
+			type: "relationship",
+			relationTo: "developers",
+			required: true,
+			index: true,
+		},
 		{ name: "address", type: "text" },
 		{
 			name: "coordinates",
@@ -63,19 +87,51 @@ export const Developments: CollectionConfig = {
 		{ name: "class", type: "text" },
 		{ name: "completion", type: "text" },
 		{ name: "deadline", type: "date" },
-		{ name: "salesStatus", type: "select", options: ["available", "limited", "sold_out", "paused"] },
-		{ name: "availability", type: "text" },
-		{ name: "dataTier", type: "select", required: true, defaultValue: "C", options: ["A", "B", "C"] },
-		{ name: "lastImportRun", type: "relationship", relationTo: "import-runs", index: true },
+		{
+			name: "salesStatus",
+			type: "select",
+			required: true,
+			options: ["on_sale", "sales_finished", "completed"],
+		},
+		{
+			name: "salesAvailability",
+			type: "select",
+			required: true,
+			options: ["in_inventory", "confirmed", "none"],
+		},
+		{
+			name: "completenessScore",
+			type: "number",
+			required: true,
+			defaultValue: 0,
+			min: 0,
+			max: 100,
+			admin: { readOnly: true },
+		},
+		{
+			name: "dataTier",
+			type: "select",
+			required: true,
+			defaultValue: "C",
+			options: ["A", "B", "C"],
+		},
+		{
+			name: "lastImportRun",
+			type: "relationship",
+			relationTo: "import-runs",
+			index: true,
+		},
 		...sourceFields,
 		{
-			name: "prices",
+			name: "priceByRooms",
 			type: "array",
 			fields: [
-				{ name: "label", type: "text", required: true },
-				{ name: "amountMinor", type: "number", required: true, min: 0 },
-				{ name: "currency", type: "select", required: true, defaultValue: "RUB", options: ["RUB"] },
-				...sourceFields,
+				{ name: "roomsLabel", type: "text", required: true },
+				{ name: "priceFromMinor", type: "number", required: true, min: 0 },
+				{ name: "priceToMinor", type: "number", min: 0 },
+				{ name: "lotsAvailable", type: "number", min: 0 },
+				{ name: "priceCheckedAt", type: "date", required: true },
+				{ name: "source", type: "text", required: true },
 			],
 		},
 		{ name: "lotsCount", type: "number", min: 0 },
@@ -83,8 +139,26 @@ export const Developments: CollectionConfig = {
 			name: "mediaItems",
 			type: "array",
 			fields: [
-				{ name: "media", type: "relationship", relationTo: "media", required: true },
-				{ name: "mediaType", type: "select", required: true, options: ["image", "plan", "document"] },
+				{
+					name: "media",
+					type: "relationship",
+					relationTo: "media",
+					required: true,
+				},
+				{
+					name: "mediaType",
+					type: "select",
+					required: true,
+					options: [
+						"hero",
+						"gallery",
+						"layout",
+						"construction_progress",
+						"document",
+						"video",
+					],
+				},
+				{ name: "capturedAt", type: "date" },
 				{ name: "rights", type: "text", required: true },
 				...sourceFields,
 			],
@@ -126,7 +200,12 @@ export const Developments: CollectionConfig = {
 			name: "descriptions",
 			type: "array",
 			fields: [
-				{ name: "kind", type: "select", required: true, options: ["short", "full", "location", "infrastructure"] },
+				{
+					name: "kind",
+					type: "select",
+					required: true,
+					options: ["short", "full", "location", "infrastructure"],
+				},
 				{ name: "text", type: "textarea", required: true },
 				...sourceFields,
 			],

@@ -47,9 +47,7 @@ function lifecycle(resolved: ResolverPageResult): EntityPageLifecycleState {
 }
 
 function registry(canonical: string) {
-	return (
-		projectSeoRegistrySeed.find((row) => row.url === canonical) ?? null
-	);
+	return projectSeoRegistrySeed.find((row) => row.url === canonical) ?? null;
 }
 
 function inputFor(
@@ -93,8 +91,7 @@ function inputFor(
 		return {
 			...common,
 			kind: "developerGeo",
-			developersWithPassingDevelopment:
-				data.developersWithPassingDevelopment,
+			developersWithPassingDevelopment: data.developersWithPassingDevelopment,
 		};
 	}
 	if (data.kind === "developer") {
@@ -116,7 +113,9 @@ function inputFor(
 			mediaCount: data.value.gallery.length,
 			layoutCount: data.layoutCount,
 			progressPresent: data.progressPresent,
-			priceRows: data.value.priceRows.map(({ checkedAt }) => ({ checkedAt })),
+			priceRows: data.value.priceByRooms.map(({ priceCheckedAt }) => ({
+				checkedAt: priceCheckedAt,
+			})),
 		};
 	}
 	if (resolved.market === "newbuild") {
@@ -127,9 +126,9 @@ function inputFor(
 		...common,
 		kind: "secondary",
 		priceMinor: data.value.price?.priceMinor ?? null,
-		area: "totalArea" in details ? details.totalArea ?? null : null,
+		area: "totalArea" in details ? (details.totalArea ?? null) : null,
 		category: data.value.category,
-		rooms: "rooms" in details ? details.rooms ?? null : null,
+		rooms: "rooms" in details ? (details.rooms ?? null) : null,
 		district: data.value.district ?? null,
 		rawDistrictRef: null,
 		ownedPhotoCount: data.value.gallery.filter(

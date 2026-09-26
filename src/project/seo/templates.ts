@@ -40,6 +40,7 @@ export type ProjectSeoTemplateContext = {
 };
 
 const projectSeoFacetLabels: Readonly<Record<string, string>> = {
+	vtorichka: "Вторичные",
 	dvukhkomnatnye: "Двухкомнатные",
 	odnokomnatnye: "Однокомнатные",
 };
@@ -58,7 +59,8 @@ const projectSeoCategoryLabels: Readonly<Record<string, string>> = {
 
 export function projectSeoCategoryLabel(slug: string): string {
 	const label = projectSeoCategoryLabels[slug];
-	if (!label) throw new Error(`Project SEO category label is missing: ${slug}.`);
+	if (!label)
+		throw new Error(`Project SEO category label is missing: ${slug}.`);
 	return label;
 }
 
@@ -77,8 +79,7 @@ const templates = {
 	geoHub: {
 		title: "Недвижимость {geoGenitive} — {brand}",
 		h1: "Недвижимость {geoGenitive}",
-		description:
-			"Квартиры, дома и новостройки[ {cityPhrase}][ — {inventory}.]",
+		description: "Квартиры, дома и новостройки[ {cityPhrase}][ — {inventory}.]",
 	},
 	categoryRoot: {
 		title: "{category} — {brand}",
@@ -159,7 +160,11 @@ export function renderProjectSeoTemplate(
 	const inventory =
 		context.inventory === undefined
 			? undefined
-			: formatRussianPlural(context.inventory, ["объект", "объекта", "объектов"]);
+			: formatRussianPlural(context.inventory, [
+					"объект",
+					"объекта",
+					"объектов",
+				]);
 	const freshPrice = context.freshPrice?.fresh
 		? context.freshPrice.label.trim()
 		: undefined;
@@ -176,11 +181,7 @@ export function renderProjectSeoTemplate(
 			category: context.category,
 			cityPhrase: morphologyPhrase(geo, "prepositional", true),
 			geoGenitive: morphologyPhrase(geo, "genitive"),
-			districtPhrase: morphologyPhrase(
-				context.district,
-				"prepositional",
-				true,
-			),
+			districtPhrase: morphologyPhrase(context.district, "prepositional", true),
 			facet: context.facet,
 			entityName: context.entityName,
 			inventory,

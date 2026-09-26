@@ -13,10 +13,12 @@ Secrets source=Secret Master / self-hosted Infisical
 ```
 
 Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №8 v6
-исполнен полностью и остаётся evidence. Текущий execution source — Plan №9 v5
-`APPROVED`, импортированный в Task Manager. GitHub получает только отдельный
-явный fast-forward mirror canonical `main`. Production и target tag
-`starter-v2.1.0` остаются отдельными owner actions после исполнения Plan №9.
+исполнен полностью и остаётся evidence. Approved Plan №9 v5 исполнен до S6;
+v6 `APPROVED` задаёт пять stable-ID delivery batches для S7-S14 и становится
+execution source только после CLEAN versioned Upgrade.
+GitHub получает только отдельный явный fast-forward mirror canonical `main`.
+Production и target tag `starter-v2.1.0` остаются отдельными owner actions
+после исполнения Plan №9.
 
 ## Delivery baseline
 
@@ -37,6 +39,10 @@ Secrets source=Secret Master / self-hosted Infisical
   PostgreSQL запускается только для первых трёх scope, build — только для
   `dependency-runtime`; каждый RISKY сначала выполняет STANDARD и затем только
   доказательство выбранного риска.
+- Plan №9 v6 применяет Gate к delivery batch, а не повторно к каждому epic
+  checkpoint: все constituent tasks сохраняют evidence, но один exact-head SHA,
+  один PR и один Gate закрывают batch. Несовместимые risk scopes в одном batch
+  запрещены.
 - Demo release contract уже требует clean exact `main`, immutable Docker image,
   migrations из того же image, один jobs owner, live health/smoke и сохранённый
   previous image/env rollback point. Текущий Dockerfile копирует весь `/app` и

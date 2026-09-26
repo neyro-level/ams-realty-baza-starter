@@ -200,14 +200,18 @@ export async function seedStarterFixture(
 						"development.developer",
 					),
 					address: development.address,
+					districtRaw: development.districtSlug,
+					salesStatus: "on_sale",
+					salesAvailability: "confirmed",
 					dataTier: development.dataTier,
-					prices: [
+					priceByRooms: [
 						{
-							label: "от",
-							amountMinor: development.priceMinor,
-							currency: "RUB",
+							roomsLabel: "1-комнатные",
+							priceFromMinor: development.priceMinor,
+							priceToMinor: development.priceMinor,
+							lotsAvailable: 1,
+							priceCheckedAt: dataset.identity.snapshotAt,
 							source: dataset.identity.source,
-							checkedAt: dataset.identity.snapshotAt,
 						},
 					],
 					descriptions: [
