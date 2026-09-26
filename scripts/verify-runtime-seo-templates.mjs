@@ -6,13 +6,14 @@ const metadata = readFileSync("src/app/(site)/[...segments]/page.tsx", "utf8");
 const gate = readFileSync("src/project/routing/content-gate.ts", "utf8");
 const nap = readFileSync("src/project/data-access/public/nap.ts", "utf8");
 
-assert.match(nap, /export async function findPublicBrandName/);
+assert.match(nap, /export async function findPublicNap/);
 assert.match(nap, /slug:\s*["']site-settings["']/);
-assert.match(runtime, /const brandName = await findPublicBrandName\(publicPayload\)/);
-assert.match(runtime, /getGeoHub\(payload, pageKey\.geo, grammar, brandName\)/);
+assert.match(runtime, /const nap = await findPublicNap\(publicPayload\)/);
+assert.match(runtime, /const brandName = nap\.brandName/);
+assert.match(runtime, /getGeoHub\(payload, pageKey\.geo, brandName, grammar\)/);
 assert.match(runtime, /getDevelopment\(payload, pageKey\.slug, brandName\)/);
 assert.match(metadata, /projectSeoMeta/);
-assert.match(metadata, /result\.brandName/);
+assert.match(metadata, /result\.nap\.brandName/);
 assert.match(metadata, /indexing:\s*result\.decision\.robots\.indexing/);
 assert.match(metadata, /following:\s*result\.decision\.robots\.following/);
 assert.match(gate, /runtime_morphology_unapproved/);

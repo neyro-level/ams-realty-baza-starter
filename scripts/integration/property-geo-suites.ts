@@ -19,6 +19,7 @@ requirePayloadRuntime();
 const payload = await getPayload({ config });
 const access = systemOverrideAccess("system-job");
 const suffix = Date.now().toString(36);
+const brandName = "Integration Realty";
 
 const feedSource = await payload.create({
 	collection: "feed-sources",
@@ -209,10 +210,14 @@ const observedPayload = new Proxy(payload, {
 });
 
 observedQueries = 0;
-const primorskListing = await getListing(observedPayload, {
-	geo: "primorsk",
-	surface: "kvartiry",
-});
+const primorskListing = await getListing(
+	observedPayload,
+	{
+		geo: "primorsk",
+		surface: "kvartiry",
+	},
+	brandName,
+);
 assert.ok(primorskListing, "primary geo listing must resolve");
 assert.ok(
 	primorskListing.subLinks.some(
@@ -234,14 +239,21 @@ assert.ok(
 	),
 	"secondary geo property must not pollute the primary geo listing",
 );
-assert.ok(observedQueries <= 2, "listing query budget must not grow per item");
+assert.ok(
+	observedQueries <= 3,
+	"listing plus same-agglomeration nearby query budget must not grow per item",
+);
 
-const pageTwoListing = await getListing(observedPayload, {
-	geo: "primorsk",
-	surface: "kvartiry",
-	page: 2,
-	query: { limit: 1 },
-});
+const pageTwoListing = await getListing(
+	observedPayload,
+	{
+		geo: "primorsk",
+		surface: "kvartiry",
+		page: 2,
+		query: { limit: 1 },
+	},
+	brandName,
+);
 assert.ok(pageTwoListing, "catalog page 2 must resolve when inventory exists");
 assert.equal(pageTwoListing.pagination.page, 2);
 const pageTwoProperty = pageTwoListing.items.find(
@@ -259,11 +271,15 @@ assert.equal(
 	"catalog page 2 entity link must resolve to the same public entity",
 );
 
-const facetListing = await getListing(observedPayload, {
-	geo: "primorsk",
-	surface: "kvartiry",
-	facet: "dvukhkomnatnye",
-});
+const facetListing = await getListing(
+	observedPayload,
+	{
+		geo: "primorsk",
+		surface: "kvartiry",
+		facet: "dvukhkomnatnye",
+	},
+	brandName,
+);
 assert.ok(facetListing, "configured SEO facet must resolve");
 assert.deepEqual(
 	facetListing.items
@@ -274,11 +290,15 @@ assert.deepEqual(
 );
 assert.equal(facetListing.total, 1);
 
-const secondaryFacetListing = await getListing(observedPayload, {
-	geo: "primorsk",
-	surface: "kvartiry",
-	facet: "vtorichka",
-});
+const secondaryFacetListing = await getListing(
+	observedPayload,
+	{
+		geo: "primorsk",
+		surface: "kvartiry",
+		facet: "vtorichka",
+	},
+	brandName,
+);
 assert.ok(secondaryFacetListing, "secondary market SEO facet must resolve");
 assert.ok(
 	!secondaryFacetListing.items.some(
@@ -303,6 +323,7 @@ const secondaryOnlyGrammar = createProjectUrlGrammar(secondaryOnlyProfile);
 const secondaryOnlyListing = await getListing(
 	observedPayload,
 	{ geo: "primorsk", surface: "kvartiry" },
+	brandName,
 	secondaryOnlyGrammar,
 	secondaryOnlyProfile,
 );
@@ -371,9 +392,13 @@ assert.ok(observedQueries <= 2, "inventory count must use a bounded aggregate");
 
 await assert.rejects(
 	() =>
-		getListing(observedPayload, {
-			surface: "kvartiry",
-		} as never),
+		getListing(
+			observedPayload,
+			{
+				surface: "kvartiry",
+			} as never,
+			brandName,
+		),
 	/geo|invalid_type/i,
 	"listing must never infer a default city",
 );

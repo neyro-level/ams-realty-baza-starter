@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { evaluateContentGate } from "../src/core/seo/content-gate.ts";
 import {
 	buildDiscoveryShards,
+	type DiscoveryCandidate,
 	discoveryGroups,
 	latestLastModified,
 	renderDiscoveryRobots,
 	renderSitemapIndexXml,
 	renderSitemapXml,
-	type DiscoveryCandidate,
 } from "../src/core/seo/discovery-feeds.ts";
-import { evaluateContentGate } from "../src/core/seo/content-gate.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 
 const origin = "https://example.test";
@@ -164,6 +165,24 @@ const publicRobots = renderDiscoveryRobots({
 });
 assert.match(publicRobots, /Disallow: \/admin\//);
 assert.match(publicRobots, /Sitemap: https:\/\/example\.test\/sitemap\.xml/);
+
+const runtimeDiscovery = readFileSync(
+	"src/project/seo/discovery-runtime.ts",
+	"utf8",
+);
+assert.match(runtimeDiscovery, /getPublicSitemapEntries/);
+assert.match(runtimeDiscovery, /resolveRuntimeRoute\(path\)/);
+assert.match(runtimeDiscovery, /runtime\.decision\.gate/);
+assert.match(runtimeDiscovery, /!entry\.lastModified/);
+assert.match(runtimeDiscovery, /group: entry\.group/);
+assert.equal(/function groupFor/.test(runtimeDiscovery), false);
+assert.equal(
+	/inventedLastModified|Date\.now\(\)|new Date\(\)\.toISOString/.test(
+		runtimeDiscovery,
+	),
+	false,
+	"runtime discovery must not invent lastmod",
+);
 
 console.log(
 	"Discovery feeds verified: five profiles, groups, shards, lastmod, XML and robots.",

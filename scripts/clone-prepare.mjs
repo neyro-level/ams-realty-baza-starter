@@ -162,24 +162,6 @@ const replaceLiteral = (source, pattern, replacement, label) => {
 let siteConfig = config;
 siteConfig = replaceLiteral(
 	siteConfig,
-	/brandName:\s*["'][^"']+["']/,
-	`brandName: ${JSON.stringify(preset.brandName)}`,
-	"brandName",
-);
-siteConfig = replaceLiteral(
-	siteConfig,
-	/defaultTitle:\s*["'][^"']+["']/,
-	`defaultTitle: ${JSON.stringify(preset.brandName)}`,
-	"defaultTitle",
-);
-siteConfig = replaceLiteral(
-	siteConfig,
-	/defaultDescription:\s*["'][^"']+["']/,
-	`defaultDescription: ${JSON.stringify(preset.defaultDescription)}`,
-	"defaultDescription",
-);
-siteConfig = replaceLiteral(
-	siteConfig,
 	/projectKind:\s*["'](?:starter-demo|client)["']/,
 	'projectKind: "client"',
 	"projectKind",

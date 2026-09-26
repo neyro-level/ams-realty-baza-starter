@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { getSiteUrl } from "@/project/seo/site";
+import { getPublicShell } from "@/project/data-access/public";
 import {
 	getProjectIndexingPolicy,
 	metadataRobotsForPolicy,
 } from "@/project/indexing-policy";
+import { getSiteUrl } from "@/project/seo/site";
 import { siteConfig } from "@/project/site.config";
 
 import "./globals.css";
@@ -15,12 +16,14 @@ const manrope = Manrope({
 	variable: "--font-manrope",
 });
 
-export const metadata: Metadata = {
-	metadataBase: new URL(getSiteUrl()),
-	title: siteConfig.defaultTitle,
-	description: siteConfig.defaultDescription,
-	robots: metadataRobotsForPolicy(getProjectIndexingPolicy()),
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const shell = await getPublicShell();
+	return {
+		metadataBase: new URL(getSiteUrl()),
+		title: shell.header.brandName,
+		robots: metadataRobotsForPolicy(getProjectIndexingPolicy()),
+	};
+}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
 	return (

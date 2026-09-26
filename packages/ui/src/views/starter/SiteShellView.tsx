@@ -1,9 +1,24 @@
-import type { SiteFooterDTO, SiteHeaderDTO } from "@ams/realtbase-contracts";
+import type {
+	PageLinkDTO,
+	SiteFooterDTO,
+	SiteHeaderDTO,
+} from "@ams/realtbase-contracts";
 import type { ReactNode } from "react";
 import { Button } from "../../components/ui/button";
 import { Container } from "../../components/ui/layout";
+import { GeoSwitcherView } from "../site-shell/GeoSwitcherView";
 
-export function StarterSiteHeader({ header }: { header: SiteHeaderDTO }) {
+export function StarterSiteHeader({
+	header,
+	geoSwitcher,
+}: {
+	header: SiteHeaderDTO;
+	geoSwitcher?: {
+		mode: "SINGLE_GEO" | "MULTI_GEO";
+		activeGeo: string;
+		options: readonly PageLinkDTO[];
+	};
+}) {
 	return (
 		<header className="sticky top-0 z-40 border-b border-border bg-[var(--surface-card)]/95 backdrop-blur-xl">
 			<Container className="flex min-h-17 items-center gap-5 py-3">
@@ -60,6 +75,11 @@ export function StarterSiteHeader({ header }: { header: SiteHeaderDTO }) {
 					</a>
 				))}
 			</Container>
+			{geoSwitcher ? (
+				<Container className="pb-3">
+					<GeoSwitcherView {...geoSwitcher} />
+				</Container>
+			) : null}
 		</header>
 	);
 }
@@ -70,7 +90,9 @@ export function StarterSiteFooter({ footer }: { footer: SiteFooterDTO }) {
 			<Container>
 				<div className="grid gap-10 md:grid-cols-[1.2fr_2fr]">
 					<div>
-						<p className="text-body font-extrabold tracking-caps">{footer.brandName}</p>
+						<p className="text-body font-extrabold tracking-caps">
+							{footer.brandName}
+						</p>
 						<p className="mt-3 max-w-sm text-label leading-step-copy text-[var(--text-dark)]">
 							Агентство недвижимости: подбор объектов, проверка документов и
 							сопровождение сделки.
@@ -97,7 +119,10 @@ export function StarterSiteFooter({ footer }: { footer: SiteFooterDTO }) {
 				</div>
 				<div className="mt-10 flex flex-col gap-3 border-t border-[var(--dark-border)] pt-6 text-caption text-[var(--text-dark)] md:flex-row md:items-center md:justify-between">
 					<p>{footer.copyright}</p>
-					<nav className="flex flex-wrap gap-4" aria-label="Правовая информация">
+					<nav
+						className="flex flex-wrap gap-4"
+						aria-label="Правовая информация"
+					>
 						{footer.legalLinks.map((link) => (
 							<a
 								key={link.href}

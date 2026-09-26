@@ -1,16 +1,14 @@
 import "server-only";
 
-import {
-	countPublicSitemapPages,
-	countPublicSitemapProperties,
-	listPublicSitemapPagesPage,
-	listPublicSitemapPropertiesPage,
-} from "./payload-reads";
+import { propertyCategorySurface } from "@/core/property/taxonomy";
+import { fixtureNap } from "@/fixture/site-settings";
 import { projectConfig } from "@/project/project.config";
 import {
 	type PublicUrlEntry,
 	staticPublicUrlEntries,
 } from "@/project/seo/site";
+import { siteProfile } from "@/project/site-profile";
+import { createProjectUrlGrammar } from "@/project/url-grammar";
 import { findPublicCatalogProperties } from "./catalog";
 import {
 	toHomePageDTO,
@@ -18,12 +16,16 @@ import {
 	toPropertyListDTO,
 	toShellDTO,
 } from "./dto";
+import { getGeoBySlug } from "./geo-catalog";
+import { findPublicNap } from "./nap";
 import { fallbackPublicPage, findPublicPage, findPublicPages } from "./pages";
 import { getOptionalPublicGatewayPayload } from "./payload";
-import { findPublicNap } from "./nap";
-import { propertyCategorySurface } from "@/core/property/taxonomy";
-import { createProjectUrlGrammar } from "@/project/url-grammar";
-import { siteProfile } from "@/project/site-profile";
+import {
+	countPublicSitemapPages,
+	countPublicSitemapProperties,
+	listPublicSitemapPagesPage,
+	listPublicSitemapPropertiesPage,
+} from "./payload-reads";
 
 const urlsPerShard = projectConfig.sitemapUrlsPerShard;
 const queryPageSize = projectConfig.sitemapQueryPageSize;
@@ -53,13 +55,20 @@ async function listRange<T>(
 export async function getPublicShell() {
 	const payload = await getOptionalPublicGatewayPayload();
 	if (!payload) {
-		return toShellDTO([]);
+		return toShellDTO([], fixtureNap);
 	}
-	const [pages, nap] = await Promise.all([
-		findPublicPages(payload),
-		findPublicNap(payload),
+	const nap = await findPublicNap(payload);
+	const [pages, geoCities] = await Promise.all([
+		findPublicPages(payload, nap.brandName),
+		Promise.all(
+			Object.keys(siteProfile.geos).map((geo) => getGeoBySlug(payload, geo)),
+		),
 	]);
-	return toShellDTO(pages, nap);
+	return toShellDTO(
+		pages,
+		nap,
+		geoCities.filter((city): city is NonNullable<typeof city> => city != null),
+	);
 }
 
 export async function getPublicSitemapTotals() {
@@ -128,6 +137,7 @@ export async function getPublicSitemapShard(
 			);
 			entries.push(
 				...pages.map((page) => ({
+					group: "static" as const,
 					path: `/${page.slug}`,
 					lastModified: page.updatedAt,
 					changeFrequency: "weekly" as const,
@@ -152,6 +162,7 @@ export async function getPublicSitemapShard(
 		);
 		entries.push(
 			...properties.map((property) => ({
+				group: "properties" as const,
 				path: urlGrammar.buildUrl({
 					kind: "property" as const,
 					category: propertyCategorySurface[property.category],
@@ -181,15 +192,17 @@ export async function getPublicHomePage() {
 	const payload = await getOptionalPublicGatewayPayload();
 	if (!payload) {
 		return {
-			page: toHomePageDTO(null),
+			page: toHomePageDTO(null, fixtureNap.brandName),
 			featured: null,
+			nap: fixtureNap,
 		} as const;
 	}
+	const nap = await findPublicNap(payload);
 	const [page, catalog] = await Promise.all([
-		findPublicPage(payload, "home"),
+		findPublicPage(payload, "home", nap.brandName),
 		findPublicCatalogProperties(payload, { limit: 1, page: 1 }),
 	]);
-	const home = toHomePageDTO(page);
+	const home = toHomePageDTO(page, nap.brandName);
 	const featured = catalog.items[0];
 
 	return {
@@ -198,14 +211,16 @@ export async function getPublicHomePage() {
 			featuredPropertyId: featured ? String(featured.id) : "",
 		},
 		featured: featured ? toPropertyListDTO(catalog).items[0] : null,
+		nap,
 	} as const;
 }
 
 export async function getPublicMarketingPage(slug: string) {
 	const payload = await getOptionalPublicGatewayPayload();
 	if (!payload) {
-		return toMarketingPageDTO(fallbackPublicPage(slug));
+		return toMarketingPageDTO(fallbackPublicPage(slug, fixtureNap.brandName));
 	}
-	const page = await findPublicPage(payload, slug);
+	const nap = await findPublicNap(payload);
+	const page = await findPublicPage(payload, slug, nap.brandName);
 	return page ? toMarketingPageDTO(page) : null;
 }

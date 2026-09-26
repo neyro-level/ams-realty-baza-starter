@@ -13,8 +13,9 @@ import type {
 import { siteConfig } from "../project/site.config.ts";
 import { siteProfile } from "../project/site-profile.ts";
 import { createProjectUrlGrammar } from "../project/url-grammar.ts";
+import { fixtureNap } from "./site-settings.ts";
 
-const brandName = siteConfig.brandName;
+const brandName = fixtureNap.brandName;
 const urlGrammar = createProjectUrlGrammar(siteProfile);
 const logo = {
 	kind: "managed" as const,
@@ -241,7 +242,11 @@ export const fixtureHome: HomePageDTO = {
 			href: "/kvartiry/",
 			description: "Квартиры из актуального каталога",
 		},
-		{ label: "Продать", href: "/prodat/", description: "Оценка и план продажи" },
+		{
+			label: "Продать",
+			href: "/prodat/",
+			description: "Оценка и план продажи",
+		},
 		{
 			label: "Сдать",
 			href: "/sdat/",

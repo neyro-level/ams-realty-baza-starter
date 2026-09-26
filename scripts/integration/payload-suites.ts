@@ -307,6 +307,7 @@ const preparedDevelopment = await payload.create({
 const preparedDevelopmentDetails = await getDevelopment(
 	payload,
 	preparedDevelopment.slug,
+	fixtureSiteSettingsData.brandName,
 );
 assert.equal(
 	preparedDevelopmentDetails?.id,
@@ -329,7 +330,13 @@ assert.ok(
 	),
 );
 assert.equal(
-	(await getDeveloper(payload, preparedDeveloper.slug))?.id,
+	(
+		await getDeveloper(
+			payload,
+			preparedDeveloper.slug,
+			fixtureSiteSettingsData.brandName,
+		)
+	)?.id,
 	String(preparedDeveloper.id),
 	"published developer must be reachable only through the public Gateway",
 );
@@ -455,12 +462,20 @@ const draftDevelopment = await payload.create({
 	...access,
 });
 assert.equal(
-	await getDevelopment(payload, draftDevelopment.slug),
+	await getDevelopment(
+		payload,
+		draftDevelopment.slug,
+		fixtureSiteSettingsData.brandName,
+	),
 	null,
 	"draft development must be excluded by an explicit Gateway status predicate",
 );
 assert.equal(
-	await getDeveloper(payload, draftDeveloper.slug),
+	await getDeveloper(
+		payload,
+		draftDeveloper.slug,
+		fixtureSiteSettingsData.brandName,
+	),
 	null,
 	"draft developer must be excluded by an explicit Gateway status predicate",
 );
@@ -807,7 +822,11 @@ assert.equal(
 	null,
 	"missing public property slug must resolve to null",
 );
-const cmsPage = await findPublicPage(payload, "__missing-public-page__");
+const cmsPage = await findPublicPage(
+	payload,
+	"__missing-public-page__",
+	fixtureSiteSettingsData.brandName,
+);
 assert.equal(
 	cmsPage,
 	null,
@@ -877,14 +896,22 @@ await payload.create({
 	...access,
 });
 
-const publicPage = await findPublicPage(payload, publishedPage.slug);
+const publicPage = await findPublicPage(
+	payload,
+	publishedPage.slug,
+	fixtureSiteSettingsData.brandName,
+);
 assert.equal(
 	publicPage?.slug,
 	publishedPage.slug,
 	"published page must pass Public Gateway access",
 );
 assert.equal(
-	await findPublicPage(payload, `integration-draft-page-${suffix}`),
+	await findPublicPage(
+		payload,
+		`integration-draft-page-${suffix}`,
+		fixtureSiteSettingsData.brandName,
+	),
 	null,
 	"draft page must remain unavailable through Public Gateway",
 );

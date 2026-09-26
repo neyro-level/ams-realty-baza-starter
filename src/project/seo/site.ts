@@ -1,10 +1,9 @@
+import type { DiscoveryGroup } from "../../core/seo/discovery-feeds.ts";
 import { detectRuntimeEnvMode, runtimeEnv } from "../env.ts";
-import { siteConfig } from "../site.config.ts";
 import { projectStaticRoutes } from "../static-routes.ts";
 
-export const siteBrandName = siteConfig.brandName;
-
 export type PublicUrlEntry = {
+	group: DiscoveryGroup;
 	path: string;
 	lastModified?: string | Date | null;
 	changeFrequency?:
@@ -19,7 +18,8 @@ export type PublicUrlEntry = {
 	indexable: boolean;
 };
 
-export const staticPublicUrlEntries: readonly PublicUrlEntry[] = projectStaticRoutes;
+export const staticPublicUrlEntries: readonly PublicUrlEntry[] =
+	projectStaticRoutes.map((entry) => ({ ...entry, group: "static" }));
 
 export function getSiteUrl(): string {
 	const configured = runtimeEnv.NEXT_PUBLIC_SERVER_URL?.trim();

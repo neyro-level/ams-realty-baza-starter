@@ -13,6 +13,11 @@ import {
 } from "../src/fixture/geo-catalog.ts";
 import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
+import {
+	projectBreadcrumbs,
+	projectGeoSwitcherOptions,
+	projectMenuLinks,
+} from "../src/project/navigation.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
@@ -85,6 +90,32 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 			assert.equal(result.profileStatus, "ACTIVE", `${name}: active`);
 		}
 	}
+	const cityOptions = Object.keys(profile.geos).map((geo) => ({
+		id: geo,
+		slug: geo,
+		name: geo,
+		nameGenitive: geo,
+		nameLocative: geo,
+		preposition: "в" as const,
+		type: "city" as const,
+		region: { id: "region", slug: "region", name: "Region", shortName: "R" },
+	}));
+	const switcher = projectGeoSwitcherOptions(cityOptions, { profile, grammar });
+	assert.equal(
+		switcher.length,
+		profile.geoMode === "SINGLE_GEO"
+			? 0
+			: Object.values(profile.geos).filter(
+					(geo) => geo.published && geo.hubStatus === "ACTIVE",
+				).length,
+		`${name}: profile-driven switcher`,
+	);
+	const menu = projectMenuLinks([], { profile, grammar });
+	assert.ok(menu.length > 0, `${name}: profile-driven menu`);
+	assert.ok(
+		menu.every((item) => !item.href.includes("?")),
+		`${name}: clean menu`,
+	);
 }
 
 const profile = siteProfileFixtures.multiGeo;
@@ -131,6 +162,53 @@ assert.deepEqual(breadcrumbs.items, [
 	{ label: "NOINDEX_AUTO geo" },
 	{ label: "Объект" },
 ]);
+
+assert.deepEqual(
+	projectBreadcrumbs(
+		[
+			{ pageKey: { kind: "home" }, label: "Главная" },
+			{ pageKey: inactiveGeo, label: "Заречный" },
+		],
+		"Объект",
+		{ profile, grammar },
+	).items,
+	[
+		{
+			pageKey: { kind: "home" },
+			href: "/",
+			label: "Главная",
+			count: undefined,
+		},
+		{ label: "Заречный" },
+		{ label: "Объект" },
+	],
+	"inactive geo breadcrumb remains text",
+);
+
+assert.deepEqual(
+	projectBreadcrumbs(
+		[
+			{ pageKey: { kind: "home" }, label: "Главная" },
+			{
+				pageKey: { kind: "geoHub", geo: "imported-city" },
+				label: "Импортированный город",
+			},
+		],
+		"Объект",
+		{ profile, grammar },
+	).items,
+	[
+		{
+			pageKey: { kind: "home" },
+			href: "/",
+			label: "Главная",
+			count: undefined,
+		},
+		{ label: "Импортированный город" },
+		{ label: "Объект" },
+	],
+	"unknown persisted geo breadcrumb fails closed as text",
+);
 
 function breadcrumbLinks(
 	items: typeof fixtureDeveloper.breadcrumbs.items,

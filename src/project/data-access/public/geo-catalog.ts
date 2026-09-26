@@ -23,6 +23,10 @@ import {
 } from "@/core/profile";
 import type { UrlGrammar } from "@/core/routing";
 import { getRuntimeClock } from "@/core/time/clock";
+import {
+	projectBreadcrumbs,
+	projectNavigationLinks,
+} from "@/project/navigation";
 import type {
 	City,
 	Developer,
@@ -38,7 +42,6 @@ import {
 	projectSeoMeta,
 	renderProjectSeoTemplate,
 } from "@/project/seo/templates";
-import { siteConfig } from "@/project/site.config";
 import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
 import { isFreshDevelopmentPrice } from "../../../core/developments/domain.ts";
@@ -104,6 +107,7 @@ const developmentSelect = {
 	layouts: true,
 	progress: true,
 	descriptions: true,
+	faq: true,
 	status: true,
 	publishedAt: true,
 	contentPurgedAt: true,
@@ -132,6 +136,10 @@ export type PublicListingInput = {
 	page?: number;
 };
 
+export type PublicDevelopmentDetailsDTO = DevelopmentDetailsDTO & {
+	faq: readonly { question: string; answer: string }[];
+};
+
 export async function getGeoBySlug(
 	payload: Payload,
 	slug: string,
@@ -143,8 +151,8 @@ export async function getGeoBySlug(
 export async function getGeoHub(
 	payload: Payload,
 	slug: string,
+	brandName: string,
 	grammar: UrlGrammar = urlGrammar,
-	brandName: string = siteConfig.brandName,
 ): Promise<GeoHubDTO | null> {
 	const geo = slugSchema.parse(slug);
 	if (!isRoutableGeo(geo)) return null;
@@ -165,36 +173,43 @@ export async function getGeoHub(
 		city: toCityDTO(city),
 		title: renderedSeo.h1,
 		intro: `Каталог объектов и проектов: ${city.title}.`,
-		breadcrumbs: {
-			items: [
-				{ label: "Главная", pageKey: { kind: "home" }, href: "/" },
-				{ label: city.title },
-			],
-		},
-		seo: projectSeoMeta("geoHub", seoContext, href),
-		categoryLinks: activeSurfaces(siteProfile).map((surface) =>
-			pageLink(
-				{ kind: "categoryGeo", geo, category: surface },
-				surfaceLabel(surface),
-			),
+		breadcrumbs: projectBreadcrumbs(
+			[{ label: "Главная", pageKey: { kind: "home" } }],
+			city.title,
+			{ grammar },
 		),
-		districtLinks: districts
-			.filter((district) => district.categories?.includes("kvartiry"))
-			.map((district) =>
-				pageLink(
-					{
+		seo: projectSeoMeta("geoHub", seoContext, href),
+		categoryLinks: projectNavigationLinks(
+			activeSurfaces(siteProfile).map((surface) => ({
+				pageKey: { kind: "categoryGeo", geo, category: surface },
+				label: surfaceLabel(surface),
+			})),
+			{ grammar },
+		),
+		districtLinks: projectNavigationLinks(
+			districts
+				.filter((district) => district.categories?.includes("kvartiry"))
+				.map((district) => ({
+					pageKey: {
 						kind: "categoryGeoDistrict",
 						geo,
 						category: "kvartiry",
 						district: district.slug,
 					},
-					district.title,
-					grammar,
-				),
-			),
-		developerLink: pageLink({ kind: "geoDevelopers", geo }, "Застройщики"),
-		nearby: nearby.map((item) =>
-			pageLink({ kind: "geoHub", geo: item.slug }, item.title),
+					label: district.title,
+				})),
+			{ grammar },
+		),
+		developerLink: projectNavigationLinks(
+			[{ pageKey: { kind: "geoDevelopers", geo }, label: "Застройщики" }],
+			{ grammar },
+		)[0],
+		nearby: projectNavigationLinks(
+			nearby.map((item) => ({
+				pageKey: { kind: "geoHub", geo: item.slug },
+				label: item.title,
+			})),
+			{ grammar },
 		),
 	};
 }
@@ -202,9 +217,9 @@ export async function getGeoHub(
 export async function getListing(
 	payload: Payload,
 	input: PublicListingInput,
+	brandName: string,
 	grammar: UrlGrammar = urlGrammar,
 	profile: SiteProfile = siteProfile,
-	brandName: string = siteConfig.brandName,
 ): Promise<ListingPageDTO | null> {
 	const parsed = z
 		.object({
@@ -269,22 +284,30 @@ export async function getListing(
 				}
 			: { kind: "categoryGeo", geo: parsed.geo, category: parsed.surface };
 	const href = safeBuildUrl(pageKey, grammar);
-	const facetLinks = Object.entries(profile.seoFacets).flatMap(
-		([facetSlug, facet]) =>
+	const facetLinks = projectNavigationLinks(
+		Object.entries(profile.seoFacets).flatMap(([facetSlug, facet]) =>
 			facet.geo === parsed.geo && facet.category === parsed.surface
 				? [
-						pageLink(
-							{
+						{
+							pageKey: {
 								kind: "categoryGeoFacet",
 								geo: parsed.geo,
 								category: parsed.surface,
 								facet: facetSlug,
 							},
-							projectSeoFacetLabel(facetSlug),
-							grammar,
-						),
+							label: projectSeoFacetLabel(facetSlug),
+						},
 					]
 				: [],
+		),
+		{ profile, grammar },
+	);
+	const nearbyLinks = projectNavigationLinks(
+		(await findNearbyCities(payload, city)).map((item) => ({
+			pageKey: { kind: "geoHub", geo: item.slug },
+			label: item.title,
+		})),
+		{ profile, grammar },
 	);
 	const page = parsed.page ?? 1;
 	const pageSize = pageSizeSchema.parse(
@@ -318,6 +341,7 @@ export async function getListing(
 			pageSize,
 			brandName,
 			facetLinks,
+			nearbyLinks,
 		);
 	}
 
@@ -351,6 +375,7 @@ export async function getListing(
 		result.pageSize,
 		brandName,
 		facetLinks,
+		nearbyLinks,
 	);
 }
 
@@ -390,8 +415,8 @@ export async function getPropertyRouteFacts(
 export async function getDevelopment(
 	payload: Payload,
 	slug: string,
-	brandName: string = siteConfig.brandName,
-): Promise<DevelopmentDetailsDTO | null> {
+	brandName: string,
+): Promise<PublicDevelopmentDetailsDTO | null> {
 	const result = await payload.find({
 		collection: "developments",
 		where: {
@@ -585,7 +610,7 @@ export async function listAllDevelopments(
 export async function getDeveloper(
 	payload: Payload,
 	slug: string,
-	brandName: string = siteConfig.brandName,
+	brandName: string,
 ): Promise<DeveloperDetailsDTO | null> {
 	const result = await payload.find({
 		collection: "developers",
@@ -638,8 +663,8 @@ export async function getDeveloper(
 	return toDeveloperDetailsDTO(
 		developer,
 		developments,
-		firstDevelopmentPage.totalDocs,
 		brandName,
+		firstDevelopmentPage.totalDocs,
 	);
 }
 
@@ -710,8 +735,11 @@ export async function getNearby(
 	const city = await findGeoRecord(payload, parsedGeo);
 	if (!city) return [];
 	const nearby = await findNearbyCities(payload, city);
-	return nearby.map((item) =>
-		pageLink({ kind: "geoHub", geo: item.slug }, item.title),
+	return projectNavigationLinks(
+		nearby.map((item) => ({
+			pageKey: { kind: "geoHub", geo: item.slug },
+			label: item.title,
+		})),
 	);
 }
 
@@ -1027,7 +1055,7 @@ function toDevelopmentCardDTO(development: Development): DevelopmentCardDTO {
 function toDevelopmentDetailsDTO(
 	development: Development,
 	brandName: string,
-): DevelopmentDetailsDTO {
+): PublicDevelopmentDetailsDTO {
 	const card = toDevelopmentCardDTO(development);
 	const city = objectRelation<City>(development.city, "city", development.id);
 	const price = minimumFreshPrice(development);
@@ -1108,6 +1136,11 @@ function toDevelopmentDetailsDTO(
 						]
 					: [],
 			) ?? [],
+		faq:
+			development.faq?.map((item) => ({
+				question: item.question,
+				answer: item.answer,
+			})) ?? [],
 		characteristics: [
 			development.completion
 				? { label: "Срок", value: development.completion }
@@ -1117,12 +1150,13 @@ function toDevelopmentDetailsDTO(
 				value: `${development.completenessScore}%`,
 			},
 		].filter((item): item is { label: string; value: string } => item != null),
-		breadcrumbs: {
-			items: [
-				{ label: "Главная", pageKey: { kind: "home" }, href: "/" },
-				{ label: development.name },
+		breadcrumbs: projectBreadcrumbs(
+			[
+				{ label: "Главная", pageKey: { kind: "home" } },
+				{ label: city.title, pageKey: { kind: "geoHub", geo: city.slug } },
 			],
-		},
+			development.name,
+		),
 		seo: projectSeoMeta("developmentNormal", seoContext, card.href),
 	};
 }
@@ -1156,8 +1190,8 @@ function toDeveloperCardDTO(
 function toDeveloperDetailsDTO(
 	developer: Developer,
 	developments: readonly Development[],
+	brandName: string,
 	developmentsCount = developments.length,
-	brandName: string = siteConfig.brandName,
 ): DeveloperDetailsDTO {
 	const card = {
 		...toDeveloperCardDTO(developer, developments),
@@ -1168,17 +1202,13 @@ function toDeveloperDetailsDTO(
 		legalName: developer.legalName ?? undefined,
 		description: developer.description ?? undefined,
 		website: developer.siteUrl ?? undefined,
-		breadcrumbs: {
-			items: [
-				{ label: "Главная", pageKey: { kind: "home" }, href: "/" },
-				{
-					label: "Застройщики",
-					pageKey: { kind: "developerRoot" },
-					href: safeBuildUrl({ kind: "developerRoot" }),
-				},
-				{ label: developer.name },
+		breadcrumbs: projectBreadcrumbs(
+			[
+				{ label: "Главная", pageKey: { kind: "home" } },
+				{ label: "Застройщики", pageKey: { kind: "developerRoot" } },
 			],
-		},
+			developer.name,
+		),
 		seo: projectSeoMeta(
 			"developer",
 			{
@@ -1203,6 +1233,7 @@ function listingDTO(
 	pageSize: number,
 	brandName: string,
 	subLinks: readonly PageLinkDTO[] = [],
+	nearby: readonly PageLinkDTO[] = [],
 ): ListingPageDTO {
 	const totalPages = Math.ceil(total / pageSize);
 	const templateKey =
@@ -1248,12 +1279,12 @@ function listingDTO(
 			nextPage: page < totalPages ? page + 1 : undefined,
 		},
 		subLinks,
-		nearby: [],
+		nearby,
 		robots: { indexing: "noindex", following: "follow" },
 		canonical: href,
-		breadcrumbs: {
-			items: [
-				{ label: "Главная", pageKey: { kind: "home" }, href: "/" },
+		breadcrumbs: projectBreadcrumbs(
+			[
+				{ label: "Главная", pageKey: { kind: "home" } },
 				{
 					label: city.title,
 					pageKey: {
@@ -1265,16 +1296,10 @@ function listingDTO(
 									? pageKey.geo
 									: siteProfile.primaryGeo,
 					},
-					href:
-						pageKey.kind === "categoryRoot"
-							? "/"
-							: "geo" in pageKey
-								? safeBuildUrl({ kind: "geoHub", geo: pageKey.geo })
-								: "/",
 				},
-				{ label: surfaceLabel(surface) },
 			],
-		},
+			surfaceLabel(surface),
+		),
 		seo: projectSeoMeta(templateKey, seoContext, href),
 	};
 }
@@ -1362,14 +1387,6 @@ function surfaceLabel(surface: CatalogSurfaceSlug): string {
 			"kottedzhnye-poselki": "Коттеджные посёлки",
 		} as const
 	)[surface];
-}
-
-function pageLink(
-	pageKey: PageKeyDTO,
-	label: string,
-	grammar: UrlGrammar = urlGrammar,
-): PageLinkDTO {
-	return { pageKey, href: safeBuildUrl(pageKey, grammar), label };
 }
 
 function safeBuildUrl(

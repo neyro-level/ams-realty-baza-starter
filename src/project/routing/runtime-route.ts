@@ -4,17 +4,17 @@ import type {
 	DeveloperCardDTO,
 	DeveloperDetailsDTO,
 	DevelopmentCardDTO,
-	DevelopmentDetailsDTO,
 	GeoHubDTO,
 	ListingPageDTO,
+	NapDTO,
 	PropertyDetailsDTO,
 } from "@ams/realtbase-contracts";
 import { cache } from "react";
 import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
 import {
 	createRouteResolver,
-	type PageKey,
 	type PageDecision,
+	type PageKey,
 	type ResolverDataPort,
 	type ResolverPageRecord,
 	type ResolverResult,
@@ -23,8 +23,8 @@ import { geoCatalogContractFixtures } from "@/fixture/geo-catalog";
 import { fixtureProperties, getFixtureProperty } from "@/fixture/provider";
 import { createFixtureResolverDataPort } from "@/fixture/resolver";
 import { fixtureDistrictRouteRegistryFor } from "@/fixture/route-registries";
+import { fixtureNap } from "@/fixture/site-settings";
 import { findPublicEntityLifecycle } from "@/project/data-access/public/entity-lifecycle";
-import { findPublicBrandName } from "@/project/data-access/public/nap";
 import {
 	countGeoInventory,
 	countInventory,
@@ -39,25 +39,27 @@ import {
 	listAllDevelopments,
 	listDeveloperDevelopments,
 	listGeoDevelopers,
+	type PublicDevelopmentDetailsDTO,
 } from "@/project/data-access/public/geo-catalog";
+import { findPublicNap } from "@/project/data-access/public/nap";
 import { getOptionalPublicGatewayPayload } from "@/project/data-access/public/payload";
 import { findPublicRedirectByFromPath } from "@/project/data-access/public/payload-reads";
-import { getCachedDistrictRouteRegistry } from "@/project/routing/district-registry";
 import {
+	type CatalogSearchParams,
 	catalogCanonicalPath,
 	parseCatalogSearchParams,
 	parsePageSearchParams,
-	type CatalogSearchParams,
 } from "@/project/routing/catalog-search-params";
-import { siteConfig } from "@/project/site.config";
-import { siteProfile } from "@/project/site-profile";
-import { createProjectUrlGrammar } from "@/project/url-grammar";
 import { decidePage } from "@/project/routing/content-gate";
+import { getCachedDistrictRouteRegistry } from "@/project/routing/district-registry";
 import {
 	projectSeoCategoryLabel,
 	projectSeoMeta,
 	renderProjectSeoTemplate,
 } from "@/project/seo/templates";
+import { siteConfig } from "@/project/site.config";
+import { siteProfile } from "@/project/site-profile";
+import { createProjectUrlGrammar } from "@/project/url-grammar";
 
 export type RuntimeRouteData =
 	| { kind: "geoHub"; value: GeoHubDTO }
@@ -82,7 +84,7 @@ export type RuntimeRouteData =
 	  }
 	| {
 			kind: "development";
-			value: DevelopmentDetailsDTO;
+			value: PublicDevelopmentDetailsDTO;
 			layoutCount: number;
 			progressPresent: boolean;
 	  }
@@ -95,7 +97,7 @@ type RuntimeRouteDecision =
 export type RuntimeRouteResolution = {
 	decision: RuntimeRouteDecision;
 	data?: RuntimeRouteData;
-	brandName?: string;
+	nap?: NapDTO;
 };
 
 async function resolveFixtureRuntimeRoute(
@@ -171,7 +173,7 @@ async function resolveFixtureRuntimeRoute(
 	};
 	let data: RuntimeRouteData | undefined;
 	if (pageKey.kind === "geoHub") {
-		const context = { brand: siteConfig.brandName, city: cityMorphology };
+		const context = { brand: fixtureNap.brandName, city: cityMorphology };
 		data = {
 			kind: "geoHub",
 			value: {
@@ -185,7 +187,7 @@ async function resolveFixtureRuntimeRoute(
 		pageKey.kind === "categoryGeo"
 	) {
 		const context = {
-			brand: siteConfig.brandName,
+			brand: fixtureNap.brandName,
 			category: projectSeoCategoryLabel(pageKey.category),
 			city: cityMorphology,
 			inventory: geoCatalogContractFixtures.listing.total,
@@ -229,7 +231,7 @@ async function resolveFixtureRuntimeRoute(
 	} else if (pageKey.kind === "development") {
 		data = {
 			kind: "development",
-			value: geoCatalogContractFixtures.development,
+			value: { ...geoCatalogContractFixtures.development, faq: [] },
 			layoutCount: 1,
 			progressPresent: true,
 		};
@@ -244,7 +246,7 @@ async function resolveFixtureRuntimeRoute(
 	const resolution: RuntimeRouteResolution = {
 		decision: decidePage(decision, data),
 		data,
-		brandName: siteConfig.brandName,
+		nap: fixtureNap,
 	};
 	if (data.kind === "listing" && catalogQuery?.queryString) {
 		const canonicalPath = catalogCanonicalPath(
@@ -388,7 +390,8 @@ export const resolveRuntimeRoute = cache(
 				: resolveFixtureRuntimeRoute(pathname, queryString);
 		}
 		const publicPayload = payload;
-		const brandName = await findPublicBrandName(publicPayload);
+		const nap = await findPublicNap(publicPayload);
+		const brandName = nap.brandName;
 
 		const grammar = createProjectUrlGrammar(
 			siteProfile,
@@ -483,7 +486,7 @@ export const resolveRuntimeRoute = cache(
 				}
 				if (pageKey.kind === "geoHub") {
 					if (queryString) return null;
-					const hub = await getGeoHub(payload, pageKey.geo, grammar, brandName);
+					const hub = await getGeoHub(payload, pageKey.geo, brandName, grammar);
 					if (!hub) return null;
 					data.set(key, { kind: "geoHub", value: hub });
 					inventory.set(key, await countGeoInventory(payload, pageKey.geo));
@@ -531,9 +534,9 @@ export const resolveRuntimeRoute = cache(
 									: {}),
 							},
 						},
+						brandName,
 						grammar,
 						siteProfile,
-						brandName,
 					);
 					if (!listing) return null;
 					data.set(key, {
@@ -697,7 +700,7 @@ export const resolveRuntimeRoute = cache(
 		const resolution: RuntimeRouteResolution = {
 			decision: decidePage(decision, routeData),
 			data: routeData,
-			brandName,
+			nap,
 		};
 		const queryVariant =
 			routeData.kind === "listing"

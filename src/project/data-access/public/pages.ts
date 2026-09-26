@@ -2,7 +2,6 @@ import "server-only";
 
 import type { PageSEOContract } from "@ams/realtbase-contracts";
 import type { Payload } from "payload";
-import { siteConfig } from "@/project/site.config";
 import { publicGatewayPolicy } from "./policy";
 
 export type PublicPageRecord = {
@@ -15,13 +14,14 @@ export type PublicPageRecord = {
 function pageSeo(
 	slug: string,
 	title: string,
+	brandName: string,
 	description?: string | null,
 	noindex?: boolean | null,
 ): PageSEOContract {
 	const canonicalPath = slug === "home" ? "/" : `/${slug}/`;
-	const seoTitle = title.includes(siteConfig.brandName)
+	const seoTitle = title.includes(brandName)
 		? title
-		: `${title} — ${siteConfig.brandName}`;
+		: `${title} — ${brandName}`;
 
 	return {
 		title: seoTitle,
@@ -32,7 +32,10 @@ function pageSeo(
 	};
 }
 
-export function fallbackPublicPage(slug: string): PublicPageRecord {
+export function fallbackPublicPage(
+	slug: string,
+	brandName: string,
+): PublicPageRecord {
 	const title =
 		slug === "home"
 			? "Главная"
@@ -46,13 +49,14 @@ export function fallbackPublicPage(slug: string): PublicPageRecord {
 		slug,
 		title,
 		updatedAt: "1970-01-01T00:00:00.000Z",
-		seo: pageSeo(slug, title),
+		seo: pageSeo(slug, title, brandName),
 	};
 }
 
 export async function findPublicPage(
 	payload: Payload,
 	slug: string,
+	brandName: string,
 ): Promise<PublicPageRecord | null> {
 	const result = await payload.find({
 		collection: "pages",
@@ -90,6 +94,7 @@ export async function findPublicPage(
 		seo: pageSeo(
 			page.slug,
 			page.seo?.title || page.title,
+			brandName,
 			page.seo?.description,
 			page.seo?.noindex,
 		),
@@ -98,6 +103,7 @@ export async function findPublicPage(
 
 export async function findPublicPages(
 	payload: Payload,
+	brandName: string,
 ): Promise<readonly PublicPageRecord[]> {
 	const result = await payload.find({
 		collection: "pages",
@@ -132,6 +138,7 @@ export async function findPublicPages(
 		seo: pageSeo(
 			page.slug,
 			page.seo?.title || page.title,
+			brandName,
 			page.seo?.description,
 			page.seo?.noindex,
 		),

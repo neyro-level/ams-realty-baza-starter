@@ -214,22 +214,25 @@ if (mode === "fixture-client") {
 	process.exit(0);
 }
 
+const bootstrap =
+	siteConfig.projectKind === "client"
+		? validateCloneBootstrap(process.cwd())
+		: null;
 const errors = validateClientReadiness({
 	...clientReadinessConfig,
 	projectKind: siteConfig.projectKind,
-	brandName: siteConfig.brandName,
+	brandName: bootstrap?.nap.brandName,
 	runtimeOrigin: process.env.NEXT_PUBLIC_SERVER_URL,
 });
 if (siteConfig.projectKind === "client") {
-	const bootstrap = validateCloneBootstrap(process.cwd());
-	if (bootstrap.productionIndexing !== clientReadinessConfig.productionIndexing) {
+	assert.ok(bootstrap);
+	if (
+		bootstrap.productionIndexing !== clientReadinessConfig.productionIndexing
+	) {
 		errors.push("bootstrap-indexing-decision-drift");
 	}
 	if (bootstrap.domain !== clientReadinessConfig.domain) {
 		errors.push("bootstrap-domain-drift");
-	}
-	if (bootstrap.nap.brandName !== siteConfig.brandName) {
-		errors.push("bootstrap-brand-identity-drift");
 	}
 }
 assert.deepEqual(errors, [], `Client readiness failed: ${errors.join(", ")}`);

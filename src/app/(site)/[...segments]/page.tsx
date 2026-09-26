@@ -1,19 +1,26 @@
-import type { Metadata } from "next";
-import { notFound, permanentRedirect } from "next/navigation";
+import type { PageSEOContract } from "@ams/realtbase-contracts";
 import {
-	DeveloperView,
 	DevelopersListView,
+	DeveloperView,
 	DevelopmentDetailsView,
 	GeoHubView,
 	ListingView,
 	PropertyPageView,
 } from "@ams/realtbase-ui";
-import type { PageSEOContract } from "@ams/realtbase-contracts";
+import type { Metadata } from "next";
+import { notFound, permanentRedirect } from "next/navigation";
 import { toMetadata } from "@/core/seo/page-metadata";
 import { leadConsentContext } from "@/project/legal.config";
-import { resolveRuntimeRoute } from "@/project/routing/runtime-route";
-import { projectSeoMeta } from "@/project/seo/templates";
 import { pageHref } from "@/project/routing/catalog-search-params";
+import { resolveRuntimeRoute } from "@/project/routing/runtime-route";
+import {
+	buildBreadcrumbJsonLd,
+	buildDevelopmentJsonLd,
+	buildFaqJsonLd,
+	buildPropertyJsonLd,
+	JsonLdScript,
+} from "@/project/seo/structured-data";
+import { projectSeoMeta } from "@/project/seo/templates";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -80,10 +87,10 @@ export async function generateMetadata({
 		pathname(segments),
 		queryString(query),
 	);
-	if (result.decision.kind !== "page" || !result.data || !result.brandName) {
+	if (result.decision.kind !== "page" || !result.data || !result.nap) {
 		return {};
 	}
-	const seo = routeSeo(result.data, result.brandName);
+	const seo = routeSeo(result.data, result.nap.brandName);
 	return toMetadata({
 		...seo,
 		canonicalPath: result.decision.canonicalPath,
@@ -103,67 +110,106 @@ export default async function CanonicalRuntimePage({
 		permanentRedirect(result.decision.destinationPath);
 	}
 	if (result.decision.kind !== "page" || !result.data) notFound();
+	const canonicalPath = result.decision.canonicalPath;
+	const breadcrumb = (items: { label: string; href?: string }[]) => (
+		<JsonLdScript data={buildBreadcrumbJsonLd(items, canonicalPath)} />
+	);
 
 	switch (result.data.kind) {
 		case "geoHub":
-			return <GeoHubView hub={result.data.value} />;
+			return (
+				<>
+					{breadcrumb([...result.data.value.breadcrumbs.items])}
+					<GeoHubView hub={result.data.value} />
+				</>
+			);
 		case "listing": {
 			const listing = result.data;
 			const listingQuery = listing.query;
 			return (
-				<ListingView
-					listing={listing.value}
-					pageHref={
-						listingQuery
-							? (page) => pageHref(routePath, listingQuery, page)
-							: undefined
-					}
-				/>
+				<>
+					{breadcrumb([...listing.value.breadcrumbs.items])}
+					<ListingView
+						listing={listing.value}
+						pageHref={
+							listingQuery
+								? (page) => pageHref(routePath, listingQuery, page)
+								: undefined
+						}
+					/>
+				</>
 			);
 		}
 		case "developers":
-			return <DevelopersListView developers={result.data.value} />;
+			return (
+				<>
+					{breadcrumb([
+						{ label: "Главная", href: "/" },
+						{ label: "Застройщики" },
+					])}
+					<DevelopersListView developers={result.data.value} />
+				</>
+			);
 		case "developer": {
 			const developer = result.data.value;
 			return (
-				<DeveloperView
-					developer={developer}
-					developments={result.data.developments}
-					total={result.data.pagination.total}
-					page={result.data.pagination.page}
-					totalPages={result.data.pagination.totalPages}
-					pageHref={(page) =>
-						page <= 1 ? routePath : `${routePath}?page=${page}`
-					}
-				/>
+				<>
+					{breadcrumb([...developer.breadcrumbs.items])}
+					<DeveloperView
+						developer={developer}
+						developments={result.data.developments}
+						total={result.data.pagination.total}
+						page={result.data.pagination.page}
+						totalPages={result.data.pagination.totalPages}
+						pageHref={(page) =>
+							page <= 1 ? routePath : `${routePath}?page=${page}`
+						}
+					/>
+				</>
 			);
 		}
-		case "development":
+		case "development": {
+			const development = result.data.value;
+			const faq = buildFaqJsonLd(development.faq);
 			return (
-				<DevelopmentDetailsView
-					development={result.data.value}
-					leadContext={{
-						formKind: "general",
-						sourcePage: result.data.value.href,
-						...leadConsentContext(),
-					}}
-				/>
+				<>
+					{breadcrumb([...development.breadcrumbs.items])}
+					<JsonLdScript data={buildDevelopmentJsonLd(development)} />
+					{faq ? <JsonLdScript data={faq} /> : null}
+					<DevelopmentDetailsView
+						development={development}
+						content={{ faq: development.faq }}
+						leadContext={{
+							formKind: "general",
+							sourcePage: development.href,
+							...leadConsentContext(),
+						}}
+					/>
+				</>
 			);
+		}
 		case "property":
 			return (
-				<PropertyPageView
-					property={result.data.value}
-					leadContext={{
-						formKind: "property",
-						sourcePage: result.data.value.href,
-						property: {
-							id: result.data.value.id,
-							slug: result.data.value.slug,
-							title: result.data.value.title,
-						},
-						...leadConsentContext(),
-					}}
-				/>
+				<>
+					{breadcrumb([
+						{ label: "Главная", href: "/" },
+						{ label: result.data.value.title },
+					])}
+					<JsonLdScript data={buildPropertyJsonLd(result.data.value)} />
+					<PropertyPageView
+						property={result.data.value}
+						leadContext={{
+							formKind: "property",
+							sourcePage: result.data.value.href,
+							property: {
+								id: result.data.value.id,
+								slug: result.data.value.slug,
+								title: result.data.value.title,
+							},
+							...leadConsentContext(),
+						}}
+					/>
+				</>
 			);
 	}
 }

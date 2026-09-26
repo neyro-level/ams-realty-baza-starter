@@ -3,8 +3,8 @@ import { execFileSync } from "node:child_process";
 import {
 	cpSync,
 	existsSync,
-	mkdtempSync,
 	mkdirSync,
+	mkdtempSync,
 	readFileSync,
 	rmSync,
 	writeFileSync,
@@ -35,17 +35,20 @@ try {
 	}
 	writeFileSync(
 		join(fixture, "src/project/site.config.ts"),
-		'export const siteConfig = { brandName: "AMS Realty Baza Starter", defaultTitle: "AMS Realty Baza Starter", defaultDescription: "Starter", locale: "ru-RU", currency: "RUB", projectKind: "starter-demo" };\n',
+		'export const siteConfig = { locale: "ru-RU", currency: "RUB", projectKind: "starter-demo" };\n',
 	);
 	writeFileSync(
 		join(fixture, "src/project/client-readiness.config.ts"),
-		'export const clientReadinessConfig = { domain: null, productionIndexing: null };\n',
+		"export const clientReadinessConfig = { domain: null, productionIndexing: null };\n",
 	);
 	writeFileSync(
 		join(fixture, "src/project/project.config.ts"),
 		"export const projectConfig = {};\n",
 	);
-	writeFileSync(join(fixture, "src/project/site-profile.config.ts"), "starter\n");
+	writeFileSync(
+		join(fixture, "src/project/site-profile.config.ts"),
+		"starter\n",
+	);
 	for (const path of [
 		"docs/legacy/a.md",
 		"docs/proofs/a.md",
@@ -106,7 +109,11 @@ try {
 			address: "Клиентск",
 			workingHours: "09:00-18:00",
 		},
-		brandAssets: { status: "ready", logoPath: "/brand/logo.svg", tokenSource: "src/app/globals.css" },
+		brandAssets: {
+			status: "ready",
+			logoPath: "/brand/logo.svg",
+			tokenSource: "src/app/globals.css",
+		},
 		feed: { status: "ready", mode: "external-urls" },
 		developmentExcel: { status: "ready", template: "client-developments.xlsx" },
 	};
@@ -132,17 +139,39 @@ try {
 			},
 		);
 	assert.throws(() => run(false), /Command failed/);
-	assert.ok(existsSync(join(fixture, "docs/legacy")), "failed source gate must not mutate clone");
+	assert.ok(
+		existsSync(join(fixture, "docs/legacy")),
+		"failed source gate must not mutate clone",
+	);
 	assert.match(run(), /prepared Client Test with MIXED/);
 	assert.ok(!existsSync(join(fixture, "docs/legacy")));
-	assert.ok(!existsSync(join(fixture, "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md")));
-	assert.match(readFileSync(join(fixture, "src/project/site.config.ts"), "utf8"), /projectKind: "client"/);
-	assert.match(readFileSync(join(fixture, "src/project/site-profile.config.ts"), "utf8"), /client-city/);
-	assert.equal(JSON.parse(readFileSync(join(fixture, "package.json"), "utf8")).name, "client-test");
-	const provenance = readFileSync(join(fixture, "docs/CLONE_PROVENANCE.md"), "utf8");
+	assert.ok(
+		!existsSync(
+			join(fixture, "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md"),
+		),
+	);
+	assert.match(
+		readFileSync(join(fixture, "src/project/site.config.ts"), "utf8"),
+		/projectKind: "client"/,
+	);
+	assert.match(
+		readFileSync(join(fixture, "src/project/site-profile.config.ts"), "utf8"),
+		/client-city/,
+	);
+	assert.equal(
+		JSON.parse(readFileSync(join(fixture, "package.json"), "utf8")).name,
+		"client-test",
+	);
+	const provenance = readFileSync(
+		join(fixture, "docs/CLONE_PROVENANCE.md"),
+		"utf8",
+	);
 	assert.match(provenance, /starter-v2\.0\.0/);
 	assert.match(run(), /already prepared from the same preset; no changes/);
-	assert.equal(readFileSync(join(fixture, "docs/CLONE_PROVENANCE.md"), "utf8"), provenance);
+	assert.equal(
+		readFileSync(join(fixture, "docs/CLONE_PROVENANCE.md"), "utf8"),
+		provenance,
+	);
 	console.log("verify:clone-prepare: preset, cleanup and idempotence PASS");
 } finally {
 	rmSync(fixture, { recursive: true, force: true });

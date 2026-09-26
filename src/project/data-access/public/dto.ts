@@ -1,6 +1,7 @@
 import "server-only";
 
 import type {
+	CityDTO,
 	HomePageDTO,
 	MarketingPageDTO,
 	NapDTO,
@@ -12,15 +13,22 @@ import type {
 	SiteFooterDTO,
 	SiteHeaderDTO,
 } from "@ams/realtbase-contracts";
-import type { PublicCatalogProperty, PublicCatalogResult } from "./catalog";
-import type { PublicCatalogFacetsResult } from "./catalog";
 import { leadConsentContext } from "@/project/legal.config";
-import type { PublicPageRecord } from "./pages";
+import {
+	projectBreadcrumbs,
+	projectGeoSwitcherOptions,
+	projectMenuLinks,
+} from "@/project/navigation";
 import { siteConfig } from "@/project/site.config";
 import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
+import type {
+	PublicCatalogFacetsResult,
+	PublicCatalogProperty,
+	PublicCatalogResult,
+} from "./catalog";
+import type { PublicPageRecord } from "./pages";
 
-const brandName = siteConfig.brandName;
 const urlGrammar = createProjectUrlGrammar(siteProfile);
 
 const propertySurfaceByCategory = {
@@ -31,14 +39,6 @@ const propertySurfaceByCategory = {
 	room: "komnaty",
 	garage: "garazhi",
 } as const;
-const logo = {
-	kind: "managed" as const,
-	src: "/fixture/logo.svg",
-	alt: brandName,
-	width: 160,
-	height: 40,
-};
-
 function rub(priceMinor: number) {
 	return new Intl.NumberFormat(siteConfig.locale, {
 		style: "currency",
@@ -339,26 +339,20 @@ export function toPropertyFilterDTO(
 
 export function toShellDTO(
 	pages: readonly PublicPageRecord[],
-	nap?: NapDTO | null,
+	nap: NapDTO,
+	geoCities: readonly CityDTO[] = [],
 ) {
-	const starterNavigation = [
-		{ label: "Недвижимость", href: urlGrammar.buildUrl({ kind: "categoryRoot", category: "kvartiry" }) },
-		{ label: "Услуги", href: "/uslugi/" },
-		{ label: "Ипотека", href: "/ipoteka/" },
-		{ label: "О компании", href: "/o-kompanii/" },
-		{ label: "Контакты", href: "/kontakty/" },
-	];
-	const cmsNavigation = pages
-		.filter((page) => page.slug !== "home")
-		.slice(0, 6)
-		.map((page) => ({ label: page.title, href: `/${page.slug}/` }));
-	const links = cmsNavigation.length ? cmsNavigation : starterNavigation;
-	const shellBrandName = nap?.brandName ?? brandName;
-	const shellLogo = nap?.logo ?? logo;
-	const phone = nap?.phone ?? {
-		label: "+7 (000) 000-00-00",
-		href: "tel:+70000000000" as const,
+	const links = projectMenuLinks(pages);
+	const geoOptions = projectGeoSwitcherOptions(geoCities);
+	const shellBrandName = nap.brandName;
+	const shellLogo = nap.logo ?? {
+		kind: "managed" as const,
+		src: "/fixture/logo.svg",
+		alt: nap.brandName,
+		width: 160,
+		height: 40,
 	};
+	const phone = nap.phone;
 
 	const header: SiteHeaderDTO = {
 		brandName: shellBrandName,
@@ -366,7 +360,9 @@ export function toShellDTO(
 		logo: shellLogo,
 		navigation: links,
 		phone,
-		primaryAction: { label: "Подобрать объект", href: "/kvartiry/" },
+		primaryAction: links[0]
+			? { label: "Подобрать объект", href: links[0].href }
+			: undefined,
 	};
 
 	const footer: SiteFooterDTO = {
@@ -375,9 +371,9 @@ export function toShellDTO(
 		groups: [{ title: "Разделы", links }],
 		contacts: compact([
 			phone,
-			nap?.email,
-			nap?.address ? { label: nap.address, href: "/kontakty/" } : null,
-			...(nap?.socialLinks ?? []),
+			nap.email,
+			nap.address ? { label: nap.address, href: "/kontakty/" } : null,
+			...nap.socialLinks,
 		]),
 		legalLinks: [
 			{
@@ -392,10 +388,21 @@ export function toShellDTO(
 		copyright: `© ${shellBrandName}`,
 	};
 
-	return { header, footer } as const;
+	return {
+		header,
+		footer,
+		geoSwitcher: {
+			mode: siteProfile.geoMode,
+			activeGeo: siteProfile.primaryGeo,
+			options: geoOptions,
+		},
+	} as const;
 }
 
-export function toHomePageDTO(page: PublicPageRecord | null): HomePageDTO {
+export function toHomePageDTO(
+	page: PublicPageRecord | null,
+	brandName: string,
+): HomePageDTO {
 	return {
 		slug: "home",
 		eyebrow: "Недвижимость без лишней неопределённости",
@@ -410,7 +417,7 @@ export function toHomePageDTO(page: PublicPageRecord | null): HomePageDTO {
 			indexing: "noindex",
 			following: "follow",
 		},
-		breadcrumbs: { items: [{ label: "Главная" }] },
+		breadcrumbs: projectBreadcrumbs([], "Главная"),
 		sections: [
 			{
 				title: "Понятный процесс",
@@ -460,9 +467,10 @@ export function toMarketingPageDTO(page: PublicPageRecord): MarketingPageDTO {
 		title: page.title,
 		lead: page.seo.description,
 		seo: page.seo,
-		breadcrumbs: {
-			items: [{ label: "Главная", href: "/" }, { label: page.title }],
-		},
+		breadcrumbs: projectBreadcrumbs(
+			[{ label: "Главная", pageKey: { kind: "home" } }],
+			page.title,
+		),
 		sections: [],
 		leadContext: {
 			formKind: "general",

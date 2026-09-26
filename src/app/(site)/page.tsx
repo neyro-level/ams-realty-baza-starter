@@ -25,8 +25,8 @@ export default async function HomePage() {
 	const home = await getPublicHomePage();
 	return (
 		<>
-			<JsonLdScript data={buildOrganizationJsonLd()} />
-			<JsonLdScript data={buildWebsiteJsonLd(home.page)} />
+			<JsonLdScript data={buildOrganizationJsonLd(home.nap)} />
+			<JsonLdScript data={buildWebsiteJsonLd(home.page, home.nap)} />
 			<HomeHeroSection page={home.page} featured={home.featured} />
 			<HomeServicesSection page={home.page} />
 			<HomeFeaturedSection featured={home.featured} />
