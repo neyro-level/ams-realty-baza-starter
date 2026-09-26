@@ -30,7 +30,7 @@ const leadContext: LeadFormContext = {
 	formKind: "general",
 	sourcePage: fixtureDevelopment.href,
 	consentVersion: "fixture-consent-v1",
-	consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
+	consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh/",
 	consentRequired: true,
 };
 

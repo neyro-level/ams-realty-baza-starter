@@ -6,7 +6,7 @@ export type LegalConsentConfig = {
 
 export const legalConsentConfig = {
 	currentConsentVersion: "pd-2026-01",
-	consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh",
+	consentHref: "/soglasie-na-obrabotku-personalnyh-dannyh/",
 	consentRequired: true,
 } as const satisfies LegalConsentConfig;
 

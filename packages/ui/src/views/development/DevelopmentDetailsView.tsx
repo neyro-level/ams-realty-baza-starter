@@ -11,7 +11,15 @@ import {
 } from "../../components/ui/card";
 import { Container, Section, SectionHeader } from "../../components/ui/layout";
 import { StarterPropertyMediaGallery } from "../property/StarterPropertyMediaGallery";
+import {
+	analyticsAttributes,
+	type PublicAnalyticsDimensions,
+} from "../shared/analytics-attributes";
 import { BreadcrumbsView } from "../shared/BreadcrumbsView";
+import {
+	developmentPricesForPresentation,
+	developmentSalesEnded,
+} from "./development-presentation";
 import { PriceRequestFormView } from "./PriceRequestFormView";
 
 export type DevelopmentPresentationContent = {
@@ -24,17 +32,67 @@ export function DevelopmentDetailsView({
 	development,
 	leadContext,
 	content = {},
+	analytics,
+	priceReferenceDate,
 }: {
 	development: DevelopmentDetailsDTO;
 	leadContext: LeadFormContext;
 	content?: DevelopmentPresentationContent;
+	analytics?: PublicAnalyticsDimensions;
+	priceReferenceDate?: string;
 }) {
-	const prices = development.priceByRooms;
+	const salesEnded = developmentSalesEnded(development);
+	const prices = developmentPricesForPresentation(
+		development,
+		priceReferenceDate ?? Date.now(),
+	);
 	return (
-		<>
+		<div {...analyticsAttributes("development_view", analytics)}>
 			<Section space="hero">
 				<Container>
 					<BreadcrumbsView breadcrumbs={development.breadcrumbs} />
+					<nav aria-label="Разделы проекта" className="mt-6">
+						<ul className="flex flex-wrap gap-3">
+							<li>
+								<a
+									className="font-medium underline underline-offset-4"
+									href="#development-prices"
+								>
+									Цены
+								</a>
+							</li>
+							{content.layouts?.length ? (
+								<li>
+									<a
+										className="font-medium underline underline-offset-4"
+										href="#development-layouts"
+									>
+										Планировки
+									</a>
+								</li>
+							) : null}
+							{content.progress ? (
+								<li>
+									<a
+										className="font-medium underline underline-offset-4"
+										href="#development-progress"
+									>
+										Ход строительства
+									</a>
+								</li>
+							) : null}
+							{content.faq?.length ? (
+								<li>
+									<a
+										className="font-medium underline underline-offset-4"
+										href="#development-faq"
+									>
+										Вопросы и ответы
+									</a>
+								</li>
+							) : null}
+						</ul>
+					</nav>
 					<div className="mt-6 grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">
 						<div>
 							<div className="relative aspect-[16/9] overflow-hidden rounded-[var(--radius-lg)] bg-surface-subtle">
@@ -49,13 +107,21 @@ export function DevelopmentDetailsView({
 							<p className="mt-3 text-body-large text-content-default">
 								{development.address ?? development.cityName}
 							</p>
+							{salesEnded ? (
+								<p
+									className="mt-4 rounded-md border border-border bg-surface-subtle p-4 font-semibold"
+									role="status"
+								>
+									Продажи в этом проекте завершены.
+								</p>
+							) : null}
 							{development.description ? (
 								<p className="mt-6 text-body-large text-content-default">
 									{development.description}
 								</p>
 							) : null}
 						</div>
-						<aside>
+						<aside id="development-prices" aria-label="Цены и наличие">
 							<Card elevation="raised">
 								<CardHeader>
 									<h2 className="text-lead font-semibold leading-tight-copy">
@@ -118,7 +184,10 @@ export function DevelopmentDetailsView({
 				</Container>
 			</Section>
 			{content.layouts?.length ? (
-				<Section aria-labelledby="development-layouts-title">
+				<Section
+					id="development-layouts"
+					aria-labelledby="development-layouts-title"
+				>
 					<Container>
 						<SectionHeader
 							titleId="development-layouts-title"
@@ -144,6 +213,7 @@ export function DevelopmentDetailsView({
 			) : null}
 			{content.progress ? (
 				<Section
+					id="development-progress"
 					className="bg-surface-subtle"
 					aria-labelledby="development-progress-title"
 				>
@@ -163,7 +233,7 @@ export function DevelopmentDetailsView({
 				</Section>
 			) : null}
 			{content.faq?.length ? (
-				<Section aria-labelledby="development-faq-title">
+				<Section id="development-faq" aria-labelledby="development-faq-title">
 					<Container size="narrow">
 						<SectionHeader
 							titleId="development-faq-title"
@@ -187,9 +257,11 @@ export function DevelopmentDetailsView({
 					<PriceRequestFormView
 						leadContext={leadContext}
 						developmentSlug={development.slug}
+						geo={analytics?.geo}
+						analytics={analytics}
 					/>
 				</Container>
 			</Section>
-		</>
+		</div>
 	);
 }

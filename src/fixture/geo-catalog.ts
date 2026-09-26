@@ -195,6 +195,8 @@ export const fixtureDevelopment = {
 			candidate(
 				{ kind: "categoryRoot", category: "novostroyki" },
 				"Новостройки",
+				undefined,
+				"noindex",
 			),
 		],
 		currentLabel: canonicalDevelopment.name,
@@ -238,6 +240,7 @@ export const fixtureGeoHub = {
 			},
 			fixtureDistrict.name,
 			3,
+			"noindex",
 		),
 	]),
 	developerLink: link(
@@ -280,6 +283,7 @@ export const fixtureListing = {
 			},
 			"Северный микрорайон",
 			3,
+			"noindex",
 		),
 	]),
 	nearby: links([

@@ -76,9 +76,24 @@ Numeric colors, type sizes, weights, radii, shadows and durations live in `globa
 
 ## Representative pages and viewports
 
-Pages: `/`, `/nedvizhimost`, `/obekty/[slug]`, `/uslugi`.  
-Viewports: `390×844`, `768×1024`, `1280×900`, `1440×1000`.  
-Proof artifacts: `docs/proofs/epic-9/` (manifest + provenance, no bulk PNG in clone).
+Pages: `/`, `/primorsk/kvartiry/`, `/novostroyki/severnyy-bereg/`, `/uslugi/`.
+Viewports: `390×844`, `768×1024`, `1280×900`, `1440×1000`.
+Proof artifacts: `docs/evidence/plan9/S14_UI_CORE_V5_EVIDENCE.md` and the
+machine-readable browser matrix beside it; bulk PNG stays outside the clone.
+
+### Canonical UI Core v5 acceptance matrix
+
+| Surface | Required states |
+|---|---|
+| Listing | default, active filters with reset, empty result, pagination previous/current/next |
+| Development | fresh and stale price, sales finished, optional layouts/progress/FAQ anchors |
+| Lead | default, invalid, submitting, server error, success; typed non-PII analytics dimensions |
+| Responsive | all representative pages at the four canonical viewports; one `h1`, no horizontal overflow |
+
+The canonical browser proof also checks that visible internal links do not
+resolve through redirects or 404 responses. Optional sections are linked only
+when rendered. Sales-finished projects expose an explicit status and never
+present stale price rows as current offers.
 
 ## Visual baseline provenance
 

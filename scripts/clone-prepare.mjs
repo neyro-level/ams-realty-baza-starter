@@ -5,6 +5,9 @@ import {
 	buildCloneBootstrap,
 	clonePresetHash,
 	readClonePreset,
+	renderClientReadinessConfig,
+	renderProjectLiterals,
+	renderSeoTemplateInputs,
 	renderSiteProfileConfig,
 	reservedRootsForSiteProfile,
 	siteProfileConfigForPreset,
@@ -43,9 +46,9 @@ const preset = readClonePreset(
 );
 const presetSha = clonePresetHash(preset);
 const sourceTag = String(args.get("--source-tag") || "");
-if (sourceTag !== "starter-v2.0.0") {
+if (sourceTag !== "starter-v2.1.0") {
 	throw new Error(
-		"clone:prepare requires the approved Plan 8 source tag starter-v2.0.0.",
+		"clone:prepare requires the approved Plan 9 source tag starter-v2.1.0.",
 	);
 }
 
@@ -75,7 +78,7 @@ if (!proofMode) {
 		sourceHead !== taggedHead
 	) {
 		throw new Error(
-			"clone:prepare must run from the exact immutable starter-v2.0.0 tag.",
+			"clone:prepare must run from the exact immutable starter-v2.1.0 tag.",
 		);
 	}
 	if (git("status", "--porcelain")) {
@@ -104,6 +107,8 @@ const removalGroups = [
 	"docs/AMS_MASTER_PLAN_6_STARTER_FINAL_FREEZE.md",
 	"docs/AMS_MASTER_PLAN_7_STARTER_FINAL_AUDIT_CORRECTIONS.md",
 	"docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+	"docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md",
+	"docs/evidence/plan9",
 	"deploy/compose/start-baza.compose.yml",
 	"deploy/nginx/start-baza.ams24.ru.conf",
 	"scripts/capture-atlas-visual-proof.mjs",
@@ -139,6 +144,7 @@ packageJson.name = preset.packageName;
 delete packageJson.scripts?.["visual:atlas-css-parity"];
 delete packageJson.scripts?.["verify:starter:clone-readiness"];
 delete packageJson.scripts?.["verify:client-clone-proof"];
+delete packageJson.scripts?.["verify:clone-presets"];
 delete packageJson.scripts?.["verify:clone-readiness"];
 delete packageJson.scripts?.["verify:clone-prepare"];
 if (packageJson.scripts?.["verify:daily"]) {
@@ -171,6 +177,14 @@ writeFileSync(
 	join(root, "src", "project", "site-profile.config.ts"),
 	renderSiteProfileConfig(preset),
 );
+writeFileSync(
+	join(root, "src", "project", "project-literals.json"),
+	renderProjectLiterals(preset),
+);
+writeFileSync(
+	join(root, "src", "project", "seo", "template-inputs.ts"),
+	renderSeoTemplateInputs(preset),
+);
 
 const readinessPath = join(
 	root,
@@ -178,16 +192,7 @@ const readinessPath = join(
 	"project",
 	"client-readiness.config.ts",
 );
-let readiness = readFileSync(readinessPath, "utf8");
-readiness = readiness.replace(
-	/domain:\s*(?:null|["'][^"']+["']),/,
-	`domain: ${JSON.stringify(preset.domain)},`,
-);
-readiness = readiness.replace(
-	/productionIndexing:\s*(?:null|["'](?:public|noindex)["']),/,
-	`productionIndexing: ${JSON.stringify(preset.productionIndexing)},`,
-);
-writeFileSync(readinessPath, readiness);
+writeFileSync(readinessPath, renderClientReadinessConfig(preset));
 
 const bootstrap = buildCloneBootstrap(
 	preset,

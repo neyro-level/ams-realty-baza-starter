@@ -1,9 +1,8 @@
 "use client"; // interactive form state, validation, fetch, focus management
 
 import type { LeadFormContext, LeadFormKind } from "@ams/realtbase-contracts";
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { Button } from "../../components/ui/button";
-import { Checkbox } from "../../components/ui/checkbox";
 import {
 	Card,
 	CardContent,
@@ -12,6 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../../components/ui/card";
+import { Checkbox } from "../../components/ui/checkbox";
 import {
 	Field,
 	FieldDescription,
@@ -21,6 +21,10 @@ import {
 } from "../../components/ui/field";
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
+import {
+	analyticsAttributes,
+	type PublicAnalyticsDimensions,
+} from "../shared/analytics-attributes";
 
 type FormStatus =
 	| "default"
@@ -56,6 +60,7 @@ export type LeadFormViewProps = {
 		development?: string;
 		developer?: string;
 	};
+	analytics?: PublicAnalyticsDimensions;
 };
 
 function toIntakeFormKind(
@@ -74,6 +79,7 @@ export function LeadFormView({
 	submitLabel = "Отправить заявку",
 	intakeKind,
 	entityContext,
+	analytics,
 }: LeadFormViewProps) {
 	const ids = {
 		name: useId(),
@@ -182,6 +188,7 @@ export function LeadFormView({
 			aria-describedby={formError ? ids.formError : undefined}
 			noValidate
 			onSubmit={onSubmit}
+			{...analyticsAttributes("development_price_request_submit", analytics)}
 		>
 			<Card elevation="raised">
 				<CardHeader>

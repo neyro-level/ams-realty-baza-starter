@@ -1,0 +1,71 @@
+{
+  "baseUrl": "http://127.0.0.1:3100",
+  "runtime": "fixture fallback with DATABASE_URI and PAYLOAD_SECRET unset",
+  "viewports": {
+    "mobile": "390x844",
+    "tablet": "768x1024",
+    "desktop": "1280x900",
+    "wide": "1440x1000"
+  },
+  "routes": [
+    {
+      "url": "/",
+      "screenshots": {
+        "mobile": "011089a8dbedb06c21e841800e85e76cb5a8ddff57c87c01f7736a64837fcf77",
+        "tablet": "b1b32ef5812eab38cdc74bd2cda7e8caec2b78139c03cf58c02849b181bcf644",
+        "desktop": "9d679b6f5f3dbf5a6886874dade5fd63d808ed39b4838d84536d1264da1b5cd3",
+        "wide": "fb4e92a95b536cf7720e59c51ba75dcffe441beb734a92c28d7709f80b53bf47"
+      }
+    },
+    {
+      "url": "/primorsk/kvartiry/",
+      "screenshots": {
+        "mobile": "507cf6c865d68abbb79367f0eeef33939a609aaf4c448266a1ccd44f8551d7a9",
+        "tablet": "4f92616f65279befbce78132f404000d545dbe11504465ea3057274ed724f68e",
+        "desktop": "daadba4003f44b23288cc304b8ba5f52b1e6d6381c153de640c67114071e132a",
+        "wide": "a41830e1efb3f20af12d67e4b7816bc2903216afc5e9c29ee1888d22f07cd408"
+      }
+    },
+    {
+      "url": "/primorsk/kvartiry/?rooms=2",
+      "screenshots": {
+        "mobile": "f3754e836e187e35a4afaa062a8baebbf5b9cbffaf9ad64a95be38bd349dc19b",
+        "tablet": "9fae90ecca7a9d06aebbb36ff36777c00617e5cda5fcdb9ca9abdbff3add989f",
+        "desktop": "a4afb2bdbc61760ddbd2b246a74aacfbfa59b6f5b852a325901651726015f01c",
+        "wide": "4925de13432333c7cbffef55a2d5dc94171753e3a8c355f2aafdeda8f539f0c6"
+      }
+    },
+    {
+      "url": "/novostroyki/zhk-severnyy-bereg/",
+      "screenshots": {
+        "mobile": "999a60d6cbc84b1a2c918486dff0120cf52420acb08731fb302e7fd29ba5831b",
+        "tablet": "6e81630cc25b5cad3a07431107b4cc79c27cb851f256c2722cb3fce5e26adf7f",
+        "desktop": "862560975875a2234b082dc97a6048533ba2019cf74b2cbfa22d116c229187fd",
+        "wide": "d465fe50541f0c520ce7b641f7277162e30dd6a53c284a07681cbd6308420e11"
+      }
+    },
+    {
+      "url": "/uslugi/",
+      "screenshots": {
+        "mobile": "d9791b2b1dd5f839890572a20f0829bb85e57eed8a7606d74022dcddcb885426",
+        "tablet": "38e398440b0b0d17d20ad08e0991b3b61706872e65e23f5cc0c16d91bb13ed7e",
+        "desktop": "fa00c4f656008fb0352364200cc570d6e7edd6e106ac7233635a3372f97d98a8",
+        "wide": "02dfdacc7ba7ec2c4740ae084f50d5e6d75ef0aa3c8f151c3d4bf1af7eeaf713"
+      }
+    }
+  ],
+  "assertions": {
+    "scenarios": 5,
+    "viewportRuns": 20,
+    "oneH1PerRun": true,
+    "horizontalOverflowPx": 0,
+    "unnamedAccessibilityControls": 0,
+    "visibleInternalLinks": 13,
+    "visibleInternalLinksDirect200": 13,
+    "filteredListingState": true,
+    "listingAnalyticsEvent": true,
+    "developmentAnalyticsEvent": true,
+    "developmentPriceAnchor": true
+  },
+  "result": "PASS"
+}

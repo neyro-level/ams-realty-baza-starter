@@ -29,8 +29,11 @@ assert.match(
 const development = read(
 	"packages/ui/src/views/development/DevelopmentDetailsView.tsx",
 );
+const developmentPresentation = read(
+	"packages/ui/src/views/development/development-presentation.ts",
+);
 assert.match(
-	development,
+	developmentPresentation,
 	/45 \* 86_400_000/,
 	"stale prices must be hidden after 45 days",
 );
@@ -48,7 +51,8 @@ assert.match(property, /property\.category/);
 assert.match(property, /Уточнить юридическую проверку/);
 
 const routes = read("docs/02_PRODUCT_STRUCTURE.md");
-assert.match(routes, /target, not live/);
+assert.match(routes, /CANONICAL GEO-CATALOG RUNTIME/);
+assert.match(routes, /live via resolver/);
 assert.doesNotMatch(
 	read("src/fixture/p8-17-ui.tsx"),
 	/from ["']@\/app/,

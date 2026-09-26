@@ -13,6 +13,7 @@ import type { SiteProfile } from "../core/profile/index.ts";
 import type { PageKey, UrlGrammar } from "../core/routing/index.ts";
 import type { ContentGateDecision } from "../core/seo/content-gate.ts";
 import type { PublicPageRecord } from "./data-access/public/pages.ts";
+import { projectSeoRegistrySeed } from "./seo/registry-seed.ts";
 import { siteProfile } from "./site-profile.ts";
 import { createProjectUrlGrammar } from "./url-grammar.ts";
 
@@ -138,10 +139,17 @@ export function projectMenuLinks(
 			page.title,
 		]),
 	);
-	const categories = Object.keys(profile.categoryStatus).map((category) => ({
-		pageKey: { kind: "categoryRoot", category } as PageKeyDTO,
-		label: categoryLabels[category as keyof typeof categoryLabels],
-	}));
+	const registeredCategoryRoots = new Set<string>(
+		projectSeoRegistrySeed.flatMap((row) =>
+			row.pageKey.kind === "categoryRoot" ? [row.pageKey.category] : [],
+		),
+	);
+	const categories = Object.keys(profile.categoryStatus)
+		.filter((category) => registeredCategoryRoots.has(category))
+		.map((category) => ({
+			pageKey: { kind: "categoryRoot", category } as PageKeyDTO,
+			label: categoryLabels[category as keyof typeof categoryLabels],
+		}));
 	const staticPages = profile.staticRoutes
 		.filter((route) => route.path !== "/" && route.indexable)
 		.map((route) => {

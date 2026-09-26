@@ -27,6 +27,18 @@ import { createProjectUrlGrammar } from "@/project/url-grammar";
 export const runtime = "nodejs";
 const grammar = createProjectUrlGrammar(siteProfile);
 
+const analyticsSurfaceByCategory = {
+	kvartiry: "apartments",
+	doma: "houses",
+	uchastki: "plots",
+	"kommercheskaya-nedvizhimost": "commercial",
+	komnaty: "apartments",
+	garazhi: "garages",
+	arenda: "apartments",
+	novostroyki: "new-buildings",
+	"kottedzhnye-poselki": "houses",
+} as const;
+
 function pathname(segments: readonly string[]) {
 	return `/${segments.join("/")}/`;
 }
@@ -128,11 +140,31 @@ export default async function CanonicalRuntimePage({
 		case "listing": {
 			const listing = result.data;
 			const listingQuery = listing.query;
+			if (!("category" in listing.value.pageKey)) notFound();
+			const listingCategory = listing.value.pageKey.category;
 			return (
 				<>
 					{breadcrumb([...listing.value.breadcrumbs.items])}
 					<ListingView
 						listing={listing.value}
+						filterState={
+							listingQuery?.hasFilters
+								? {
+										hasFilters: true,
+										clearHref: routePath,
+										summary: "Каталог отфильтрован по выбранным параметрам.",
+									}
+								: undefined
+						}
+						analytics={{
+							page: routePath,
+							geo:
+								"geo" in listing.value.pageKey
+									? listing.value.pageKey.geo
+									: siteProfile.primaryGeo,
+							surface: analyticsSurfaceByCategory[listingCategory],
+							market: listingCategory === "arenda" ? "rent" : "sale",
+						}}
 						pageHref={
 							listingQuery
 								? (page) => pageHref(routePath, listingQuery, page)
@@ -181,6 +213,13 @@ export default async function CanonicalRuntimePage({
 					<DevelopmentDetailsView
 						development={development}
 						content={{ faq: development.faq }}
+						analytics={{
+							page: development.href,
+							geo: siteProfile.primaryGeo,
+							surface: "new-buildings",
+							market: "sale",
+							entityKey: development.slug,
+						}}
 						leadContext={{
 							formKind: "general",
 							sourcePage: development.href,

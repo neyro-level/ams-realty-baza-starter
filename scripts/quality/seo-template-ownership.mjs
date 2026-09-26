@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const core = readFileSync("src/core/seo/registry.ts", "utf8");
-const project = readFileSync("src/project/seo/templates.ts", "utf8");
+const project = [
+	"src/project/seo/templates.ts",
+	"src/project/seo/template-inputs.ts",
+]
+	.map((path) => readFileSync(path, "utf8"))
+	.join("\n");
 const catalog = readFileSync(
 	"src/project/data-access/public/geo-catalog.ts",
 	"utf8",

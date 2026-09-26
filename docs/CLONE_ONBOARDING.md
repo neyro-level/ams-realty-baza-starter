@@ -20,16 +20,19 @@ domain: start-baza.ams24.ru, noindex
 
 ## B. Client development
 
-Plan №9 v4 утверждён, но tag `starter-v2.1.0` ещё не создан. Его создаёт
+Plan №9 v6 утверждён, но tag `starter-v2.1.0` ещё не создан. Его создаёт
 владелец отдельной release-командой только после исполнения Plan №9 и проверки
 canonical `main`. До появления этого immutable tag клиентский clone не начинать.
 
 1. Создать отдельный client repository из exact tag `starter-v2.1.0`.
-2. Скопировать `docs/CLONE_PRESET.example.json` во временный утверждаемый preset
-   вне Git и заполнить `projectId`, package/brand/domain, один из режимов
+2. Скопировать `docs/CLONE_PRESET.example.json` и
+   `docs/CLONE_SEO_TEMPLATES.example.json` во временный утверждаемый каталог
+   вне Git. Заполнить `projectId`, package/brand/domain, один из режимов
    `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`, `SINGLE_GEO | MULTI_GEO`,
-   морфологию каждого geo, NAP-контакты, indexing decision, logo/tokens, feed и
-   development Excel readiness.
+   явные `published`/`hubStatus`, морфологию каждого geo, NAP-контакты,
+   indexing decision, logo/tokens, feed, development Excel, client readiness и
+   SEO templates. Вместо `seoTemplateFile` допустим эквивалентный встроенный
+   объект `seoTemplates`. Schema v1 отклоняется с подсказкой миграции.
 3. В clean checkout выполнить:
 
    ```bash
@@ -39,12 +42,13 @@ canonical `main`. До появления этого immutable tag клиент�
 
    Команда fail-closed проверяет, что checkout чистый и `HEAD` совпадает с
    immutable tag. Затем она генерирует project SiteProfile, client identity и
-   `docs/CLIENT_BOOTSTRAP.json`, очищает demo fixture runtime и starter-only
+   `project-literals.json`, SEO template inputs и `docs/CLIENT_BOOTSTRAP.json`,
+   очищает demo fixture runtime и starter-only
    evidence, но не меняет `src/core/**`, `packages/**`, migrations или guards.
    Повтор с тем же preset — no-op; другой preset требует новый чистый clone.
-4. Проверить и закоммитить generated client bootstrap. Затем заполнить
-   `src/project/client-readiness.config.ts`: retention, legal approval,
-   allowlists, deployment/database/media topology и lead channels.
+4. Проверить и закоммитить generated client bootstrap. Значения
+   `src/project/client-readiness.config.ts` генерируются из утверждённого preset;
+   любые изменения требуют нового clean clone с обновлённым preset.
 5. Создать geo/district data по утверждённой морфологии, заполнить SEO registry,
    установить brand tokens/logo, подключить feed и development Excel по
    `docs/CLIENT_BOOTSTRAP.json`. В client mode отсутствие Payload data означает

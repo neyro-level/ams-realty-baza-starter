@@ -23,6 +23,7 @@ const presetPath = join(fixture, "approved-preset.json");
 try {
 	for (const path of [
 		"src/project",
+		"src/project/seo",
 		"docs/legacy",
 		"docs/proofs",
 		"docs/orchestration",
@@ -80,8 +81,11 @@ try {
 	for (const script of ["clone-prepare.mjs", "clone-preset.mjs"]) {
 		cpSync(join(root, "scripts", script), join(fixture, "scripts", script));
 	}
+	const seoTemplates = JSON.parse(
+		readFileSync(join(root, "docs/CLONE_SEO_TEMPLATES.example.json"), "utf8"),
+	);
 	const preset = {
-		schemaVersion: 1,
+		schemaVersion: 2,
 		projectId: "Client Test",
 		packageName: "client-test",
 		brandName: "Client Test",
@@ -95,6 +99,8 @@ try {
 			{
 				slug: "client-city",
 				title: "Клиентск",
+				published: true,
+				hubStatus: "ACTIVE",
 				morphologyApproved: true,
 				morphology: {
 					nominative: "Клиентск",
@@ -116,7 +122,36 @@ try {
 		},
 		feed: { status: "ready", mode: "external-urls" },
 		developmentExcel: { status: "ready", template: "client-developments.xlsx" },
+		clientReadiness: {
+			deploymentTarget: "approved-runtime",
+			database: "approved-managed-postgresql",
+			mediaStorage: "approved-object-storage",
+			feedImageSource: "external-urls",
+			jobsActiveRuntimeCount: 1,
+			leadRetentionDays: 180,
+			archiveRetentionDays: 90,
+			legalContent: "approved",
+			requiredHostAllowlists: {
+				outbound: ["api.client-test.local"],
+				externalImages: ["images.client-test.local"],
+				leadOutbound: ["crm.client-test.local"],
+			},
+			nginx: true,
+			automaticBackup: true,
+			externalMonitoring: true,
+		},
+		seoTemplates,
 	};
+	writeFileSync(presetPath, JSON.stringify({ schemaVersion: 1 }));
+	assert.throws(
+		() => readClonePreset(presetPath),
+		/schemaVersion 1 is obsolete.*Migrate to schemaVersion 2/,
+	);
+	writeFileSync(
+		presetPath,
+		JSON.stringify({ ...preset, apiToken: "forbidden" }),
+	);
+	assert.throws(() => readClonePreset(presetPath), /must not contain secrets/);
 	writeFileSync(presetPath, JSON.stringify(preset));
 	const run = (proofMode = true) =>
 		execFileSync(
@@ -125,7 +160,7 @@ try {
 				join(fixture, "scripts/clone-prepare.mjs"),
 				`--root=${fixture}`,
 				`--preset-file=${presetPath}`,
-				"--source-tag=starter-v2.0.0",
+				"--source-tag=starter-v2.1.0",
 				"--source-sha=0123456789012345678901234567890123456789",
 				"--date=2026-09-25T00:00:00.000Z",
 			],
@@ -158,15 +193,29 @@ try {
 		readFileSync(join(fixture, "src/project/site-profile.config.ts"), "utf8"),
 		/client-city/,
 	);
+	assert.match(
+		readFileSync(join(fixture, "src/project/project-literals.json"), "utf8"),
+		/client-test\.local/,
+	);
+	assert.match(
+		readFileSync(join(fixture, "src/project/seo/template-inputs.ts"), "utf8"),
+		/projectSeoTemplatesInput/,
+	);
 	assert.equal(
 		JSON.parse(readFileSync(join(fixture, "package.json"), "utf8")).name,
 		"client-test",
+	);
+	assert.equal(
+		JSON.parse(readFileSync(join(fixture, "package.json"), "utf8"))
+			.dependencies?.["@payloadcms/storage-s3"],
+		undefined,
+		"clone:prepare must not activate S3 storage",
 	);
 	const provenance = readFileSync(
 		join(fixture, "docs/CLONE_PROVENANCE.md"),
 		"utf8",
 	);
-	assert.match(provenance, /starter-v2\.0\.0/);
+	assert.match(provenance, /starter-v2\.1\.0/);
 	assert.match(run(), /already prepared from the same preset; no changes/);
 	assert.equal(
 		readFileSync(join(fixture, "docs/CLONE_PROVENANCE.md"), "utf8"),

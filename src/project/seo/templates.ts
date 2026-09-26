@@ -1,13 +1,18 @@
 import type { SeoMetaDTO } from "@ams/realtbase-contracts";
 import {
+	type ApprovedMorphology,
 	formatRussianPlural,
 	isApprovedMorphology,
 	morphologyPhrase,
-	renderSeoDefinition,
-	type ApprovedMorphology,
 	type RenderedSeoTemplate,
+	renderSeoDefinition,
 	type SeoTemplateDefinition,
 } from "../../core/seo/registry.ts";
+import {
+	projectSeoCategoryLabelsInput,
+	projectSeoFacetLabelsInput,
+	projectSeoTemplatesInput,
+} from "./template-inputs.ts";
 
 export const projectSeoTemplateKeys = [
 	"home",
@@ -39,23 +44,11 @@ export type ProjectSeoTemplateContext = {
 	freshPrice?: { label: string; fresh: boolean };
 };
 
-const projectSeoFacetLabels: Readonly<Record<string, string>> = {
-	vtorichka: "Вторичные",
-	dvukhkomnatnye: "Двухкомнатные",
-	odnokomnatnye: "Однокомнатные",
-};
+const projectSeoFacetLabels: Readonly<Record<string, string>> =
+	projectSeoFacetLabelsInput;
 
-const projectSeoCategoryLabels: Readonly<Record<string, string>> = {
-	kvartiry: "Квартиры",
-	doma: "Дома",
-	uchastki: "Участки",
-	"kommercheskaya-nedvizhimost": "Коммерческая недвижимость",
-	komnaty: "Комнаты",
-	garazhi: "Гаражи",
-	arenda: "Аренда",
-	novostroyki: "Новостройки",
-	"kottedzhnye-poselki": "Коттеджные посёлки",
-};
+const projectSeoCategoryLabels: Readonly<Record<string, string>> =
+	projectSeoCategoryLabelsInput;
 
 export function projectSeoCategoryLabel(slug: string): string {
 	const label = projectSeoCategoryLabels[slug];
@@ -70,68 +63,10 @@ export function projectSeoFacetLabel(slug: string): string {
 	return label;
 }
 
-const templates = {
-	home: {
-		title: "Недвижимость {geoGenitive} — {brand}",
-		h1: "Недвижимость {geoGenitive}",
-		description: "Подбор недвижимости[ {cityPhrase}][ — {inventory}.]",
-	},
-	geoHub: {
-		title: "Недвижимость {geoGenitive} — {brand}",
-		h1: "Недвижимость {geoGenitive}",
-		description: "Квартиры, дома и новостройки[ {cityPhrase}][ — {inventory}.]",
-	},
-	categoryRoot: {
-		title: "{category} — {brand}",
-		h1: "{category}",
-		description: "{category} — актуальные предложения[. {inventory}.]",
-	},
-	categoryGeo: {
-		title: "{category} {cityPhrase} — {brand}",
-		h1: "{category} {cityPhrase}",
-		description:
-			"{category} {cityPhrase} — актуальные предложения[. {inventory}.]",
-	},
-	categoryGeoDistrict: {
-		title: "{category} {districtPhrase} {cityPhrase} — {brand}",
-		h1: "{category} {districtPhrase} {cityPhrase}",
-		description:
-			"{category} {districtPhrase} {cityPhrase} — актуальные предложения[. {inventory}.]",
-	},
-	categoryGeoFacet: {
-		title: "{facet} {category} {cityPhrase} — {brand}",
-		h1: "{facet} {category} {cityPhrase}",
-		description:
-			"{facet} {category} {cityPhrase} — актуальные предложения[. {inventory}.]",
-	},
-	geoDevelopers: {
-		title: "Застройщики {cityPhrase} — {brand}",
-		h1: "Застройщики {cityPhrase}",
-		description:
-			"Застройщики и проверенные жилые комплексы {cityPhrase}[ — {inventory}.]",
-	},
-	developmentNormal: {
-		title: "{entityName} — {brand}",
-		h1: "{entityName}",
-		description: "{entityName}[ {cityPhrase}][ — {freshPrice}.]",
-	},
-	developmentCollision: {
-		title: "{entityName} {cityPhrase} — {brand}",
-		h1: "{entityName} {cityPhrase}",
-		description: "{entityName} {cityPhrase}[ — {freshPrice}.]",
-	},
-	developer: {
-		title: "{entityName} — {brand}",
-		h1: "{entityName}",
-		description:
-			"Объекты застройщика {entityName}[ {cityPhrase}][ — {inventory}.]",
-	},
-	property: {
-		title: "{entityName} — {brand}",
-		h1: "{entityName}",
-		description: "{entityName}[ {cityPhrase}][ — {freshPrice}.]",
-	},
-} satisfies Record<ProjectSeoTemplateKey, SeoTemplateDefinition>;
+const templates = projectSeoTemplatesInput satisfies Record<
+	ProjectSeoTemplateKey,
+	SeoTemplateDefinition
+>;
 
 const districtTemplateByType = {
 	administrative: templates.categoryGeoDistrict,

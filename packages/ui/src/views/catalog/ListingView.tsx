@@ -1,18 +1,32 @@
 import type { ListingPageDTO } from "@ams/realtbase-contracts";
 import { Button } from "../../components/ui/button";
 import { Container, Section, SectionHeader } from "../../components/ui/layout";
-import { DevelopmentCardView } from "../development/DevelopmentCardView";
 import { DevelopersListView } from "../developer/DevelopersListView";
+import { DevelopmentCardView } from "../development/DevelopmentCardView";
 import { StarterPropertyCard } from "../property/StarterPropertyCardView";
+import {
+	analyticsAttributes,
+	type PublicAnalyticsDimensions,
+} from "../shared/analytics-attributes";
 import { BreadcrumbsView } from "../shared/BreadcrumbsView";
 import { NearbyView } from "./NearbyView";
+
+export type ListingPresentationState = {
+	hasFilters: boolean;
+	clearHref: string;
+	summary?: string;
+};
 
 export function ListingView({
 	listing,
 	pageHref,
+	filterState,
+	analytics,
 }: {
 	listing: ListingPageDTO;
 	pageHref?: (page: number) => string;
+	filterState?: ListingPresentationState;
+	analytics?: PublicAnalyticsDimensions;
 }) {
 	const developers = listing.items
 		.filter((item) => item.kind === "developer")
@@ -21,7 +35,7 @@ export function ListingView({
 		(item) => item.kind !== "developer",
 	);
 	return (
-		<>
+		<div {...analyticsAttributes("listing_view", analytics)}>
 			<Section
 				space="hero"
 				className="border-b border-border bg-surface-raised"
@@ -56,6 +70,19 @@ export function ListingView({
 			) : null}
 			<Section aria-labelledby="listing-results-title">
 				<Container>
+					{filterState?.hasFilters ? (
+						<div
+							className="mb-8 flex flex-col gap-4 rounded-md border border-border bg-surface-subtle p-4 sm:flex-row sm:items-center sm:justify-between"
+							role="status"
+						>
+							<p className="text-body text-content-default">
+								{filterState.summary ?? "Применены параметры каталога."}
+							</p>
+							<Button asChild variant="outline">
+								<a href={filterState.clearHref}>Сбросить фильтры</a>
+							</Button>
+						</div>
+					) : null}
 					<SectionHeader
 						titleId="listing-results-title"
 						title={`Найдено: ${listing.total}`}
@@ -128,6 +155,6 @@ export function ListingView({
 				/>
 			) : null}
 			<NearbyView links={listing.nearby} />
-		</>
+		</div>
 	);
 }

@@ -1,5 +1,5 @@
 {
-	"schemaVersion": 1,
+	"schemaVersion": 2,
 	"projectId": "CLIENT-PROJECT-ID",
 	"packageName": "client-realty-site",
 	"brandName": "Клиент Недвижимость",
@@ -13,6 +13,8 @@
 		{
 			"slug": "klientograd",
 			"title": "Клиентоград",
+			"published": true,
+			"hubStatus": "ACTIVE",
 			"morphologyApproved": true,
 			"morphology": {
 				"nominative": "Клиентоград",
@@ -39,5 +41,24 @@
 	"developmentExcel": {
 		"status": "ready",
 		"template": "client-developments.xlsx"
-	}
+	},
+	"clientReadiness": {
+		"deploymentTarget": "approved-runtime",
+		"database": "approved-managed-postgresql",
+		"mediaStorage": "approved-object-storage",
+		"feedImageSource": "external-urls",
+		"jobsActiveRuntimeCount": 1,
+		"leadRetentionDays": 180,
+		"archiveRetentionDays": 90,
+		"legalContent": "approved",
+		"requiredHostAllowlists": {
+			"outbound": ["api.realty-client.ru"],
+			"externalImages": ["images.realty-client.ru"],
+			"leadOutbound": ["crm.realty-client.ru"]
+		},
+		"nginx": true,
+		"automaticBackup": true,
+		"externalMonitoring": true
+	},
+	"seoTemplateFile": "CLONE_SEO_TEMPLATES.example.json"
 }

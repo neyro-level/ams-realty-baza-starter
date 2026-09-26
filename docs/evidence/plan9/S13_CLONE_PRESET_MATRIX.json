@@ -1,0 +1,52 @@
+{
+	"schemaVersion": 1,
+	"plan": "AMS-REALTY-BAZA-STARTER-V2-1-CLONE-READINESS-9",
+	"planVersion": "v6",
+	"epic": "S13",
+	"presetSchemaVersion": 2,
+	"profiles": [
+		{
+			"name": "single-geo-three-cities",
+			"preset": "MIXED",
+			"geoMode": "SINGLE_GEO",
+			"configuredGeos": 3,
+			"routableGeos": 1,
+			"verdict": "PASS"
+		},
+		{
+			"name": "secondary-only",
+			"preset": "SECONDARY_FIRST",
+			"geoMode": "SINGLE_GEO",
+			"configuredGeos": 1,
+			"routableGeos": 1,
+			"verdict": "PASS"
+		},
+		{
+			"name": "newbuild-only",
+			"preset": "NEWBUILD_FIRST",
+			"geoMode": "SINGLE_GEO",
+			"configuredGeos": 1,
+			"routableGeos": 1,
+			"verdict": "PASS"
+		},
+		{
+			"name": "multi-geo",
+			"preset": "MIXED",
+			"geoMode": "MULTI_GEO",
+			"configuredGeos": 2,
+			"routableGeos": 2,
+			"verdict": "PASS"
+		}
+	],
+	"checks": {
+		"clonePrepare": "PASS",
+		"cloneBootstrap": "PASS",
+		"dailyPerProfile": "PASS",
+		"s12MatrixPerProfile": "PASS",
+		"idempotence": "PASS",
+		"protectedPathMutation": "NONE",
+		"secretFieldsRejected": "PASS",
+		"schemaVersion1RejectedWithMigrationGuidance": "PASS",
+		"storageActivation": "NONE"
+	}
+}

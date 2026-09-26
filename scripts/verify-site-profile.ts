@@ -7,12 +7,12 @@ import {
 	seoTierMetrics,
 	siteProfileSchema,
 } from "../src/core/profile/index.ts";
+import { projectSiteProfileConfig } from "../src/project/site-profile.config.ts";
 import {
 	createProjectSiteProfile,
 	siteProfile,
 	siteProfileFixtures,
 } from "../src/project/site-profile.ts";
-import { projectSiteProfileConfig } from "../src/project/site-profile.config.ts";
 
 for (const [name, fixture] of Object.entries(siteProfileFixtures)) {
 	assert.equal(
@@ -27,8 +27,10 @@ assert.deepEqual(
 	siteProfile,
 	createProjectSiteProfile(projectSiteProfileConfig),
 );
-assert.equal(siteProfile.preset, "MIXED");
-assert.equal(siteProfile.geoMode, "SINGLE_GEO");
+assert.ok(
+	["MIXED", "NEWBUILD_FIRST", "SECONDARY_FIRST"].includes(siteProfile.preset),
+);
+assert.ok(["SINGLE_GEO", "MULTI_GEO"].includes(siteProfile.geoMode));
 assert.deepEqual(Object.keys(siteProfileFixtures.singleGeoThreeCities.geos), [
 	"primorsk",
 	"zarechnyy",

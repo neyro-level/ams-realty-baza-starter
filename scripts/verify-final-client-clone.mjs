@@ -13,10 +13,34 @@ import { join } from "node:path";
 
 const root = process.cwd();
 const matrix = [
-	{ preset: "MIXED", geoMode: "SINGLE_GEO", suffix: "mixed" },
-	{ preset: "NEWBUILD_FIRST", geoMode: "MULTI_GEO", suffix: "newbuild" },
-	{ preset: "SECONDARY_FIRST", geoMode: "MULTI_GEO", suffix: "secondary" },
+	{
+		name: "single-geo-three-cities",
+		preset: "MIXED",
+		geoMode: "SINGLE_GEO",
+		geoCount: 3,
+	},
+	{
+		name: "secondary-only",
+		preset: "SECONDARY_FIRST",
+		geoMode: "SINGLE_GEO",
+		geoCount: 1,
+	},
+	{
+		name: "newbuild-only",
+		preset: "NEWBUILD_FIRST",
+		geoMode: "SINGLE_GEO",
+		geoCount: 1,
+	},
+	{ name: "multi-geo", preset: "MIXED", geoMode: "MULTI_GEO", geoCount: 2 },
 ];
+const selectedProfile = process.env.AMS_CLONE_PROFILE;
+const selectedMatrix = selectedProfile
+	? matrix.filter((entry) => entry.name === selectedProfile)
+	: matrix;
+assert.ok(
+	selectedMatrix.length,
+	`Unknown AMS_CLONE_PROFILE: ${selectedProfile}`,
+);
 
 function git(cwd, args) {
 	return execFileSync("git", args, {
@@ -31,11 +55,22 @@ function hash(value) {
 	return createHash("sha256").update(value).digest("hex");
 }
 
-for (const entry of matrix) {
-	const clone = mkdtempSync(join(tmpdir(), `ams-p8-24-${entry.suffix}-`));
+function pnpm(cwd, args, environment) {
+	const cli = process.env.npm_execpath;
+	assert.ok(cli, "pnpm CLI path is unavailable from npm_execpath");
+	return execFileSync(process.execPath, [cli, ...args], {
+		cwd,
+		env: environment,
+		stdio: "pipe",
+		maxBuffer: 64 * 1024 * 1024,
+	});
+}
+
+for (const entry of selectedMatrix) {
+	const clone = mkdtempSync(join(tmpdir(), `ams-s13-${entry.name}-`));
 	const presetPath = join(
 		tmpdir(),
-		`ams-p8-24-${entry.suffix}-${process.pid}.json`,
+		`ams-s13-${entry.name}-${process.pid}.json`,
 	);
 	try {
 		execFileSync("git", ["worktree", "add", "--detach", clone, "HEAD"], {
@@ -46,6 +81,12 @@ for (const entry of matrix) {
 			"scripts/clone-prepare.mjs",
 			"scripts/clone-preset.mjs",
 			"scripts/verify-clone-bootstrap.mjs",
+			"scripts/verify-site-profile.ts",
+			"scripts/quality/seo-template-ownership.mjs",
+			"src/project/client-readiness.config.ts",
+			"src/project/project-literals.json",
+			"src/project/seo/templates.ts",
+			"src/project/seo/template-inputs.ts",
 			"src/project/site-profile.config.ts",
 			"src/project/site-profile.config.types.ts",
 			"src/project/site-profile.ts",
@@ -54,10 +95,13 @@ for (const entry of matrix) {
 		]) {
 			cpSync(join(root, relativePath), join(clone, relativePath));
 		}
+		const primarySlug = `${entry.name}-city`;
 		const geos = [
 			{
-				slug: `${entry.suffix}-city`,
+				slug: primarySlug,
 				title: "Тестоград",
+				published: true,
+				hubStatus: "ACTIVE",
 				morphologyApproved: true,
 				morphology: {
 					nominative: "Тестоград",
@@ -65,37 +109,54 @@ for (const entry of matrix) {
 					prepositional: "Тестограде",
 				},
 			},
-			...(entry.geoMode === "MULTI_GEO"
-				? [
-						{
-							slug: `${entry.suffix}-satellite`,
-							title: "Спутник",
+			...Array.from({ length: entry.geoCount - 1 }, (_, index) =>
+				entry.geoMode === "MULTI_GEO"
+					? {
+							slug: `${entry.name}-satellite-${index + 1}`,
+							title: `Спутник ${index + 1}`,
+							published: true,
+							hubStatus: "NOINDEX_AUTO",
 							morphologyApproved: true,
 							morphology: {
-								nominative: "Спутник",
-								genitive: "Спутника",
-								prepositional: "Спутнике",
+								nominative: `Спутник ${index + 1}`,
+								genitive: `Спутника ${index + 1}`,
+								prepositional: `Спутнике ${index + 1}`,
 							},
-							agglomerationOf: `${entry.suffix}-city`,
+							agglomerationOf: primarySlug,
+						}
+					: {
+							slug: `${entry.name}-inactive-${index + 1}`,
+							title: `Резерв ${index + 1}`,
+							published: false,
+							hubStatus: "PREPARED_OFF",
+							morphologyApproved: true,
+							morphology: {
+								nominative: `Резерв ${index + 1}`,
+								genitive: `Резерва ${index + 1}`,
+								prepositional: `Резерве ${index + 1}`,
+							},
+							agglomerationOf: primarySlug,
 						},
-					]
-				: []),
+			),
 		];
+		const seoTemplates = JSON.parse(
+			readFileSync(join(root, "docs/CLONE_SEO_TEMPLATES.example.json"), "utf8"),
+		);
 		const preset = {
-			schemaVersion: 1,
+			schemaVersion: 2,
 			projectId: `P8-24 ${entry.preset}`,
-			packageName: `p8-24-${entry.suffix}`,
-			brandName: `Агентство ${entry.suffix}`,
+			packageName: `s13-${entry.name}`,
+			brandName: `Агентство ${entry.name}`,
 			defaultDescription: `Клиентский проект ${entry.preset}`,
-			domain: `${entry.suffix}.client-proof.local`,
+			domain: `${entry.name}.client-proof.local`,
 			preset: entry.preset,
 			geoMode: entry.geoMode,
-			primaryGeo: `${entry.suffix}-city`,
+			primaryGeo: primarySlug,
 			productionIndexing: "noindex",
 			geos,
 			nap: {
 				phone: "+7 900 000-00-00",
-				email: `hello@${entry.suffix}.local`,
+				email: `hello@${entry.name}.local`,
 				address: "Тестоград",
 				workingHours: "09:00-18:00",
 			},
@@ -109,13 +170,41 @@ for (const entry of matrix) {
 				status: "ready",
 				template: "client-developments.xlsx",
 			},
+			clientReadiness: {
+				deploymentTarget: "approved-runtime",
+				database: "approved-managed-postgresql",
+				mediaStorage: "approved-object-storage",
+				feedImageSource: "external-urls",
+				jobsActiveRuntimeCount: 1,
+				leadRetentionDays: 180,
+				archiveRetentionDays: 90,
+				legalContent: "approved",
+				requiredHostAllowlists: {
+					outbound: [`api.${entry.name}.local`],
+					externalImages: [`images.${entry.name}.local`],
+					leadOutbound: [`crm.${entry.name}.local`],
+				},
+				nginx: true,
+				automaticBackup: true,
+				externalMonitoring: true,
+			},
+			seoTemplates,
 		};
 		writeFileSync(presetPath, JSON.stringify(preset));
+		const protectedPaths = [
+			"src/core",
+			"packages",
+			"migrations",
+			"scripts/quality",
+		];
+		const protectedBaseline = hash(
+			git(clone, ["diff", "--binary", "--", ...protectedPaths]),
+		);
 		const args = [
 			join(clone, "scripts/clone-prepare.mjs"),
 			`--root=${clone}`,
 			`--preset-file=${presetPath}`,
-			"--source-tag=starter-v2.0.0",
+			"--source-tag=starter-v2.1.0",
 			`--source-sha=${git(root, ["rev-parse", "HEAD"]).trim()}`,
 			"--date=2026-09-25T00:00:00.000Z",
 		];
@@ -130,11 +219,17 @@ for (const entry of matrix) {
 			[join(clone, "scripts/verify-clone-bootstrap.mjs"), `--root=${clone}`],
 			{ cwd: clone, stdio: "pipe" },
 		);
+		pnpm(clone, ["install", "--frozen-lockfile"], proofEnvironment);
+		pnpm(clone, ["verify:daily"], {
+			...proofEnvironment,
+			NEXT_PUBLIC_SERVER_URL: `https://${preset.domain}`,
+			NEXT_PUBLIC_INDEXABLE: "false",
+		});
 		assert.equal(
-			git(clone, ["diff", "--", "src/core", "packages", "migrations"]).trim(),
-			"",
+			hash(git(clone, ["diff", "--binary", "--", ...protectedPaths])),
+			protectedBaseline,
+			"clone:prepare changed a protected platform path",
 		);
-		assert.equal(git(clone, ["diff", "--", "scripts/quality"]).trim(), "");
 		assert.match(
 			readFileSync(join(clone, "src/project/site-profile.config.ts"), "utf8"),
 			new RegExp(entry.preset),
@@ -142,6 +237,12 @@ for (const entry of matrix) {
 		assert.match(
 			readFileSync(join(clone, "src/project/routing/runtime-route.ts"), "utf8"),
 			/resolveEmptyClientRuntimeRoute/,
+		);
+		assert.equal(
+			JSON.parse(readFileSync(join(clone, "package.json"), "utf8"))
+				.dependencies?.["@payloadcms/storage-s3"],
+			undefined,
+			"clone:prepare must not activate S3 storage",
 		);
 		const firstDiffHash = hash(git(clone, ["diff"]));
 		execFileSync(process.execPath, args, {
@@ -154,7 +255,9 @@ for (const entry of matrix) {
 			firstDiffHash,
 			`${entry.preset} repeat must be idempotent`,
 		);
-		console.log(`verify:client-clone-proof: ${entry.preset} PASS`);
+		console.log(
+			`verify:client-clone-proof: ${entry.name} PASS (bootstrap + daily + protected paths + idempotence)`,
+		);
 	} finally {
 		try {
 			execFileSync("git", ["worktree", "remove", "--force", clone], {
@@ -169,5 +272,5 @@ for (const entry of matrix) {
 }
 
 console.log(
-	"verify:client-clone-proof: PASS (three presets, no core/packages/guards/migrations diff)",
+	`verify:client-clone-proof: PASS (${selectedMatrix.length} preset(s), no clone mutation in core/packages/guards/migrations)`,
 );
