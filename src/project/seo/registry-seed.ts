@@ -179,9 +179,9 @@ export const projectSeoRegistrySeed: readonly SeoRegistryRow<ProjectSeoTemplateK
     "minimumObjects": 10,
     "defaultRobots": "noindex,follow",
     "templateKey": "categoryGeoDistrictAdmin",
-    "title": "Купить квартиру в Ленинском районе в Приморске — цены",
-    "h1": "Квартиры в Ленинском районе в Приморске",
-    "description": "Квартиры в Ленинском районе в Приморске — актуальные предложения. 9 объектов.",
+    "title": "Купить квартиру в Ленинском районе Приморска — цены",
+    "h1": "Квартиры в Ленинском районе Приморска",
+    "description": "Квартиры в Ленинском районе Приморска — актуальные предложения. 9 объектов.",
     "status": "draft",
     "morphologyApproved": true,
     "release": "starter-v2.1.0",
@@ -417,6 +417,462 @@ export const projectSeoRegistrySeed: readonly SeoRegistryRow<ProjectSeoTemplateK
     "morphologyApproved": true,
     "release": "starter-v2.1.0",
     "contentGateRule": "secondary"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryRoot",
+      "category": "arenda"
+    },
+    "url": "/arenda/",
+    "canonical": "/arenda/",
+    "entityRef": "category:arenda",
+    "targetPhrases": [
+      "starter coverage /arenda/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryRoot",
+    "title": "Аренда — AMS Realty",
+    "h1": "Аренда",
+    "description": "Аренда — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryRoot",
+      "category": "doma"
+    },
+    "url": "/doma/",
+    "canonical": "/doma/",
+    "entityRef": "category:doma",
+    "targetPhrases": [
+      "starter coverage /doma/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryRoot",
+    "title": "Дома — AMS Realty",
+    "h1": "Дома",
+    "description": "Дома — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryRoot",
+      "category": "garazhi"
+    },
+    "url": "/garazhi/",
+    "canonical": "/garazhi/",
+    "entityRef": "category:garazhi",
+    "targetPhrases": [
+      "starter coverage /garazhi/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryRoot",
+    "title": "Гаражи — AMS Realty",
+    "h1": "Гаражи",
+    "description": "Гаражи — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryRoot",
+      "category": "kommercheskaya-nedvizhimost"
+    },
+    "url": "/kommercheskaya-nedvizhimost/",
+    "canonical": "/kommercheskaya-nedvizhimost/",
+    "entityRef": "category:kommercheskaya-nedvizhimost",
+    "targetPhrases": [
+      "starter coverage /kommercheskaya-nedvizhimost/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryRoot",
+    "title": "Коммерческая недвижимость — AMS Realty",
+    "h1": "Коммерческая недвижимость",
+    "description": "Коммерческая недвижимость — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryRoot",
+      "category": "komnaty"
+    },
+    "url": "/komnaty/",
+    "canonical": "/komnaty/",
+    "entityRef": "category:komnaty",
+    "targetPhrases": [
+      "starter coverage /komnaty/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryRoot",
+    "title": "Комнаты — AMS Realty",
+    "h1": "Комнаты",
+    "description": "Комнаты — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryRoot",
+      "category": "kottedzhnye-poselki"
+    },
+    "url": "/kottedzhnye-poselki/",
+    "canonical": "/kottedzhnye-poselki/",
+    "entityRef": "category:kottedzhnye-poselki",
+    "targetPhrases": [
+      "starter coverage /kottedzhnye-poselki/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryRoot",
+    "title": "Коттеджные посёлки — AMS Realty",
+    "h1": "Коттеджные посёлки",
+    "description": "Коттеджные посёлки — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryRoot",
+      "category": "novostroyki"
+    },
+    "url": "/novostroyki/",
+    "canonical": "/novostroyki/",
+    "entityRef": "category:novostroyki",
+    "targetPhrases": [
+      "starter coverage /novostroyki/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryRoot",
+    "title": "Новостройки — AMS Realty",
+    "h1": "Новостройки",
+    "description": "Новостройки — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeo",
+      "geo": "primorsk",
+      "category": "arenda"
+    },
+    "url": "/primorsk/arenda/",
+    "canonical": "/primorsk/arenda/",
+    "entityRef": "geo:primorsk/category:arenda",
+    "targetPhrases": [
+      "starter coverage /primorsk/arenda/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeo",
+    "title": "Аренда в Приморске — AMS Realty",
+    "h1": "Аренда в Приморске",
+    "description": "Аренда в Приморске — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeo",
+      "geo": "primorsk",
+      "category": "doma"
+    },
+    "url": "/primorsk/doma/",
+    "canonical": "/primorsk/doma/",
+    "entityRef": "geo:primorsk/category:doma",
+    "targetPhrases": [
+      "starter coverage /primorsk/doma/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeo",
+    "title": "Дома в Приморске — AMS Realty",
+    "h1": "Дома в Приморске",
+    "description": "Дома в Приморске — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeo",
+      "geo": "primorsk",
+      "category": "garazhi"
+    },
+    "url": "/primorsk/garazhi/",
+    "canonical": "/primorsk/garazhi/",
+    "entityRef": "geo:primorsk/category:garazhi",
+    "targetPhrases": [
+      "starter coverage /primorsk/garazhi/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeo",
+    "title": "Гаражи в Приморске — AMS Realty",
+    "h1": "Гаражи в Приморске",
+    "description": "Гаражи в Приморске — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeo",
+      "geo": "primorsk",
+      "category": "kommercheskaya-nedvizhimost"
+    },
+    "url": "/primorsk/kommercheskaya-nedvizhimost/",
+    "canonical": "/primorsk/kommercheskaya-nedvizhimost/",
+    "entityRef": "geo:primorsk/category:kommercheskaya-nedvizhimost",
+    "targetPhrases": [
+      "starter coverage /primorsk/kommercheskaya-nedvizhimost/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeo",
+    "title": "Коммерческая недвижимость в Приморске — AMS Realty",
+    "h1": "Коммерческая недвижимость в Приморске",
+    "description": "Коммерческая недвижимость в Приморске — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeo",
+      "geo": "primorsk",
+      "category": "komnaty"
+    },
+    "url": "/primorsk/komnaty/",
+    "canonical": "/primorsk/komnaty/",
+    "entityRef": "geo:primorsk/category:komnaty",
+    "targetPhrases": [
+      "starter coverage /primorsk/komnaty/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeo",
+    "title": "Комнаты в Приморске — AMS Realty",
+    "h1": "Комнаты в Приморске",
+    "description": "Комнаты в Приморске — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeo",
+      "geo": "primorsk",
+      "category": "kottedzhnye-poselki"
+    },
+    "url": "/primorsk/kottedzhnye-poselki/",
+    "canonical": "/primorsk/kottedzhnye-poselki/",
+    "entityRef": "geo:primorsk/category:kottedzhnye-poselki",
+    "targetPhrases": [
+      "starter coverage /primorsk/kottedzhnye-poselki/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeo",
+    "title": "Коттеджные посёлки в Приморске — AMS Realty",
+    "h1": "Коттеджные посёлки в Приморске",
+    "description": "Коттеджные посёлки в Приморске — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeo",
+      "geo": "primorsk",
+      "category": "novostroyki"
+    },
+    "url": "/primorsk/novostroyki/",
+    "canonical": "/primorsk/novostroyki/",
+    "entityRef": "geo:primorsk/category:novostroyki",
+    "targetPhrases": [
+      "starter coverage /primorsk/novostroyki/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeo",
+    "title": "Новостройки в Приморске — AMS Realty",
+    "h1": "Новостройки в Приморске",
+    "description": "Новостройки в Приморске — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeo",
+      "geo": "primorsk",
+      "category": "uchastki"
+    },
+    "url": "/primorsk/uchastki/",
+    "canonical": "/primorsk/uchastki/",
+    "entityRef": "geo:primorsk/category:uchastki",
+    "targetPhrases": [
+      "starter coverage /primorsk/uchastki/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeo",
+    "title": "Участки в Приморске — AMS Realty",
+    "h1": "Участки в Приморске",
+    "description": "Участки в Приморске — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryRoot",
+      "category": "uchastki"
+    },
+    "url": "/uchastki/",
+    "canonical": "/uchastki/",
+    "entityRef": "category:uchastki",
+    "targetPhrases": [
+      "starter coverage /uchastki/"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryRoot",
+    "title": "Участки — AMS Realty",
+    "h1": "Участки",
+    "description": "Участки — актуальные предложения",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
   }
 ] as const;
 

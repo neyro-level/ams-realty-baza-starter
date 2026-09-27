@@ -4,28 +4,42 @@ const goneCacheHeaders = {
 	"Cache-Control": "public, max-age=300, must-revalidate",
 } as const;
 
-export function renderEntityGoneHtml(slug: string): string {
+export type EntityGoneCopy = {
+	title: string;
+	bodyPrefix: string;
+	bodySuffix: string;
+	catalogLabel: string;
+	catalogHref: string;
+};
+
+export function renderEntityGoneHtml(
+	slug: string,
+	copy: EntityGoneCopy,
+): string {
 	const safeSlug = slug.replaceAll(/[^a-z0-9_-]/gi, "");
 	return `<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Объект снят с публикации</title>
+<title>${copy.title}</title>
 <meta name="robots" content="noindex, follow">
 </head>
 <body>
 <main>
 <p>410</p>
-<h1>Объект снят с публикации</h1>
-<p>Страница объекта ${safeSlug} больше не содержит публичные данные после окончания retention-периода. Автоматический редирект на главную не выполняется.</p>
-<p><a href="/kvartiry/">Смотреть актуальные объекты</a></p>
+<h1>${copy.title}</h1>
+<p>${copy.bodyPrefix} ${safeSlug} ${copy.bodySuffix}</p>
+<p><a href="${copy.catalogHref}">${copy.catalogLabel}</a></p>
 </main>
 </body>
 </html>`;
 }
 
-export function createEntityGoneResponse(slug: string): Response {
-	return new Response(renderEntityGoneHtml(slug), {
+export function createEntityGoneResponse(
+	slug: string,
+	copy: EntityGoneCopy,
+): Response {
+	return new Response(renderEntityGoneHtml(slug, copy), {
 		status: 410,
 		headers: goneCacheHeaders,
 	});

@@ -42,7 +42,7 @@ import {
 	countPropertyGatePhotos,
 } from "@/project/routing/property-gate-facts";
 import {
-	projectSeoCategoryLabel,
+	projectSeoCategoryForms,
 	projectSeoFacetLabel,
 	projectSeoMeta,
 	renderProjectSeoTemplate,
@@ -1399,7 +1399,7 @@ function listingDTO(
 				: "categoryGeo";
 	const seoContext = {
 		brand: brandName,
-		category: projectSeoCategoryLabel(surface),
+		category: projectSeoCategoryForms(surface),
 		city: cityMorphology(city),
 		district: district ? districtMorphology(district) : undefined,
 		districtType: district?.districtType,

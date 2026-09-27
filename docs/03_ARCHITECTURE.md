@@ -108,6 +108,12 @@ client-specific defaults. Опубликованные Payload districts фор�
 а `proxy.ts` не выполняет district DB reads.
 Project-owned static routes, brand, domain, city literals и будущий literal
 denylist не переходят в core/packages.
+Public Russian route copy принадлежит generated `src/project/copy.ts`.
+Канонический preset определяет routable catalog link; `clone:prepare` и
+`copy:generate` детерминированно создают один typed module. Кириллица в
+`src/app` и `src/core` запрещена, кроме документированных reusable protocol
+cases: transliteration, inbound feed/workbook vocabulary, normalization и
+grammatical data contracts. Граница проверяется `verify:copy-ownership`.
 `docs/CLONE_PRESET.starter.json` — единственный редактируемый owner starter
 SiteProfile. `src/project/site-profile.config.ts` генерируется командой
 `pnpm profile:generate`, а `pnpm profile:check` fail-closed обнаруживает drift.
@@ -149,6 +155,26 @@ SEO Registry имеет одного editable owner: `docs/seo/SEO_REGISTRY_SEED
 generated-файла и параллельный registry в Payload запрещены. Drift блокируется
 `pnpm seo:registry:check` внутри `verify:daily`; решение закреплено в
 `docs/adr/ADR-SEO-REGISTRY-CSV-OWNER.md`.
+Измеренный спрос попадает в owner CSV только через
+`seo:registry:import-demand`: команда сначала валидирует весь snapshot,
+отклоняет неизвестные/повторные URL и смешанные даты, затем атомарно заменяет
+файл. Tier и minimum inventory всегда пересчитываются из текущего SiteProfile.
+
+Одобрение измеренной строки выполняет только `seo:registry:approve`.
+Append-only журнал `docs/seo/REGISTRY_APPROVALS.csv` хранит actor, reason,
+timestamp, scope и SHA-256 выбранной строки; status owner CSV материализуется
+из журнала. Guard отклоняет ручную смену status, повторное одобрение и изменение
+строки между выбором и commit.
+`seo:registry:coverage` строит обязательный набор тем же canonical URL builder,
+который использует runtime: home, category roots, опубликованные geo hubs,
+ACTIVE/NOINDEX_AUTO geo-category и district routes, facets и developer hubs.
+PREPARED_OFF/OUT не создают требования и считаются ineligible, если строка для
+них вручную появилась в Registry.
+
+Категория SEO хранится как явный набор `nominativePlural`,
+`accusativeSingular`, `genitivePlural` в project-owned template inputs. Районные
+шаблоны получают эти формы и утверждённые формы города/района как данные;
+renderer не склоняет слова и не содержит литералы конкретной категории.
 
 ## Client clone boundary
 
@@ -268,6 +294,14 @@ minor units до `Number.MAX_SAFE_INTEGER`. Площади — `0..99_999_999.99
 PostgreSQL constraints из migration `20260919_120900`.
 
 ## Data, jobs и cache
+
+Persistent Public Gateway route cache имеет конечную identity-модель: для
+catalog routes кэшируются только канонические `page` (1..10000) и четыре
+значения `sort`, для developer route — только `page`, для остальных routes —
+единственный query-free вариант. Filter keys сначала сверяются с whitelist
+текущего `SiteProfile`, но запросы с filter values обходят persistent cache:
+произвольные пользовательские значения не могут расширять cache key space или
+случайно разделить один key между разными результатами.
 
 - schema любого deployed contour меняется только migrations;
 - деньги хранятся integer minor units, площади — в квадратных метрах;

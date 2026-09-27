@@ -8,6 +8,7 @@ import type { PageKey } from "../routing/url-grammar.ts";
 export const seoEvidenceSources = [
 	"wordstat",
 	"broad39",
+	"searchDemand",
 	"webmaster",
 	"fallback_no_data",
 ] as const;

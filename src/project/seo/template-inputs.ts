@@ -1,14 +1,50 @@
 /** Project-owned SEO copy inputs. Client clones replace this file from preset v2. */
 export const projectSeoCategoryLabelsInput = {
-	kvartiry: "Квартиры",
-	doma: "Дома",
-	uchastki: "Участки",
-	"kommercheskaya-nedvizhimost": "Коммерческая недвижимость",
-	komnaty: "Комнаты",
-	garazhi: "Гаражи",
-	arenda: "Аренда",
-	novostroyki: "Новостройки",
-	"kottedzhnye-poselki": "Коттеджные посёлки",
+	kvartiry: {
+		nominativePlural: "Квартиры",
+		accusativeSingular: "квартиру",
+		genitivePlural: "квартир",
+	},
+	doma: {
+		nominativePlural: "Дома",
+		accusativeSingular: "дом",
+		genitivePlural: "домов",
+	},
+	uchastki: {
+		nominativePlural: "Участки",
+		accusativeSingular: "участок",
+		genitivePlural: "участков",
+	},
+	"kommercheskaya-nedvizhimost": {
+		nominativePlural: "Коммерческая недвижимость",
+		accusativeSingular: "коммерческую недвижимость",
+		genitivePlural: "объектов коммерческой недвижимости",
+	},
+	komnaty: {
+		nominativePlural: "Комнаты",
+		accusativeSingular: "комнату",
+		genitivePlural: "комнат",
+	},
+	garazhi: {
+		nominativePlural: "Гаражи",
+		accusativeSingular: "гараж",
+		genitivePlural: "гаражей",
+	},
+	arenda: {
+		nominativePlural: "Аренда",
+		accusativeSingular: "объект в аренду",
+		genitivePlural: "предложений аренды",
+	},
+	novostroyki: {
+		nominativePlural: "Новостройки",
+		accusativeSingular: "новостройку",
+		genitivePlural: "новостроек",
+	},
+	"kottedzhnye-poselki": {
+		nominativePlural: "Коттеджные посёлки",
+		accusativeSingular: "коттеджный посёлок",
+		genitivePlural: "коттеджных посёлков",
+	},
 } as const;
 
 export const projectSeoFacetLabelsInput = {
@@ -40,16 +76,17 @@ export const projectSeoTemplatesInput = {
 			"{category} {cityPhrase} — актуальные предложения[. {inventory}.]",
 	},
 	categoryGeoDistrictAdmin: {
-		title: "Купить квартиру в {districtAdjLocative} районе {cityPhrase} — цены",
-		h1: "Квартиры в {districtAdjLocative} районе {cityPhrase}",
+		title:
+			"Купить {categoryAccusative} в {districtAdjLocative} районе {cityGenitive} — цены",
+		h1: "{categoryNominativePlural} в {districtAdjLocative} районе {cityGenitive}",
 		description:
-			"Квартиры в {districtAdjLocative} районе {cityPhrase} — актуальные предложения[. {inventory}.]",
+			"{categoryNominativePlural} в {districtAdjLocative} районе {cityGenitive} — актуальные предложения[. {inventory}.]",
 	},
 	categoryGeoDistrictMicro: {
-		title: "Купить квартиру {districtPhrase} {cityPhrase} — цены",
-		h1: "{category} {districtPhrase} {cityPhrase}",
+		title: "Купить {categoryAccusative} {districtPhrase} {cityPhrase} — цены",
+		h1: "{categoryNominativePlural} {districtPhrase} {cityPhrase}",
 		description:
-			"{category} {districtPhrase} {cityPhrase} — актуальные предложения[. {inventory}.]",
+			"{categoryNominativePlural} {districtPhrase} {cityPhrase} — актуальные предложения[. {inventory}.]",
 	},
 	categoryGeoFacet: {
 		title: "{facet} {category} {cityPhrase} — {brand}",

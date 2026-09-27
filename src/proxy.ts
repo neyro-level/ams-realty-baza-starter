@@ -5,6 +5,7 @@ import {
 	parseCurrentPropertyLifecyclePath,
 } from "./core/http/property-lifecycle-preflight.ts";
 import { anonymousRawRestEdgeDecision } from "./core/security/anonymous-raw-rest.ts";
+import { projectCopy } from "./project/copy.ts";
 import { lookupCanonicalEntityLifecyclePreflight } from "./project/data-access/public/entity-lifecycle-preflight.ts";
 import { lookupCurrentPropertyLifecyclePreflight } from "./project/data-access/public/property-lifecycle-preflight.ts";
 import { matchLegacyRoute } from "./project/routing/legacy-route-manifest.ts";
@@ -46,6 +47,7 @@ export async function proxy(request: NextRequest) {
 	if (decision.kind === "gone") {
 		return createEntityGoneResponse(
 			"label" in decision ? String(decision.label) : (propertySlug ?? "entity"),
+			projectCopy.entityGone,
 		);
 	}
 	if (decision.kind === "redirect") {

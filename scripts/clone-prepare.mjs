@@ -13,6 +13,7 @@ import {
 	readClonePreset,
 	renderClientReadinessConfig,
 	renderClientSeoArtifacts,
+	renderProjectCopy,
 	renderProjectLiterals,
 	renderSeoTemplateInputs,
 	renderSiteProfileConfig,
@@ -188,6 +189,10 @@ writeFileSync(
 writeFileSync(
 	join(root, "src", "project", "project-literals.json"),
 	renderProjectLiterals(preset),
+);
+writeFileSync(
+	join(root, "src", "project", "copy.ts"),
+	renderProjectCopy(preset),
 );
 writeFileSync(
 	join(root, "src", "project", "seo", "template-inputs.ts"),

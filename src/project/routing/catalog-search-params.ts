@@ -1,7 +1,19 @@
 import { z } from "zod";
 
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
-const positiveIntegerSchema = z.coerce.number().int().min(1).max(10_000);
+export const MAX_CATALOG_PAGE = 10_000;
+export const catalogSortValues = [
+	"recommended",
+	"newest",
+	"priceAsc",
+	"priceDesc",
+] as const;
+
+const positiveIntegerSchema = z.coerce
+	.number()
+	.int()
+	.min(1)
+	.max(MAX_CATALOG_PAGE);
 const priceSchema = z.coerce.number().int().min(1).max(10_000_000_000);
 const areaSchema = z.coerce.number().positive().max(1_000_000);
 const roomSchema = z.coerce.number().int().min(0).max(100);
@@ -21,9 +33,7 @@ export type CatalogQueryFilterKey = (typeof catalogQueryFilterKeys)[number];
 const catalogSearchSchema = z
 	.object({
 		page: positiveIntegerSchema.default(1),
-		sort: z
-			.enum(["recommended", "newest", "priceAsc", "priceDesc"])
-			.default("recommended"),
+		sort: z.enum(catalogSortValues).default("recommended"),
 		priceFrom: priceSchema.optional(),
 		priceTo: priceSchema.optional(),
 		rooms: z.array(roomSchema).max(8).optional(),
@@ -54,7 +64,7 @@ const catalogSearchSchema = z
 
 export type CatalogSearchParams = {
 	page: number;
-	sort: "recommended" | "newest" | "priceAsc" | "priceDesc";
+	sort: (typeof catalogSortValues)[number];
 	priceFromMinor?: number;
 	priceToMinor?: number;
 	rooms?: readonly number[];

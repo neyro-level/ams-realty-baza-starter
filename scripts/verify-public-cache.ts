@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { buildPublicEntityInvalidationTargets } from "../src/core/cache/entity-change-targets.ts";
 import { executeInternalRevalidation } from "../src/core/cache/internal-route-executor.ts";
-import { publicGatewayCacheTags } from "../src/project/routing/public-gateway-cache.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
+import {
+	MAX_PERSISTENT_CACHE_KEYS_PER_ROUTE,
+	publicGatewayCacheTags,
+	publicGatewayRouteCacheIdentity,
+} from "../src/project/routing/public-gateway-cache.ts";
 
 const listingTags = publicGatewayCacheTags({
 	kind: "categoryGeoDistrict",
@@ -29,6 +34,62 @@ assert.deepEqual(
 		publicUrlId: 2001,
 	}),
 	["site", "registry", "properties", "property:2001"],
+);
+
+const catalogPageKey = {
+	kind: "categoryGeo",
+	geo: "primorsk",
+	category: "kvartiry",
+} as const;
+for (const [fixtureName, profile] of Object.entries(siteProfileFixtures)) {
+	const identity = publicGatewayRouteCacheIdentity(
+		profile,
+		catalogPageKey,
+		"sort=priceAsc&page=2",
+	);
+	assert.ok(identity, `${fixtureName} must produce a bounded cache identity.`);
+	assert.ok(
+		identity.maxKeysPerRoute <= MAX_PERSISTENT_CACHE_KEYS_PER_ROUTE,
+		`${fixtureName} exceeded the finite cache-key bound.`,
+	);
+	assert.deepEqual(identity.keyParts, ["page", "2", "sort", "priceAsc"]);
+
+	const equivalent = publicGatewayRouteCacheIdentity(
+		profile,
+		catalogPageKey,
+		"page=2&sort=priceAsc",
+	);
+	assert.deepEqual(equivalent, identity);
+	assert.deepEqual(
+		publicGatewayRouteCacheIdentity(profile, catalogPageKey, ""),
+		publicGatewayRouteCacheIdentity(
+			profile,
+			catalogPageKey,
+			"page=1&sort=recommended",
+		),
+	);
+}
+
+const profile = siteProfileFixtures.multiGeo;
+assert.equal(
+	publicGatewayRouteCacheIdentity(profile, catalogPageKey, "district=center"),
+	null,
+	"Enabled filters must bypass persistent cache because their values are not finite.",
+);
+assert.equal(
+	publicGatewayRouteCacheIdentity(profile, catalogPageKey, "unknown=value"),
+	null,
+	"Arbitrary query input must never enter persistent cache identity.",
+);
+assert.equal(
+	publicGatewayRouteCacheIdentity(profile, catalogPageKey, "developer=acme"),
+	null,
+	"A filter outside the category SiteProfile whitelist must be rejected.",
+);
+assert.equal(
+	publicGatewayRouteCacheIdentity(profile, catalogPageKey, "page=10001"),
+	null,
+	"Out-of-bound pages must never enter persistent cache identity.",
 );
 
 const canonicalMoveTargets = buildPublicEntityInvalidationTargets({

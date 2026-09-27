@@ -32,10 +32,15 @@ export const projectSeoTemplateKeys = [
 
 export type ProjectSeoTemplateKey = (typeof projectSeoTemplateKeys)[number];
 export type ProjectDistrictType = "admin_district" | "microdistrict";
+export type ProjectSeoCategoryForms = {
+	nominativePlural: string;
+	accusativeSingular: string;
+	genitivePlural: string;
+};
 
 export type ProjectSeoTemplateContext = {
 	brand: string;
-	category?: string;
+	category?: ProjectSeoCategoryForms;
 	city?: ApprovedMorphology;
 	region?: ApprovedMorphology;
 	district?: ApprovedMorphology;
@@ -51,14 +56,20 @@ export type ProjectSeoTemplateContext = {
 const projectSeoFacetLabels: Readonly<Record<string, string>> =
 	projectSeoFacetLabelsInput;
 
-const projectSeoCategoryLabels: Readonly<Record<string, string>> =
-	projectSeoCategoryLabelsInput;
+const projectSeoCategoryLabels: Readonly<
+	Record<string, ProjectSeoCategoryForms>
+> = projectSeoCategoryLabelsInput;
 
-export function projectSeoCategoryLabel(slug: string): string {
-	const label = projectSeoCategoryLabels[slug];
-	if (!label)
-		throw new Error(`Project SEO category label is missing: ${slug}.`);
-	return label;
+export function projectSeoCategoryForms(slug: string): ProjectSeoCategoryForms {
+	const forms = projectSeoCategoryLabels[slug];
+	if (!forms)
+		throw new Error(`Project SEO category forms are missing: ${slug}.`);
+	for (const [name, value] of Object.entries(forms)) {
+		if (!value.trim()) {
+			throw new Error(`Project SEO category form is missing: ${slug}.${name}.`);
+		}
+	}
+	return forms;
 }
 
 export function projectSeoFacetLabel(slug: string): string {
@@ -117,8 +128,12 @@ export function renderProjectSeoTemplate(
 		definition,
 		{
 			brand: context.brand,
-			category: context.category,
+			category: context.category?.nominativePlural,
+			categoryNominativePlural: context.category?.nominativePlural,
+			categoryAccusative: context.category?.accusativeSingular,
+			categoryGenitivePlural: context.category?.genitivePlural,
 			cityPhrase: morphologyPhrase(geo, "prepositional", true),
+			cityGenitive: morphologyPhrase(geo, "genitive"),
 			geoGenitive: morphologyPhrase(geo, "genitive"),
 			districtPhrase: morphologyPhrase(context.district, "prepositional", true),
 			districtAdjLocative: context.districtAdjLocative?.trim(),

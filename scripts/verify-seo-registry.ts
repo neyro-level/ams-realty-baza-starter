@@ -14,6 +14,7 @@ import {
 } from "../src/project/seo/registry-seed.ts";
 import {
 	isFreshPriceCheckedAt,
+	projectSeoCategoryForms,
 	projectSeoTemplateKeys,
 	renderProjectSeoTemplate,
 } from "../src/project/seo/templates.ts";
@@ -88,7 +89,10 @@ assert.throws(
 assert.throws(
 	() =>
 		validateRegistryCsv(
-			csvSource.replace('"","fallback_no_data"', '"1","fallback_no_data"'),
+			csvSource.replace(
+				",searchDemand,,fallback_no_data,",
+				",searchDemand,1,fallback_no_data,",
+			),
 		),
 	/must keep value null/,
 );
@@ -96,8 +100,8 @@ assert.throws(
 	() =>
 		validateRegistryCsv(
 			csvSource.replace(
-				'"draft","true","starter-v2.1.0"',
-				'"approved","true","starter-v2.1.0"',
+				",draft,true,starter-v2.1.0,",
+				",approved,true,starter-v2.1.0,",
 			),
 		),
 	/Synthetic SEO row cannot be approved/,
@@ -106,8 +110,8 @@ assert.throws(
 	() =>
 		validateRegistryCsv(
 			csvSource.replace(
-				'"draft","true","starter-v2.1.0","listing"',
-				'"unknown","true","starter-v2.1.0","listing"',
+				",draft,true,starter-v2.1.0,listing",
+				",unknown,true,starter-v2.1.0,listing",
 			),
 		),
 	/Unsupported SEO registry status/,
@@ -115,29 +119,24 @@ assert.throws(
 assert.throws(
 	() =>
 		validateRegistryCsv(
-			csvSource.replace('"noindex,follow","home"', '"unknown","home"'),
+			csvSource.replace(',"noindex,follow",home', ",unknown,home"),
 		),
 	/Unsupported SEO robots directive/,
 );
 assert.throws(
 	() =>
 		validateRegistryCsv(
-			csvSource.replace(
-				'"starter-v2.1.0","listing"',
-				'"starter-v2.1.0","unknown"',
-			),
+			csvSource.replace(",starter-v2.1.0,listing", ",starter-v2.1.0,unknown"),
 		),
 	/Unsupported contentGateRule/,
 );
 assert.throws(
-	() => validateRegistryCsv(csvSource.replace('"searchDemand"', '"wordstat"')),
+	() => validateRegistryCsv(csvSource.replace(",searchDemand,", ",wordstat,")),
 	/differs from SiteProfile metric/,
 );
 assert.throws(
 	() =>
-		validateRegistryCsv(
-			csvSource.replace('"true","TEST","10"', '"true","P1","10"'),
-		),
+		validateRegistryCsv(csvSource.replace(",true,TEST,10,", ",true,P1,10,")),
 	/differs from derived tier/,
 );
 assert.throws(
@@ -177,7 +176,7 @@ const wordstatProfile = {
 };
 assert.equal(
 	validateRegistryCsv(
-		`${csvHeader}\n${homeCsvRow.replace('"searchDemand"', '"wordstat"')}\n`,
+		`${csvHeader}\n${homeCsvRow.replace(",searchDemand,", ",wordstat,")}\n`,
 		wordstatProfile,
 		projectDistrictRouteRegistry,
 	)[0]?.metric,
@@ -222,7 +221,7 @@ assert.equal(stalePrice.description, "ЖК «Тест»");
 
 const unapproved = renderProjectSeoTemplate("categoryGeo", {
 	brand: "AMS Realty",
-	category: "Квартиры",
+	category: projectSeoCategoryForms("kvartiry"),
 	city: {
 		approved: false,
 		nominative: "Тестоград",
@@ -251,7 +250,7 @@ assert.equal(
 
 const districtSnapshot = renderProjectSeoTemplate("categoryGeoDistrictMicro", {
 	brand: "AMS Realty",
-	category: "Квартиры",
+	category: projectSeoCategoryForms("kvartiry"),
 	city: {
 		approved: true,
 		nominative: "Ростов-на-Дону",
@@ -283,7 +282,7 @@ const explicitAdminDistrictSnapshot = renderProjectSeoTemplate(
 	"categoryGeoDistrictAdmin",
 	{
 		brand: "AMS Realty",
-		category: "Квартиры",
+		category: projectSeoCategoryForms("kvartiry"),
 		city: {
 			approved: true,
 			nominative: "Ростов-на-Дону",
@@ -305,7 +304,7 @@ const explicitAdminDistrictSnapshot = renderProjectSeoTemplate(
 );
 assert.equal(
 	explicitAdminDistrictSnapshot.title,
-	"Купить квартиру в Ленинском районе в Ростове-на-Дону — цены",
+	"Купить квартиру в Ленинском районе Ростова-на-Дону — цены",
 );
 assert.equal(explicitAdminDistrictSnapshot.morphologyApproved, true);
 
@@ -313,7 +312,7 @@ assert.throws(
 	() =>
 		renderProjectSeoTemplate("categoryGeoDistrictAdmin", {
 			brand: "AMS Realty",
-			category: "Квартиры",
+			category: projectSeoCategoryForms("kvartiry"),
 			city: {
 				approved: true,
 				nominative: "Ростов-на-Дону",
@@ -340,7 +339,7 @@ const registryDistrictSnapshot = renderProjectSeoTemplate(
 	"categoryGeoDistrictMicro",
 	{
 		brand: "AMS Realty",
-		category: "Квартиры",
+		category: projectSeoCategoryForms("kvartiry"),
 		city: {
 			approved: true,
 			nominative: "Приморск",
@@ -391,7 +390,7 @@ const adminDistrictSnapshot = renderProjectSeoTemplate(
 	"categoryGeoDistrictAdmin",
 	{
 		brand: "AMS Realty",
-		category: "Квартиры",
+		category: projectSeoCategoryForms("kvartiry"),
 		city: {
 			approved: true,
 			nominative: "Ростов-на-Дону",
@@ -414,11 +413,11 @@ const adminDistrictSnapshot = renderProjectSeoTemplate(
 );
 assert.equal(
 	adminDistrictSnapshot.title,
-	"Купить квартиру в Ленинском районе в Ростове-на-Дону — цены",
+	"Купить квартиру в Ленинском районе Ростова-на-Дону — цены",
 );
 assert.equal(
 	adminDistrictSnapshot.h1,
-	"Квартиры в Ленинском районе в Ростове-на-Дону",
+	"Квартиры в Ленинском районе Ростова-на-Дону",
 );
 assert.equal(isFreshPriceCheckedAt("2026-09-01T12:00:00.000Z", 45, now), true);
 assert.equal(isFreshPriceCheckedAt("2026-07-01T12:00:00.000Z", 45, now), false);

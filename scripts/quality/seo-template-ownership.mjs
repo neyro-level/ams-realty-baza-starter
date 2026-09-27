@@ -8,6 +8,10 @@ const project = [
 ]
 	.map((path) => readFileSync(path, "utf8"))
 	.join("\n");
+const templateInputs = readFileSync(
+	"src/project/seo/template-inputs.ts",
+	"utf8",
+);
 const catalog = readFileSync(
 	"src/project/data-access/public/geo-catalog.ts",
 	"utf8",
@@ -35,5 +39,12 @@ for (const literal of marketingLiterals) {
 assert.doesNotMatch(catalog, /\bsafeSeo\b/);
 assert.doesNotMatch(catalog, /following:\s*["']nofollow["']/);
 assert.match(catalog, /projectSeoMeta/);
+const districtTemplates = templateInputs.slice(
+	templateInputs.indexOf("categoryGeoDistrictAdmin:"),
+	templateInputs.indexOf("categoryGeoFacet:"),
+);
+assert.match(districtTemplates, /\{categoryAccusative\}/);
+assert.match(districtTemplates, /\{categoryNominativePlural\}/);
+assert.doesNotMatch(districtTemplates, /Купить квартиру|Квартиры/);
 
 console.log("project SEO template ownership guard passed");

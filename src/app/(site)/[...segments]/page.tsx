@@ -11,6 +11,7 @@ import {
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { toMetadata } from "@/core/seo/page-metadata";
+import { projectCopy } from "@/project/copy";
 import { leadConsentContext } from "@/project/legal.config";
 import { pageHref } from "@/project/routing/catalog-search-params";
 import { resolveRuntimeRoute } from "@/project/routing/runtime-route";
@@ -152,7 +153,7 @@ export default async function CanonicalRuntimePage({
 								? {
 										hasFilters: true,
 										clearHref: routePath,
-										summary: "Каталог отфильтрован по выбранным параметрам.",
+										summary: projectCopy.catalog.filteredSummary,
 									}
 								: undefined
 						}

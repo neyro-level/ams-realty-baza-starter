@@ -71,9 +71,12 @@ import {
 	mergeDeveloperCards,
 	publishedDeveloperGeoSlugs,
 } from "@/project/routing/developer-surface";
-import { publicGatewayCacheTags } from "@/project/routing/public-gateway-cache";
 import {
-	projectSeoCategoryLabel,
+	publicGatewayCacheTags,
+	publicGatewayRouteCacheIdentity,
+} from "@/project/routing/public-gateway-cache";
+import {
+	projectSeoCategoryForms,
 	projectSeoMeta,
 	renderProjectSeoTemplate,
 } from "@/project/seo/templates";
@@ -221,7 +224,7 @@ async function resolveFixtureRuntimeRoute(
 	) {
 		const context = {
 			brand: fixtureNap.brandName,
-			category: projectSeoCategoryLabel(pageKey.category),
+			category: projectSeoCategoryForms(pageKey.category),
 			city: cityMorphology,
 			inventory: geoCatalogContractFixtures.listing.total,
 		};
@@ -934,9 +937,17 @@ async function resolveRuntimeRoutePersisted(
 		await getCachedDistrictRouteRegistry(),
 	);
 	const pageKey = grammar.parseUrl(pathname);
+	const cacheIdentity = publicGatewayRouteCacheIdentity(
+		siteProfile,
+		pageKey,
+		queryString,
+	);
+	if (!cacheIdentity) {
+		return resolveRuntimeRouteUncached(pathname, queryString);
+	}
 	const cached = unstable_cache(
 		() => resolveRuntimeRouteUncached(pathname, queryString),
-		["public-gateway-route", pathname, queryString],
+		["public-gateway-route", pathname, ...cacheIdentity.keyParts],
 		{
 			tags: publicGatewayCacheTags(pageKey),
 			revalidate: 3600,

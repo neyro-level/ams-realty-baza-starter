@@ -170,10 +170,22 @@ function validateSeoInputs(input) {
 		}
 	}
 	for (const surface of catalogSurfaces) {
-		requiredString(
-			input.categoryLabels[surface],
-			`seoTemplates.categoryLabels.${surface}`,
-		);
+		const forms = input.categoryLabels[surface];
+		if (!forms || typeof forms !== "object" || Array.isArray(forms)) {
+			throw new Error(
+				`SEO category forms are required: seoTemplates.categoryLabels.${surface}.`,
+			);
+		}
+		for (const form of [
+			"nominativePlural",
+			"accusativeSingular",
+			"genitivePlural",
+		]) {
+			requiredString(
+				forms[form],
+				`seoTemplates.categoryLabels.${surface}.${form}`,
+			);
+		}
 	}
 	for (const key of seoTemplateKeys) {
 		const definition = input.templates[key];
@@ -484,6 +496,48 @@ export function renderSiteProfileConfigFromConfig(config) {
 	)} as const satisfies ProjectSiteProfileConfig;\n`;
 }
 
+export function renderProjectCopy(preset) {
+	return renderProjectCopyFromConfig(siteProfileConfigForPreset(preset));
+}
+
+export function renderProjectCopyFromConfig(config) {
+	const catalogSurface = catalogSurfaces.find((surface) =>
+		["ACTIVE", "NOINDEX_AUTO"].includes(config.categoryStatus[surface]),
+	);
+	if (!catalogSurface) {
+		throw new Error(
+			"Project copy requires at least one routable catalog surface.",
+		);
+	}
+	const catalogHref = `/${catalogSurface}/`;
+	const copy = {
+		notFound: {
+			code: "Ошибка 404",
+			title: "Страница не найдена",
+			body: "Адрес мог измениться. Вернитесь на главную или откройте каталог недвижимости.",
+			homeLabel: "На главную",
+			catalogLabel: "В каталог",
+			catalogHref,
+		},
+		catalog: {
+			filteredSummary: "Каталог отфильтрован по выбранным параметрам.",
+		},
+		entityGone: {
+			title: "Объект снят с публикации",
+			bodyPrefix: "Страница объекта",
+			bodySuffix:
+				"больше не содержит публичные данные после окончания retention-периода. Автоматический редирект на главную не выполняется.",
+			catalogLabel: "Смотреть актуальные объекты",
+			catalogHref,
+		},
+	};
+	return `/** Generated from the canonical project preset. Do not edit directly. */\nimport type { ProjectCopy } from "./copy.types.ts";\n\nexport const projectCopy = ${JSON.stringify(
+		copy,
+		null,
+		"\t",
+	)} as const satisfies ProjectCopy;\n`;
+}
+
 export function renderSeoTemplateInputs(preset) {
 	return `/** Generated project-owned SEO copy inputs from clone preset v2. */\nexport const projectSeoCategoryLabelsInput = ${JSON.stringify(
 		preset.seoTemplates.categoryLabels,
@@ -572,6 +626,7 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 		geo,
 		category,
 		facet,
+		district,
 		entityRef,
 		contentGateRule,
 	}) => {
@@ -584,12 +639,27 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 				cityPhrase: geoMorphology
 					? `${geoMorphology.preposition} ${geoMorphology.prepositional}`
 					: undefined,
+				cityGenitive: geoMorphology?.genitive,
+				districtPhrase: district
+					? `${district.preposition} ${district.locative}`
+					: undefined,
+				districtAdjLocative: district?.adjLocative,
 				category: category
-					? preset.seoTemplates.categoryLabels[category]
+					? preset.seoTemplates.categoryLabels[category].nominativePlural
+					: undefined,
+				categoryNominativePlural: category
+					? preset.seoTemplates.categoryLabels[category].nominativePlural
+					: undefined,
+				categoryAccusative: category
+					? preset.seoTemplates.categoryLabels[category].accusativeSingular
+					: undefined,
+				categoryGenitivePlural: category
+					? preset.seoTemplates.categoryLabels[category].genitivePlural
 					: undefined,
 				facet: facet ? preset.seoTemplates.facetLabels[facet] : undefined,
 			},
-			geo ? geo.morphologyApproved : true,
+			(geo ? geo.morphologyApproved : true) &&
+				(district ? district.morphologyApproved : true),
 		);
 		const url = grammar.buildUrl(pageKey);
 		rows.push({
@@ -624,6 +694,16 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 		entityRef: null,
 		contentGateRule: "listing",
 	});
+	for (const [category, status] of Object.entries(profile.categoryStatus)) {
+		if (status === "PREPARED_OFF" || status === "OUT") continue;
+		add({
+			pageKey: { kind: "categoryRoot", category },
+			templateKey: "categoryRoot",
+			category,
+			entityRef: `category:${category}`,
+			contentGateRule: "listing",
+		});
+	}
 	for (const geo of preset.geos.filter(
 		(item) => item.published && item.hubStatus !== "PREPARED_OFF",
 	)) {
@@ -637,7 +717,7 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 		for (const [category, status] of Object.entries(
 			profile.geoCategoryStatus[geo.slug] ?? {},
 		)) {
-			if (status !== "ACTIVE") continue;
+			if (status === "PREPARED_OFF" || status === "OUT") continue;
 			add({
 				pageKey: { kind: "categoryGeo", geo: geo.slug, category },
 				templateKey: "categoryGeo",
@@ -646,8 +726,30 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 				entityRef: `geo:${geo.slug}/category:${category}`,
 				contentGateRule: "listing",
 			});
+			for (const district of geo.districts) {
+				add({
+					pageKey: {
+						kind: "categoryGeoDistrict",
+						geo: geo.slug,
+						category,
+						district: district.slug,
+					},
+					templateKey:
+						district.type === "admin_district"
+							? "categoryGeoDistrictAdmin"
+							: "categoryGeoDistrictMicro",
+					geo,
+					category,
+					district,
+					entityRef: `geo:${geo.slug}/category:${category}/district:${district.slug}`,
+					contentGateRule: "listing",
+				});
+			}
 		}
-		if (profile.developersSurface.byGeo[geo.slug] === "ACTIVE") {
+		if (
+			profile.developersSurface.byGeo[geo.slug] !== "PREPARED_OFF" &&
+			profile.developersSurface.byGeo[geo.slug] !== "OUT"
+		) {
 			add({
 				pageKey: { kind: "geoDevelopers", geo: geo.slug },
 				templateKey: "geoDevelopers",
@@ -657,12 +759,24 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 			});
 		}
 	}
+	if (
+		profile.developersSurface.root !== "PREPARED_OFF" &&
+		profile.developersSurface.root !== "OUT"
+	) {
+		add({
+			pageKey: { kind: "developerRoot" },
+			templateKey: "developerRoot",
+			entityRef: "developers:root",
+			contentGateRule: "developerGeo",
+		});
+	}
 	for (const [facet, definition] of Object.entries(profile.seoFacets)) {
 		const geo = preset.geos.find((item) => item.slug === definition.geo);
 		if (
 			!geo ||
-			profile.geoCategoryStatus[definition.geo]?.[definition.category] !==
-				"ACTIVE"
+			profile.geoCategoryStatus[definition.geo]?.[definition.category] ===
+				"PREPARED_OFF" ||
+			profile.geoCategoryStatus[definition.geo]?.[definition.category] === "OUT"
 		)
 			continue;
 		add({

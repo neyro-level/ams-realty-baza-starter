@@ -16,6 +16,7 @@ import {
 	readClonePreset,
 	siteProfileConfigForPreset,
 } from "./clone-preset.mjs";
+import { registryCoverage } from "./seo-registry-coverage.ts";
 
 const root = process.cwd();
 const clonePresetSource = readFileSync(
@@ -57,16 +58,27 @@ const souzSkeleton = buildClientSeoSkeleton(
 	souzProfile,
 	"2026-09-27T00:00:00.000Z",
 );
-assert.equal(souzSkeleton.rows.length, 6);
+assert.equal(souzSkeleton.rows.length, 17);
 assert.deepEqual(
 	new Set(souzSkeleton.rows.map((row) => row.pageKey.kind)),
 	new Set([
 		"home",
+		"categoryRoot",
 		"geoHub",
 		"categoryGeo",
+		"categoryGeoDistrict",
 		"categoryGeoFacet",
 		"geoDevelopers",
+		"developerRoot",
 	]),
+);
+assert.equal(
+	registryCoverage(
+		souzProfile,
+		souzSkeleton.districtRegistry,
+		souzSkeleton.rows,
+	).status,
+	"PASS",
 );
 assert.ok(
 	souzSkeleton.rows.every(
@@ -275,6 +287,14 @@ try {
 			new RegExp(`Client preset requires explicit ${requiredField}`),
 		);
 	}
+	const missingCategoryForm = structuredClone(preset);
+	delete missingCategoryForm.seoTemplates.categoryLabels.kvartiry
+		.genitivePlural;
+	writeFileSync(presetPath, JSON.stringify(missingCategoryForm));
+	assert.throws(
+		() => readClonePreset(presetPath),
+		/seoTemplates\.categoryLabels\.kvartiry\.genitivePlural/,
+	);
 	writeFileSync(presetPath, JSON.stringify({ schemaVersion: 2 }));
 	assert.throws(
 		() => readClonePreset(presetPath),
@@ -426,6 +446,10 @@ try {
 		/client-test\.local/,
 	);
 	assert.match(
+		readFileSync(join(fixture, "src/project/copy.ts"), "utf8"),
+		/projectCopy/,
+	);
+	assert.match(
 		readFileSync(join(fixture, "src/project/seo/template-inputs.ts"), "utf8"),
 		/projectSeoTemplatesInput/,
 	);
@@ -452,6 +476,7 @@ try {
 		"docs/seo/DISTRICTS.csv",
 		"docs/seo/SEO_REGISTRY_SEED.csv",
 		"src/project/site-profile.config.ts",
+		"src/project/copy.ts",
 		"src/project/project-literals.json",
 		"src/project/seo/template-inputs.ts",
 		"src/project/seo/registry-seed.ts",
