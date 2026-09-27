@@ -1,6 +1,6 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 10 V4 APPROVED HANDOFF / PLAN 9 EXECUTION COMPLETE`.
+Статус: `ACTIVE / PLAN 10 EXECUTION COMPLETE / NO ACTIVE READY GRAPH`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
@@ -14,18 +14,16 @@ tag и production не входили в Developer graph и не разреше�
 команды владельца. Репозиторное зеркало выполняется отдельно и не разрешает
 release.
 
-Plan №10 «Clone-Ready 2.1» собран как
-`docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md`, `v4 APPROVED`.
-Финальный четырёхпроходный аудит завершён: 22/22 узла, циклов 0, открытых
-blocker/major 0, readiness `READY_WITH_LIMITS`. Owner approval exact v4
-получен; разрешены clean Task Manager import и Developer handoff по трём
-`MERGE_AFTER_GATE` batch. Production, tag, mirror и live target execution не
-разрешены.
+Plan №10 «Clone-Ready 2.1» (`docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md`, v4
+APPROVED) исполнен полностью: Task Manager `22/22` closed, три approved
+`MERGE_AFTER_GATE` batch приняты PR 174/175/176, итоговый implementation merge
+— SourceCraft `main@c08ea05721d434670885ad45b0f473f2642a155c`.
+Production, tag и live target execution планом не разрешались.
 
 ## NOW
 
-- Выполнить readiness revalidation, clean import exact Plan №10 v4 в Task
-  Manager и handoff Developer через одну goal на весь approved graph.
+- Активного READY implementation graph нет; новый scope начинается только с
+  отдельного approved плана или task contract владельца.
 - Поддерживать канонические документы и runtime без скрытого расширения scope.
 - Любая новая реализация начинается approved task contract и batch-owned
   рабочим потоком от актуального SourceCraft `main`.
@@ -60,6 +58,9 @@ blocker/major 0, readiness `READY_WITH_LIMITS`. Owner approval exact v4
   accepted implementation baseline
   `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` входит в текущий SourceCraft
   `main`; S15 excluded.
+- Plan №10: `EXECUTION_COMPLETE`; 22/22 tasks, PR 174/175/176, canonical
+  implementation merge `c08ea05721d434670885ad45b0f473f2642a155c`; итоговый
+  отчёт `evidence/plan10/FINAL_REPORT.md`.
 - Plan №7: завершённый исторический execution record.
 - Plans №2–6: закрытая история; не исполнять повторно без нового approved scope.
 

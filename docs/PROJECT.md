@@ -11,8 +11,10 @@ route cutover и P8-23B cleanup находятся в текущем runtime. К
 `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
 `main`; execution graph Plan №9 `48/48` closed.
 S15, release tag и production не выполнялись и остаются owner gates. Plan №10
-B1/B2 уже добавили preset schema v3, geo seed, актуальную SEO template matrix и
-bounded public runtime; B3 готовит проверяемый release package без rollout.
+v4 полностью исполнен: B1 добавил preset schema v3 и geo seed, B2 — актуальную
+SEO template matrix и bounded public runtime, B3 — проверяемый release package
+без rollout. Итоговый implementation merge — SourceCraft
+`main@c08ea05721d434670885ad45b0f473f2642a155c`.
 Репозиторное GitHub-зеркало синхронизируется отдельно и не является release
 proof.
 
@@ -75,8 +77,8 @@ proof.
 | Development model | Одна `developments` entity с `kind = residential_complex | cottage_village` и strict kind-specific validation |
 | Plan 8 delivery | `EXECUTION_COMPLETE`; production и release tag остаются отдельными owner actions; repository mirror — отдельная операционная синхронизация |
 | Plan 9 delivery | S0-S14 `EXECUTION_COMPLETE`; accepted implementation baseline `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` is contained in current SourceCraft `main`; S15 excluded |
-| Target release tag | `starter-v2.1.0`; only after Plan №9 acceptance and a separate owner release command |
-| Plan 10 delivery | B1/B2 merged; B3 release-readiness in progress. Production, tag, mirror and actual live proof are not authorized by plan execution |
+| Target release tag | `starter-v2.1.0`; only after a separate S15 preflight and owner release command |
+| Plan 10 delivery | `EXECUTION_COMPLETE`; 22/22 tasks closed through PR 174/175/176; canonical implementation merge `c08ea05721d434670885ad45b0f473f2642a155c`. Production, tag and actual live proof were not authorized by plan execution |
 
 ## Optional modules
 

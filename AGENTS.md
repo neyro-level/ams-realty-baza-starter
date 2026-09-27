@@ -11,16 +11,14 @@
   `docs/plan8/S8_25_FINAL_EXECUTION_REPORT.md`. Принятый implementation SHA —
   `bd570ee40db9e25f73a24013be836dd3876282ac`; docs-only reconciliation слит в
   SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
-- Текущий execution source —
-  `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md`, Plan №9 v6
-  `APPROVED`. S0-S14 исполнены через 12 SourceCraft PR/Gate/merge cycles;
-  принятый implementation baseline —
-  `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
-  `main`. Локальный Task Manager
-  закрыт `48/48`, без READY/open/in-progress задач внутри execution graph.
-  S15, release tag и production остаются отдельным owner/release gate;
-  репозиторное зеркало выполняется только по явной команде владельца и не
-  заменяет release proof. `.beads` не коммитится.
+- Последний исполненный execution source —
+  `docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md`, Plan №10 v4 `APPROVED`.
+  Все 22/22 узла закрыты тремя SourceCraft PR/Gate/merge cycles; итоговый
+  implementation merge — SourceCraft
+  `main@c08ea05721d434670885ad45b0f473f2642a155c`. Активного READY execution
+  graph сейчас нет. S15, release tag и production остаются отдельным
+  owner/release gate; репозиторное зеркало выполняется только по явной команде
+  владельца и не заменяет release proof. `.beads` не коммитится.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
@@ -32,21 +30,18 @@
    `04_BACKLOG.md` по scope.
 4. `docs/PROJECT.md` — решения этого starter instance.
 5. `docs/DESIGN.md` или `docs/OPERATIONS.md` по scope.
-6. `docs/AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — только для
-   approved/approval-bound scope Plan №9.
+6. `docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md` — исполненный exact scope Plan
+   №10; читать как execution contract/evidence, а не как READY-очередь.
 7. Профильный ADR/module/research документ, только когда он входит в scope.
 8. `docs/plan8/`, `docs/proofs/` и `docs/legacy/` — только для evidence.
 
 ## Invariants
 
-- Один независимый stream = одна branch/worktree = один Pull Request. Для Plan
-  №9 v6 один stream равен approved delivery batch; constituent epic tasks внутри
-  batch используют тот же worktree и сохраняют отдельные evidence checkpoints.
+- Один независимый stream = одна branch/worktree = один Pull Request.
 - Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
-- Планы №6–8 и implementation scope Plan №9 S0-S14 исполнены и не являются
-  очередью работ. Существующий tag
+- Планы №6–10 исполнены и не являются очередью работ. Существующий tag
   `starter-freeze` остаётся историческим. Целевой tag `starter-v2.1.0` может
-  создаваться только после исполнения и финальной приёмки Plan №9 и по
+  создаваться только после отдельного S15 preflight и по
   отдельной явной release-команде владельца; production также требует
   отдельной команды.
 - Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.

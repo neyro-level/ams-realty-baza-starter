@@ -8,10 +8,12 @@ for (const required of [
 	"| `pnpm verify` | `LOCAL PASS` |",
 	"| `pnpm verify:clone-matrix` | `LOCAL PASS` |",
 	"LIVE PROOFS: `NOT RUN`",
-	"B3 SourceCraft Gate: `PENDING B3-D`",
+	"B3 SourceCraft Gate: `PASS`",
 	"Production: `NOT RUN`",
 	"Release tag: `NOT CREATED`",
-	"Mirror: `NOT RUN`",
+	"1644529894bd0ff1418a7e47e29f8e0b1f396d01",
+	"c08ea05721d434670885ad45b0f473f2642a155c",
+	"RISKY run `347`",
 ]) {
 	assert.ok(
 		report.includes(required),

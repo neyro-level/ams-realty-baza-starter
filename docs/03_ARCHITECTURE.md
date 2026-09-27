@@ -13,13 +13,12 @@ Secrets source=Secret Master / self-hosted Infisical
 ```
 
 Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №8 v6
-остаётся historical evidence. Plan №9 v6 S0-S14 исполнен через approved
-stable-ID delivery batches; принятый implementation baseline —
-`5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
-`main`; execution graph Plan №9 `48/48` closed.
+и Plan №9 v6 остаются historical evidence. Plan №10 v4 исполнен тремя approved
+delivery batches; execution graph закрыт `22/22`, итоговый implementation merge
+— SourceCraft `main@c08ea05721d434670885ad45b0f473f2642a155c`.
 GitHub получает только отдельный явный fast-forward mirror canonical `main`.
 S15, production и target tag `starter-v2.1.0` остаются отдельными owner actions
-после завершённого implementation scope Plan №9. Репозиторное зеркало —
+после завершённого implementation scope Plan №10. Репозиторное зеркало —
 отдельная операционная синхронизация и не является S15/release proof.
 
 ## Delivery baseline
@@ -39,17 +38,17 @@ S15, production и target tag `starter-v2.1.0` остаются отдельны
   PostgreSQL запускается только для первых трёх scope, build — только для
   `dependency-runtime`; каждый RISKY сначала выполняет STANDARD и затем только
   доказательство выбранного риска.
-- Plan №9 v6 применяет Gate к delivery batch, а не повторно к каждому epic
-  checkpoint: все constituent tasks сохраняют evidence, но один exact-head SHA,
-  один PR и один Gate закрывают batch. Несовместимые risk scopes в одном batch
-  запрещены.
+- Исполненные Plan №9/10 применяли Gate к delivery batch, а не повторно к
+  каждому task checkpoint: constituent tasks сохраняют evidence, но один
+  exact-head SHA, один PR и один Gate закрывают batch. Несовместимые risk scopes
+  в одном batch запрещены.
 - Demo release contract уже требует clean exact `main`, immutable Docker image,
   migrations из того же image, один jobs owner, live health/smoke и сохранённый
   previous image/env rollback point. Текущий Dockerfile копирует весь `/app` и
   не использует standalone allowlist; release hardening остаётся отдельной
   RISKY-задачей до первого client production и не выполняется этим inventory.
 - Наблюдаемый SourceCraft tag `starter-freeze` остаётся историческим. Новый
-  target tag `starter-v2.1.0` требует завершения Plan №9, финальной приёмки и
+  target tag `starter-v2.1.0` требует отдельного S15 preflight и
   отдельной release-команды владельца.
 
 ## Stack и ownership

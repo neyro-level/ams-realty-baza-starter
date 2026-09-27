@@ -1,9 +1,9 @@
 # Release Checklist
 
-Статус: `ACTIVE RELEASE CONTRACT / PLAN 9 S0-S14 COMPLETE / NO CURRENT RELEASE
-AUTHORIZATION`. Принятый Plan №9 implementation baseline
-`5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` входит в текущий SourceCraft
-`main`, но S15, release tag и production не запускались. Репозиторное GitHub-
+Статус: `ACTIVE RELEASE CONTRACT / PLAN 10 EXECUTION COMPLETE / NO CURRENT
+RELEASE AUTHORIZATION`. Итоговый Plan №10 implementation merge
+`c08ea05721d434670885ad45b0f473f2642a155c` входит в SourceCraft `main`, но
+S15, release tag и production не запускались. Репозиторное GitHub-
 зеркало синхронизируется отдельно и не является release proof. Owner-operated
 demo contour существует. PII
 retention days остаются `NEEDS_OWNER`; implementation proof не заменяет
@@ -11,9 +11,7 @@ retention days остаются `NEEDS_OWNER`; implementation proof не зам�
 
 ## Перед Pull Request
 
-- scope соответствует одному claimed delivery stream и одному worktree; Plan
-  №9 v6 допускает несколько constituent tasks только внутри одного approved
-  batch с общей delivery boundary;
+- scope соответствует одному claimed delivery stream и одному worktree;
 - source documents и runtime не имеют известного незафиксированного drift;
 - релевантные локальные проверки завершены;
 - секреты, PII и generated artifacts не попали в diff;

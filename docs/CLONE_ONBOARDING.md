@@ -20,8 +20,8 @@ domain: start-baza.ams24.ru, noindex
 
 ## B. Client development
 
-Plan №9 v6 утверждён, но tag `starter-v2.1.0` ещё не создан. Его создаёт
-владелец отдельной release-командой только после исполнения Plan №9 и проверки
+Plan №10 v4 исполнен, но tag `starter-v2.1.0` ещё не создан. Его создаёт
+владелец отдельной release-командой только после S15 preflight и проверки
 canonical `main`. До появления этого immutable tag клиентский clone не начинать.
 
 1. Создать отдельный client repository из exact tag `starter-v2.1.0`.

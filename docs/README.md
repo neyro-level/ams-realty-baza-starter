@@ -1,12 +1,10 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 10 V4 APPROVED HANDOFF / PLAN 9 EXECUTION COMPLETE`.
-SourceCraft — primary, GitHub — одностороннее зеркало. Exact v6 исполнен через
-пять approved delivery batches; принятый implementation baseline —
-`5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
-`main`. Execution graph Plan №9 закрыт `48/48`,
-без READY/open/in-progress задач внутри этого графа. Текущие owner gates принадлежат
-`04_BACKLOG.md`.
+Статус: `ACTIVE / PLAN 10 EXECUTION COMPLETE / NO ACTIVE READY GRAPH`.
+SourceCraft — primary, GitHub — одностороннее зеркало. Plan №10 v4 исполнен
+тремя approved delivery batches; 22/22 узла закрыты, итоговый implementation
+merge — SourceCraft `main@c08ea05721d434670885ad45b0f473f2642a155c`.
+Текущие owner gates принадлежат `04_BACKLOG.md`.
 
 ## Source of Truth
 
@@ -25,13 +23,13 @@ SourceCraft — primary, GitHub — одностороннее зеркало. E
 | Граница reusable platform и project composition | `adr/ADR-PLATFORM-LAYOUT.md` |
 | Кандидаты на отдельный future upstream workstream | `UPSTREAM_CANDIDATES.md` |
 
-## Активное планирование
+## Execution state
 
-- `AMS_MASTER_PLAN_10_CLONE_READY_2_1.md` — текущая canonical основа нового
-  Plan №10, `v4 APPROVED / APPROVAL_HANDOFF`. Четыре audit-pass завершены,
-  граф 22/22 без циклов; approval разрешает clean Task Manager import и
-  Developer handoff по трём `MERGE_AFTER_GATE` batch, но не production, tag,
-  mirror или live target execution.
+- `AMS_MASTER_PLAN_10_CLONE_READY_2_1.md` — exact approved contract исполненного
+  Plan №10, `v4 APPROVED / EXECUTION_COMPLETE`. Все 22/22 узла и три
+  `MERGE_AFTER_GATE` batch закрыты; итоговый отчёт —
+  `evidence/plan10/FINAL_REPORT.md`. Production, tag и live target execution в
+  Plan №10 не входили.
 - `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — exact approved source
   исполненного scope S0-S14, `v6 APPROVED / EXECUTION_COMPLETE`.
 - S15, release tag и production не входят в завершённый Developer graph и
@@ -61,6 +59,8 @@ SourceCraft — primary, GitHub — одностороннее зеркало. E
   принятый implementation baseline —
   `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
   `main`.
+- `evidence/plan10/FINAL_REPORT.md` — итоговый implementation и delivery report
+  Plan №10; canonical merge `c08ea05721d434670885ad45b0f473f2642a155c`.
 - `proofs/` — проверки и аудиты на конкретных исторических SHA. Они не
   доказывают текущее production-состояние без нового запуска.
 - `legacy/plans/` и `legacy/orchestration/` — завершённые планы №6–8 и их
