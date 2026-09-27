@@ -8,6 +8,7 @@ import {
 	normalizeGeoPublication,
 } from "../src/core/geo/hierarchy.ts";
 import {
+	assertDistrictMorphologyForms,
 	reservedDistrictSlugs,
 	reservedGeoRootSlugs,
 } from "../src/project/geo/collection-guards.ts";
@@ -99,6 +100,32 @@ const northern = allDistrictFixtures.find(
 assert.equal(northern?.districtType, "microdistrict");
 assert.equal(northern?.parent, null);
 assert.equal(northern?.preposition, "na");
+assert.equal(northern?.locative, "Северном районе");
+assert.doesNotThrow(() =>
+	assertDistrictMorphologyForms({
+		districtType: "admin_district",
+		adjLocative: "Ленинском",
+		adjGenitive: "Ленинского",
+	}),
+);
+assert.throws(() =>
+	assertDistrictMorphologyForms({ districtType: "admin_district" }),
+);
+assert.doesNotThrow(() =>
+	assertDistrictMorphologyForms({
+		districtType: "microdistrict",
+		locative: "Северном",
+		preposition: "na",
+	}),
+);
+assert.throws(() =>
+	assertDistrictMorphologyForms({
+		districtType: "microdistrict",
+		locative: "Северном",
+		preposition: "na",
+		adjLocative: "Северном",
+	}),
+);
 const child = allDistrictFixtures.find(
 	(district) => district.slug === "solnechnyy",
 );

@@ -1,0 +1,228 @@
+{
+	"schemaVersion": 1,
+	"source": {
+		"planId": "AMS-SOUZ-HOME-GEO-CATALOG-PLATFORM-BUILD",
+		"version": "4.1.1 FINAL",
+		"file": "AMS_SOUZ_HOME_FINAL_MASTER_PLAN_V4_1_1.md",
+		"requiredSections": ["SOUZ-4.4", "SOUZ-17.3", "SOUZ-20"],
+		"sections": {
+			"SOUZ-4.4": {
+				"heading": "4.4. Souz R1 project config [PROJECT]",
+				"sourceLines": "621-665"
+			},
+			"SOUZ-5": {
+				"heading": "5. INTENT OWNERSHIP / SEMANTIC SNAPSHOT [PROJECT]",
+				"sourceLines": "684-722"
+			},
+			"SOUZ-17.3": {
+				"heading": "17.3. Canonical metadata templates [PLATFORM]",
+				"sourceLines": "2063-2117"
+			},
+			"SOUZ-20": {
+				"heading": "20. LEGACY MIGRATION POLICY [PROJECT]",
+				"sourceLines": "2197-2258"
+			},
+			"PLAN11-OD11-01": {
+				"heading": "Plan 11 OD11-01 — komnaty status",
+				"decision": "OUT"
+			},
+			"PLAN11-OD11-02": {
+				"heading": "Plan 11 OD11-02 — garazhi status",
+				"decision": "OUT"
+			},
+			"PLAN11-OD11-04": {
+				"heading": "Plan 11 OD11-04 — owner-approved city and district morphology",
+				"decision": "APPROVED"
+			}
+		}
+	},
+	"expectedPreset": {
+		"geoMode": "SINGLE_GEO",
+		"primaryGeo": "rostov-na-donu",
+		"categoryStatus": {
+			"kvartiry": "ACTIVE",
+			"doma": "PREPARED_OFF",
+			"uchastki": "PREPARED_OFF",
+			"kommercheskaya-nedvizhimost": "PREPARED_OFF",
+			"komnaty": "OUT",
+			"garazhi": "OUT",
+			"arenda": "OUT",
+			"novostroyki": "ACTIVE",
+			"kottedzhnye-poselki": "PREPARED_OFF"
+		},
+		"marketCapability": {
+			"newbuild": "ACTIVE",
+			"secondary": "ACTIVE"
+		},
+		"geoCategoryStatus": {
+			"rostov-na-donu": {
+				"kvartiry": "ACTIVE",
+				"doma": "PREPARED_OFF",
+				"uchastki": "PREPARED_OFF",
+				"kommercheskaya-nedvizhimost": "PREPARED_OFF",
+				"komnaty": "OUT",
+				"garazhi": "OUT",
+				"arenda": "OUT",
+				"novostroyki": "ACTIVE",
+				"kottedzhnye-poselki": "PREPARED_OFF"
+			},
+			"bataysk": {
+				"kvartiry": "PREPARED_OFF",
+				"doma": "PREPARED_OFF",
+				"uchastki": "PREPARED_OFF",
+				"kommercheskaya-nedvizhimost": "PREPARED_OFF",
+				"komnaty": "OUT",
+				"garazhi": "OUT",
+				"arenda": "OUT",
+				"novostroyki": "PREPARED_OFF",
+				"kottedzhnye-poselki": "PREPARED_OFF"
+			},
+			"aksay": {
+				"kvartiry": "PREPARED_OFF",
+				"doma": "PREPARED_OFF",
+				"uchastki": "PREPARED_OFF",
+				"kommercheskaya-nedvizhimost": "PREPARED_OFF",
+				"komnaty": "OUT",
+				"garazhi": "OUT",
+				"arenda": "OUT",
+				"novostroyki": "PREPARED_OFF",
+				"kottedzhnye-poselki": "PREPARED_OFF"
+			}
+		},
+		"marketStatus": {
+			"rostov-na-donu": {
+				"newbuild": "ACTIVE",
+				"secondary": "ACTIVE"
+			},
+			"bataysk": {
+				"newbuild": "PREPARED_OFF",
+				"secondary": "PREPARED_OFF"
+			},
+			"aksay": {
+				"newbuild": "PREPARED_OFF",
+				"secondary": "PREPARED_OFF"
+			}
+		},
+		"geos": [
+			{
+				"slug": "rostov-na-donu",
+				"hubStatus": "ACTIVE",
+				"morphology": {
+					"nominative": "Ростов-на-Дону",
+					"genitive": "Ростова-на-Дону",
+					"prepositional": "Ростове-на-Дону",
+					"preposition": "в"
+				},
+				"districts": [
+					{
+						"slug": "leninskiy",
+						"name": "Ленинский",
+						"type": "admin_district",
+						"locative": "Ленинском",
+						"adjLocative": "Ленинском",
+						"adjGenitive": "Ленинского",
+						"preposition": "в",
+						"synonyms": [],
+						"parent": null
+					},
+					{
+						"slug": "voroshilovskiy",
+						"name": "Ворошиловский",
+						"type": "admin_district",
+						"locative": "Ворошиловском",
+						"adjLocative": "Ворошиловском",
+						"adjGenitive": "Ворошиловского",
+						"preposition": "в",
+						"synonyms": [],
+						"parent": null
+					},
+					{
+						"slug": "severnyy",
+						"name": "Северный",
+						"type": "microdistrict",
+						"locative": "Северном",
+						"preposition": "на",
+						"synonyms": [],
+						"parent": null
+					},
+					{
+						"slug": "tsentr",
+						"name": "Центр",
+						"type": "microdistrict",
+						"locative": "Центре",
+						"preposition": "в",
+						"synonyms": [],
+						"parent": null
+					}
+				]
+			},
+			{
+				"slug": "bataysk",
+				"hubStatus": "PREPARED_OFF",
+				"agglomerationOf": "rostov-na-donu"
+			},
+			{
+				"slug": "aksay",
+				"hubStatus": "PREPARED_OFF",
+				"agglomerationOf": "rostov-na-donu"
+			}
+		],
+		"seoFacets": {
+			"vtorichka": {
+				"geo": "rostov-na-donu",
+				"category": "kvartiry",
+				"filter": {
+					"key": "market",
+					"value": "secondary"
+				}
+			}
+		}
+	},
+	"constraints": {
+		"forbiddenStaticRoutes": [
+			{
+				"path": "/sdat",
+				"sources": ["SOUZ-4.4", "PLAN11-OD11-01"]
+			}
+		],
+		"requiredLegacyRoutes": [
+			{
+				"sourceFrom": "/kvartiry-rostova/",
+				"from": "/kvartiry-rostova",
+				"to": "/rostov-na-donu/kvartiry/",
+				"statusCode": 301,
+				"sources": ["SOUZ-20"]
+			}
+		],
+		"forbiddenPreparedCategories": [
+			{
+				"category": "komnaty",
+				"sources": ["PLAN11-OD11-01"]
+			},
+			{
+				"category": "garazhi",
+				"sources": ["PLAN11-OD11-02"]
+			}
+		]
+	},
+	"fieldSources": {
+		"/geoMode": ["SOUZ-4.4"],
+		"/primaryGeo": ["SOUZ-4.4"],
+		"/categoryStatus": ["SOUZ-4.4"],
+		"/categoryStatus/komnaty": ["PLAN11-OD11-01"],
+		"/categoryStatus/garazhi": ["PLAN11-OD11-02"],
+		"/marketCapability": ["SOUZ-4.4"],
+		"/geoCategoryStatus": ["SOUZ-4.4"],
+		"/geoCategoryStatus/rostov-na-donu/komnaty": ["PLAN11-OD11-01"],
+		"/geoCategoryStatus/rostov-na-donu/garazhi": ["PLAN11-OD11-02"],
+		"/geoCategoryStatus/bataysk/komnaty": ["PLAN11-OD11-01"],
+		"/geoCategoryStatus/bataysk/garazhi": ["PLAN11-OD11-02"],
+		"/geoCategoryStatus/aksay/komnaty": ["PLAN11-OD11-01"],
+		"/geoCategoryStatus/aksay/garazhi": ["PLAN11-OD11-02"],
+		"/marketStatus": ["SOUZ-4.4"],
+		"/geos": ["SOUZ-4.4"],
+		"/geos/0/morphology": ["SOUZ-17.3", "PLAN11-OD11-04"],
+		"/geos/0/districts": ["SOUZ-17.3", "PLAN11-OD11-04"],
+		"/seoFacets/vtorichka": ["SOUZ-5"]
+	}
+}

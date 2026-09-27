@@ -1,6 +1,6 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 10 EXECUTION COMPLETE / NO ACTIVE READY GRAPH`.
+Статус: `ACTIVE / PLAN 11 v4 APPROVED / TASK MANAGER CLEAN / DEVELOPER ACTIVE`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
@@ -22,8 +22,26 @@ Production, tag и live target execution планом не разрешалис�
 
 ## NOW
 
-- Активного READY implementation graph нет; новый scope начинается только с
-  отдельного approved плана или task contract владельца.
+- Plan №11 «Clone Factory 2.2» находится в стадии `APPROVAL_HANDOFF`:
+  `docs/AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md`,
+  `v4 APPROVED`. Владелец утвердил exact v4; Task Manager import завершён,
+  reconciliation `CLEAN`, Developer goal активен.
+- `DECIDED P11-OD-01`: `komnaty=OUT`; отдельная route/schema/readiness-модель
+  не заявляется.
+- `DECIDED P11-OD-02`: `garazhi=OUT`; отдельная route/schema/readiness-модель
+  не заявляется.
+- `DECIDED P11-OD-03`: только 20–30 brand primitives живут в
+  `src/project/brand.css`, semantic/component map остаётся в
+  `src/app/globals.css`; Core, DESIGN и guards обновляются в B3-T1. До
+  реализации B3 текущий runtime canon не изменён.
+- `DECIDED P11-OD-04`: точные формы Souz baseline для Ростова-на-Дону,
+  Ленинского и Ворошиловского районов, Северного и Центра утверждены владельцем
+  и зафиксированы в Plan №11.
+- Повторный финальный аудит exact v4 выполнен: blockers `0`, cycles `0`, owner
+  decisions `0`, Night Run `READY_WITH_LIMITS`. Task Manager содержит
+  `4 epic + 26 task`; inventory drift `0`, graph cycles `0`.
+- Текущая READY implementation-задача — `ams11-b1-t1`; остальные узлы
+  открываются только по утверждённым зависимостям.
 - Поддерживать канонические документы и runtime без скрытого расширения scope.
 - Любая новая реализация начинается approved task contract и batch-owned
   рабочим потоком от актуального SourceCraft `main`.

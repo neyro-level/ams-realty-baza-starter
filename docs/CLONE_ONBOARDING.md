@@ -25,8 +25,15 @@ Plan №10 v4 исполнен, но tag `starter-v2.1.0` ещё не созда
 canonical `main`. До появления этого immutable tag клиентский clone не начинать.
 
 1. Создать отдельный client repository из exact tag `starter-v2.1.0`.
-2. Скопировать `docs/CLONE_PRESET.example.json` и
-   `docs/CLONE_SEO_TEMPLATES.example.json` во временный утверждаемый каталог
+2. Скопировать `docs/CLONE_INTAKE.souz.json` как короткий intake клиента и
+   проверить его по `docs/CLONE_INTAKE.schema.json`. Явно заполнить brand/domain,
+   NAP, города и морфологию, статусы разделов и рынков, районы, legacy URL,
+   метрику и пороги; затем выполнить
+   `pnpm clone:init --intake=C:/secure/client-intake.json`. Команда создаёт
+   полный preset v3 и детерминированный отчёт применённых значений профиля
+   `REALTY_BASE_CLIENT_V1`. Отсутствующее решение не дополняется молча.
+   При ручной работе допустимо начать с `docs/CLONE_PRESET.example.json` и
+   `docs/CLONE_SEO_TEMPLATES.example.json` во временном утверждаемом каталоге
    вне Git. Заполнить `projectId`, package/brand/domain, один из режимов
    `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`, `SINGLE_GEO | MULTI_GEO`,
    явные `published`/`hubStatus`, морфологию каждого geo, NAP-контакты,

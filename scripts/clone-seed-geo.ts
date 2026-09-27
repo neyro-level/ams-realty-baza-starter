@@ -37,22 +37,35 @@ const dataset: GeoSeedDataset = {
 		morphologyApproved: true,
 		sortOrder: (cityIndex + 1) * 10,
 		agglomerationOf: geo.agglomerationOf,
-		districts: geo.districts.map((district, districtIndex) => ({
-			slug: district.slug,
-			title: district.name,
-			morphology: {
-				nominative: district.name,
-				genitive: district.name,
-				prepositional: district.locative,
-			},
-			districtType: district.type,
-			parent: district.parent,
-			synonyms: district.synonyms.map((value: string) => ({ value })),
-			preposition:
-				preposition[district.preposition as keyof typeof preposition],
-			morphologyApproved: true,
-			sortOrder: (districtIndex + 1) * 10,
-		})),
+		districts: geo.districts.map((district, districtIndex) => {
+			const common = {
+				slug: district.slug,
+				title: district.name,
+				morphology: {
+					nominative: district.name,
+					genitive: district.name,
+					prepositional: district.locative,
+				},
+				parent: district.parent,
+				synonyms: district.synonyms.map((value: string) => ({ value })),
+				preposition:
+					preposition[district.preposition as keyof typeof preposition],
+				morphologyApproved: true,
+				sortOrder: (districtIndex + 1) * 10,
+			};
+			return district.type === "admin_district"
+				? {
+						...common,
+						districtType: "admin_district" as const,
+						adjLocative: district.adjLocative,
+						adjGenitive: district.adjGenitive,
+					}
+				: {
+						...common,
+						districtType: "microdistrict" as const,
+						locative: district.locative,
+					};
+		}),
 	})),
 };
 

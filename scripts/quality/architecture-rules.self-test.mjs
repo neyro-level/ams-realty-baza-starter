@@ -3,15 +3,17 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import dependencyConfig from "../../.dependency-cruiser.mjs";
 import {
+	configuredLegacyRoutePaths,
+	configuredProjectGeoSlugs,
+	configuredStaticRoutePaths,
 	findCacheGraphViolations,
 	findForbiddenProjectLiteralViolations,
 	findHrefLiteralReports,
 	findPackageBoundaryViolations,
-	configuredStaticRoutePaths,
-	configuredProjectGeoSlugs,
+	findSeoMorphologyDerivationViolations,
 	findStaticRouteParityViolations,
-	projectLiteralDenylist,
 	findUiPersistenceViolations,
+	projectLiteralDenylist,
 } from "./architecture-rules.mjs";
 import { findMissingLocalApiModes } from "./local-api-mode-rule.mjs";
 import { findSqlGovernanceViolations } from "./sql-governance.mjs";
@@ -117,7 +119,11 @@ assert.equal(
 );
 assert.deepEqual(
 	projectLiteralDenylist({
-		projectIdentity: { brands: ["Brand"], domains: ["example.test"], cities: ["City"] },
+		projectIdentity: {
+			brands: ["Brand"],
+			domains: ["example.test"],
+			cities: ["City"],
+		},
 	}),
 	["Brand", "example.test", "City"],
 );
@@ -126,6 +132,13 @@ const staticProfileFixture = `export const config = { staticRoutes: [{ path: "/"
 assert.deepEqual(
 	configuredStaticRoutePaths("site-profile.config.ts", staticProfileFixture),
 	["/", "/kontakty"],
+);
+assert.deepEqual(
+	configuredLegacyRoutePaths(
+		"site-profile.config.ts",
+		`export const config = { legacyRoutes: [{ from: "/old", to: "/new/" }] }`,
+	),
+	["/old"],
 );
 assert.deepEqual(
 	configuredProjectGeoSlugs(
@@ -148,6 +161,14 @@ assert.equal(
 	).length,
 	1,
 	"unregistered static route folder must fail",
+);
+assert.deepEqual(
+	findStaticRouteParityViolations(
+		["src/app/(site)/page.tsx", "src/app/(site)/legacy/page.tsx"],
+		["/"],
+		["/legacy"],
+	),
+	[],
 );
 
 assert.equal(
@@ -208,6 +229,29 @@ assert.equal(
 	]).length,
 	1,
 	"UI browser persistence fixture must fail",
+);
+
+assert.equal(
+	findSeoMorphologyDerivationViolations([
+		{
+			name: "src/project/seo/templates.ts",
+			content:
+				"const districtAdjLocative = context.districtAdjLocative?.trim();",
+		},
+	]).length,
+	0,
+	"explicit district morphology must remain allowed",
+);
+assert.equal(
+	findSeoMorphologyDerivationViolations([
+		{
+			name: "src/project/seo/templates.ts",
+			content:
+				'districtAdjLocative: districtPhrase.replace(/\\s+районе$/iu, "")',
+		},
+	]).length,
+	1,
+	"district suffix mutation must fail",
 );
 
 const dependencyRules = new Set(

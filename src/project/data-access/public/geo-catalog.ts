@@ -86,6 +86,9 @@ const districtSelect = {
 	title: true,
 	morphology: true,
 	districtType: true,
+	adjLocative: true,
+	adjGenitive: true,
+	locative: true,
 	city: true,
 	parent: true,
 	preposition: true,
@@ -1400,6 +1403,8 @@ function listingDTO(
 		city: cityMorphology(city),
 		district: district ? districtMorphology(district) : undefined,
 		districtType: district?.districtType,
+		districtAdjLocative: district?.adjLocative ?? undefined,
+		districtAdjGenitive: district?.adjGenitive ?? undefined,
 		facet:
 			pageKey.kind === "categoryGeoFacet"
 				? projectSeoFacetLabel(pageKey.facet)
@@ -1568,7 +1573,10 @@ function districtMorphology(district: District) {
 		approved: district.morphologyApproved,
 		nominative: district.morphology.nominative,
 		genitive: district.morphology.genitive,
-		prepositional: district.morphology.prepositional,
+		prepositional:
+			district.districtType === "microdistrict"
+				? (district.locative ?? "")
+				: district.morphology.prepositional,
 		preposition:
 			district.preposition === "na"
 				? ("на" as const)

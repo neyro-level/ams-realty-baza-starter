@@ -45,6 +45,8 @@ try {
 						parent: null,
 						synonyms: [{ value: "Clone District" }],
 						preposition: "vo" as const,
+						adjLocative: "Clone Seed District",
+						adjGenitive: "Clone Seed District",
 						morphologyApproved: true,
 						sortOrder: 900,
 					},

@@ -1,15 +1,11 @@
-/** Generated from the canonical project preset. Do not edit directly. */
-import type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";
-
-export const projectSiteProfileConfig = {
+{
+	"schemaVersion": 1,
+	"projectKind": "starter-demo",
 	"preset": "MIXED",
 	"geoMode": "SINGLE_GEO",
 	"primaryGeo": "primorsk",
 	"geos": {
-		"primorsk": {
-			"published": true,
-			"hubStatus": "ACTIVE"
-		}
+		"primorsk": { "published": true, "hubStatus": "ACTIVE" }
 	},
 	"categoryStatus": {
 		"kvartiry": "ACTIVE",
@@ -22,10 +18,7 @@ export const projectSiteProfileConfig = {
 		"novostroyki": "ACTIVE",
 		"kottedzhnye-poselki": "ACTIVE"
 	},
-	"marketCapability": {
-		"newbuild": "ACTIVE",
-		"secondary": "ACTIVE"
-	},
+	"marketCapability": { "newbuild": "ACTIVE", "secondary": "ACTIVE" },
 	"geoCategoryStatus": {
 		"primorsk": {
 			"kvartiry": "ACTIVE",
@@ -40,97 +33,40 @@ export const projectSiteProfileConfig = {
 		}
 	},
 	"marketStatus": {
-		"primorsk": {
-			"newbuild": "ACTIVE",
-			"secondary": "ACTIVE"
-		}
+		"primorsk": { "newbuild": "ACTIVE", "secondary": "ACTIVE" }
 	},
 	"developersSurface": {
 		"root": "ACTIVE",
-		"byGeo": {
-			"primorsk": "ACTIVE"
-		}
+		"byGeo": { "primorsk": "ACTIVE" }
 	},
 	"filterKeys": {
-		"kvartiry": [
-			"rooms",
-			"district",
-			"price",
-			"area",
-			"market"
-		],
-		"doma": [
-			"district",
-			"price",
-			"area"
-		],
-		"uchastki": [
-			"district",
-			"price",
-			"area"
-		],
-		"kommercheskaya-nedvizhimost": [
-			"district",
-			"price",
-			"area"
-		],
-		"komnaty": [
-			"rooms",
-			"district",
-			"price"
-		],
-		"garazhi": [
-			"district",
-			"price"
-		],
-		"arenda": [
-			"rooms",
-			"district",
-			"price"
-		],
-		"novostroyki": [
-			"district",
-			"developer",
-			"completionYear"
-		],
-		"kottedzhnye-poselki": [
-			"district",
-			"developer"
-		]
+		"kvartiry": ["rooms", "district", "price", "area", "market"],
+		"doma": ["district", "price", "area"],
+		"uchastki": ["district", "price", "area"],
+		"kommercheskaya-nedvizhimost": ["district", "price", "area"],
+		"komnaty": ["rooms", "district", "price"],
+		"garazhi": ["district", "price"],
+		"arenda": ["rooms", "district", "price"],
+		"novostroyki": ["district", "developer", "completionYear"],
+		"kottedzhnye-poselki": ["district", "developer"]
 	},
 	"seoFacets": {
 		"vtorichka": {
 			"geo": "primorsk",
 			"category": "kvartiry",
-			"filter": {
-				"key": "market",
-				"value": "secondary"
-			}
+			"filter": { "key": "market", "value": "secondary" }
 		},
 		"dvukhkomnatnye": {
 			"geo": "primorsk",
 			"category": "kvartiry",
-			"filter": {
-				"key": "rooms",
-				"value": [
-					2
-				]
-			}
+			"filter": { "key": "rooms", "value": [2] }
 		}
 	},
 	"seoTiers": {
 		"metric": "searchDemand",
 		"snapshotDate": "2026-09-24",
-		"bands": {
-			"P1": 100,
-			"P2": 50,
-			"TEST": 0
-		},
-		"minInventory": {
-			"P1": 5,
-			"P2": 5,
-			"TEST": 10
-		},
+		"bands": { "P1": 100, "P2": 50, "TEST": 0 },
+		"minInventory": { "P1": 5, "P2": 5, "TEST": 10 },
 		"unmeasuredPolicy": "TEST"
 	},
 	"gate": {
@@ -212,41 +148,9 @@ export const projectSiteProfileConfig = {
 		}
 	],
 	"legacyRoutes": [
-		{
-			"from": "/nedvizhimost",
-			"to": "/kvartiry/",
-			"statusCode": 301
-		}
+		{ "from": "/nedvizhimost", "to": "/kvartiry/", "statusCode": 301 }
 	],
 	"legacyPatterns": [
-		{
-			"kind": "property",
-			"from": "/obekty/{slug}",
-			"statusCode": 301
-		}
-	],
-	"modules": {
-		"novostroyki": {
-			"state": "prepared",
-			"reservedRoots": [
-				"komplex"
-			]
-		},
-		"journal": {
-			"state": "disabled",
-			"reservedRoots": [
-				"journal"
-			]
-		},
-		"agents": {
-			"state": "disabled",
-			"reservedRoots": [
-				"sotrudniki"
-			]
-		}
-	},
-	"entityPrefixes": {
-		"residentialComplex": "zhk-",
-		"cottageVillage": "kp-"
-	}
-} as const satisfies ProjectSiteProfileConfig;
+		{ "kind": "property", "from": "/obekty/{slug}", "statusCode": 301 }
+	]
+}

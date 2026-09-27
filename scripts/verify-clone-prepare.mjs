@@ -57,7 +57,7 @@ const souzSkeleton = buildClientSeoSkeleton(
 	souzProfile,
 	"2026-09-27T00:00:00.000Z",
 );
-assert.equal(souzSkeleton.rows.length, 13);
+assert.equal(souzSkeleton.rows.length, 6);
 assert.deepEqual(
 	new Set(souzSkeleton.rows.map((row) => row.pageKey.kind)),
 	new Set([
@@ -98,14 +98,15 @@ assert.throws(
 	() =>
 		siteProfileConfigForPreset({
 			...souzPreset,
-			categoryStatus: { ...souzPreset.categoryStatus, arenda: "OUT" },
-			geoCategoryStatus: {
-				...souzPreset.geoCategoryStatus,
-				"rostov-na-donu": {
-					...souzPreset.geoCategoryStatus["rostov-na-donu"],
-					arenda: "OUT",
+			staticRoutes: [
+				...souzPreset.staticRoutes,
+				{
+					path: "/sdat",
+					changeFrequency: "weekly",
+					priority: 0.7,
+					indexable: true,
 				},
-			},
+			],
 		}),
 	/\/sdat must be absent/,
 );
@@ -212,12 +213,25 @@ try {
 						name: "Центральный район",
 						type: "admin_district",
 						locative: "Центральном районе",
+						adjLocative: "Центральном",
+						adjGenitive: "Центрального",
 						preposition: "в",
 						synonyms: ["Центр"],
 						parent: null,
 					},
 				],
 			},
+		],
+		seoFacets: {},
+		seoTiers: {
+			metric: "searchDemand",
+			snapshotDate: "2026-09-27",
+			bands: { P1: 100, P2: 50, TEST: 0 },
+			minInventory: { P1: 5, P2: 5, TEST: 10 },
+			unmeasuredPolicy: "TEST",
+		},
+		staticRoutes: [
+			{ path: "/", changeFrequency: "daily", priority: 1, indexable: true },
 		],
 		nap: {
 			phone: "+7 900 000-00-00",
@@ -252,6 +266,15 @@ try {
 		},
 		seoTemplates,
 	};
+	for (const requiredField of ["seoFacets", "seoTiers", "staticRoutes"]) {
+		const missing = { ...preset };
+		delete missing[requiredField];
+		writeFileSync(presetPath, JSON.stringify(missing));
+		assert.throws(
+			() => readClonePreset(presetPath),
+			new RegExp(`Client preset requires explicit ${requiredField}`),
+		);
+	}
 	writeFileSync(presetPath, JSON.stringify({ schemaVersion: 2 }));
 	assert.throws(
 		() => readClonePreset(presetPath),
@@ -296,6 +319,45 @@ try {
 		}),
 	);
 	assert.throws(() => readClonePreset(presetPath), /morphology.preposition/);
+	writeFileSync(
+		presetPath,
+		JSON.stringify({
+			...preset,
+			geos: [
+				{
+					...preset.geos[0],
+					districts: [
+						{
+							...preset.geos[0].districts[0],
+							adjLocative: undefined,
+						},
+					],
+				},
+			],
+		}),
+	);
+	assert.throws(() => readClonePreset(presetPath), /adjLocative/);
+	writeFileSync(
+		presetPath,
+		JSON.stringify({
+			...preset,
+			geos: [
+				{
+					...preset.geos[0],
+					districts: [
+						{
+							...preset.geos[0].districts[0],
+							type: "microdistrict",
+						},
+					],
+				},
+			],
+		}),
+	);
+	assert.throws(
+		() => readClonePreset(presetPath),
+		/cannot contain admin adjective/,
+	);
 	writeFileSync(
 		presetPath,
 		JSON.stringify({

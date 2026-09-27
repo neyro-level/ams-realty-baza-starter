@@ -7,6 +7,7 @@ import {
 	type SeoRegistryRow,
 } from "../src/core/seo/registry.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
 import {
 	projectDistrictRouteRegistry,
 	projectSeoRegistrySeed,
@@ -16,10 +17,7 @@ import {
 	projectSeoTemplateKeys,
 	renderProjectSeoTemplate,
 } from "../src/project/seo/templates.ts";
-import {
-	siteProfile,
-	siteProfileFixtures,
-} from "../src/project/site-profile.ts";
+import { siteProfile } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 import {
 	districtRegistryFromBootstrap,
@@ -280,6 +278,60 @@ assert.equal(
 	districtSnapshot.description,
 	"Квартиры на Северном в Ростове-на-Дону — актуальные предложения. 22 объекта.",
 );
+
+const explicitAdminDistrictSnapshot = renderProjectSeoTemplate(
+	"categoryGeoDistrictAdmin",
+	{
+		brand: "AMS Realty",
+		category: "Квартиры",
+		city: {
+			approved: true,
+			nominative: "Ростов-на-Дону",
+			genitive: "Ростова-на-Дону",
+			prepositional: "Ростове-на-Дону",
+			preposition: "в",
+		},
+		district: {
+			approved: true,
+			nominative: "Ленинский",
+			genitive: "Ленинского",
+			prepositional: "Ленинском районе",
+			preposition: "в",
+		},
+		districtType: "admin_district",
+		districtAdjLocative: "Ленинском",
+		districtAdjGenitive: "Ленинского",
+	},
+);
+assert.equal(
+	explicitAdminDistrictSnapshot.title,
+	"Купить квартиру в Ленинском районе в Ростове-на-Дону — цены",
+);
+assert.equal(explicitAdminDistrictSnapshot.morphologyApproved, true);
+
+assert.throws(
+	() =>
+		renderProjectSeoTemplate("categoryGeoDistrictAdmin", {
+			brand: "AMS Realty",
+			category: "Квартиры",
+			city: {
+				approved: true,
+				nominative: "Ростов-на-Дону",
+				genitive: "Ростова-на-Дону",
+				prepositional: "Ростове-на-Дону",
+				preposition: "в",
+			},
+			district: {
+				approved: true,
+				nominative: "Ленинский",
+				genitive: "Ленинского",
+				prepositional: "Ленинском районе",
+				preposition: "в",
+			},
+			districtType: "admin_district",
+		}),
+	/SEO template requires districtAdjLocative/,
+);
 const materializedDistrict = projectSeoRegistrySeed.find(
 	(row) => row.entityRef === "district:severnyy",
 );
@@ -355,6 +407,8 @@ const adminDistrictSnapshot = renderProjectSeoTemplate(
 			preposition: "в",
 		},
 		districtType: "admin_district",
+		districtAdjLocative: "Ленинском",
+		districtAdjGenitive: "Ленинского",
 		inventory: 9,
 	},
 );

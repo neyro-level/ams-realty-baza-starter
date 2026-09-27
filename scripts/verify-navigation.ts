@@ -13,13 +13,13 @@ import {
 } from "../src/fixture/geo-catalog.ts";
 import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
 import {
 	projectBreadcrumbs,
 	projectGeoSwitcherOptions,
 	projectMenuLinks,
 	projectObjectBreadcrumbs,
 } from "../src/project/navigation.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
 function gate(

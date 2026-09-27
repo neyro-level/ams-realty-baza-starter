@@ -108,11 +108,19 @@ client-specific defaults. Опубликованные Payload districts фор�
 а `proxy.ts` не выполняет district DB reads.
 Project-owned static routes, brand, domain, city literals и будущий literal
 denylist не переходят в core/packages.
+`docs/CLONE_PRESET.starter.json` — единственный редактируемый owner starter
+SiteProfile. `src/project/site-profile.config.ts` генерируется командой
+`pnpm profile:generate`, а `pnpm profile:check` fail-closed обнаруживает drift.
+Client preset обязан явно задавать `seoFacets`, `seoTiers` и `staticRoutes`;
+география и facets демонстрационных fixtures принадлежат только `src/fixture`.
 Payload остаётся единственным schema/auth/Admin owner; public reads продолжают
 идти через explicit Public Gateway и storage-neutral DTO. Legacy manifest в
-`src/project/routing/legacy-route-manifest.ts` — единственный owner прямых `301`
-для `/nedvizhimost` и `/obekty/[slug]`; соответствующие App Router files только
-fail-closed 404 fallbacks. `src/proxy.ts` также владеет canonical slash `308`,
+SiteProfile `legacyRoutes`/`legacyPatterns` — единственный data owner прямых
+`301` для exact routes и `/obekty/{slug}`;
+`src/project/routing/legacy-route-manifest.ts` только компилирует этот contract
+для proxy. Соответствующие App Router files остаются fail-closed 404 fallbacks.
+Profile-owned legacy preflight выполняется раньше stored Payload redirects и
+canonical resolution. `src/proxy.ts` отдельно владеет canonical slash `308`,
 потому автоматический Next trailing-slash redirect отключён. Отдельная
 proof-only lifecycle HTTP boundary и старые catalog/property/sitemap
 presentation owners удалены; rollback — revert cleanup PR, без удаления raw
@@ -144,6 +152,13 @@ generated-файла и параллельный registry в Payload запре�
 
 ## Client clone boundary
 
+`docs/CLONE_INTAKE.schema.json` задаёт короткий owner-owned вход. Команда
+`clone:init` детерминированно компилирует его в preset v3 и отдельный отчёт
+применённых значений именованного baseline `REALTY_BASE_CLIENT_V1`. Статусы
+разделов, городов и рынков, морфология, legacy и host allowlists всегда
+являются решениями intake; compiler не выводит их из названий или выбранного
+preset. Повторный запуск с тем же входом обязан быть byte-stable.
+
 `clone:prepare` принимает только утверждённый preset и exact source tag
 `starter-v2.1.0`; обычный запуск требует clean checkout и совпадение tag с
 `HEAD`. Preset определяет project identity, catalog-first режим,
@@ -167,7 +182,8 @@ fixtures.
   reference: [Next.js 16 Proxy](https://nextjs.org/docs/16/app/api-reference/file-conventions/proxy).
 - Canonical entity pages belong to the catch-all resolver. `src/proxy.ts`
   returns real `301/308/410` responses before rendering. Legacy redirects are
-  manifest-owned; legacy App Router pages are 404-only fallbacks and never own
+  SiteProfile-owned and compiled by the manifest; legacy App Router pages are
+  404-only fallbacks and never own
   metadata or a visual gone state. The former
   `/http/property-lifecycle/[slug]` proof route is forbidden by guards.
 - Payload `jobs.autoRun` cron `* * * * *` is only the queue polling/execution

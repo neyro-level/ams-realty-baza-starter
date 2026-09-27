@@ -40,6 +40,8 @@ export type ProjectSeoTemplateContext = {
 	region?: ApprovedMorphology;
 	district?: ApprovedMorphology;
 	districtType?: ProjectDistrictType;
+	districtAdjLocative?: string;
+	districtAdjGenitive?: string;
 	facet?: string;
 	entityName?: string;
 	inventory?: number;
@@ -104,7 +106,12 @@ export function renderProjectSeoTemplate(
 		templateKey === "categoryGeoDistrictMicro";
 	const morphologyApproved =
 		(!requiresCity || isApprovedMorphology(geo)) &&
-		(!requiresDistrict || isApprovedMorphology(context.district));
+		(!requiresDistrict || isApprovedMorphology(context.district)) &&
+		(templateKey !== "categoryGeoDistrictAdmin" ||
+			Boolean(
+				context.districtAdjLocative?.trim() &&
+					context.districtAdjGenitive?.trim(),
+			));
 
 	return renderSeoDefinition(
 		definition,
@@ -114,10 +121,7 @@ export function renderProjectSeoTemplate(
 			cityPhrase: morphologyPhrase(geo, "prepositional", true),
 			geoGenitive: morphologyPhrase(geo, "genitive"),
 			districtPhrase: morphologyPhrase(context.district, "prepositional", true),
-			districtAdjLocative: morphologyPhrase(
-				context.district,
-				"prepositional",
-			)?.replace(/\s+(?:районе|округе)$/iu, ""),
+			districtAdjLocative: context.districtAdjLocative?.trim(),
 			facet: context.facet,
 			entityName: context.entityName,
 			inventory,

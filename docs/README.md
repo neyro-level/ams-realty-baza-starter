@@ -1,10 +1,13 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 10 EXECUTION COMPLETE / NO ACTIVE READY GRAPH`.
+Статус: `ACTIVE / PLAN 11 v4 APPROVED / TASK MANAGER CLEAN / DEVELOPER ACTIVE`.
 SourceCraft — primary, GitHub — одностороннее зеркало. Plan №10 v4 исполнен
 тремя approved delivery batches; 22/22 узла закрыты, итоговый implementation
 merge — SourceCraft `main@c08ea05721d434670885ad45b0f473f2642a155c`.
-Текущие owner gates принадлежат `04_BACKLOG.md`.
+Текущий Plan №11 утверждён владельцем как exact v4, импортирован в Task
+Manager и прошёл reconciliation `CLEAN`: `4 epic + 26 task`, drift `0`, cycles
+`0`. Developer goal активен; первая READY-задача — `ams11-b1-t1`. Актуальные
+owner decisions принадлежат `04_BACKLOG.md`.
 
 ## Source of Truth
 
@@ -19,12 +22,18 @@ merge — SourceCraft `main@c08ea05721d434670885ad45b0f473f2642a155c`.
 | Дизайн-система и UI-правила | `DESIGN.md` |
 | Эксплуатация starter demo | `OPERATIONS.md` |
 | Подготовка коммерческого client clone | `CLONE_ONBOARDING.md` |
+| Короткий вход и его проверяемая схема | `CLONE_INTAKE.souz.json`, `CLONE_INTAKE.schema.json` |
+| Текущая сборка Clone Factory 2.2 | `AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md` |
 | Geo/catalog URL, status, resolution и lifecycle | `platform/GEO_CATALOG_CONTRACT.md` |
 | Граница reusable platform и project composition | `adr/ADR-PLATFORM-LAYOUT.md` |
 | Кандидаты на отдельный future upstream workstream | `UPSTREAM_CANDIDATES.md` |
 
 ## Execution state
 
+- `AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md` — текущий утверждённый
+  архитектурный scope, `v4 APPROVED`. Четыре финальных audit-pass повторены на
+  exact v4; блокеров и открытых owner decisions нет. Validated Task Manager
+  import завершён с reconciliation `CLEAN`; Developer handoff запущен.
 - `AMS_MASTER_PLAN_10_CLONE_READY_2_1.md` — exact approved contract исполненного
   Plan №10, `v4 APPROVED / EXECUTION_COMPLETE`. Все 22/22 узла и три
   `MERGE_AFTER_GATE` batch закрыты; итоговый отчёт —

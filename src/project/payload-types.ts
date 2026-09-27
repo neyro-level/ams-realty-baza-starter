@@ -291,6 +291,18 @@ export interface District {
     prepositional: string;
   };
   districtType: 'admin_district' | 'microdistrict';
+  /**
+   * Required explicit adjective locative for admin districts.
+   */
+  adjLocative?: string | null;
+  /**
+   * Required explicit adjective genitive for admin districts.
+   */
+  adjGenitive?: string | null;
+  /**
+   * Required explicit locative for microdistricts.
+   */
+  locative?: string | null;
   city: number | City;
   /**
    * Public category routes where this published district may resolve.
@@ -1283,6 +1295,9 @@ export interface DistrictsSelect<T extends boolean = true> {
         prepositional?: T;
       };
   districtType?: T;
+  adjLocative?: T;
+  adjGenitive?: T;
+  locative?: T;
   city?: T;
   categories?: T;
   parent?: T;

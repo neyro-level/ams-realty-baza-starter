@@ -35,12 +35,81 @@
 					"name": "Центральный район",
 					"type": "admin_district",
 					"locative": "Центральном районе",
+					"adjLocative": "Центральном",
+					"adjGenitive": "Центрального",
 					"preposition": "в",
 					"synonyms": ["Центр"],
 					"parent": null
 				}
 			]
 		}
+	],
+	"seoFacets": {},
+	"seoTiers": {
+		"metric": "searchDemand",
+		"snapshotDate": "2026-09-27",
+		"bands": { "P1": 100, "P2": 50, "TEST": 0 },
+		"minInventory": { "P1": 5, "P2": 5, "TEST": 10 },
+		"unmeasuredPolicy": "TEST"
+	},
+	"staticRoutes": [
+		{
+			"path": "/",
+			"changeFrequency": "daily",
+			"priority": 1,
+			"indexable": true
+		},
+		{
+			"path": "/uslugi",
+			"changeFrequency": "weekly",
+			"priority": 0.7,
+			"indexable": true
+		},
+		{
+			"path": "/o-kompanii",
+			"changeFrequency": "monthly",
+			"priority": 0.6,
+			"indexable": true
+		},
+		{
+			"path": "/ipoteka",
+			"changeFrequency": "weekly",
+			"priority": 0.7,
+			"indexable": true
+		},
+		{
+			"path": "/prodat",
+			"changeFrequency": "weekly",
+			"priority": 0.7,
+			"indexable": true
+		},
+		{
+			"path": "/sdat",
+			"changeFrequency": "weekly",
+			"priority": 0.7,
+			"indexable": true
+		},
+		{
+			"path": "/kontakty",
+			"changeFrequency": "monthly",
+			"priority": 0.6,
+			"indexable": true
+		},
+		{
+			"path": "/politika-konfidencialnosti",
+			"changeFrequency": "yearly",
+			"priority": 0.2,
+			"indexable": false
+		},
+		{
+			"path": "/soglasie-na-obrabotku-personalnyh-dannyh",
+			"changeFrequency": "yearly",
+			"priority": 0.2,
+			"indexable": false
+		}
+	],
+	"legacyPatterns": [
+		{ "kind": "property", "from": "/obekty/{slug}", "statusCode": 301 }
 	],
 	"nap": {
 		"phone": "+7 900 000-00-00",

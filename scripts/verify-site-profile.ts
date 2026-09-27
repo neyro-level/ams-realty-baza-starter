@@ -7,12 +7,12 @@ import {
 	seoTierMetrics,
 	siteProfileSchema,
 } from "../src/core/profile/index.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
 import { projectSiteProfileConfig } from "../src/project/site-profile.config.ts";
 import {
 	createPresetSiteProfileConfig,
 	createProjectSiteProfile,
 	siteProfile,
-	siteProfileFixtures,
 } from "../src/project/site-profile.ts";
 
 for (const [name, fixture] of Object.entries(siteProfileFixtures)) {
@@ -55,6 +55,7 @@ const ownedFields = [
 	"gate",
 	"staticRoutes",
 	"legacyRoutes",
+	"legacyPatterns",
 	"modules",
 ] as const;
 for (const field of ownedFields) {
@@ -194,6 +195,7 @@ for (const metric of seoTierMetrics) {
 }
 
 const overriddenPreset = createPresetSiteProfileConfig({
+	projectKind: "starter-demo",
 	preset: "MIXED",
 	geoMode: "SINGLE_GEO",
 	primaryGeo: "primorsk",
@@ -211,9 +213,69 @@ const overriddenPreset = createPresetSiteProfileConfig({
 });
 assert.equal(overriddenPreset.seoTiers.metric, "broad39");
 assert.equal(overriddenPreset.legacyRoutes[0]?.from, "/legacy-catalog");
+assert.deepEqual(overriddenPreset.legacyPatterns, [
+	{ kind: "property", from: "/obekty/{slug}", statusCode: 301 },
+]);
+assert.deepEqual(overriddenPreset.seoFacets, {});
+for (const requiredField of [
+	"seoFacets",
+	"seoTiers",
+	"staticRoutes",
+] as const) {
+	const clientInput = {
+		projectKind: "client" as const,
+		preset: "MIXED" as const,
+		geoMode: "SINGLE_GEO" as const,
+		primaryGeo: "client-city",
+		geos: { "client-city": { published: true, hubStatus: "ACTIVE" as const } },
+		seoFacets: {},
+		seoTiers: overriddenPreset.seoTiers,
+		staticRoutes: overriddenPreset.staticRoutes,
+	};
+	delete (clientInput as Record<string, unknown>)[requiredField];
+	assert.throws(
+		() => createPresetSiteProfileConfig(clientInput),
+		new RegExp(`Client preset requires explicit ${requiredField}`),
+	);
+}
 assert.throws(
 	() =>
 		createPresetSiteProfileConfig({
+			projectKind: "starter-demo",
+			preset: "MIXED",
+			geoMode: "SINGLE_GEO",
+			primaryGeo: "primorsk",
+			geos: { primorsk: { published: true, hubStatus: "ACTIVE" } },
+			staticRoutes: [
+				{
+					path: "/obekty",
+					changeFrequency: "weekly",
+					priority: 0.5,
+					indexable: true,
+				},
+			],
+		}),
+	/Legacy pattern root cannot collide/,
+);
+assert.throws(
+	() =>
+		createPresetSiteProfileConfig({
+			projectKind: "starter-demo",
+			preset: "MIXED",
+			geoMode: "SINGLE_GEO",
+			primaryGeo: "primorsk",
+			geos: { primorsk: { published: true, hubStatus: "ACTIVE" } },
+			legacyRoutes: [
+				{ from: "/old-a", to: "/old-b/", statusCode: 301 },
+				{ from: "/old-b", to: "/kvartiry/", statusCode: 301 },
+			],
+		}),
+	/Legacy redirects must be direct and cannot form chains/,
+);
+assert.throws(
+	() =>
+		createPresetSiteProfileConfig({
+			projectKind: "starter-demo",
 			preset: "MIXED",
 			geoMode: "SINGLE_GEO",
 			primaryGeo: "primorsk",

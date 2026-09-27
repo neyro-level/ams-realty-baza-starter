@@ -16,10 +16,10 @@ import {
 } from "../core/navigation/index.ts";
 import type { ContentGateDecision } from "../core/seo/content-gate.ts";
 import { starterFixtureDataset } from "../project/fixture-data/starter-dataset.ts";
-import { siteProfileFixtures } from "../project/site-profile.ts";
 import { createProjectUrlGrammar } from "../project/url-grammar.ts";
 import { fixtureProperties } from "./provider.ts";
 import { fixtureDistrictRouteRegistry } from "./route-registries.ts";
+import { siteProfileFixtures } from "./site-profile.ts";
 
 const grammar = createProjectUrlGrammar(
 	siteProfileFixtures.multiGeo,

@@ -191,7 +191,14 @@ const siteProfileInputSchema = z.strictObject({
 		z.strictObject({
 			from: staticPathSchema,
 			to: legacyDestinationPathSchema,
-			statusCode: z.union([z.literal(301), z.literal(308)]),
+			statusCode: z.literal(301),
+		}),
+	),
+	legacyPatterns: z.array(
+		z.strictObject({
+			kind: z.literal("property"),
+			from: z.literal("/obekty/{slug}"),
+			statusCode: z.literal(301),
 		}),
 	),
 	modules: z.record(
@@ -395,6 +402,16 @@ export const siteProfileSchema = siteProfileInputSchema.superRefine(
 				message: "Legacy route sources must be unique.",
 			});
 		}
+		const legacyPatternSources = profile.legacyPatterns.map(
+			(pattern) => pattern.from,
+		);
+		if (new Set(legacyPatternSources).size !== legacyPatternSources.length) {
+			context.addIssue({
+				code: "custom",
+				path: ["legacyPatterns"],
+				message: "Legacy pattern sources must be unique.",
+			});
+		}
 		const indexableStaticRoots = new Map(
 			profile.staticRoutes
 				.filter((route) => route.indexable)
@@ -414,6 +431,17 @@ export const siteProfileSchema = siteProfileInputSchema.superRefine(
 				});
 			}
 		}
+		for (const [index, pattern] of profile.legacyPatterns.entries()) {
+			const legacyRoot = pattern.from.split("/").filter(Boolean)[0];
+			if (indexableStaticRoots.has(legacyRoot)) {
+				context.addIssue({
+					code: "custom",
+					path: ["legacyPatterns", index, "from"],
+					message:
+						"Legacy pattern root cannot collide with an indexable static route.",
+				});
+			}
+		}
 		const sdatIndex = profile.staticRoutes.findIndex(
 			(route) => route.path === "/sdat",
 		);
@@ -430,6 +458,16 @@ export const siteProfileSchema = siteProfileInputSchema.superRefine(
 					code: "custom",
 					path: ["legacyRoutes", index, "to"],
 					message: "Legacy route destination must differ from its source.",
+				});
+			}
+			const normalizedDestination = (
+				route.to === "/" ? route.to : route.to.replace(/\/$/, "")
+			) as `/${string}`;
+			if (legacySources.includes(normalizedDestination)) {
+				context.addIssue({
+					code: "custom",
+					path: ["legacyRoutes", index, "to"],
+					message: "Legacy redirects must be direct and cannot form chains.",
 				});
 			}
 		}

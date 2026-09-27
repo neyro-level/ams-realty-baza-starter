@@ -95,6 +95,23 @@ function validateGeoTaxonomy(geos) {
 			if (!allowedDistrictTypes.includes(district.type)) {
 				throw new Error(`District ${key} type is invalid.`);
 			}
+			if (district.type === "admin_district") {
+				district.adjLocative = requiredString(
+					district.adjLocative,
+					`district ${key} adjLocative`,
+				);
+				district.adjGenitive = requiredString(
+					district.adjGenitive,
+					`district ${key} adjGenitive`,
+				);
+			} else if (
+				district.adjLocative !== undefined ||
+				district.adjGenitive !== undefined
+			) {
+				throw new Error(
+					`Microdistrict ${key} cannot contain admin adjective forms.`,
+				);
+			}
 			if (!allowedGeoPrepositions.includes(district.preposition)) {
 				throw new Error(`District ${key} preposition must be в, во or на.`);
 			}
@@ -282,6 +299,7 @@ export function siteProfileConfigForPreset(preset) {
 		]),
 	);
 	return createPresetSiteProfileConfig({
+		projectKind: "client",
 		preset: preset.preset,
 		geoMode: preset.geoMode,
 		primaryGeo: preset.primaryGeo,
@@ -297,6 +315,7 @@ export function siteProfileConfigForPreset(preset) {
 		gate: preset.gate,
 		staticRoutes: preset.staticRoutes,
 		legacyRoutes: preset.legacyRoutes,
+		legacyPatterns: preset.legacyPatterns,
 	});
 }
 
@@ -311,6 +330,9 @@ export function reservedRootsForSiteProfile(config) {
 				.filter(Boolean),
 			...config.legacyRoutes
 				.map((route) => route.from.split("/").filter(Boolean)[0])
+				.filter(Boolean),
+			...config.legacyPatterns
+				.map((pattern) => pattern.from.split("/").filter(Boolean)[0])
 				.filter(Boolean),
 			...Object.values(config.modules).flatMap(
 				(module) => module.reservedRoots,
@@ -451,8 +473,12 @@ export function clonePresetHash(preset) {
 }
 
 export function renderSiteProfileConfig(preset) {
-	return `import type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";\n\nexport const projectSiteProfileConfig = ${JSON.stringify(
-		siteProfileConfigForPreset(preset),
+	return renderSiteProfileConfigFromConfig(siteProfileConfigForPreset(preset));
+}
+
+export function renderSiteProfileConfigFromConfig(config) {
+	return `/** Generated from the canonical project preset. Do not edit directly. */\nimport type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";\n\nexport const projectSiteProfileConfig = ${JSON.stringify(
+		config,
 		null,
 		"\t",
 	)} as const satisfies ProjectSiteProfileConfig;\n`;
@@ -710,7 +736,8 @@ export function buildCloneBootstrap(
 		seoTiers: preset.seoTiers,
 		gate: preset.gate,
 		staticRoutes: preset.staticRoutes,
-		legacyRoutes: preset.legacyRoutes,
+		legacyRoutes: profile.legacyRoutes,
+		legacyPatterns: profile.legacyPatterns,
 		nap: { brandName: preset.brandName, ...preset.nap },
 		seoRegistry: {
 			activeSurfaces,

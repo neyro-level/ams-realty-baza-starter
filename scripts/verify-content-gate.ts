@@ -10,13 +10,13 @@ import {
 	evaluateContentGate,
 } from "../src/core/seo/content-gate.ts";
 import type { SeoRegistryRow } from "../src/core/seo/registry.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
 import {
 	collectPassingDeveloperIds,
 	mergeDeveloperCards,
 	publishedDeveloperGeoSlugs,
 } from "../src/project/routing/developer-surface.ts";
 import { projectSeoRegistrySeed } from "../src/project/seo/registry-seed.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
 
 const now = new Date("2026-09-24T12:00:00.000Z");
 const activeLifecycle: EntityPageLifecycleState = {

@@ -30,6 +30,7 @@ import { createMemoryFeedRepository } from "./integration/memory-feed-repository
 import {
 	prepareIntegrationDatabase,
 	proveDevelopmentsMigration,
+	proveDistrictMorphologyMigration,
 	proveDistrictRouteCategoriesMigration,
 	proveGeoHierarchyMigration,
 	proveGeoTaxonomyV3Migration,
@@ -288,6 +289,8 @@ await prepareIntegrationDatabase(preferredUri);
 proveDistrictRouteCategoriesMigration(preferredUri);
 await prepareIntegrationDatabase(preferredUri);
 proveGeoTaxonomyV3Migration(preferredUri);
+await prepareIntegrationDatabase(preferredUri);
+proveDistrictMorphologyMigration(preferredUri);
 const prepared = await prepareIntegrationDatabase(preferredUri);
 const testUri = prepared.uri;
 if (!process.env.PAYLOAD_SECRET && !prepared.fromZero) {

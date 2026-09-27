@@ -22,36 +22,6 @@ const defaultFilterKeys: ProjectSiteProfileConfig["filterKeys"] = {
 	"kottedzhnye-poselki": ["district", "developer"],
 };
 
-function defaultSeoFacets(
-	geos: ProjectSiteProfileConfig["geos"],
-): ProjectSiteProfileConfig["seoFacets"] {
-	return {
-		...(geos.primorsk
-			? {
-					vtorichka: {
-						geo: "primorsk",
-						category: "kvartiry" as const,
-						filter: { key: "market", value: "secondary" },
-					},
-					dvukhkomnatnye: {
-						geo: "primorsk",
-						category: "kvartiry" as const,
-						filter: { key: "rooms", value: [2] },
-					},
-				}
-			: {}),
-		...(geos.zarechnyy
-			? {
-					odnokomnatnye: {
-						geo: "zarechnyy",
-						category: "kvartiry" as const,
-						filter: { key: "rooms", value: [1] },
-					},
-				}
-			: {}),
-	};
-}
-
 const defaultStaticRoutes: ProjectSiteProfileConfig["staticRoutes"] = [
 	{ path: "/", changeFrequency: "daily", priority: 1, indexable: true },
 	{
@@ -101,6 +71,10 @@ const defaultStaticRoutes: ProjectSiteProfileConfig["staticRoutes"] = [
 
 const defaultLegacyRoutes: ProjectSiteProfileConfig["legacyRoutes"] = [
 	{ from: "/nedvizhimost", to: "/kvartiry/", statusCode: 301 },
+];
+
+const defaultLegacyPatterns: ProjectSiteProfileConfig["legacyPatterns"] = [
+	{ kind: "property", from: "/obekty/{slug}", statusCode: 301 },
 ];
 
 const defaultModules: ProjectSiteProfileConfig["modules"] = {
@@ -155,10 +129,12 @@ type PresetOverrides = Partial<
 		| "gate"
 		| "staticRoutes"
 		| "legacyRoutes"
+		| "legacyPatterns"
 	>
 >;
 
 export type PresetSiteProfileInput = {
+	projectKind: "starter-demo" | "client";
 	preset: SitePreset;
 	geoMode: ProjectSiteProfileConfig["geoMode"];
 	primaryGeo: string;
@@ -168,6 +144,13 @@ export type PresetSiteProfileInput = {
 export function createPresetSiteProfileConfig(
 	input: PresetSiteProfileInput,
 ): ProjectSiteProfileConfig {
+	if (input.projectKind === "client") {
+		for (const field of ["seoFacets", "seoTiers", "staticRoutes"] as const) {
+			if (input[field] === undefined) {
+				throw new Error(`Client preset requires explicit ${field}.`);
+			}
+		}
+	}
 	const defaultCategoryStatus = surfaceStatuses(input.preset);
 	const categoryStatus = input.categoryStatus ?? defaultCategoryStatus;
 	const defaultMarketCapability = {
@@ -225,7 +208,7 @@ export function createPresetSiteProfileConfig(
 			byGeo: developersByGeo,
 		},
 		filterKeys: input.filterKeys ?? defaultFilterKeys,
-		seoFacets: input.seoFacets ?? defaultSeoFacets(input.geos),
+		seoFacets: input.seoFacets ?? {},
 		seoTiers: input.seoTiers ?? {
 			metric: "searchDemand",
 			snapshotDate: "2026-09-24",
@@ -261,6 +244,7 @@ export function createPresetSiteProfileConfig(
 				(route) => route.path !== "/sdat" || categoryStatus.arenda !== "OUT",
 			),
 		legacyRoutes: input.legacyRoutes ?? defaultLegacyRoutes,
+		legacyPatterns: input.legacyPatterns ?? defaultLegacyPatterns,
 		modules: defaultModules,
 		entityPrefixes: { residentialComplex: "zhk-", cottageVillage: "kp-" },
 	});

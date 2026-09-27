@@ -10,7 +10,7 @@ import {
 	renderSitemapIndexXml,
 	renderSitemapXml,
 } from "../src/core/seo/discovery-feeds.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
 
 const origin = "https://example.test";
 const now = new Date("2026-09-25T12:00:00.000Z");

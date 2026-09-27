@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { parseAllowedImageHosts } from "../src/core/ingest/image-hosts.ts";
 import { evaluateContentGate } from "../src/core/seo/content-gate.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
 import { countPropertyGatePhotos } from "../src/project/routing/property-gate-facts.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
 
 const allowedHosts = parseAllowedImageHosts("images.example.test");
 const allowedExternal = [1, 2, 3].map((id) => ({

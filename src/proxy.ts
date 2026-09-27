@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
 		"not-applicable",
 	);
 	const legacyRoute = matchLegacyRoute(request.nextUrl.pathname);
-	if (legacyRoute.kind === "catalog") {
+	if (legacyRoute.kind === "route") {
 		return NextResponse.redirect(
 			new URL(legacyRoute.destination, request.url),
 			legacyRoute.statusCode,

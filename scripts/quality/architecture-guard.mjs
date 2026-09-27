@@ -1,15 +1,17 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import {
+	configuredLegacyRoutePaths,
+	configuredProjectGeoSlugs,
+	configuredStaticRoutePaths,
 	findCacheGraphViolations,
 	findForbiddenProjectLiteralViolations,
 	findHrefLiteralReports,
 	findPackageBoundaryViolations,
-	configuredStaticRoutePaths,
-	configuredProjectGeoSlugs,
+	findSeoMorphologyDerivationViolations,
 	findStaticRouteParityViolations,
-	projectLiteralDenylist,
 	findUiPersistenceViolations,
+	projectLiteralDenylist,
 } from "./architecture-rules.mjs";
 import {
 	assertSqlOperationManifest,
@@ -56,6 +58,14 @@ const packageBoundaryEntries = packageBoundaryFiles.map((file) => ({
 	name: relative(file),
 	content: readFileSync(file, "utf8"),
 }));
+
+const seoEntries = filesUnder("src/project/seo").map((file) => ({
+	name: relative(file),
+	content: readFileSync(file, "utf8"),
+}));
+for (const violation of findSeoMorphologyDerivationViolations(seoEntries)) {
+	violations.push(violation);
+}
 for (const violation of findPackageBoundaryViolations(packageBoundaryEntries)) {
 	violations.push(violation);
 }
@@ -80,7 +90,10 @@ if (!existsSync(projectLiteralPolicyPath)) {
 	);
 	const generatedDenylist = [
 		...projectLiteralDenylist(projectLiteralPolicy),
-		...configuredProjectGeoSlugs("src/project/site-profile.config.ts", siteProfileSource),
+		...configuredProjectGeoSlugs(
+			"src/project/site-profile.config.ts",
+			siteProfileSource,
+		),
 	];
 	for (const violation of findForbiddenProjectLiteralViolations(
 		packageBoundaryEntries,
@@ -99,7 +112,9 @@ if (!existsSync(projectLiteralPolicyPath)) {
 		})),
 	);
 	if (projectLiteralPolicy.hrefLiteralMode !== "enforce") {
-		violations.push("src/project/project-literals.json: hrefLiteralMode must be enforce");
+		violations.push(
+			"src/project/project-literals.json: hrefLiteralMode must be enforce",
+		);
 	}
 	violations.push(...hrefReports);
 }
@@ -110,17 +125,74 @@ if (!existsSync(path.join(root, "src", "project", "static-routes.ts"))) {
 	);
 }
 
-const siteProfileConfigPath = path.join(root, "src", "project", "site-profile.config.ts");
+const siteProfileConfigPath = path.join(
+	root,
+	"src",
+	"project",
+	"site-profile.config.ts",
+);
 if (existsSync(siteProfileConfigPath)) {
+	const siteProfileConfig = readFileSync(siteProfileConfigPath, "utf8");
+	if (
+		!siteProfileConfig.startsWith(
+			"/** Generated from the canonical project preset. Do not edit directly. */",
+		)
+	) {
+		violations.push(
+			"src/project/site-profile.config.ts: runtime profile must remain generated from docs/CLONE_PRESET.starter.json",
+		);
+	}
 	violations.push(
 		...findStaticRouteParityViolations(
 			filesUnder("src/app/(site)").map(relative),
 			configuredStaticRoutePaths(
 				"src/project/site-profile.config.ts",
-				readFileSync(siteProfileConfigPath, "utf8"),
+				siteProfileConfig,
+			),
+			configuredLegacyRoutePaths(
+				"src/project/site-profile.config.ts",
+				siteProfileConfig,
 			),
 		),
 	);
+}
+
+const siteProfilePresetPath = path.join(
+	root,
+	"src",
+	"project",
+	"site-profile-presets.ts",
+);
+if (existsSync(siteProfilePresetPath)) {
+	const presetSource = readFileSync(siteProfilePresetPath, "utf8");
+	if (/primorsk|zarechnyy|defaultSeoFacets/.test(presetSource)) {
+		violations.push(
+			"src/project/site-profile-presets.ts: fixture geography and facets must stay in src/fixture",
+		);
+	}
+	if (
+		!presetSource.includes('["seoFacets", "seoTiers", "staticRoutes"]') ||
+		!/Client preset requires explicit \$\{field\}\./.test(presetSource)
+	) {
+		violations.push(
+			"src/project/site-profile-presets.ts: client preset must require explicit seoFacets, seoTiers and staticRoutes",
+		);
+	}
+}
+
+const projectSiteProfilePath = path.join(
+	root,
+	"src",
+	"project",
+	"site-profile.ts",
+);
+if (existsSync(projectSiteProfilePath)) {
+	const projectProfileSource = readFileSync(projectSiteProfilePath, "utf8");
+	if (/primorsk|zarechnyy|siteProfileFixtures/.test(projectProfileSource)) {
+		violations.push(
+			"src/project/site-profile.ts: production profile module must not own fixture geography",
+		);
+	}
 }
 
 for (const file of filesUnder("src")) {
@@ -248,6 +320,13 @@ if (
 }
 const proxyPath = path.join(root, "src", "proxy.ts");
 const middlewarePath = path.join(root, "src", "middleware.ts");
+const legacyManifestPath = path.join(
+	root,
+	"src",
+	"project",
+	"routing",
+	"legacy-route-manifest.ts",
+);
 const anonymousRestHelperPath = path.join(
 	root,
 	"src",
@@ -288,6 +367,42 @@ if (!existsSync(proxyPath)) {
 	if (proxy.includes("fetch(")) {
 		violations.push(
 			"src/proxy.ts: lifecycle preflight must not recursively fetch the application",
+		);
+	}
+	if (
+		proxy.indexOf("const legacyRoute = matchLegacyRoute(") >
+		proxy.indexOf("await lookupCanonicalEntityLifecyclePreflight(")
+	) {
+		violations.push(
+			"src/proxy.ts: SiteProfile legacy contract must run before stored redirect/canonical resolution",
+		);
+	}
+}
+if (!existsSync(legacyManifestPath)) {
+	violations.push(
+		"src/project/routing/legacy-route-manifest.ts: SiteProfile-derived matcher is missing",
+	);
+} else {
+	const legacyManifest = readFileSync(legacyManifestPath, "utf8");
+	if (
+		!legacyManifest.includes("siteProfile.legacyRoutes") ||
+		!legacyManifest.includes("siteProfile.legacyPatterns")
+	) {
+		violations.push(
+			"src/project/routing/legacy-route-manifest.ts: legacy routes and patterns must be read from SiteProfile",
+		);
+	}
+	if (/['"]\/(?:nedvizhimost|obekty)(?:\/|['"])/.test(legacyManifest)) {
+		violations.push(
+			"src/project/routing/legacy-route-manifest.ts: duplicate hardcoded legacy declaration is forbidden",
+		);
+	}
+	if (
+		!legacyManifest.includes("statusCode: route.statusCode") ||
+		!legacyManifest.includes("statusCode: pattern.statusCode")
+	) {
+		violations.push(
+			"src/project/routing/legacy-route-manifest.ts: compiled legacy matches must preserve the SiteProfile 301 status",
 		);
 	}
 }
@@ -353,18 +468,6 @@ if (!existsSync(propertyPagePath)) {
 			"src/app/(site)/obekty/[slug]/page.tsx: proxy-owned legacy route fallback must stay 404-only without a 308 redirect",
 		);
 	}
-}
-const legacyManifestPath = path.join(
-	root,
-	"src/project/routing/legacy-route-manifest.ts",
-);
-if (
-	!existsSync(legacyManifestPath) ||
-	!readFileSync(legacyManifestPath, "utf8").includes("statusCode: 301")
-) {
-	violations.push(
-		"src/project/routing/legacy-route-manifest.ts: declared direct 301 legacy transport is missing",
-	);
 }
 for (const removedRuntime of [
 	"packages/ui/src/views/catalog/StarterCatalogPageView.tsx",

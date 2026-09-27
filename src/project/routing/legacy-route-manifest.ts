@@ -1,39 +1,62 @@
+import { siteProfile } from "../site-profile.ts";
+
 export const legacyRouteManifest = {
-	catalog: {
-		from: "/nedvizhimost",
-		to: "/kvartiry/",
-		statusCode: 301,
-	},
-	property: {
-		pattern: /^\/obekty\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/,
-		statusCode: 301,
-	},
+	routes: siteProfile.legacyRoutes,
+	patterns: siteProfile.legacyPatterns,
 } as const;
 
-export const legacyRouteRoots = ["nedvizhimost", "obekty"] as const;
+export const legacyRouteRoots = [
+	...new Set(
+		[
+			...legacyRouteManifest.routes.map((route) => route.from),
+			...legacyRouteManifest.patterns.map((pattern) => pattern.from),
+		]
+			.map((source) => source.split("/").filter(Boolean)[0])
+			.filter((root): root is string => Boolean(root)),
+	),
+];
 
 export type LegacyRouteMatch =
-	| { kind: "catalog"; destination: string; statusCode: 301 }
+	| { kind: "route"; destination: string; statusCode: 301 }
 	| { kind: "property"; slug: string; statusCode: 301 }
 	| { kind: "none" };
 
+function normalizedSource(pathname: string): string {
+	return pathname === "/" ? pathname : pathname.replace(/\/$/, "");
+}
+
+function matchPropertyPattern(
+	pattern: string,
+	pathname: string,
+): string | null {
+	const [prefix, suffix] = pattern.split("{slug}");
+	if (prefix === undefined || suffix === undefined) return null;
+	const normalized = normalizedSource(pathname);
+	if (!normalized.startsWith(prefix) || !normalized.endsWith(suffix))
+		return null;
+	const slug = normalized.slice(
+		prefix.length,
+		normalized.length - suffix.length,
+	);
+	return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) ? slug : null;
+}
+
 export function matchLegacyRoute(pathname: string): LegacyRouteMatch {
-	if (
-		pathname === legacyRouteManifest.catalog.from ||
-		pathname === `${legacyRouteManifest.catalog.from}/`
-	) {
+	const normalized = normalizedSource(pathname);
+	const route = legacyRouteManifest.routes.find(
+		(candidate) => candidate.from === normalized,
+	);
+	if (route) {
 		return {
-			kind: "catalog",
-			destination: legacyRouteManifest.catalog.to,
-			statusCode: legacyRouteManifest.catalog.statusCode,
+			kind: "route",
+			destination: route.to,
+			statusCode: route.statusCode,
 		};
 	}
-	const property = pathname.match(legacyRouteManifest.property.pattern);
-	return property?.[1]
-		? {
-				kind: "property",
-				slug: property[1],
-				statusCode: legacyRouteManifest.property.statusCode,
-			}
-		: { kind: "none" };
+	for (const pattern of legacyRouteManifest.patterns) {
+		if (pattern.kind !== "property") continue;
+		const slug = matchPropertyPattern(pattern.from, pathname);
+		if (slug) return { kind: "property", slug, statusCode: pattern.statusCode };
+	}
+	return { kind: "none" };
 }

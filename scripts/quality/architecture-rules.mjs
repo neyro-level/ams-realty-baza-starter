@@ -106,7 +106,9 @@ function stringLiterals(name, content) {
 }
 
 export function findForbiddenProjectLiteralViolations(entries, denylist) {
-	const forbidden = denylist.filter((value) => typeof value === "string" && value.length > 0);
+	const forbidden = denylist.filter(
+		(value) => typeof value === "string" && value.length > 0,
+	);
 	return entries.flatMap(({ name, content }) => {
 		const file = normalize(name);
 		return stringLiterals(file, content).flatMap((value) =>
@@ -125,7 +127,10 @@ export function projectLiteralDenylist(policy) {
 	const groups = ["brands", "domains", "cities"];
 	const values = groups.flatMap((group) => {
 		const items = identity[group];
-		if (!Array.isArray(items) || items.some((item) => typeof item !== "string")) {
+		if (
+			!Array.isArray(items) ||
+			items.some((item) => typeof item !== "string")
+		) {
 			throw new Error(`project literal policy ${group} must be a string array`);
 		}
 		return items.map((item) => item.trim()).filter(Boolean);
@@ -140,17 +145,18 @@ export function findHrefLiteralReports(entries) {
 		if (!file.startsWith("packages/ui/")) continue;
 		const visit = (node) => {
 			const reportValue = (value) => {
-				if (value.startsWith("#") || /^(?:mailto|tel|https?):/.test(value)) return;
+				if (value.startsWith("#") || /^(?:mailto|tel|https?):/.test(value))
+					return;
 				reports.push(`${file}: JSX/object href literal`);
 			};
 			if (
 				ts.isJsxAttribute(node) &&
 				node.name.text === "href" &&
-				(node.initializer &&
-					(ts.isStringLiteral(node.initializer) ||
-						(ts.isJsxExpression(node.initializer) &&
-							node.initializer.expression &&
-							ts.isStringLiteralLike(node.initializer.expression))))
+				node.initializer &&
+				(ts.isStringLiteral(node.initializer) ||
+					(ts.isJsxExpression(node.initializer) &&
+						node.initializer.expression &&
+						ts.isStringLiteralLike(node.initializer.expression)))
 			) {
 				const initializer = node.initializer;
 				const value = ts.isStringLiteral(initializer)
@@ -187,8 +193,10 @@ export function configuredStaticRoutePaths(name, content) {
 				const pathProperty = element.properties.find(
 					(property) =>
 						ts.isPropertyAssignment(property) &&
-						((ts.isIdentifier(property.name) && property.name.text === "path") ||
-							(ts.isStringLiteral(property.name) && property.name.text === "path")),
+						((ts.isIdentifier(property.name) &&
+							property.name.text === "path") ||
+							(ts.isStringLiteral(property.name) &&
+								property.name.text === "path")),
 				);
 				if (
 					pathProperty &&
@@ -196,6 +204,40 @@ export function configuredStaticRoutePaths(name, content) {
 					ts.isStringLiteralLike(pathProperty.initializer)
 				) {
 					paths.push(pathProperty.initializer.text);
+				}
+			}
+		}
+		ts.forEachChild(node, visit);
+	};
+	visit(sourceFile(name, content));
+	return [...new Set(paths)];
+}
+
+export function configuredLegacyRoutePaths(name, content) {
+	const paths = [];
+	const visit = (node) => {
+		if (
+			ts.isPropertyAssignment(node) &&
+			((ts.isIdentifier(node.name) && node.name.text === "legacyRoutes") ||
+				(ts.isStringLiteral(node.name) && node.name.text === "legacyRoutes")) &&
+			ts.isArrayLiteralExpression(node.initializer)
+		) {
+			for (const element of node.initializer.elements) {
+				if (!ts.isObjectLiteralExpression(element)) continue;
+				const fromProperty = element.properties.find(
+					(property) =>
+						ts.isPropertyAssignment(property) &&
+						((ts.isIdentifier(property.name) &&
+							property.name.text === "from") ||
+							(ts.isStringLiteral(property.name) &&
+								property.name.text === "from")),
+				);
+				if (
+					fromProperty &&
+					ts.isPropertyAssignment(fromProperty) &&
+					ts.isStringLiteralLike(fromProperty.initializer)
+				) {
+					paths.push(fromProperty.initializer.text);
 				}
 			}
 		}
@@ -231,9 +273,18 @@ export function configuredProjectGeoSlugs(name, content) {
 	return [...new Set(values)];
 }
 
-export function findStaticRouteParityViolations(routeFiles, configuredPaths) {
+export function findStaticRouteParityViolations(
+	routeFiles,
+	configuredPaths,
+	legacyFallbackPaths = [],
+) {
 	const normalizedConfigured = new Set(
 		configuredPaths.map((value) =>
+			value === "/" ? "/" : `/${value.replace(/^\/+|\/+$/g, "")}`,
+		),
+	);
+	const normalizedLegacyFallbacks = new Set(
+		legacyFallbackPaths.map((value) =>
 			value === "/" ? "/" : `/${value.replace(/^\/+|\/+$/g, "")}`,
 		),
 	);
@@ -243,15 +294,24 @@ export function findStaticRouteParityViolations(routeFiles, configuredPaths) {
 			const prefix = "src/app/(site)/";
 			if (file === "src/app/(site)/page.tsx") return ["/"];
 			if (!file.startsWith(prefix) || !file.endsWith("/page.tsx")) return [];
-			const segments = file.slice(prefix.length, -"/page.tsx".length).split("/");
+			const segments = file
+				.slice(prefix.length, -"/page.tsx".length)
+				.split("/");
 			if (segments.some((segment) => segment.startsWith("["))) return [];
 			return [`/${segments.join("/")}`];
 		}),
 	);
 	return [
 		...[...folderPaths]
-			.filter((pathValue) => !normalizedConfigured.has(pathValue))
-			.map((pathValue) => `static route folder missing from registry: ${pathValue}`),
+			.filter(
+				(pathValue) =>
+					!normalizedConfigured.has(pathValue) &&
+					!normalizedLegacyFallbacks.has(pathValue),
+			)
+			.map(
+				(pathValue) =>
+					`static route folder missing from registry: ${pathValue}`,
+			),
 		...[...normalizedConfigured]
 			.filter((pathValue) => !folderPaths.has(pathValue))
 			.map((pathValue) => `static route registry missing folder: ${pathValue}`),
@@ -306,6 +366,25 @@ export function findUiPersistenceViolations(entries) {
 		visit(sourceFile(file, content));
 		for (const api of hits) {
 			violations.push(`${file}: UI must not own browser persistence (${api})`);
+		}
+	}
+	return violations;
+}
+
+export function findSeoMorphologyDerivationViolations(entries) {
+	const violations = [];
+	for (const { name, content } of entries) {
+		const file = normalize(name);
+		if (!file.startsWith("src/project/seo/")) continue;
+		if (
+			/district(?:AdjLocative|AdjGenitive|Phrase)[\s\S]{0,160}\.replace\s*\(/u.test(
+				content,
+			) ||
+			/\.replace\s*\([\s\S]{0,160}(?:районе|округе|микрорайоне)/iu.test(content)
+		) {
+			violations.push(
+				`${file}: district morphology must use explicit stored forms, not suffix mutation`,
+			);
 		}
 	}
 	return violations;

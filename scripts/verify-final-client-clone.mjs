@@ -163,6 +163,9 @@ for (const entry of selectedMatrix) {
 		const seoTemplates = JSON.parse(
 			readFileSync(join(root, "docs/CLONE_SEO_TEMPLATES.example.json"), "utf8"),
 		);
+		const clientExample = JSON.parse(
+			readFileSync(join(root, "docs/CLONE_PRESET.example.json"), "utf8"),
+		);
 		const preset = entry.presetFile
 			? JSON.parse(readFileSync(join(root, entry.presetFile), "utf8"))
 			: {
@@ -184,6 +187,9 @@ for (const entry of selectedMatrix) {
 						shortName: "Тестовый край",
 					},
 					geos,
+					seoFacets: {},
+					seoTiers: clientExample.seoTiers,
+					staticRoutes: clientExample.staticRoutes,
 					nap: {
 						phone: "+7 900 000-00-00",
 						email: `hello@${entry.name}.local`,

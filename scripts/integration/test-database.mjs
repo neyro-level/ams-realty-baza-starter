@@ -37,6 +37,10 @@ import {
 	geoTaxonomyV3DownSql,
 	geoTaxonomyV3UpSql,
 } from "../../migrations/20260927_010000_geo_taxonomy_v3.ts";
+import {
+	districtMorphologyDownSql,
+	districtMorphologyUpSql,
+} from "../../migrations/20260927_110000_district_morphology.ts";
 import { propertyNumericInvariantsUpSql } from "../../src/core/data-access/system/sql/property-numeric-invariants.ts";
 import { assertLocalTestDatabaseUri } from "./env.mjs";
 
@@ -44,10 +48,11 @@ function psql(uri, sql) {
 	try {
 		return execFileSync(
 			"psql",
-			["-X", "-v", "ON_ERROR_STOP=1", "-d", uri, "-t", "-A", "-c", sql],
+			["-X", "-v", "ON_ERROR_STOP=1", "-d", uri, "-t", "-A"],
 			{
 				stdio: "pipe",
 				encoding: "utf8",
+				input: sql,
 				env: { ...process.env, PGPASSWORD: process.env.PGPASSWORD ?? "" },
 			},
 		).trim();
@@ -725,6 +730,89 @@ export function proveGeoTaxonomyV3Migration(testUri) {
 		throw new Error("Geo taxonomy v3 down did not map vo back to v.");
 	}
 	psql(testUri, geoTaxonomyV3UpSql);
+}
+
+export function proveDistrictMorphologyMigration(testUri) {
+	const previousSchema = `
+		CREATE TYPE enum_districts_district_type AS ENUM('admin_district', 'microdistrict');
+		CREATE TABLE cities (id serial PRIMARY KEY, slug varchar NOT NULL UNIQUE);
+		CREATE TABLE districts (
+			id serial PRIMARY KEY,
+			city_id integer NOT NULL REFERENCES cities(id),
+			slug varchar NOT NULL,
+			district_type enum_districts_district_type NOT NULL,
+			morphology_genitive varchar NOT NULL,
+			morphology_prepositional varchar NOT NULL,
+			preposition varchar NOT NULL
+		);`;
+	psql(testUri, previousSchema);
+	psql(testUri, districtMorphologyUpSql);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.columns WHERE table_name='districts' AND column_name IN ('adj_locative','adj_genitive','locative')",
+		) !== "3"
+	) {
+		throw new Error("Clean district morphology migration missed new columns.");
+	}
+	psql(testUri, districtMorphologyDownSql);
+	psql(
+		testUri,
+		`INSERT INTO cities (slug) VALUES ('primorsk'), ('zarechnyy'), ('rostov-na-donu');
+		 INSERT INTO districts (city_id, slug, district_type, morphology_genitive, morphology_prepositional, preposition)
+		 SELECT city.id, fixture.slug, fixture.kind::enum_districts_district_type,
+		   fixture.genitive, fixture.prepositional, fixture.preposition
+		 FROM cities city
+		 JOIN (VALUES
+		   ('primorsk', 'yuzhnyy', 'admin_district', 'Южного района', 'Южном районе', 'v'),
+		   ('primorsk', 'severnyy', 'microdistrict', 'Северного района', 'Северном районе', 'na'),
+		   ('zarechnyy', 'tsentralnyy', 'admin_district', 'Центрального района', 'Центральном районе', 'v'),
+		   ('rostov-na-donu', 'leninskiy', 'admin_district', 'Ленинского', 'Ленинском', 'v'),
+		   ('rostov-na-donu', 'voroshilovskiy', 'admin_district', 'Ворошиловского', 'Ворошиловском', 'v'),
+		   ('rostov-na-donu', 'tsentr', 'microdistrict', 'Центра', 'Центре', 'v')
+		 ) AS fixture(city_slug, slug, kind, genitive, prepositional, preposition)
+		 ON fixture.city_slug = city.slug;`,
+	);
+	psql(testUri, districtMorphologyUpSql);
+	const mapped = psql(
+		testUri,
+		`SELECT string_agg(
+		  city.slug || '/' || district.slug || ':' ||
+		  coalesce(district.adj_locative, district.locative) || ':' ||
+		  coalesce(district.adj_genitive, '-'),
+		  ',' ORDER BY city.slug, district.slug)
+		 FROM districts district JOIN cities city ON city.id=district.city_id`,
+	);
+	if (
+		mapped !==
+		"primorsk/severnyy:Северном районе:-,primorsk/yuzhnyy:Южном:Южного,rostov-na-donu/leninskiy:Ленинском:Ленинского,rostov-na-donu/tsentr:Центре:-,rostov-na-donu/voroshilovskiy:Ворошиловском:Ворошиловского,zarechnyy/tsentralnyy:Центральном:Центрального"
+	) {
+		throw new Error(
+			`District morphology migration mapped unexpected data: ${mapped}`,
+		);
+	}
+	psql(testUri, districtMorphologyDownSql);
+	psql(
+		testUri,
+		`INSERT INTO districts (city_id, slug, district_type, morphology_genitive, morphology_prepositional, preposition)
+		 SELECT id, 'unknown-admin', 'admin_district', 'Unknown', 'Unknown', 'v'
+		 FROM cities WHERE slug='primorsk';`,
+	);
+	expectPsqlFailure(
+		testUri,
+		`BEGIN;\n${districtMorphologyUpSql}\nCOMMIT;`,
+		/explicit admin district mapping/i,
+	);
+	if (
+		psql(
+			testUri,
+			"SELECT count(*) FROM information_schema.columns WHERE table_name='districts' AND column_name='adj_locative'",
+		) !== "0"
+	) {
+		throw new Error(
+			"Rejected district morphology migration left partial schema.",
+		);
+	}
 }
 
 export function psqlOnTest(testUri, sql) {

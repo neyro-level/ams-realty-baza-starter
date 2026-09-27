@@ -63,6 +63,35 @@ export const Districts: CollectionConfig = {
 			],
 		},
 		{
+			name: "adjLocative",
+			type: "text",
+			admin: {
+				description:
+					"Required explicit adjective locative for admin districts.",
+				condition: (_data, siblingData) =>
+					siblingData?.districtType === "admin_district",
+			},
+		},
+		{
+			name: "adjGenitive",
+			type: "text",
+			admin: {
+				description:
+					"Required explicit adjective genitive for admin districts.",
+				condition: (_data, siblingData) =>
+					siblingData?.districtType === "admin_district",
+			},
+		},
+		{
+			name: "locative",
+			type: "text",
+			admin: {
+				description: "Required explicit locative for microdistricts.",
+				condition: (_data, siblingData) =>
+					siblingData?.districtType === "microdistrict",
+			},
+		},
+		{
 			name: "city",
 			type: "relationship",
 			relationTo: "cities",

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { listingFilterControlKeys } from "../packages/ui/src/views/catalog/listing-filter-contract.ts";
 import { catalogFilterKeys } from "../src/core/profile/site-profile.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
 import {
 	catalogCanonicalPath,
 	catalogFilterKeysForQuery,
@@ -10,7 +11,6 @@ import {
 	parseCatalogSearchParams,
 	parsePageSearchParams,
 } from "../src/project/routing/catalog-search-params.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
 
 assert.deepEqual(
 	[...catalogQueryFilterKeys].sort(),

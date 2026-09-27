@@ -1,18 +1,18 @@
 import assert from "node:assert/strict";
+import { catalogSurfaceSlugs } from "../src/core/profile/index.ts";
 import {
 	createUrlGrammar,
+	type PageKey,
 	propertySurfaceSlugs,
 	transliterateToSlug,
-	type PageKey,
 } from "../src/core/routing/index.ts";
-import { catalogSurfaceSlugs } from "../src/core/profile/index.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
-import { projectStaticRoutes } from "../src/project/static-routes.ts";
-import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 import {
 	fixtureDistrictRouteRegistry,
 	fixtureDistrictRouteRegistryFor,
 } from "../src/fixture/route-registries.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
+import { projectStaticRoutes } from "../src/project/static-routes.ts";
+import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
 function keysFor(geo: string): PageKey[] {
 	const keys: PageKey[] = [

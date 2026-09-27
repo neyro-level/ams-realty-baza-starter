@@ -3,7 +3,7 @@ import type { PageKeyDTO, PageLinkDTO } from "@ams/realtbase-contracts";
 import { geoCatalogContractFixtures } from "../src/fixture/geo-catalog.ts";
 import { fixtureProperties } from "../src/fixture/provider.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
 const grammar = createProjectUrlGrammar(

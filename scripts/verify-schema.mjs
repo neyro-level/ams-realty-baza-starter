@@ -168,6 +168,20 @@ BEGIN
 	IF (
 		SELECT count(*) FROM information_schema.columns
 		WHERE table_schema = 'public'
+			AND table_name = 'districts'
+			AND column_name IN ('adj_locative', 'adj_genitive', 'locative')
+	) <> 3 OR NOT EXISTS (
+		SELECT 1 FROM pg_constraint
+		WHERE conrelid = 'districts'::regclass
+			AND conname = 'districts_explicit_morphology_guard'
+			AND contype = 'c'
+	) THEN
+		RAISE EXCEPTION 'Missing explicit district morphology contract';
+	END IF;
+
+	IF (
+		SELECT count(*) FROM information_schema.columns
+		WHERE table_schema = 'public'
 			AND table_name = 'properties'
 			AND column_name IN ('region_ref_id', 'city_ref_id', 'district_ref_id')
 	) <> 3 THEN

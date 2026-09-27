@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import { getPayload } from "payload";
 import config from "../../payload.config.ts";
 import { systemOverrideAccess } from "../../src/core/data-access/system/overrides.ts";
+import { siteProfileFixtures } from "../../src/fixture/site-profile.ts";
 import { requirePayloadRuntime } from "../../src/project/env.ts";
 import { geoHierarchyFixtures } from "../../src/project/geo/fixtures.ts";
 import type { District } from "../../src/project/payload-types.ts";
-import { siteProfileFixtures } from "../../src/project/site-profile.ts";
-import { createProjectUrlGrammar } from "../../src/project/url-grammar.ts";
 import { readPublishedDistrictRouteRegistry } from "../../src/project/routing/district-registry.ts";
+import { createProjectUrlGrammar } from "../../src/project/url-grammar.ts";
 
 requirePayloadRuntime();
 
@@ -277,6 +277,7 @@ await assert.rejects(
 				title: "Facet collision",
 				morphology: primaryFixture.morphology,
 				districtType: "microdistrict",
+				locative: "Северном районе",
 				preposition: "na",
 				morphologyApproved: true,
 				sortOrder: 99,

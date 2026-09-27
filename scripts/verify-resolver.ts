@@ -8,8 +8,12 @@ import {
 } from "../src/core/routing/index.ts";
 import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
-import { matchLegacyRoute } from "../src/project/routing/legacy-route-manifest.ts";
-import { siteProfileFixtures } from "../src/project/site-profile.ts";
+import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
+import {
+	legacyRouteManifest,
+	matchLegacyRoute,
+} from "../src/project/routing/legacy-route-manifest.ts";
+import { siteProfile } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
 function activeRecord(
@@ -73,11 +77,18 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 }
 
 assert.deepEqual(matchLegacyRoute("/nedvizhimost/"), {
-	kind: "catalog",
+	kind: "route",
 	destination: "/kvartiry/",
 	statusCode: 301,
 });
+assert.deepEqual(legacyRouteManifest.routes, siteProfile.legacyRoutes);
+assert.deepEqual(legacyRouteManifest.patterns, siteProfile.legacyPatterns);
 assert.deepEqual(matchLegacyRoute("/obekty/dom-42"), {
+	kind: "property",
+	slug: "dom-42",
+	statusCode: 301,
+});
+assert.deepEqual(matchLegacyRoute("/obekty/dom-42/"), {
 	kind: "property",
 	slug: "dom-42",
 	statusCode: 301,

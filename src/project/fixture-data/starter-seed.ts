@@ -21,18 +21,31 @@ export type StarterFixtureSeedPort = {
 	}>;
 };
 
+type GeoSeedDistrict = Record<string, unknown> & {
+	slug: string;
+	parent: string | null;
+	preposition: "v" | "vo" | "na";
+} & (
+		| {
+				districtType: "admin_district";
+				adjLocative: string;
+				adjGenitive: string;
+		  }
+		| {
+				districtType: "microdistrict";
+				locative: string;
+				adjLocative?: never;
+				adjGenitive?: never;
+		  }
+	);
+
 export type GeoSeedDataset = {
 	snapshotAt: string;
 	region: Record<string, unknown> & { slug: string };
 	cities: readonly (Record<string, unknown> & {
 		slug: string;
 		agglomerationOf?: string;
-		districts: readonly (Record<string, unknown> & {
-			slug: string;
-			parent: string | null;
-			districtType: "admin_district" | "microdistrict";
-			preposition: "v" | "vo" | "na";
-		})[];
+		districts: readonly GeoSeedDistrict[];
 	})[];
 };
 
@@ -83,6 +96,28 @@ export function validateGeoSeedDataset(dataset: GeoSeedDataset): void {
 			if (!["v", "vo", "na"].includes(district.preposition)) {
 				throw new Error(
 					`Geo seed district ${city.slug}/${district.slug} preposition is invalid.`,
+				);
+			}
+			if (
+				district.districtType === "admin_district" &&
+				(typeof district.adjLocative !== "string" ||
+					!district.adjLocative.trim() ||
+					typeof district.adjGenitive !== "string" ||
+					!district.adjGenitive.trim())
+			) {
+				throw new Error(
+					`Geo seed admin district ${city.slug}/${district.slug} requires adjective forms.`,
+				);
+			}
+			if (
+				district.districtType === "microdistrict" &&
+				(typeof district.locative !== "string" ||
+					!district.locative.trim() ||
+					district.adjLocative !== undefined ||
+					district.adjGenitive !== undefined)
+			) {
+				throw new Error(
+					`Geo seed microdistrict ${city.slug}/${district.slug} has invalid morphology forms.`,
 				);
 			}
 			if (district.parent !== null && !districts.has(district.parent)) {

@@ -66,6 +66,9 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.3.0(@types/react@19.3.0)
+      ajv:
+        specifier: 8.18.0
+        version: 8.18.0
       dependency-cruiser:
         specifier: 18.2.0
         version: 18.2.0

@@ -58,6 +58,39 @@ function mergedValue(
 	return data[key] === undefined ? originalDoc?.[key] : data[key];
 }
 
+export function assertDistrictMorphologyForms(
+	data: GeoData,
+	originalDoc?: GeoData,
+): void {
+	const districtType = String(
+		mergedValue(data, originalDoc, "districtType") ?? "",
+	);
+	const requiredForm = (key: string) => {
+		const value = mergedValue(data, originalDoc, key);
+		return typeof value === "string" && value.trim() !== "";
+	};
+	if (
+		districtType === "admin_district" &&
+		(!requiredForm("adjLocative") || !requiredForm("adjGenitive"))
+	) {
+		throw new Error(
+			"Administrative district requires explicit adjLocative and adjGenitive.",
+		);
+	}
+	if (districtType === "microdistrict") {
+		if (!requiredForm("locative") || !requiredForm("preposition")) {
+			throw new Error(
+				"Microdistrict requires explicit locative and preposition.",
+			);
+		}
+		if (requiredForm("adjLocative") || requiredForm("adjGenitive")) {
+			throw new Error(
+				"Microdistrict cannot own administrative adjective forms.",
+			);
+		}
+	}
+}
+
 export function normalizeGeoWrite(
 	data: GeoData,
 	originalDoc?: GeoData,
@@ -200,6 +233,7 @@ export async function validateDistrictWrite(input: {
 	req: PayloadRequest;
 }): Promise<GeoData> {
 	normalizeGeoWrite(input.data, input.originalDoc, "District");
+	assertDistrictMorphologyForms(input.data, input.originalDoc);
 	const slug = String(input.data.slug);
 	assertSlugOutsideNamespace(slug, reservedDistrictSlugs, "District");
 	const cityId = relationId(mergedValue(input.data, input.originalDoc, "city"));

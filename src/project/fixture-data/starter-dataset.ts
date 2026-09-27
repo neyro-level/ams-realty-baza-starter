@@ -39,6 +39,7 @@ export const starterFixtureDataset = {
 					parent: null,
 					synonyms: [{ value: "Северный" }],
 					preposition: "na",
+					locative: "Северном районе",
 					morphologyApproved: true,
 					sortOrder: 10,
 					morphology: {
@@ -54,6 +55,8 @@ export const starterFixtureDataset = {
 					parent: null,
 					synonyms: [{ value: "Южный" }],
 					preposition: "v",
+					adjLocative: "Южном",
+					adjGenitive: "Южного",
 					morphologyApproved: true,
 					sortOrder: 20,
 					morphology: {
@@ -69,6 +72,7 @@ export const starterFixtureDataset = {
 					parent: "yuzhnyy",
 					synonyms: [{ value: "Солнечный" }],
 					preposition: "v",
+					locative: "Солнечном микрорайоне",
 					morphologyApproved: true,
 					sortOrder: 30,
 					morphology: {
@@ -100,6 +104,8 @@ export const starterFixtureDataset = {
 					parent: null,
 					synonyms: [{ value: "Центр" }],
 					preposition: "v",
+					adjLocative: "Центральном",
+					adjGenitive: "Центрального",
 					morphologyApproved: true,
 					sortOrder: 10,
 					morphology: {

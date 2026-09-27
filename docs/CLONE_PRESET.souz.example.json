@@ -29,7 +29,48 @@
 				"prepositional": "Ростове-на-Дону",
 				"preposition": "в"
 			},
-			"districts": []
+			"districts": [
+				{
+					"slug": "leninskiy",
+					"name": "Ленинский",
+					"type": "admin_district",
+					"locative": "Ленинском",
+					"adjLocative": "Ленинском",
+					"adjGenitive": "Ленинского",
+					"preposition": "в",
+					"synonyms": [],
+					"parent": null
+				},
+				{
+					"slug": "voroshilovskiy",
+					"name": "Ворошиловский",
+					"type": "admin_district",
+					"locative": "Ворошиловском",
+					"adjLocative": "Ворошиловском",
+					"adjGenitive": "Ворошиловского",
+					"preposition": "в",
+					"synonyms": [],
+					"parent": null
+				},
+				{
+					"slug": "severnyy",
+					"name": "Северный",
+					"type": "microdistrict",
+					"locative": "Северном",
+					"preposition": "на",
+					"synonyms": [],
+					"parent": null
+				},
+				{
+					"slug": "tsentr",
+					"name": "Центр",
+					"type": "microdistrict",
+					"locative": "Центре",
+					"preposition": "в",
+					"synonyms": [],
+					"parent": null
+				}
+			]
 		},
 		{
 			"slug": "bataysk",
@@ -64,36 +105,36 @@
 	],
 	"categoryStatus": {
 		"kvartiry": "ACTIVE",
-		"doma": "ACTIVE",
-		"uchastki": "ACTIVE",
-		"kommercheskaya-nedvizhimost": "ACTIVE",
-		"komnaty": "ACTIVE",
-		"garazhi": "ACTIVE",
-		"arenda": "ACTIVE",
+		"doma": "PREPARED_OFF",
+		"uchastki": "PREPARED_OFF",
+		"kommercheskaya-nedvizhimost": "PREPARED_OFF",
+		"komnaty": "OUT",
+		"garazhi": "OUT",
+		"arenda": "OUT",
 		"novostroyki": "ACTIVE",
-		"kottedzhnye-poselki": "ACTIVE"
+		"kottedzhnye-poselki": "PREPARED_OFF"
 	},
 	"marketCapability": { "newbuild": "ACTIVE", "secondary": "ACTIVE" },
 	"geoCategoryStatus": {
 		"rostov-na-donu": {
 			"kvartiry": "ACTIVE",
-			"doma": "ACTIVE",
-			"uchastki": "ACTIVE",
-			"kommercheskaya-nedvizhimost": "ACTIVE",
-			"komnaty": "ACTIVE",
-			"garazhi": "ACTIVE",
-			"arenda": "ACTIVE",
+			"doma": "PREPARED_OFF",
+			"uchastki": "PREPARED_OFF",
+			"kommercheskaya-nedvizhimost": "PREPARED_OFF",
+			"komnaty": "OUT",
+			"garazhi": "OUT",
+			"arenda": "OUT",
 			"novostroyki": "ACTIVE",
-			"kottedzhnye-poselki": "ACTIVE"
+			"kottedzhnye-poselki": "PREPARED_OFF"
 		},
 		"bataysk": {
 			"kvartiry": "PREPARED_OFF",
 			"doma": "PREPARED_OFF",
 			"uchastki": "PREPARED_OFF",
 			"kommercheskaya-nedvizhimost": "PREPARED_OFF",
-			"komnaty": "PREPARED_OFF",
-			"garazhi": "PREPARED_OFF",
-			"arenda": "PREPARED_OFF",
+			"komnaty": "OUT",
+			"garazhi": "OUT",
+			"arenda": "OUT",
 			"novostroyki": "PREPARED_OFF",
 			"kottedzhnye-poselki": "PREPARED_OFF"
 		},
@@ -102,9 +143,9 @@
 			"doma": "PREPARED_OFF",
 			"uchastki": "PREPARED_OFF",
 			"kommercheskaya-nedvizhimost": "PREPARED_OFF",
-			"komnaty": "PREPARED_OFF",
-			"garazhi": "PREPARED_OFF",
-			"arenda": "PREPARED_OFF",
+			"komnaty": "OUT",
+			"garazhi": "OUT",
+			"arenda": "OUT",
 			"novostroyki": "PREPARED_OFF",
 			"kottedzhnye-poselki": "PREPARED_OFF"
 		}
@@ -168,12 +209,6 @@
 			"indexable": true
 		},
 		{
-			"path": "/sdat",
-			"changeFrequency": "weekly",
-			"priority": 0.7,
-			"indexable": true
-		},
-		{
 			"path": "/kontakty",
 			"changeFrequency": "monthly",
 			"priority": 0.6,
@@ -193,7 +228,15 @@
 		}
 	],
 	"legacyRoutes": [
-		{ "from": "/nedvizhimost", "to": "/kvartiry/", "statusCode": 301 }
+		{ "from": "/nedvizhimost", "to": "/kvartiry/", "statusCode": 301 },
+		{
+			"from": "/kvartiry-rostova",
+			"to": "/rostov-na-donu/kvartiry/",
+			"statusCode": 301
+		}
+	],
+	"legacyPatterns": [
+		{ "kind": "property", "from": "/obekty/{slug}", "statusCode": 301 }
 	],
 	"nap": {
 		"phone": "+7 863 000-00-00",
