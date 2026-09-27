@@ -78,8 +78,9 @@ Numeric colors, type sizes, weights, radii, shadows and durations live in `globa
 
 Pages: `/`, `/primorsk/kvartiry/`, `/novostroyki/zhk-severnyy-bereg/`, `/uslugi/`.
 Viewports: `390×844`, `768×1024`, `1280×900`, `1440×1000`.
-Proof artifacts: `docs/evidence/plan9/S14_UI_CORE_V5_EVIDENCE.md` and the
-machine-readable browser matrix beside it; bulk PNG stays outside the clone.
+Proof artifacts: `docs/evidence/plan9/S14_UI_CORE_V5_EVIDENCE.md` and
+`docs/evidence/plan9/S14_UI_CORE_V5_BROWSER_MATRIX.json`; bulk PNG stays
+outside the clone.
 
 ### Canonical UI Core v5 acceptance matrix
 

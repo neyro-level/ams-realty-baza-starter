@@ -192,6 +192,13 @@ Registry validation rejects duplicate intent, URL or canonical ownership and
 any URL that differs from `buildUrl(PageKey)`. Unapproved morphology cannot
 produce an indexable page.
 
+Clone preparation emits registry rows as `draft`. Promotion to `approved` is a
+row-level owner decision made only after synthetic/fallback evidence is replaced
+with real evidence and the referenced geo/district morphology is approved.
+`retired` removes former intent from indexable discovery without reassigning its
+canonical URL silently. Generated `src/project/seo/registry-seed.ts` is a
+validated runtime projection; the CSV remains the editable source.
+
 Content Gate is the single indexability decision. It consumes profile status,
 registry evidence, inventory/content quality and lifecycle. Newbuild lots are
 always `noindex,follow` and absent from sitemap; listing, secondary property,
@@ -205,6 +212,12 @@ content remains `200 noindex,follow` with a self-canonical URL and is absent
 from every discovery surface. Developer eligibility counts only developments
 that pass the same Gate. Owner override is audited and cannot bypass profile
 `OUT | PREPARED_OFF`, lifecycle or hard-noindex rules.
+
+District routes select `categoryGeoDistrictAdmin` or
+`categoryGeoDistrictMicro` from the persisted district type; both share the
+same `categoryGeoDistrict` PageKey and URL grammar. Developer root uses the
+dedicated `developerRoot` template. A missing or unknown template key fails
+closed rather than borrowing metadata from another surface.
 
 ## 8. Lifecycle and HTTP semantics
 

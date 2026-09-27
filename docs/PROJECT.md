@@ -10,7 +10,9 @@ route cutover и P8-23B cleanup находятся в текущем runtime. К
 через approved delivery batches; принятый implementation baseline —
 `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
 `main`; execution graph Plan №9 `48/48` closed.
-S15, release tag и production не выполнялись и остаются owner gates.
+S15, release tag и production не выполнялись и остаются owner gates. Plan №10
+B1/B2 уже добавили preset schema v3, geo seed, актуальную SEO template matrix и
+bounded public runtime; B3 готовит проверяемый release package без rollout.
 Репозиторное GitHub-зеркало синхронизируется отдельно и не является release
 proof.
 
@@ -63,16 +65,18 @@ proof.
 | Geo-catalog runtime | `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover и guarded cleanup реализованы |
 | Content Gate runtime | `decidePage` — единый owner robots/canonical/discovery; resolver отдаёт route facts, metadata и sitemap consume Gate decision |
 | SEO templates | Core хранит только renderer/morphology/plural engine; project config владеет ключами и русскими шаблонами, brand приходит из `site-settings` Gateway, unapproved morphology всегда `noindex,follow` |
-| SEO Registry | `docs/seo/SEO_REGISTRY_SEED.csv` — единственный editable owner; validated generation создаёт runtime `src/project/seo/registry-seed.ts`, CMS ownership запрещён |
+| SEO Registry | `docs/seo/SEO_REGISTRY_SEED.csv` — единственный editable owner; строки начинаются как `draft`, получают `approved` только после реальных evidence и утверждённой morphology; synthetic строки не утверждаются; validated generation создаёт runtime `src/project/seo/registry-seed.ts`, CMS ownership запрещён |
 | Geo modes | `SINGLE_GEO | MULTI_GEO`; validated SiteProfile separates geo `published` from `hubStatus`; SINGLE_GEO owns exactly one routable primary hub |
 | District/facet routes | Published Payload districts are cached per `geo×category`; project `seoFacets` owns clean facet slugs and filters; registry invalidation uses the authenticated `registry` tag |
-| Clone preset | `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`; `clone:prepare` generates the complete explicit SiteProfile matrix plus `docs/CLIENT_BOOTSTRAP.json` |
+| Clone preset | Только schema v3: `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`; optional overrides валидируются canonical SiteProfile schema; `clone:prepare` generates the complete explicit SiteProfile matrix plus `docs/CLIENT_BOOTSTRAP.json` |
+| Clone geo seed | `clone:seed-geo` идемпотентно применяет approved city/district morphology через project-owned privileged gateway; direct DB/anonymous REST не используются |
 | Client fixture boundary | `projectKind=client` never falls back to starter demo properties when Payload data is absent; empty client data produces an empty/not-found runtime result |
 | Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |
 | Development model | Одна `developments` entity с `kind = residential_complex | cottage_village` и strict kind-specific validation |
 | Plan 8 delivery | `EXECUTION_COMPLETE`; production и release tag остаются отдельными owner actions; repository mirror — отдельная операционная синхронизация |
 | Plan 9 delivery | S0-S14 `EXECUTION_COMPLETE`; accepted implementation baseline `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` is contained in current SourceCraft `main`; S15 excluded |
 | Target release tag | `starter-v2.1.0`; only after Plan №9 acceptance and a separate owner release command |
+| Plan 10 delivery | B1/B2 merged; B3 release-readiness in progress. Production, tag, mirror and actual live proof are not authorized by plan execution |
 
 ## Optional modules
 

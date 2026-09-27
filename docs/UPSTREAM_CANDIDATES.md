@@ -1,6 +1,6 @@
 # Upstream Candidates
 
-Статус: `ACTIVE / EMPTY REGISTER`.
+Статус: `ACTIVE / EMPTY REGISTER` (проверено после Plan №10 B1/B2).
 
 Этот реестр хранит только наблюдения о потенциально reusable улучшениях,
 обнаруженных в проекте. Он не является backlog, вторым task store или
@@ -24,3 +24,8 @@
 ## Register
 
 Активных candidates нет.
+
+Preset v3, geo seed, registry lifecycle and bounded geo-catalog reads remain
+project-owned implementations in this repository. Their inclusion in the clone
+contract does not promote them to another repository or create an upstream
+workstream.

@@ -31,8 +31,10 @@ canonical `main`. До появления этого immutable tag клиент�
    `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`, `SINGLE_GEO | MULTI_GEO`,
    явные `published`/`hubStatus`, морфологию каждого geo, NAP-контакты,
    indexing decision, logo/tokens, feed, development Excel, client readiness и
-   SEO templates. Вместо `seoTemplateFile` допустим эквивалентный встроенный
-   объект `seoTemplates`. Schema v1 отклоняется с подсказкой миграции.
+   SEO templates и optional SiteProfile overrides. Вместо `seoTemplateFile`
+   допустим эквивалентный встроенный объект `seoTemplates`. Единственная
+   поддерживаемая схема — `schemaVersion: 3`; v1/v2 отклоняются с явной
+   подсказкой миграции.
 3. В clean checkout выполнить:
 
    ```bash
@@ -49,20 +51,35 @@ canonical `main`. До появления этого immutable tag клиент�
 4. Проверить и закоммитить generated client bootstrap. Значения
    `src/project/client-readiness.config.ts` генерируются из утверждённого preset;
    любые изменения требуют нового clean clone с обновлённым preset.
-5. Создать geo/district data по утверждённой морфологии, заполнить SEO registry,
-   установить brand tokens/logo, подключить feed и development Excel по
+5. Выполнить `pnpm clone:seed-geo`: команда через привилегированный project
+   gateway идемпотентно создаёт region, cities и typed districts из preset.
+   Повторный запуск не создаёт дубликаты; невалидные parent/type/morphology
+   отклоняются до записи.
+6. Пройти lifecycle SEO Registry. `clone:prepare` создаёт CSV-каркас со
+   статусом `draft`. Заменить synthetic/fallback evidence реальными метриками,
+   датой и источником, проверить canonical URL/template key и только после
+   утверждения морфологии перевести конкретные строки в `approved`. Synthetic
+   строка не может быть approved или indexable. Затем выполнить
+   `pnpm seo:registry:generate` и `pnpm seo:registry:check`; CSV остаётся
+   editable owner, generated TypeScript — только runtime projection.
+7. Установить brand tokens/logo, подключить feed и development Excel по
    `docs/CLIENT_BOOTSTRAP.json`. В client mode отсутствие Payload data означает
    пустой каталог: starter demo fixture не используется как fallback.
-6. Использовать отдельные локальные PostgreSQL и секреты; секреты хранить только
+8. Использовать отдельные локальные PostgreSQL и секреты; секреты хранить только
    в Secret Master.
-7. После отдельного topology decision выполнить
+9. После отдельного topology decision выполнить
    `pnpm clone:activate-timeweb-storage`. Команда добавляет точно совместимый
    `@payloadcms/storage-s3@3.90.1`, подключает Media к Timeweb S3, добавляет
    client-only env schema и выполняет typecheck. Она не входит в
    `clone:prepare`; повторный запуск — безопасный no-op.
-8. Выполнить `pnpm install --frozen-lockfile`, `pnpm verify:daily` и
+10. Выполнить `pnpm install --frozen-lockfile`, `pnpm verify:daily` и
    `pnpm verify:client-readiness`. До production дополнительно пройти release
    gates раздела D.
+
+Проверяемая clone matrix состоит из четырёх профилей: Souz reference preset,
+`NEWBUILD_FIRST + SINGLE_GEO`, `SECONDARY_FIRST + SINGLE_GEO` и
+`MIXED + MULTI_GEO`. `pnpm verify:clone-matrix` доказывает подготовку этих
+деревьев; это локальная проверка переносимости, а не release/live proof.
 
 После Design Intake нового клиента UI cleanup выполняется отдельно:
 

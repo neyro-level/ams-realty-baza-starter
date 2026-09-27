@@ -49,16 +49,17 @@ env file: /etc/ams/realtbase/start-baza.env
 backup rehearsal: pg_dump custom format -> temporary restore database -> migration count check
 ```
 
-Release sequence:
+Canonical release sequence (requires a separate owner release command):
 
 1. Confirm clean canonical SourceCraft `main` and exact full SHA.
-2. Run `pnpm release:manifest` for local release identity evidence.
-3. Build one Docker image from the exact SHA outside the production host and tag it with the full SHA.
-4. Run Payload migrations from the same image against the local AMS Server PostgreSQL database.
-5. Start/recreate exactly one application runtime with `JOBS_AUTORUN=true`; no parallel jobs owner is allowed.
-6. Route `start-baza.ams24.ru` through Nginx/TLS to this runtime with `noindex` preserved.
-7. Check `/api/internal/healthz` with the configured health secret and run the changed live smoke.
-8. Keep the previous image tag and env snapshot available for rollback.
+2. Run the release preflight required by `05_RELEASE_CHECKLIST.md`.
+3. Outside production run `pnpm release:build --expected-sha=<sha> --image=<registry/image:<sha>>`; it builds the existing Dockerfile and fails on a dirty tree, unknown/mismatched SHA or mutable image reference.
+4. Verify the same `.release/release-manifest.json` contains the exact source SHA, `release-build-v1/dockerfile` identity, immutable image reference and full sha256 digest.
+5. Publish/store the immutable artifact only inside this owner-authorized release; a local `--dry-run` is fixture evidence and never publication/deploy.
+6. Preserve the previous known-good image and env snapshot as the rollback point.
+7. Run Payload migrations from the same image against the local AMS Server PostgreSQL database.
+8. Roll out exactly one application runtime. During handover start with `JOBS_AUTORUN=false`, stop the previous jobs owner, then enable exactly one new owner.
+9. Route through Nginx/TLS, check `/api/internal/healthz`, run explicit live smoke with `noindex` preserved, and rollback to the saved image on failure.
 
 При handover jobs сначала новый runtime стартует с `JOBS_AUTORUN=false`; старый jobs owner выключается до controlled restart нового с `true`. Два jobs-active runtime недопустимы.
 

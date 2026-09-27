@@ -92,3 +92,17 @@ geo/source fields и history redirects не удалялись.
 - **Cleanup evidence:** P8-23B —
   `docs/plan8/S8_23B_POST_CUTOVER_CLEANUP_EVIDENCE.md`. Raw legacy geo/source
   data сохранены.
+
+## Clone profile and registry ownership
+
+- Clone input is preset schema v3. The project-owned preset module is the only
+  default/profile owner; optional overrides pass the canonical SiteProfile
+  schema before generated files are written.
+- Runtime status is an explicit matrix: category and market capability at the
+  profile level, geo/category and geo/market status per published geo, plus
+  root/per-geo developer surfaces. Missing configuration fails closed.
+- `clone:seed-geo` materializes approved city/district morphology through the
+  privileged gateway. It does not make a route indexable.
+- Registry rows move `draft → approved` only after non-synthetic demand
+  evidence, canonical URL/template validation and approved morphology. Content
+  Gate still owns the final 200/robots/canonical/discovery decision.
