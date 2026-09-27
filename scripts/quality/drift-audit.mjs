@@ -5,6 +5,7 @@ const root = process.cwd();
 const stylesEntryPath = join(root, "packages", "ui", "src", "styles.css");
 const stylesDir = join(root, "packages", "ui", "src", "styles");
 const tokenSource = join(root, "src", "app", "globals.css");
+const brandSource = join(root, "src", "project", "brand.css");
 const maxImportedBytes = 10 * 1024;
 const violations = [];
 
@@ -64,6 +65,27 @@ const extraTokenFiles = walk(join(root, "src"), new Set([".css"]))
 	.filter((path) => /tokens\.css$/i.test(path) && path !== tokenSource);
 for (const path of extraTokenFiles) {
 	violations.push(`${relative(root, path).replaceAll("\\", "/")}: extra token file`);
+}
+
+const projectCss = walk(join(root, "src"), new Set([".css"])).concat(
+	walk(join(root, "packages"), new Set([".css"])),
+);
+for (const path of projectCss) {
+	const css = readFileSync(path, "utf8");
+	const name = relative(root, path).replaceAll("\\", "/");
+	if (path !== brandSource && /^\s*--brand-[a-z0-9_-]+\s*:/im.test(css)) {
+		violations.push(`${name}: brand primitive defined outside src/project/brand.css`);
+	}
+}
+
+const brandCss = readFileSync(brandSource, "utf8");
+const nonBrandDefinitions = [
+	...brandCss.matchAll(/^\s*(--(?!brand-)[a-z0-9_-]+)\s*:/gim),
+].map((match) => match[1]);
+if (nonBrandDefinitions.length > 0) {
+	violations.push(
+		`src/project/brand.css: non-brand custom properties ${nonBrandDefinitions.join(", ")}`,
+	);
 }
 
 if (violations.length) {

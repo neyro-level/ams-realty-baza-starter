@@ -244,10 +244,25 @@
 		"address": "Ростов-на-Дону",
 		"workingHours": "Пн-Пт 09:00-18:00"
 	},
+	"brand": {
+		"colors": {
+			"background": "#f4f4f3", "foreground": "#17161a", "surface": "#ffffff",
+			"surfaceMuted": "#ebebe9", "surfaceSoft": "#fafafa", "surfaceDark": "#18181a",
+			"surfaceDarkStrong": "#101011", "contentSecondary": "#413f41", "contentMuted": "#827f81",
+			"contentInverse": "#ffffff", "border": "#e3e3e1", "accent": "#8a1515",
+			"accentHover": "#630e0e", "accentSoft": "#f7f2f2", "statusWarning": "#996000",
+			"statusDanger": "#9e1c1c", "statusSuccess": "#159947", "statusInfo": "#0a66cc"
+		},
+		"radii": { "sm": "8px", "md": "10px", "lg": "12px", "xl": "12px", "full": "999px" },
+		"fontFamily": "Manrope",
+		"logoFile": "public/brand/logo.svg",
+		"faviconFile": "src/app/icon.svg"
+	},
 	"brandAssets": {
 		"status": "ready",
 		"logoPath": "/brand/logo.svg",
-		"tokenSource": "src/app/globals.css"
+		"faviconPath": "/icon.svg",
+		"tokenSource": "src/project/brand.css"
 	},
 	"feed": { "status": "ready", "mode": "external-urls" },
 	"developmentExcel": {

@@ -7,6 +7,14 @@ import { join } from "node:path";
 
 const baseUrl = process.env.STARTER_VISUAL_BASE_URL;
 assert.ok(baseUrl, "STARTER_VISUAL_BASE_URL is required");
+const baselineUrl = process.env.STARTER_VISUAL_BASELINE_URL ?? null;
+const brandProofTheme = process.env.STARTER_BRAND_PROOF_THEME ?? "current";
+const checkVisibleInternalLinks =
+	process.env.STARTER_VISUAL_CHECK_LINKS !== "false";
+assert.ok(
+	["current", "blue"].includes(brandProofTheme),
+	"STARTER_BRAND_PROOF_THEME must be current or blue",
+);
 const captureDirectory = process.env.STARTER_VISUAL_CAPTURE_DIR;
 if (captureDirectory) mkdirSync(captureDirectory, { recursive: true });
 
@@ -173,6 +181,12 @@ try {
 			});
 			await client.send("Page.navigate", { url: new URL(route, baseUrl).href });
 			await waitForDocument(client);
+			if (brandProofTheme === "blue") {
+				await client.send("Runtime.evaluate", {
+					expression: `document.documentElement.dataset.brandProof = "blue"`,
+				});
+				await delay(100);
+			}
 			const inspection = await client.send("Runtime.evaluate", {
 				expression: `(() => ({
 				path: location.pathname + location.search,
@@ -189,6 +203,18 @@ try {
 					.filter((id) => document.getElementById(id)),
 				analyticsEvents: [...document.querySelectorAll('[data-analytics-event]')]
 					.map((node) => node.getAttribute('data-analytics-event')),
+				brand: {
+					accent: getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim(),
+					accentHover: getComputedStyle(document.documentElement).getPropertyValue('--brand-accent-hover').trim(),
+					accentSoft: getComputedStyle(document.documentElement).getPropertyValue('--brand-accent-soft').trim(),
+				},
+				geometry: [...document.querySelectorAll('main h1, main section, main article, main button, main input')]
+					.filter((node) => node.getClientRects().length > 0)
+					.slice(0, 30)
+					.map((node, index) => {
+						const rect = node.getBoundingClientRect();
+						return { index, tag: node.tagName, x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+					}),
 			}))()`,
 				returnByValue: true,
 			});
@@ -199,6 +225,11 @@ try {
 				value.overflow <= 1,
 				`${route} overflows by ${value.overflow}px`,
 			);
+			assert.equal(
+				value.brand.accent,
+				brandProofTheme === "blue" ? "#1557b0" : "#8a1515",
+				`${route} must resolve the selected brand theme`,
+			);
 			if (route.includes("rooms=2")) assert.equal(value.filterStatus, true);
 			if (route.includes("zhk-severnyy-bereg")) {
 				assert.ok(value.anchors.includes("development-prices"));
@@ -207,7 +238,7 @@ try {
 			if (route === "/primorsk/kvartiry/") {
 				assert.ok(value.analyticsEvents.includes("listing_view"));
 			}
-			if (viewport.name === "desktop") {
+			if (viewport.name === "desktop" && checkVisibleInternalLinks) {
 				checkedLinks = checkedLinks.concat(
 					await checkInternalLinks(value.hrefs),
 				);
@@ -230,6 +261,36 @@ try {
 				captureBeyondViewport: false,
 			});
 			const screenshotBuffer = Buffer.from(screenshot.data, "base64");
+			let maxGeometryDrift = null;
+			if (baselineUrl) {
+				await client.send("Page.navigate", {
+					url: new URL(route, baselineUrl).href,
+				});
+				await waitForDocument(client);
+				const baselineInspection = await client.send("Runtime.evaluate", {
+					expression: `(() => [...document.querySelectorAll('main h1, main section, main article, main button, main input')]
+					.filter((node) => node.getClientRects().length > 0)
+					.slice(0, 30)
+					.map((node, index) => {
+						const rect = node.getBoundingClientRect();
+						return { index, tag: node.tagName, x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+					}))()`,
+					returnByValue: true,
+				});
+				const baselineGeometry = baselineInspection.result.value;
+				assert.equal(baselineGeometry.length, value.geometry.length, `${route} geometry node count drifted`);
+				maxGeometryDrift = 0;
+				for (let index = 0; index < value.geometry.length; index += 1) {
+					assert.equal(value.geometry[index].tag, baselineGeometry[index].tag);
+					for (const field of ["x", "y", "width", "height"]) {
+						maxGeometryDrift = Math.max(
+							maxGeometryDrift,
+							Math.abs(value.geometry[index][field] - baselineGeometry[index][field]),
+						);
+					}
+				}
+				assert.ok(maxGeometryDrift <= 1, `${route} geometry drifted by ${maxGeometryDrift}px`);
+			}
 			if (captureDirectory) {
 				const routeKey =
 					route === "/"
@@ -248,6 +309,8 @@ try {
 				h1: value.h1,
 				overflow: value.overflow,
 				unnamedControls: unnamedControls.length,
+				brand: value.brand,
+				maxGeometryDrift,
 				screenshotSha256: createHash("sha256")
 					.update(screenshotBuffer)
 					.digest("hex"),
@@ -272,6 +335,9 @@ try {
 			{
 				schema: "ams-ui-browser-proof/v1",
 				baseUrl,
+				baselineUrl,
+				brandProofTheme,
+				checkVisibleInternalLinks,
 				matrix,
 				checkedInternalLinks: uniqueLinks,
 				status: "PASS",

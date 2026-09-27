@@ -3,13 +3,14 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
 	cpSync,
+	mkdirSync,
 	mkdtempSync,
 	readFileSync,
 	rmSync,
 	writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 const root = process.cwd();
 const matrix = [
@@ -69,8 +70,12 @@ function safeFailure(entry, step, error) {
 		typeof error === "object" && error && "status" in error
 			? String(error.status ?? "unknown")
 			: "unknown";
+	const diagnostic =
+		process.env.AMS_CLONE_DEBUG === "1"
+			? `\n${String(error?.stderr ?? error?.stdout ?? error?.message ?? "unknown failure")}`
+			: "";
 	return new Error(
-		`verify:clone-matrix: ${entry.name} FAIL at ${step} (exit ${exitCode}); command output omitted and disposable worktree removed`,
+		`verify:clone-matrix: ${entry.name} FAIL at ${step} (exit ${exitCode}); command output omitted and disposable worktree removed${diagnostic}`,
 	);
 }
 
@@ -87,6 +92,7 @@ for (const entry of selectedMatrix) {
 			stdio: "pipe",
 		});
 		for (const relativePath of [
+			"public/brand/logo.svg",
 			"scripts/clone-prepare.mjs",
 			"scripts/clone-preset.mjs",
 			"scripts/seo-registry.ts",
@@ -96,6 +102,10 @@ for (const entry of selectedMatrix) {
 			"scripts/verify-site-profile.ts",
 			"scripts/quality/seo-template-ownership.mjs",
 			"src/project/client-readiness.config.ts",
+			"src/app/icon.svg",
+			"src/app/layout.tsx",
+			"src/project/brand.css",
+			"src/project/font.generated.ts",
 			"src/project/project-literals.json",
 			"src/project/seo/templates.ts",
 			"src/project/seo/template-inputs.ts",
@@ -105,6 +115,7 @@ for (const entry of selectedMatrix) {
 			"src/project/routing/runtime-route.ts",
 			"src/project/routing/legacy-route-manifest.ts",
 		]) {
+			mkdirSync(dirname(join(clone, relativePath)), { recursive: true });
 			cpSync(join(root, relativePath), join(clone, relativePath));
 		}
 		step = "compose approved preset";
@@ -196,10 +207,12 @@ for (const entry of selectedMatrix) {
 						address: "Тестоград",
 						workingHours: "09:00-18:00",
 					},
+					brand: structuredClone(clientExample.brand),
 					brandAssets: {
 						status: "ready",
 						logoPath: "/brand/logo.svg",
-						tokenSource: "src/app/globals.css",
+						faviconPath: "/icon.svg",
+						tokenSource: "src/project/brand.css",
 					},
 					feed:
 						entry.preset === "NEWBUILD_FIRST"
@@ -266,6 +279,18 @@ for (const entry of selectedMatrix) {
 			[join(clone, "scripts/verify-clone-bootstrap.mjs"), `--root=${clone}`],
 			{ cwd: clone, stdio: "pipe" },
 		);
+		step = "prove repeat safety";
+		const firstDiffHash = hash(git(clone, ["diff"]));
+		execFileSync(process.execPath, args, {
+			cwd: clone,
+			env: proofEnvironment,
+			stdio: "pipe",
+		});
+		assert.equal(
+			hash(git(clone, ["diff"])),
+			firstDiffHash,
+			`${entry.preset} repeat must be idempotent`,
+		);
 		step = "generate and check client SEO registry";
 		pnpm(clone, ["seo:registry:generate"], proofEnvironment);
 		pnpm(clone, ["seo:registry:check"], proofEnvironment);
@@ -321,18 +346,6 @@ for (const entry of selectedMatrix) {
 			],
 			"node --conditions=react-server ./node_modules/payload/bin.js run scripts/clone-seed-geo.ts",
 			"prepared clone must retain the explicit geo seed command",
-		);
-		step = "prove repeat safety";
-		const firstDiffHash = hash(git(clone, ["diff"]));
-		execFileSync(process.execPath, args, {
-			cwd: clone,
-			env: proofEnvironment,
-			stdio: "pipe",
-		});
-		assert.equal(
-			hash(git(clone, ["diff"])),
-			firstDiffHash,
-			`${entry.preset} repeat must be idempotent`,
 		);
 		console.log(
 			`verify:clone-matrix: ${entry.name} PASS (client-kind + fixture-free outputs + registry URLs + typecheck + idempotence)`,

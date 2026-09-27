@@ -125,7 +125,7 @@ REALTY_BASE
 **UI и дизайн**
 
 19. Один проект = один Design System. Новая страница — новая композиция, а не новый дизайн.
-20. Фактические значения дизайна — цвета, радиусы, ритм, типографические размеры/веса, easing — определяются только в `src/app/globals.css`. Любой другой CSS использует эти значения через `var(--*)` и не создаёт второй набор design literals.
+20. Project brand primitives (20–30 значений цветов, основных радиусов и font family) определяются только в `src/project/brand.css`. Semantic/component tokens, ритм, типографические размеры/веса и easing определяются только в `src/app/globals.css`, который потребляет brand primitives через `var()`/`color-mix()`. Любой другой CSS использует semantic/component tokens через `var(--*)` и не создаёт второй набор design literals.
 21. shadcn/ui — единственная primitive foundation. Второй Button/Input/Dialog/Card не создаётся.
 22. Server Components по умолчанию; `"use client"` — только на интерактивном leaf.
 23. Reusable UI не импортирует Payload, DB clients и persistence types.
@@ -164,7 +164,8 @@ REALTY_BASE
 | Версии | `package.json`, `pnpm-lock.yaml` |
 | Schema | Payload collections/config + `migrations/` |
 | Project profile | `AMS_PROFILE` + `docs/PROJECT.md` |
-| Design values | `src/app/globals.css` |
+| Brand primitives | `src/project/brand.css` |
+| Semantic/component design values | `src/app/globals.css` |
 | Design policy | `docs/DESIGN.md` |
 | Client/project config | `docs/PROJECT.md` |
 | Operations | `docs/OPERATIONS.md` |
@@ -1728,7 +1729,16 @@ existing project component
 
 ## 13.2 Design values
 
-`src/app/globals.css` — единственный source of truth **значений** design system:
+Design values имеют ровно два непересекающихся owner-слоя:
+
+- `src/project/brand.css` — единственный source of truth для 20–30 generated
+  project brand primitives: base colors/status colors, approved main radii и
+  font family;
+- `src/app/globals.css` — единственный semantic/component map и source of truth
+  для typography scales/weights, section rhythm, easing, containers, shadows и
+  component roles. Он получает brand values только через `var()`/`color-mix()`.
+
+`globals.css` владеет:
 
 ```text
 semantic colors
@@ -1781,7 +1791,8 @@ Component-specific CSS внутри `globals.css` запрещён.
 Направление:
 
 ```text
-globals.css design values
+brand.css project primitives
+→ globals.css semantic/component design values
 → page/section CSS consumes var(--*)
 ```
 
@@ -2639,7 +2650,7 @@ package.json не содержит:
 
 ### Guard 11 — CSS literals
 
-Во всех CSS кроме `globals.css` запрещаются project-authored literal:
+Во всех CSS кроме `brand.css` и `globals.css` запрещаются project-authored literal:
 
 ```text
 colors
@@ -2661,6 +2672,10 @@ aspect-ratio
 ```
 
 Guard не должен ошибочно запрещать browser/system keywords, необходимые для layout; allowlist фиксируется тестами.
+`brand.css` содержит только `--brand-*` primitives и verification theme;
+semantic/component token или page selector в нём является ошибкой. Raw
+brand-colored shadows вне `brand.css` запрещены, neutral/effect RGB допускается
+только через явный allowlist guard.
 
 ## 18.5 Integration tests — mandatory minimum
 
@@ -3232,7 +3247,7 @@ duplicate Button/Input/Dialog/Card/Table
 
 universal page-builder
 
-design literals вне globals.css
+design literals вне brand.css/globals.css
 кроме approved non-design structural CSS values
 
 занятие reserved module URL namespace unrelated page
@@ -3258,9 +3273,10 @@ UI isolation =
 folder guards
 или preferred package boundary
 
-Design values = globals.css
+Brand primitives = src/project/brand.css
+Semantic/component design values = src/app/globals.css
 Page layout CSS may consume var(--*)
-Design literals do not fork outside globals
+Design literals do not fork outside their two explicit owners
 
 Import =
 multi-feed

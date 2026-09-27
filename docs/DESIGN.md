@@ -16,7 +16,7 @@ Anti-goals: новый visual language без owner approval; вторая primi
 
 ## Source of truth
 
-`src/app/globals.css` — единственный источник значений design system: semantic colors, surfaces, typography scale/weights, radii, containers, section rhythm, easing, shadcn mappings и font mapping.
+`src/project/brand.css` — единственный источник 20–30 generated project brand primitives: base/status colors, approved main radii и font family. `src/app/globals.css` — единственный semantic/component token map: typography scale/weights, containers, section rhythm, easing, shadows, component roles и shadcn mappings. Он потребляет brand primitives только через `var()`/`color-mix()`.
 
 Другой CSS может описывать grid, flex, positioning, sizing relationships и responsive composition, но получает design values через `var(--*)`. Component-specific literals не образуют второй набор токенов.
 
@@ -24,6 +24,7 @@ Anti-goals: новый visual language без owner approval; вторая primi
 
 | Class | Meaning |
 |---|---|
+| BRAND | `--brand-*` primitives, принадлежащие только `src/project/brand.css`; current theme и verification-only blue proof theme. |
 | CORE | Required semantic tokens enforced by `scripts/quality/design-tokens.mjs` (`--background`, section rhythm, radii, motion, fonts). |
 | SHADCN | `@theme inline` mappings that expose CORE/PROJECT values to Tailwind utilities. |
 | PROJECT | Starter/Atlas page tokens with live `var(--*)` usage in `packages/ui` or `src`, including live corporate prefixes `about-company`, `sale`, `new-building`. |
@@ -53,14 +54,21 @@ Reusable visual rhythm goes through tokens and `Section` / `Container` variants.
 
 ## Geometry vs design-values
 
-Numeric colors, type sizes, weights, radii, shadows and durations live in `globals.css`. Component CSS consumes them. Repeated section spacing uses `--section-space-*` / `--site-section-space-desktop`.
+Numeric brand primitives live only in `brand.css`. Semantic/component colors, type sizes, weights, derived radii, shadows and durations live in `globals.css`; accent shadows derive from `--brand-accent` через `color-mix()`. Neutral/effect raw RGB values follow the explicit guard allowlist. Component CSS consumes only semantic/component variables. Repeated section spacing uses `--section-space-*` / `--site-section-space-desktop`.
+
+Typography scale consolidation preserves role names while aliases replace only
+values whose source difference is below `0.5px`. The mechanical guard records
+each approved alias and rejects a larger source delta; distinct display/process
+sizes remain when collapsing them would cross that limit or alter composition.
 
 ## Font contract
 
-- family: Manrope через `next/font/google` в `src/app/layout.tsx`;
+- family: allowlisted Manrope/Inter/Roboto через generated
+  `src/project/font.generated.ts`, который подключает `next/font/google`;
 - subsets: `cyrillic`, `latin`; loading mode: `display: swap`;
-- runtime variable: `--font-manrope`; `body` и Tailwind `--font-sans` используют
-  её с system fallback;
+- runtime variable: `--font-project`; `--brand-font-sans` владеет approved family
+  plus system fallback, а semantic `--site-font-family` и Tailwind `--font-sans`
+  получают это значение через mapping;
 - weights: variable font, без отдельного списка загружаемых static weights;
 - license: [SIL Open Font License 1.1 upstream](https://github.com/google/fonts/blob/main/ofl/manrope/OFL.txt);
   файл шрифта self-hosted сборкой Next.js, runtime-запрос к Google Fonts не
@@ -68,6 +76,10 @@ Numeric colors, type sizes, weights, radii, shadows and durations live in `globa
 - system stack остаётся только fallback, не основной визуальный font claim.
 
 ## Approved exceptions
+
+- Neutral/effect RGB bases outside brand primitives are limited by
+  `neutralEffectRgbAllowlist` in `scripts/quality/design-tokens.mjs`; burgundy
+  accent/danger RGB is never allowlisted outside `brand.css`.
 
 - Feed images Variant B (unoptimized + allowlist), see Media.
 - Atlas donor `home-page.css` удалён из live package source; starter public home

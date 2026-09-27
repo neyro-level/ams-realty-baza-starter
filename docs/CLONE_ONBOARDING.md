@@ -69,7 +69,11 @@ canonical `main`. До появления этого immutable tag клиент�
    строка не может быть approved или indexable. Затем выполнить
    `pnpm seo:registry:generate` и `pnpm seo:registry:check`; CSV остаётся
    editable owner, generated TypeScript — только runtime projection.
-7. Установить brand tokens/logo, подключить feed и development Excel по
+7. Заполнить обязательный `brand` block: 18 цветов, пять approved radii,
+   allowlisted `next/font` family, repository-local logo и favicon. Команда
+   генерирует `src/project/brand.css` и `src/project/font.generated.ts`;
+   semantic/component mapping остаётся в `src/app/globals.css`. Все generated
+   outputs фиксируются SHA-256 в `docs/CLONE_GENERATED_OUTPUTS.json`. Затем подключить feed и development Excel по
    `docs/CLIENT_BOOTSTRAP.json`. В client mode отсутствие Payload data означает
    пустой каталог: starter demo fixture не используется как fallback.
 8. Использовать отдельные локальные PostgreSQL и секреты; секреты хранить только

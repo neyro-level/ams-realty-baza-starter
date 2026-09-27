@@ -3,7 +3,9 @@ import { extname, join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../..");
 const tokenSource = join(root, "src/app/globals.css");
+const brandSource = join(root, "src/project/brand.css");
 const tokenCss = readFileSync(tokenSource, "utf8");
+const brandCss = readFileSync(brandSource, "utf8");
 
 function walk(directory, extensions) {
 	return readdirSync(directory).flatMap((entry) => {
@@ -20,10 +22,15 @@ function walk(directory, extensions) {
 const definitions = new Set(
 	[...tokenCss.matchAll(/^\s*(--[a-z0-9_-]+)\s*:/gim)].map((match) => match[1]),
 );
+const brandDefinitions = new Set(
+	[...brandCss.matchAll(/^\s*(--brand-[a-z0-9_-]+)\s*:/gim)].map(
+		(match) => match[1],
+	),
+);
 
 const componentCssFiles = walk(join(root, "src"), new Set([".css"]))
 	.concat(walk(join(root, "packages"), new Set([".css"])))
-	.filter((path) => path !== tokenSource);
+	.filter((path) => path !== tokenSource && path !== brandSource);
 const externalDefinitions = new Set(
 	componentCssFiles.flatMap((path) => {
 		const css = readFileSync(path, "utf8");
@@ -32,7 +39,11 @@ const externalDefinitions = new Set(
 		);
 	}),
 );
-const knownDefinitions = new Set([...definitions, ...externalDefinitions]);
+const knownDefinitions = new Set([
+	...definitions,
+	...brandDefinitions,
+	...externalDefinitions,
+]);
 const externalValues = componentCssFiles.flatMap((path) => {
 	const css = readFileSync(path, "utf8");
 	return [...css.matchAll(/^\s*(--[a-z0-9_-]+)\s*:\s*([^;]+);/gim)]
@@ -207,8 +218,62 @@ const codeCorpus = [
 	...walk(join(root, "packages"), new Set([".css", ".ts", ".tsx"])),
 	...walk(join(root, "scripts"), new Set([".mjs", ".ts"])),
 ]
-	.filter((path) => path !== tokenSource)
+	.filter((path) => path !== tokenSource && path !== brandSource)
 	.map((path) => ({ path, text: readFileSync(path, "utf8") }));
+
+const brandPrimitiveValues = [
+	...brandCss.matchAll(
+		/^\s*--brand-[a-z0-9_-]+\s*:\s*(#[0-9a-f]{3,8}|-?(?:\d*\.)?\d+(?:px|rem)|[^;]*font[^;]*);/gim,
+	),
+].map((match) => match[1].trim());
+const duplicateBrandValues = [...new Set(brandPrimitiveValues)].flatMap(
+	(value) => {
+		const pattern = value.startsWith("#")
+			? new RegExp(value.replace("#", "#"), "i")
+			: null;
+		if (!pattern) return [];
+		return tokenCss.match(pattern) ? [value] : [];
+	},
+);
+const guardedBrandColorNames = new Set([
+	"--brand-accent",
+	"--brand-accent-hover",
+	"--brand-accent-soft",
+	"--brand-status-warning",
+	"--brand-status-danger",
+	"--brand-status-success",
+	"--brand-status-info",
+]);
+const rawBrandColorPatterns = [
+	...brandCss.matchAll(
+		/^\s*(--brand-[a-z0-9_-]+)\s*:\s*(#[0-9a-f]{3,8})\s*;/gim,
+	),
+]
+	.filter((match) => guardedBrandColorNames.has(match[1]))
+	.map((match) => new RegExp(`${match[2]}\\b`, "i"));
+const rawBrandColorFindings = codeCorpus.flatMap((file) =>
+	!file.path.includes(`${join(root, "scripts")}`) &&
+	rawBrandColorPatterns.some((pattern) => pattern.test(file.text))
+		? [relative(root, file.path).replaceAll("\\", "/")]
+		: [],
+);
+const neutralEffectRgbAllowlist = new Set([
+	"0,0,0",
+	"16,16,17",
+	"17,24,39",
+	"20,18,22",
+	"23,22,26",
+	"24,22,24",
+	"24,24,26",
+	"28,27,31",
+	"227,227,225",
+	"255,255,255",
+]);
+const unapprovedEffectColors = [
+	...tokenCss.matchAll(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,/gim),
+]
+	.map((match) => `${match[1]},${match[2]},${match[3]}`)
+	.filter((rgb) => !neutralEffectRgbAllowlist.has(rgb));
 
 const deadTokens = [...definitions].filter((token) => {
 	if (themeKeys.has(token) || isReservedToken(token)) return false;
@@ -377,6 +442,18 @@ if (
 
 const missingRequired = required.filter((token) => !definitions.has(token));
 const failures = [
+	...(brandDefinitions.size < 20 || brandDefinitions.size > 30
+		? [`brand primitive count ${brandDefinitions.size} is outside 20..30`]
+		: []),
+	...duplicateBrandValues.map(
+		(value) => `brand primitive value duplicated in globals.css: ${value}`,
+	),
+	...rawBrandColorFindings.map(
+		(file) => `raw brand color outside brand.css: ${file}`,
+	),
+	...unapprovedEffectColors.map(
+		(rgb) => `raw effect RGB is absent from the explicit neutral allowlist: ${rgb}`,
+	),
 	...missingRequired.map((token) => `missing required token ${token}`),
 	...externalValues.map(
 		(item) => `raw token value outside globals.css ${item}`,
@@ -393,10 +470,16 @@ const failures = [
 
 if (!tokenCss.includes("@theme inline"))
 	failures.push("missing Tailwind @theme mapping");
+if (!tokenCss.includes('@import "../project/brand.css"'))
+	failures.push("globals.css must import the project brand primitive source");
+if (!brandCss.includes(':root[data-brand-proof="blue"]'))
+	failures.push("brand.css is missing the verification-only blue proof theme");
 
 export function analyzeDesignTokens() {
 	return {
 		tokenSource: "src/app/globals.css",
+		brandSource: "src/project/brand.css",
+		brandPrimitives: brandDefinitions.size,
 		definitions: definitions.size,
 		uiSourceFiles: uiFiles.length,
 		inventory,
@@ -411,6 +494,6 @@ if (resolve(process.argv[1] ?? "") === import.meta.filename) {
 	}
 
 	console.log(
-		`Design tokens OK: ${definitions.size} definitions, ${uiFiles.length} UI source files, one token source.`,
+		`Design tokens OK: ${definitions.size} semantic/component definitions + ${brandDefinitions.size} brand primitives, ${uiFiles.length} UI source files.`,
 	);
 }

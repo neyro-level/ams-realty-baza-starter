@@ -44,7 +44,7 @@ if (format === "json") {
 	);
 } else {
 	console.log(
-		Object.entries(counts)
+		[["BRAND", analysis.brandPrimitives], ...Object.entries(counts)]
 			.map(([state, count]) => `${state}=${count}`)
 			.join(" | "),
 	);

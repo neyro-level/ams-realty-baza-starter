@@ -6,6 +6,7 @@ import {
 	catalogSurfaces,
 	clonePresets,
 	siteProfileConfigForPreset,
+	validateCloneBrand,
 } from "./clone-preset.mjs";
 
 const defaultProfile = "REALTY_BASE_CLIENT_V1";
@@ -58,7 +59,6 @@ const staticRoutes = [
 	},
 ];
 const appliedDefaults = [
-	"$.brandAssets",
 	"$.clientReadiness.archiveRetentionDays",
 	"$.clientReadiness.automaticBackup",
 	"$.clientReadiness.database",
@@ -299,8 +299,10 @@ export function compileCloneIntake(input) {
 		brandAssets: {
 			status: "ready",
 			logoPath: "/brand/logo.svg",
-			tokenSource: "src/app/globals.css",
+			faviconPath: "/icon.svg",
+			tokenSource: "src/project/brand.css",
 		},
+		brand: validateCloneBrand(structuredClone(input.brand)),
 		feed: { status: "ready", mode: "external-urls" },
 		developmentExcel: { status: "ready", template: "client-developments.xlsx" },
 		clientReadiness: {

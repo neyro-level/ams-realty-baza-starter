@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
 	existsSync,
 	mkdirSync,
@@ -11,10 +12,12 @@ import {
 	buildCloneBootstrap,
 	clonePresetHash,
 	readClonePreset,
+	renderBrandCss,
 	renderClientReadinessConfig,
 	renderClientSeoArtifacts,
 	renderProjectCopy,
 	renderProjectLiterals,
+	renderProjectFontConfig,
 	renderSeoTemplateInputs,
 	renderSiteProfileConfig,
 	reservedRootsForSiteProfile,
@@ -53,6 +56,17 @@ const preset = readClonePreset(
 		: resolve(process.cwd(), String(presetFile)),
 );
 const presetSha = clonePresetHash(preset);
+const resolveRepositoryFile = (relativePath, label) => {
+	const target = resolve(root, relativePath);
+	const rootRelative = relative(root, target);
+	if (!rootRelative || rootRelative.startsWith("..") || isAbsolute(rootRelative)) {
+		throw new Error(`${label} must stay inside the repository.`);
+	}
+	if (!existsSync(target)) throw new Error(`${label} does not exist: ${relativePath}`);
+	return target;
+};
+resolveRepositoryFile(preset.brand.logoFile, "brand.logoFile");
+resolveRepositoryFile(preset.brand.faviconFile, "brand.faviconFile");
 const sourceTag = String(args.get("--source-tag") || "");
 if (sourceTag !== "starter-v2.1.0") {
 	throw new Error(
@@ -198,6 +212,14 @@ writeFileSync(
 	join(root, "src", "project", "seo", "template-inputs.ts"),
 	renderSeoTemplateInputs(preset),
 );
+writeFileSync(
+	join(root, "src", "project", "brand.css"),
+	renderBrandCss(preset),
+);
+writeFileSync(
+	join(root, "src", "project", "font.generated.ts"),
+	renderProjectFontConfig(preset),
+);
 
 const readinessPath = join(
 	root,
@@ -233,10 +255,43 @@ writeFileSync(
 	join(root, "src", "project", "seo", "registry-seed.ts"),
 	seoArtifacts.registryModule,
 );
-validateCloneBootstrap(root);
 
 const provenance = `# Clone provenance\n\n- Client project: ${preset.projectId}\n- Preset: ${preset.preset}\n- Preset SHA-256: ${presetSha}\n- Source starter tag: ${sourceTag}\n- Source starter SHA: ${sourceSha}\n- Prepared at: ${preparedAt}\n- Fixture runtime: cleared for client mode\n- Storage topology: separate explicit clone:activate-* step\n- Retained platform standard: AMS Realty Platform Core 5.5 (repository-pinned)\n- Retained UI contract: project Design System and closed @ams/realtbase-ui public API\n\n## Removed starter-only groups\n\n${removed.length ? removed.map((item) => `- \`${item}\``).join("\n") : "- None (already absent)"}\n\nCore, packages, guards, migrations and shared security/data checks remain unchanged.\n`;
 writeFileSync(provenancePath, provenance);
+
+const generatedOutputs = [
+	"package.json",
+	"src/project/site.config.ts",
+	"src/project/site-profile.config.ts",
+	"src/project/project-literals.json",
+	"src/project/copy.ts",
+	"src/project/seo/template-inputs.ts",
+	"src/project/brand.css",
+	"src/project/font.generated.ts",
+	"src/project/client-readiness.config.ts",
+	"docs/CLIENT_BOOTSTRAP.json",
+	"docs/seo/DISTRICTS.csv",
+	"docs/seo/SEO_REGISTRY_SEED.csv",
+	"src/project/seo/registry-seed.ts",
+	"docs/CLONE_PROVENANCE.md",
+];
+const outputManifest = {
+	schemaVersion: 1,
+	presetSha,
+	outputs: Object.fromEntries(
+		generatedOutputs.map((relativePath) => [
+			relativePath,
+			createHash("sha256")
+				.update(readFileSync(join(root, relativePath)))
+				.digest("hex"),
+		]),
+	),
+};
+writeFileSync(
+	join(root, "docs", "CLONE_GENERATED_OUTPUTS.json"),
+	`${JSON.stringify(outputManifest, null, "\t")}\n`,
+);
+validateCloneBootstrap(root);
 console.log(
 	`clone:prepare: prepared ${preset.projectId} with ${preset.preset}; removed ${removed.length} starter-only groups`,
 );

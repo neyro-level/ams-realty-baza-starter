@@ -15,6 +15,7 @@
 		"seo",
 		"legacy",
 		"nap",
+		"brand",
 		"hostAllowlists"
 	],
 	"properties": {
@@ -117,6 +118,7 @@
 			}
 		},
 		"nap": { "$ref": "#/$defs/nap" },
+		"brand": { "$ref": "#/$defs/brand" },
 		"hostAllowlists": {
 			"type": "object",
 			"additionalProperties": false,
@@ -130,6 +132,55 @@
 	},
 	"$defs": {
 		"nonEmpty": { "type": "string", "minLength": 1 },
+		"hexColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+		"radius": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]+)?px$" },
+		"brand": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["colors", "radii", "fontFamily", "logoFile", "faviconFile"],
+			"properties": {
+				"colors": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["background", "foreground", "surface", "surfaceMuted", "surfaceSoft", "surfaceDark", "surfaceDarkStrong", "contentSecondary", "contentMuted", "contentInverse", "border", "accent", "accentHover", "accentSoft", "statusWarning", "statusDanger", "statusSuccess", "statusInfo"],
+					"properties": {
+						"background": { "$ref": "#/$defs/hexColor" },
+						"foreground": { "$ref": "#/$defs/hexColor" },
+						"surface": { "$ref": "#/$defs/hexColor" },
+						"surfaceMuted": { "$ref": "#/$defs/hexColor" },
+						"surfaceSoft": { "$ref": "#/$defs/hexColor" },
+						"surfaceDark": { "$ref": "#/$defs/hexColor" },
+						"surfaceDarkStrong": { "$ref": "#/$defs/hexColor" },
+						"contentSecondary": { "$ref": "#/$defs/hexColor" },
+						"contentMuted": { "$ref": "#/$defs/hexColor" },
+						"contentInverse": { "$ref": "#/$defs/hexColor" },
+						"border": { "$ref": "#/$defs/hexColor" },
+						"accent": { "$ref": "#/$defs/hexColor" },
+						"accentHover": { "$ref": "#/$defs/hexColor" },
+						"accentSoft": { "$ref": "#/$defs/hexColor" },
+						"statusWarning": { "$ref": "#/$defs/hexColor" },
+						"statusDanger": { "$ref": "#/$defs/hexColor" },
+						"statusSuccess": { "$ref": "#/$defs/hexColor" },
+						"statusInfo": { "$ref": "#/$defs/hexColor" }
+					}
+				},
+				"radii": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["sm", "md", "lg", "xl", "full"],
+					"properties": {
+						"sm": { "$ref": "#/$defs/radius" },
+						"md": { "$ref": "#/$defs/radius" },
+						"lg": { "$ref": "#/$defs/radius" },
+						"xl": { "$ref": "#/$defs/radius" },
+						"full": { "$ref": "#/$defs/radius" }
+					}
+				},
+				"fontFamily": { "enum": ["Manrope", "Inter", "Roboto"] },
+				"logoFile": { "$ref": "#/$defs/nonEmpty" },
+				"faviconFile": { "$ref": "#/$defs/nonEmpty" }
+			}
+		},
 		"slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
 		"status": { "enum": ["ACTIVE", "NOINDEX_AUTO", "PREPARED_OFF", "OUT"] },
 		"region": {

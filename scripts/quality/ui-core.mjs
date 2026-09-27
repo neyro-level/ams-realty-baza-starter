@@ -109,14 +109,18 @@ for (const path of walk(join(root, "packages", "ui", "src"))) {
 }
 
 const layout = readFileSync(join(root, "src", "app", "layout.tsx"), "utf8");
+const fontConfig = readFileSync(
+	join(root, "src", "project", "font.generated.ts"),
+	"utf8",
+);
 const globals = readFileSync(join(root, "src", "app", "globals.css"), "utf8");
 const fontToken = globals.match(/--font-sans:\s*([^;]+);/)?.[1]?.trim();
-const usesNextFont = /from\s+["']next\/font\//.test(layout);
+const usesNextFont = /from\s+["']next\/font\//.test(fontConfig);
 if (!fontToken) failures.push("font mapping: --font-sans is missing");
-if (fontToken?.includes('"Manrope"') && !usesNextFont) {
-	const key = "font-mapping|src/app/layout.tsx|Manrope-without-next-font";
-	if (!accepted.has(key)) failures.push(`font mapping mismatch: ${key}`);
-}
+if (!usesNextFont || !layout.includes('from "@/project/font.generated"'))
+	failures.push("font mapping: generated next/font owner is not wired into layout");
+if (!fontConfig.includes('variable: "--font-project"'))
+	failures.push("font mapping: generated font must own --font-project");
 
 const clientFiles = walk(join(root, "packages", "ui", "src"))
 	.filter((path) => /^\s*["']use client["'];/m.test(readFileSync(path, "utf8")))

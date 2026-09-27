@@ -19,6 +19,9 @@ import {
 import { registryCoverage } from "./seo-registry-coverage.ts";
 
 const root = process.cwd();
+const defaultBrand = JSON.parse(
+	readFileSync(join(root, "docs/CLONE_PRESET.example.json"), "utf8"),
+).brand;
 const clonePresetSource = readFileSync(
 	join(root, "scripts/clone-preset.mjs"),
 	"utf8",
@@ -89,6 +92,10 @@ assert.ok(
 			row.synthetic === false,
 	),
 );
+assert.ok(
+	souzSkeleton.rows.every((row) => row.morphologyApproved === true),
+	"validated city and district forms must compile to approved registry rows",
+);
 assert.doesNotMatch(JSON.stringify(souzSkeleton), /primorsk|Приморск/i);
 assert.throws(
 	() =>
@@ -128,6 +135,8 @@ try {
 	for (const path of [
 		"src/project",
 		"src/project/seo",
+		"src/app",
+		"public/brand",
 		"docs/legacy",
 		"docs/proofs",
 		"docs/orchestration",
@@ -154,6 +163,8 @@ try {
 		join(fixture, "src/project/site-profile.config.ts"),
 		"starter\n",
 	);
+	cpSync(join(root, "public/brand/logo.svg"), join(fixture, "public/brand/logo.svg"));
+	cpSync(join(root, "src/app/icon.svg"), join(fixture, "src/app/icon.svg"));
 	for (const path of [
 		"docs/legacy/a.md",
 		"docs/proofs/a.md",
@@ -251,10 +262,12 @@ try {
 			address: "Клиентск",
 			workingHours: "09:00-18:00",
 		},
+		brand: structuredClone(defaultBrand),
 		brandAssets: {
 			status: "ready",
 			logoPath: "/brand/logo.svg",
-			tokenSource: "src/app/globals.css",
+			faviconPath: "/icon.svg",
+			tokenSource: "src/project/brand.css",
 		},
 		feed: { status: "ready", mode: "external-urls" },
 		developmentExcel: { status: "ready", template: "client-developments.xlsx" },
@@ -399,6 +412,22 @@ try {
 		}),
 	);
 	assert.equal(readClonePreset(presetPath).feed.status, "not_required");
+	writeFileSync(
+		presetPath,
+		JSON.stringify({
+			...preset,
+			brand: { ...preset.brand, fontFamily: "UntrustedFont" },
+		}),
+	);
+	assert.throws(() => readClonePreset(presetPath), /fontFamily is not allowlisted/);
+	writeFileSync(
+		presetPath,
+		JSON.stringify({
+			...preset,
+			brand: { ...preset.brand, logoFile: "../outside.svg" },
+		}),
+	);
+	assert.throws(() => readClonePreset(presetPath), /must stay inside the repository/);
 	writeFileSync(presetPath, JSON.stringify(preset));
 	const run = (proofMode = true) =>
 		execFileSync(
@@ -421,12 +450,49 @@ try {
 				stdio: ["ignore", "pipe", "pipe"],
 			},
 		);
+	writeFileSync(
+		presetPath,
+		JSON.stringify({
+			...preset,
+			brand: { ...preset.brand, faviconFile: "src/app/missing-icon.svg" },
+		}),
+	);
+	assert.throws(() => run(), /Command failed/);
+	writeFileSync(presetPath, JSON.stringify(preset));
 	assert.throws(() => run(false), /Command failed/);
 	assert.ok(
 		existsSync(join(fixture, "docs/legacy")),
 		"failed source gate must not mutate clone",
 	);
 	assert.match(run(), /prepared Client Test with MIXED/);
+	assert.match(
+		readFileSync(join(fixture, "src/project/brand.css"), "utf8"),
+		/--brand-accent: #8a1515/,
+	);
+	assert.equal(
+		[
+			...readFileSync(join(fixture, "src/project/brand.css"), "utf8").matchAll(
+				/^\s*--brand-[a-z0-9_-]+\s*:/gim,
+			),
+		].length,
+		27,
+		"client brand output must contain 24 base primitives plus three proof overrides",
+	);
+	assert.match(
+		readFileSync(join(fixture, "src/project/font.generated.ts"), "utf8"),
+		/import \{ Manrope \} from "next\/font\/google"/,
+	);
+	const generatedManifest = JSON.parse(
+		readFileSync(join(fixture, "docs/CLONE_GENERATED_OUTPUTS.json"), "utf8"),
+	);
+	assert.ok(generatedManifest.outputs["src/project/brand.css"]);
+	assert.ok(generatedManifest.outputs["src/project/font.generated.ts"]);
+	const generatedBefore = Object.fromEntries(
+		Object.keys(generatedManifest.outputs).map((relativePath) => [
+			relativePath,
+			readFileSync(join(fixture, relativePath), "utf8"),
+		]),
+	);
 	assert.ok(!existsSync(join(fixture, "docs/legacy")));
 	assert.ok(
 		!existsSync(
@@ -503,6 +569,13 @@ try {
 	);
 	assert.match(provenance, /starter-v2\.1\.0/);
 	assert.match(run(), /already prepared from the same preset; no changes/);
+	for (const [relativePath, content] of Object.entries(generatedBefore)) {
+		assert.equal(readFileSync(join(fixture, relativePath), "utf8"), content);
+	}
+	const generatedBrandPath = join(fixture, "src/project/brand.css");
+	writeFileSync(generatedBrandPath, `${generatedBefore["src/project/brand.css"]}\n`);
+	assert.throws(() => run(), /Command failed/);
+	writeFileSync(generatedBrandPath, generatedBefore["src/project/brand.css"]);
 	assert.equal(
 		readFileSync(join(fixture, "docs/CLONE_PROVENANCE.md"), "utf8"),
 		provenance,

@@ -212,8 +212,11 @@ assert.equal(
 );
 assert.ok(
 	readFileSync("src/project/routing/legacy-route-manifest.ts", "utf8").includes(
-		'to: "/kvartiry/"',
-	),
+		"routes: siteProfile.legacyRoutes",
+	) &&
+		readFileSync("src/project/site-profile.config.ts", "utf8").includes(
+			'"to": "/kvartiry/"',
+		),
 	"legacy catalog must remain in the direct redirect manifest",
 );
 assert.ok(

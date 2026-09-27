@@ -63,7 +63,7 @@ proof.
 | Admin access | public+hardened until owner sets IP/VPN |
 | Field ownership | `manual → field override → owning feed`; foreign-feed identity is degenerate for REALTY_BASE |
 | Favorites / comparison | out of scope for starter; no DB schema; client-only later only with a separate project trigger |
-| Public font | Manrope via `next/font/google`; variable `--font-manrope`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
+| Public font | Allowlisted generated `src/project/font.generated.ts` via `next/font/google`; current Manrope, variable `--font-project`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
 | Geo-catalog runtime | `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover и guarded cleanup реализованы |
 | Content Gate runtime | `decidePage` — единый owner robots/canonical/discovery; resolver отдаёт route facts, metadata и sitemap consume Gate decision |
 | SEO templates | Core хранит только renderer/morphology/plural engine; project config владеет ключами и русскими шаблонами, brand приходит из `site-settings` Gateway, unapproved morphology всегда `noindex,follow` |
