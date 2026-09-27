@@ -47,6 +47,15 @@ export function renderSeoRegistryCsv(columns, rows) {
 	].join("\n")}\n`;
 }
 
+export function deterministicSeoRegistryValidationNow(rows) {
+	const latestSnapshot = rows
+		.map((row) => row.snapshotDate)
+		.sort()
+		.at(-1);
+	if (!latestSnapshot) throw new Error("SEO registry cannot be empty.");
+	return `${latestSnapshot}T23:59:59.999Z`;
+}
+
 export function renderSeoRegistryModule(
 	rows,
 	districtRegistry,

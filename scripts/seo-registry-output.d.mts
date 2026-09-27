@@ -8,6 +8,9 @@ export function renderSeoRegistryCsv(
 	columns: readonly string[],
 	rows: readonly SeoRegistryRow<ProjectSeoTemplateKey>[],
 ): string;
+export function deterministicSeoRegistryValidationNow(
+	rows: readonly SeoRegistryRow<ProjectSeoTemplateKey>[],
+): string;
 export function renderSeoRegistryModule(
 	rows: readonly SeoRegistryRow<ProjectSeoTemplateKey>[],
 	districtRegistry: ProjectDistrictRouteRegistry,

@@ -200,6 +200,23 @@ client topology decision. Runtime с `projectKind=client` и отсутству�
 Payload records возвращает пустой результат и никогда не подмешивает starter
 fixtures.
 
+`starter-owned.json` — единственный manifest границы обновляемой платформы.
+Он включает reusable core, packages, migrations, guards и точечно названные
+platform scripts/docs; project preset, copy, brand, app composition и
+`docs/seo/**` остаются client-owned. `clone:prepare` записывает
+`.starter-version` с source tag/SHA, версией manifest и воспроизводимыми
+SHA-256 каждого starter-owned файла. Traversal, overlap, неизвестные пути и
+symlink-escape блокируются до записи.
+
+`starter:upgrade` принимает только bounded JSON-архив с embedded released
+manifest, exact tag/SHA и hashes всех файлов. Локально изменённый
+starter-owned файл не перезаписывается: создаются `.rej` и conflict report,
+а версия не меняется. Clean update сначала пишет backup и pending journal,
+использует atomic file replace и поддерживает явный `--recover`; migrations
+могут только добавляться. `verify:starter-drift` работает в `warn`, `fail` и
+`report` режимах, причём клиентская daily-проверка использует не блокирующий
+`warn`.
+
 ## Version-sensitive framework boundaries
 
 - Next.js `16.3.5` intentionally uses `src/proxy.ts` with the named

@@ -46,6 +46,28 @@ function matchesSeedData(
 export function createPayloadStarterFixtureSeedPort(payload: Payload) {
 	const access = systemOverrideAccess("controlled-maintenance");
 	return {
+		async upsertSiteSettings(data: {
+			brandName: string;
+			phone: string;
+			email?: string;
+			address?: string;
+			workingHours?: string;
+		}) {
+			const existing = await payload.findGlobal({
+				slug: "site-settings",
+				depth: 0,
+				...access,
+			} as never);
+			if (matchesSeedData(existing, data)) {
+				return { state: "unchanged" as const };
+			}
+			await payload.updateGlobal({
+				slug: "site-settings",
+				data,
+				...access,
+			} as never);
+			return { state: "updated" as const };
+		},
 		async upsert({
 			collection,
 			identity,

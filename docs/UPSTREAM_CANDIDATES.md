@@ -21,6 +21,26 @@
 5. `REJECTED` сохраняет краткую причину, чтобы предложение не возвращалось без
    новых данных.
 
+## One-way contribution path
+
+Client repository никогда автоматически не синхронизируется обратно в starter
+и не push-ит в его branch. Project-owned brand, content, secrets, domains,
+fixtures, migrations and client data upstream не переносятся.
+
+1. В client task зафиксировать минимальный reusable defect/evidence и candidate
+   только для `src/core/**`, `packages/**` или starter tooling.
+2. Создать отдельный starter workstream от свежего canonical `main`: отдельные
+   branch, worktree, Task Contract и SourceCraft PR.
+3. Воспроизвести проблему на neutral fixture без client identity/PII/secrets;
+   перенести минимальный platform fix и targeted regression test.
+4. Провести full diff review и соответствующий exact-head SourceCraft Gate.
+5. Только после merge записать canonical SHA как `PROMOTED`. Client получает
+   исправление позже обычным reviewable `starter:upgrade`; reverse/bidirectional
+   sync, прямой cherry-pick client commit и автоматический merge запрещены.
+
+STOP: нет neutral reproduction, ownership не platform/starter, candidate
+содержит client данные, или предлагается обойти отдельный PR/Gate.
+
 ## Register
 
 Активных candidates нет.

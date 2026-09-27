@@ -21,6 +21,7 @@ import { siteProfile } from "../src/project/site-profile.ts";
 import type { ProjectDistrictRouteRegistry } from "../src/project/url-grammar.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 import {
+	deterministicSeoRegistryValidationNow,
 	renderSeoRegistryModule,
 	seoRegistryColumns,
 } from "./seo-registry-output.mjs";
@@ -266,15 +267,6 @@ export function validateRegistryCsv(
 	return rows;
 }
 
-function deterministicValidationNow(rows: readonly GeneratedRow[]): string {
-	const latestSnapshot = rows
-		.map((row) => row.snapshotDate)
-		.sort()
-		.at(-1);
-	if (!latestSnapshot) throw new Error("SEO registry cannot be empty.");
-	return `${latestSnapshot}T23:59:59.999Z`;
-}
-
 if (
 	process.argv[1] &&
 	resolve(process.argv[1]) === fileURLToPath(import.meta.url)
@@ -288,7 +280,7 @@ if (
 	const output = renderSeoRegistryModule(
 		rows,
 		districtRegistry,
-		deterministicValidationNow(rows),
+		deterministicSeoRegistryValidationNow(rows),
 	);
 	if (process.argv.includes("--check")) {
 		assert.equal(

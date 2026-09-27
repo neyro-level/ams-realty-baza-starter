@@ -1,5 +1,12 @@
 export type CloneBootstrap = {
 	preparedAt: string;
+	nap: {
+		brandName: string;
+		phone: string;
+		email: string;
+		address: string;
+		workingHours: string;
+	};
 	region: {
 		slug: string;
 		name: string;

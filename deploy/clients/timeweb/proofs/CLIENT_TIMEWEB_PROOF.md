@@ -3,6 +3,7 @@
 | Proof | Starter blueprint status | Required client-staging evidence |
 |---|---|---|
 | Blueprint static contract | PROVEN | `pnpm verify:client-readiness --mode=fixture-client` |
+| TLS/restore tooling contract | PROVEN LOCALLY | `pnpm verify:db-restore-drill`; real Timeweb remains NOT RUN |
 | Real Managed PostgreSQL connection | NOT PROVEN | TLS connection and exact non-secret resource identity |
 | Clean Payload migrations | NOT PROVEN | migration log from the immutable application artifact |
 | Real Payload Admin S3 upload | NOT PROVEN | upload/read/delete plus expected access behavior |

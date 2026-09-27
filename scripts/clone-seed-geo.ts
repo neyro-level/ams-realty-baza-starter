@@ -72,11 +72,21 @@ const dataset: GeoSeedDataset = {
 requirePayloadRuntime();
 const payload = await getPayload({ config });
 try {
+	const seedPort = createPayloadStarterFixtureSeedPort(payload);
 	const result = await seedGeoDataset(
-		createPayloadStarterFixtureSeedPort(payload),
+		seedPort,
 		dataset,
 	);
-	payload.logger.info(`clone geo seed: ${JSON.stringify(result.report)}`);
+	const siteSettings = await seedPort.upsertSiteSettings({
+		brandName: bootstrap.nap.brandName,
+		phone: bootstrap.nap.phone,
+		email: bootstrap.nap.email,
+		address: bootstrap.nap.address,
+		workingHours: bootstrap.nap.workingHours,
+	});
+	payload.logger.info(
+		`clone geo seed: ${JSON.stringify({ ...result.report, siteSettings })}`,
+	);
 } finally {
 	await payload.destroy();
 }

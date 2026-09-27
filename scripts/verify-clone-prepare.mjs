@@ -17,6 +17,7 @@ import {
 	siteProfileConfigForPreset,
 } from "./clone-preset.mjs";
 import { registryCoverage } from "./seo-registry-coverage.ts";
+import { hashStarterOwnedFiles } from "./starter-ownership.mjs";
 
 const root = process.cwd();
 const defaultBrand = JSON.parse(
@@ -193,9 +194,22 @@ try {
 			2,
 		),
 	);
-	for (const script of ["clone-prepare.mjs", "clone-preset.mjs"]) {
+	for (const script of ["clone-prepare.mjs", "clone-preset.mjs", "starter-ownership.mjs", "starter-release.mjs"]) {
 		cpSync(join(root, "scripts", script), join(fixture, "scripts", script));
 	}
+	writeFileSync(
+		join(fixture, "starter-owned.json"),
+		JSON.stringify({
+			schemaVersion: 1,
+			include: [
+				{ path: "starter-owned.json", type: "file" },
+				{ path: "scripts/clone-prepare.mjs", type: "file" },
+				{ path: "scripts/clone-preset.mjs", type: "file" },
+				{ path: "scripts/starter-ownership.mjs", type: "file" },
+			],
+			exclude: ["src/project", "src/app", "docs/seo"],
+		}, null, 2),
+	);
 	const seoTemplates = JSON.parse(
 		readFileSync(join(root, "docs/CLONE_SEO_TEMPLATES.example.json"), "utf8"),
 	);
@@ -429,6 +443,20 @@ try {
 	);
 	assert.throws(() => readClonePreset(presetPath), /must stay inside the repository/);
 	writeFileSync(presetPath, JSON.stringify(preset));
+	const sourceTag = "starter-v2.2.0";
+	const sourceSha = "0123456789012345678901234567890123456789";
+	const releaseManifestPath = join(fixture, "starter-release.json");
+	writeFileSync(
+		releaseManifestPath,
+		JSON.stringify({
+			schemaVersion: 1,
+			status: "released",
+			tag: sourceTag,
+			sha: sourceSha,
+			starterOwnedManifestVersion: 1,
+			hashes: hashStarterOwnedFiles(fixture),
+		}),
+	);
 	const run = (proofMode = true) =>
 		execFileSync(
 			process.execPath,
@@ -437,8 +465,9 @@ try {
 				join(root, "scripts/clone-prepare.mjs"),
 				`--root=${fixture}`,
 				`--preset-file=${presetPath}`,
-				"--source-tag=starter-v2.1.0",
-				"--source-sha=0123456789012345678901234567890123456789",
+				`--source-tag=${sourceTag}`,
+				`--source-sha=${sourceSha}`,
+				`--release-manifest=${releaseManifestPath}`,
 				"--date=2026-09-25T00:00:00.000Z",
 			],
 			{
@@ -465,6 +494,14 @@ try {
 		"failed source gate must not mutate clone",
 	);
 	assert.match(run(), /prepared Client Test with MIXED/);
+	const starterVersion = JSON.parse(
+		readFileSync(join(fixture, ".starter-version"), "utf8"),
+	);
+	assert.equal(starterVersion.tag, sourceTag);
+	assert.equal(starterVersion.sha, sourceSha);
+	assert.equal(starterVersion.manifestVersion, 1);
+	assert.ok(starterVersion.hashes["scripts/clone-prepare.mjs"]);
+	assert.doesNotMatch(JSON.stringify(starterVersion), /([a-z]:\\|\/Users\/|\\Users\\)/i);
 	assert.match(
 		readFileSync(join(fixture, "src/project/brand.css"), "utf8"),
 		/--brand-accent: #8a1515/,
@@ -567,7 +604,7 @@ try {
 		join(fixture, "docs/CLONE_PROVENANCE.md"),
 		"utf8",
 	);
-	assert.match(provenance, /starter-v2\.1\.0/);
+	assert.match(provenance, /starter-v2\.2\.0/);
 	assert.match(run(), /already prepared from the same preset; no changes/);
 	for (const [relativePath, content] of Object.entries(generatedBefore)) {
 		assert.equal(readFileSync(join(fixture, relativePath), "utf8"), content);

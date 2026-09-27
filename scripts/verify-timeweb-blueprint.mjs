@@ -64,6 +64,9 @@ export function validateBlueprint(input) {
 		"Secret Master",
 		"immutable image",
 		"Exactly one runtime",
+		"sslmode=verify-full",
+		"DATABASE_POOL_MAX",
+		"db:restore-drill",
 	]) {
 		if (!allText.includes(marker)) add(`contract-marker:${marker}`);
 	}

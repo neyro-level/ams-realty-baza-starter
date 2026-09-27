@@ -18,94 +18,99 @@ domain: start-baza.ams24.ru, noindex
 Это owner-operated verification contour. Его Nginx/Compose и локальное
 хранилище относятся только к starter demo.
 
-## B. Client development
+## B. One-day client clone checklist
 
-Plan №10 v4 исполнен, но tag `starter-v2.1.0` ещё не создан. Его создаёт
-владелец отдельной release-командой только после S15 preflight и проверки
-canonical `main`. До появления этого immutable tag клиентский clone не начинать.
+Этот маршрут выполняется последовательно. Переход к следующему шагу разрешён
+только после проверки output текущего. Неизвестное решение — `STOP`, а не
+скрытый default. Исходная точка — отдельный clean repository на опубликованном
+`starter-v2.MINOR.PATCH` с release manifest того же tag/SHA. Plan 11 не создаёт
+tag и не разрешает использовать непубликованный `starter-v2.2.0`.
 
-1. Создать отдельный client repository из exact tag `starter-v2.1.0`.
-2. Скопировать `docs/CLONE_INTAKE.souz.json` как короткий intake клиента и
-   проверить его по `docs/CLONE_INTAKE.schema.json`. Явно заполнить brand/domain,
-   NAP, города и морфологию, статусы разделов и рынков, районы, legacy URL,
-   метрику и пороги; затем выполнить
-   `pnpm clone:init --intake=C:/secure/client-intake.json`. Команда создаёт
-   полный preset v3 и детерминированный отчёт применённых значений профиля
-   `REALTY_BASE_CLIENT_V1`. Отсутствующее решение не дополняется молча.
-   При ручной работе допустимо начать с `docs/CLONE_PRESET.example.json` и
-   `docs/CLONE_SEO_TEMPLATES.example.json` во временном утверждаемом каталоге
-   вне Git. Заполнить `projectId`, package/brand/domain, один из режимов
-   `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`, `SINGLE_GEO | MULTI_GEO`,
-   явные `published`/`hubStatus`, морфологию каждого geo, NAP-контакты,
-   indexing decision, logo/tokens, feed, development Excel, client readiness и
-   SEO templates и optional SiteProfile overrides. Вместо `seoTemplateFile`
-   допустим эквивалентный встроенный объект `seoTemplates`. Единственная
-   поддерживаемая схема — `schemaVersion: 3`; v1/v2 отклоняются с явной
-   подсказкой миграции.
-3. В clean checkout выполнить:
+### 1. Intake
 
-   ```bash
-   pnpm clone:prepare --preset-file=C:/secure/client-preset.json --source-tag=starter-v2.1.0
-   pnpm verify:clone-bootstrap
-   ```
+- Input: утверждённый JSON вне Git по `docs/CLONE_INTAKE.schema.json`; пример —
+  `docs/CLONE_INTAKE.souz.json`. Обязательны brand/domain, NAP, режим рынка,
+  города и морфология, районы, статусы категорий, legacy URL, indexing и
+  client-readiness решения.
+- Command: `pnpm clone:init --intake=C:/secure/client-intake.json`.
+- Output: `client-intake.preset.json` schema v3 и
+  `client-intake.defaults-diff.json` с hash входа/preset.
+- STOP: пропущенное owner-решение, v1/v2, synthetic production evidence или
+  секрет в intake. Исправить intake и повторить; generated preset вручную не
+  дополнять.
 
-   Команда fail-closed проверяет, что checkout чистый и `HEAD` совпадает с
-   immutable tag. Затем она генерирует project SiteProfile, client identity и
-   `project-literals.json`, SEO template inputs и `docs/CLIENT_BOOTSTRAP.json`,
-   очищает demo fixture runtime и starter-only
-   evidence, но не меняет `src/core/**`, `packages/**`, migrations или guards.
-   Повтор с тем же preset — no-op; другой preset требует новый чистый clone.
-4. Проверить и закоммитить generated client bootstrap. Значения
-   `src/project/client-readiness.config.ts` генерируются из утверждённого preset;
-   любые изменения требуют нового clean clone с обновлённым preset.
-5. Выполнить `pnpm clone:seed-geo`: команда через привилегированный project
-   gateway идемпотентно создаёт region, cities и typed districts из preset.
-   Повторный запуск не создаёт дубликаты; невалидные parent/type/morphology
-   отклоняются до записи.
-6. Пройти lifecycle SEO Registry. `clone:prepare` создаёт CSV-каркас со
-   статусом `draft`. Заменить synthetic/fallback evidence реальными метриками,
-   датой и источником, проверить canonical URL/template key и только после
-   утверждения морфологии перевести конкретные строки в `approved`. Synthetic
-   строка не может быть approved или indexable. Затем выполнить
-   `pnpm seo:registry:generate` и `pnpm seo:registry:check`; CSV остаётся
-   editable owner, generated TypeScript — только runtime projection.
-7. Заполнить обязательный `brand` block: 18 цветов, пять approved radii,
-   allowlisted `next/font` family, repository-local logo и favicon. Команда
-   генерирует `src/project/brand.css` и `src/project/font.generated.ts`;
-   semantic/component mapping остаётся в `src/app/globals.css`. Все generated
-   outputs фиксируются SHA-256 в `docs/CLONE_GENERATED_OUTPUTS.json`. Затем подключить feed и development Excel по
-   `docs/CLIENT_BOOTSTRAP.json`. В client mode отсутствие Payload data означает
-   пустой каталог: starter demo fixture не используется как fallback.
-8. Использовать отдельные локальные PostgreSQL и секреты; секреты хранить только
-   в Secret Master.
-9. После отдельного topology decision выполнить
-   `pnpm clone:activate-timeweb-storage`. Команда добавляет точно совместимый
-   `@payloadcms/storage-s3@3.90.1`, подключает Media к Timeweb S3, добавляет
-   client-only env schema и выполняет typecheck. Она не входит в
-   `clone:prepare`; повторный запуск — безопасный no-op.
-10. Выполнить `pnpm install --frozen-lockfile`, `pnpm verify:daily` и
-   `pnpm verify:client-readiness`. До production дополнительно пройти release
-   gates раздела D.
+### 2. Prepare
 
-Проверяемая clone matrix состоит из четырёх профилей: Souz reference preset,
-`NEWBUILD_FIRST + SINGLE_GEO`, `SECONDARY_FIRST + SINGLE_GEO` и
-`MIXED + MULTI_GEO`. `pnpm verify:clone-matrix` доказывает подготовку этих
-деревьев; это локальная проверка переносимости, а не release/live proof.
+- Input: clean checkout exact released tag, preset, exact 40-char SHA и release
+  manifest из опубликованного release package.
+- Command:
+  `pnpm clone:prepare --preset-file=C:/secure/client-intake.preset.json --source-tag=starter-v2.2.0 --source-sha=<exact-tag-sha> --release-manifest=C:/secure/starter-v2.2.0.manifest.json`.
+- Output: client identity, SiteProfile, brand primitives, SEO seed,
+  `docs/CLIENT_BOOTSTRAP.json`, provenance и generated-output hashes; demo
+  fixture runtime удалён. Повтор с тем же preset — no-op.
+- Check: `pnpm verify:clone-bootstrap`.
+- STOP: tag не опубликован, SHA/manifest/hash не совпали, worktree dirty,
+  protected `src/core/**`, `packages/**`, migrations или guards изменились.
 
-После Design Intake нового клиента UI cleanup выполняется отдельно:
+### 3. Activate storage
 
-```text
-удалить неиспользуемые starter views
-→ pnpm tokens:report --dead-only
-→ вручную проверить и удалить только доказанный DEAD-набор
-→ pnpm quality:design-tokens
-→ pnpm verify:drift
-→ проверить representative pages
-→ pnpm verify:ui-core
-```
+- Input: утверждённая client topology и отдельные client Secret Master/Timeweb
+  resources; значения секретов не попадают в Git или командную строку.
+- Command: `pnpm clone:activate-timeweb-storage`.
+- Output: version-pinned S3 adapter и client-owned storage config; повтор —
+  безопасный no-op.
+- STOP: topology не утверждена, нет отдельного bucket/credentials или команда
+  пытается изменить starter demo runtime.
 
-Команда отчёта ничего не удаляет. Atlas-derived vocabulary не вычищается
-механически до появления утверждённой Design System клиента.
+### 4. Seed geography and NAP
+
+- Input: отдельная пустая client PostgreSQL, process-local runtime env из Secret
+  Master и prepared bootstrap.
+- Command: `pnpm clone:seed-geo`.
+- Output: идемпотентные region/cities/typed districts и обязательные публичные
+  NAP-настройки без demo fallback.
+- STOP: target DB identity неизвестна, parent/type/morphology невалидны или
+  повтор создаёт дубликаты.
+
+### 5. Import demand
+
+- Input: owner-approved CSV `url,phrase,value,snapshotDate` с реальным
+  источником/датой; URL должны точно принадлежать generated draft registry.
+- Command: `pnpm seo:registry:import-demand --file=C:/secure/client-demand.csv`.
+- Output: измеренные значения в `docs/seo/SEO_REGISTRY_SEED.csv`; повтор того же
+  файла — no-op.
+- STOP: synthetic/fallback evidence, чужой URL, duplicate, неверная дата или
+  изменение schema.
+
+### 6. Approve
+
+- Input: проверенная морфология, canonical URL/template key и owner decision.
+- Command:
+  `pnpm seo:registry:approve --scope=all-measured --actor=<owner> --reason=<decision>`.
+- Check: `pnpm seo:registry:approvals:check`, затем
+  `pnpm seo:registry:generate` и `pnpm seo:registry:check`.
+- Output: append-only approval journal и детерминированная runtime projection.
+- STOP: строка без измерения, synthetic evidence или неутверждённая морфология.
+
+### 7. Verify and deployment handoff
+
+- Commands: `pnpm install --frozen-lockfile`, `pnpm verify:daily`,
+  `pnpm verify:client-readiness`; для DB recovery contract также
+  `pnpm verify:db-restore-drill` и инструкция
+  `deploy/clients/timeweb/backup/README.md`.
+- Output: clean committed client tree, local validation evidence, immutable
+  candidate SHA и заполненный staging checklist.
+- STOP: любая красная проверка, SKIPPED required DB suite, неизвестная backup
+  provenance, непроверенный TLS/S3/jobs-owner contract или dirty tree.
+- Deploy не выполняется этой инструкцией. После отдельной команды владельца
+  `Выпускаем production` используется project-specific release workflow из
+  canonical `main`, exact immutable artifact, rollback и live smoke. Эта фраза
+  является human gate, а не package script и не разрешена самим onboarding.
+
+Проверяемая clone matrix включает Souz, `NEWBUILD_FIRST`, `SECONDARY_FIRST`,
+`MULTI_GEO` и профиль typed districts + legacy. `pnpm verify:clone-matrix` —
+редкий локальный acceptance-check переносимости, а не ежедневная команда и не
+production proof.
 
 ## C. Client Timeweb staging
 

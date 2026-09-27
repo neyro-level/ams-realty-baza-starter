@@ -1,16 +1,19 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
 	cpSync,
+	existsSync,
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
 	rmSync,
 	writeFileSync,
 } from "node:fs";
+import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { hashStarterOwnedFiles, starterOwnedFiles } from "./starter-ownership.mjs";
 
 const root = process.cwd();
 const matrix = [
@@ -31,7 +34,9 @@ const matrix = [
 		geoCount: 1,
 	},
 	{ name: "multi-geo", preset: "MIXED", geoMode: "MULTI_GEO", geoCount: 2 },
+	{ name: "districts-legacy", preset: "MIXED", geoMode: "SINGLE_GEO", geoCount: 1, districtsLegacy: true },
 ];
+const runtimeMatrix = process.env.AMS_CLONE_RUNTIME === "1";
 const selectedProfile = process.env.AMS_CLONE_PROFILE;
 const selectedMatrix = selectedProfile
 	? matrix.filter((entry) => entry.name === selectedProfile)
@@ -72,11 +77,118 @@ function safeFailure(entry, step, error) {
 			: "unknown";
 	const diagnostic =
 		process.env.AMS_CLONE_DEBUG === "1"
-			? `\n${String(error?.stderr ?? error?.stdout ?? error?.message ?? "unknown failure")}`
+			? `\n${[error?.stdout, error?.stderr, error?.message]
+					.filter((value) => value !== undefined && String(value).trim())
+					.map(String)
+					.join("\n") || "unknown failure"}`
 			: "";
 	return new Error(
 		`verify:clone-matrix: ${entry.name} FAIL at ${step} (exit ${exitCode}); command output omitted and disposable worktree removed${diagnostic}`,
 	);
+}
+
+const wait = (milliseconds) => new Promise((resolvePromise) => setTimeout(resolvePromise, milliseconds));
+
+async function availablePort() {
+	return new Promise((resolvePromise, reject) => {
+		const server = createServer();
+		server.once("error", reject);
+		server.listen(0, "127.0.0.1", () => {
+			const address = server.address();
+			const port = typeof address === "object" && address ? address.port : 0;
+			server.close((error) => error ? reject(error) : resolvePromise(port));
+		});
+	});
+}
+
+function docker(args, options = {}) {
+	return execFileSync("docker", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options }).trim();
+}
+
+function dockerContainerExists(containerName) {
+	try {
+		docker(["inspect", "--format", "{{.Id}}", containerName]);
+		return true;
+	} catch (error) {
+		if (error?.status === 1 && /no such object/i.test(String(error?.stderr ?? ""))) return false;
+		throw error;
+	}
+}
+
+function processExists(processId) {
+	try {
+		process.kill(processId, 0);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function waitForPostgres(containerName) {
+	for (let attempt = 0; attempt < 60; attempt += 1) {
+		try {
+			if (docker(["exec", containerName, "pg_isready", "-U", "postgres", "-d", "clone_runtime"]).includes("accepting connections")) return;
+		} catch {}
+		await wait(1000);
+	}
+	throw new Error("Disposable PostgreSQL did not become ready.");
+}
+
+async function waitForHttp(origin, serverProcess, serverLogs) {
+	for (let attempt = 0; attempt < 90; attempt += 1) {
+		if (serverProcess.exitCode !== null) {
+			throw new Error(`Disposable Next runtime exited before readiness. ${serverLogs().slice(-1000)}`);
+		}
+		try {
+			const response = await fetch(`${origin}/robots.txt`);
+			if (response.status === 200) return;
+		} catch {}
+		await wait(1000);
+	}
+	throw new Error(`Disposable Next runtime did not become ready. ${serverLogs().slice(-1000)}`);
+}
+
+function findStatusPath(bootstrap, status) {
+	for (const [category, value] of Object.entries(bootstrap.categoryStatus ?? {})) {
+		if (value === status) return `/${category}/`;
+	}
+	for (const [geo, categories] of Object.entries(bootstrap.geoCategoryStatus ?? {})) {
+		for (const [category, value] of Object.entries(categories)) {
+			if (value === status) return `/${geo}/${category}/`;
+		}
+	}
+	for (const geo of bootstrap.geos ?? []) if (geo.hubStatus === status) return `/${geo.slug}/`;
+	return null;
+}
+
+async function proveRuntime(origin, bootstrap) {
+	const request = async (path, expected) => {
+		const response = await fetch(new URL(path, origin), { redirect: "manual" });
+		const body = await response.text();
+		assert.equal(response.status, expected, `${path} expected ${expected}, got ${response.status}: ${body.slice(0, 500)}`);
+		return { response, body };
+	};
+	const activePath = `/${bootstrap.primaryGeo}/`;
+	await request(activePath, 200);
+	for (const status of ["PREPARED_OFF", "OUT"]) {
+		const path = findStatusPath(bootstrap, status);
+		assert.ok(path, `${status} route is required for runtime proof`);
+		await request(path, 404);
+	}
+	const legacy = bootstrap.legacyRoutes?.[0];
+	assert.ok(legacy, "runtime proof requires an exact legacy route");
+	const legacyResult = await request(legacy.from, 301);
+	assert.equal(new URL(legacyResult.response.headers.get("location"), origin).pathname, legacy.to);
+	const direct = await request(legacy.to, 200);
+	assert.ok(direct.response.status < 300, "legacy target must not redirect again");
+	const draft = bootstrap.seoRegistry.rows.find((row) => row.status === "draft" && row.url === activePath)
+		?? bootstrap.seoRegistry.rows.find((row) => row.status === "draft");
+	assert.ok(draft, "runtime proof requires a draft registry row");
+	const draftResult = await request(draft.url, 200);
+	assert.match(`${draftResult.response.headers.get("x-robots-tag") ?? ""}\n${draftResult.body}`, /noindex/i);
+	const robots = await request("/robots.txt", 200);
+	assert.match(robots.body, /user-agent:/i);
+	assert.match(robots.body, /disallow:\s*\//i);
 }
 
 for (const entry of selectedMatrix) {
@@ -86,15 +198,18 @@ for (const entry of selectedMatrix) {
 		`ams-plan10-${entry.name}-${process.pid}.json`,
 	);
 	let step = "create disposable worktree";
+	let containerName = "";
+	let serverProcess = null;
+	let serverOutput = "";
+	let taskFailure = null;
+	let cleanupFailure = null;
 	try {
 		execFileSync("git", ["worktree", "add", "--detach", clone, "HEAD"], {
 			cwd: root,
 			stdio: "pipe",
 		});
-		for (const relativePath of [
+		for (const relativePath of new Set([...starterOwnedFiles(root),
 			"public/brand/logo.svg",
-			"scripts/clone-prepare.mjs",
-			"scripts/clone-preset.mjs",
 			"scripts/seo-registry.ts",
 			"scripts/seo-registry-output.mjs",
 			"scripts/seo-registry-output.d.mts",
@@ -114,7 +229,7 @@ for (const entry of selectedMatrix) {
 			"src/project/site-profile.ts",
 			"src/project/routing/runtime-route.ts",
 			"src/project/routing/legacy-route-manifest.ts",
-		]) {
+		])) {
 			mkdirSync(dirname(join(clone, relativePath)), { recursive: true });
 			cpSync(join(root, relativePath), join(clone, relativePath));
 		}
@@ -135,7 +250,17 @@ for (const entry of selectedMatrix) {
 							prepositional: "Тестограде",
 							preposition: "в",
 						},
-						districts: [],
+						districts: entry.districtsLegacy ? [{
+							slug: "centralnyy",
+							name: "Центральный район",
+							type: "admin_district",
+							locative: "Центральном районе",
+							adjLocative: "Центральном",
+							adjGenitive: "Центрального",
+							preposition: "в",
+							synonyms: ["Центр"],
+							parent: null,
+						}] : [],
 					},
 					...Array.from({ length: entry.geoCount - 1 }, (_, index) =>
 						entry.geoMode === "MULTI_GEO"
@@ -177,6 +302,17 @@ for (const entry of selectedMatrix) {
 		const clientExample = JSON.parse(
 			readFileSync(join(root, "docs/CLONE_PRESET.example.json"), "utf8"),
 		);
+		const categoryStatus = {
+			kvartiry: "ACTIVE",
+			doma: "PREPARED_OFF",
+			uchastki: "ACTIVE",
+			"kommercheskaya-nedvizhimost": "ACTIVE",
+			komnaty: "OUT",
+			garazhi: "ACTIVE",
+			arenda: "ACTIVE",
+			novostroyki: "ACTIVE",
+			"kottedzhnye-poselki": "ACTIVE",
+		};
 		const preset = entry.presetFile
 			? JSON.parse(readFileSync(join(root, entry.presetFile), "utf8"))
 			: {
@@ -198,9 +334,13 @@ for (const entry of selectedMatrix) {
 						shortName: "Тестовый край",
 					},
 					geos,
+					categoryStatus,
+					geoCategoryStatus: Object.fromEntries(geos.map((geo) => [geo.slug, categoryStatus])),
 					seoFacets: {},
 					seoTiers: clientExample.seoTiers,
 					staticRoutes: clientExample.staticRoutes,
+					legacyRoutes: [{ from: `/legacy-${entry.name}`, to: `/${primarySlug}/`, statusCode: 301 }],
+					legacyPatterns: clientExample.legacyPatterns,
 					nap: {
 						phone: "+7 900 000-00-00",
 						email: `hello@${entry.name}.local`,
@@ -260,11 +400,28 @@ for (const entry of selectedMatrix) {
 			join(clone, "scripts/clone-prepare.mjs"),
 			`--root=${clone}`,
 			`--preset-file=${effectivePresetPath}`,
-			"--source-tag=starter-v2.1.0",
+			"--source-tag=starter-v2.2.0",
 			`--source-sha=${git(root, ["rev-parse", "HEAD"]).trim()}`,
+			`--release-manifest=${join(clone, ".starter-release-proof.json")}`,
 			"--date=2026-09-25T00:00:00.000Z",
 		];
-		const proofEnvironment = { ...process.env, AMS_CLONE_PROOF_MODE: "1" };
+		const proofEnvironment = {
+			...process.env,
+			AMS_CLONE_PROOF_MODE: "1",
+			NEXT_TELEMETRY_DISABLED: "1",
+			NODE_OPTIONS: "--max-old-space-size=1024",
+		};
+		writeFileSync(
+			join(clone, ".starter-release-proof.json"),
+			JSON.stringify({
+				schemaVersion: 1,
+				status: "released",
+				tag: "starter-v2.2.0",
+				sha: git(root, ["rev-parse", "HEAD"]).trim(),
+				starterOwnedManifestVersion: 1,
+				hashes: hashStarterOwnedFiles(clone),
+			}),
+		);
 		step = "install locked dependencies";
 		pnpm(clone, ["install", "--frozen-lockfile"], proofEnvironment);
 		step = "prepare client clone";
@@ -298,6 +455,55 @@ for (const entry of selectedMatrix) {
 		pnpm(clone, ["verify:site-profile"], proofEnvironment);
 		step = "typecheck prepared client";
 		pnpm(clone, ["typecheck"], proofEnvironment);
+		if (runtimeMatrix) {
+			step = "build prepared client";
+			pnpm(clone, ["build"], proofEnvironment);
+			step = "start disposable PostgreSQL";
+			containerName = `ams-plan11-${process.pid}-${entry.name}`.replace(/[^a-z0-9_.-]/g, "-");
+				docker(["run", "-d", "--rm", "--name", containerName, "-e", "POSTGRES_PASSWORD=fixture-clone-runtime-password", "-e", "POSTGRES_DB=clone_runtime", "-p", "127.0.0.1::5432", "postgres:18-alpine"]);
+			await waitForPostgres(containerName);
+			const mapped = docker(["port", containerName, "5432/tcp"]);
+			const databasePort = mapped.split(":").at(-1).trim();
+			const appPort = await availablePort();
+			const origin = `http://127.0.0.1:${appPort}`;
+			const mediaDir = join(clone, ".runtime-media");
+			mkdirSync(mediaDir, { recursive: true });
+			const runtimeEnvironment = {
+				...proofEnvironment,
+				AMS_PROFILE: "REALTY_BASE",
+				TZ: "Europe/Moscow",
+				DATABASE_URI: `postgresql://postgres:fixture-clone-runtime-password@127.0.0.1:${databasePort}/clone_runtime`,
+				PAYLOAD_SECRET: "clone-runtime-payload-secret-at-least-32-characters",
+				REVALIDATE_SECRET: "clone-runtime-revalidate-secret-at-least-32-characters",
+				INTERNAL_HEALTH_SECRET: "clone-runtime-health-secret-at-least-32-characters",
+				NEXT_PUBLIC_SERVER_URL: origin,
+				INTERNAL_REVALIDATE_BASE_URL: origin,
+				MEDIA_DIR: mediaDir,
+				ARCHIVE_RETENTION_DAYS: "30",
+				JOBS_AUTORUN: "false",
+				PAYLOAD_DB_PUSH: "false",
+			};
+			step = "run migrations";
+			pnpm(clone, ["payload:migrate"], runtimeEnvironment);
+			step = "seed geo";
+			pnpm(clone, ["clone:seed-geo"], runtimeEnvironment);
+			step = "start disposable client runtime";
+			serverProcess = spawn(process.execPath, [process.env.npm_execpath, "exec", "next", "start", "-p", String(appPort)], {
+				cwd: clone,
+				env: { ...runtimeEnvironment, NODE_ENV: "production" },
+				stdio: ["ignore", "pipe", "pipe"],
+			});
+			serverProcess.stdout.on("data", (chunk) => { serverOutput = `${serverOutput}${chunk}`.slice(-10000); });
+			serverProcess.stderr.on("data", (chunk) => { serverOutput = `${serverOutput}${chunk}`.slice(-10000); });
+			await waitForHttp(origin, serverProcess, () => serverOutput);
+			step = "run HTTP smoke";
+			const bootstrap = JSON.parse(readFileSync(join(clone, "docs/CLIENT_BOOTSTRAP.json"), "utf8"));
+			try {
+				await proveRuntime(origin, bootstrap);
+			} catch (error) {
+				throw new Error(`${String(error?.message ?? error)}\n${serverOutput.slice(-2000)}`);
+			}
+		}
 		assert.equal(
 			hash(git(clone, ["diff", "--binary", "--", ...protectedPaths])),
 			protectedBaseline,
@@ -351,8 +557,27 @@ for (const entry of selectedMatrix) {
 			`verify:clone-matrix: ${entry.name} PASS (client-kind + fixture-free outputs + registry URLs + typecheck + idempotence)`,
 		);
 	} catch (error) {
-		throw safeFailure(entry, step, error);
+		taskFailure = safeFailure(entry, step, error);
 	} finally {
+		if (serverProcess && serverProcess.exitCode === null) {
+			try {
+				if (process.platform === "win32") execFileSync("taskkill", ["/PID", String(serverProcess.pid), "/T", "/F"], { stdio: "ignore" });
+				else serverProcess.kill("SIGTERM");
+			} catch {}
+			await wait(250);
+			if (processExists(serverProcess.pid)) cleanupFailure ??= new Error(`Disposable process leaked: ${serverProcess.pid}`);
+		}
+		serverProcess?.stdout?.destroy();
+		serverProcess?.stderr?.destroy();
+		serverProcess?.unref();
+		if (containerName) {
+			try { docker(["rm", "-f", containerName]); } catch {}
+			try {
+				if (dockerContainerExists(containerName)) cleanupFailure ??= new Error(`Disposable container leaked: ${containerName}`);
+			} catch (error) {
+				cleanupFailure ??= new Error(`Unable to prove disposable container cleanup: ${String(error?.message ?? error)}`);
+			}
+		}
 		try {
 			execFileSync("git", ["worktree", "remove", "--force", clone], {
 				cwd: root,
@@ -361,8 +586,11 @@ for (const entry of selectedMatrix) {
 		} catch {
 			rmSync(clone, { recursive: true, force: true });
 		}
+		if (existsSync(clone)) cleanupFailure ??= new Error(`Disposable worktree leaked: ${clone}`);
 		rmSync(presetPath, { force: true });
 	}
+	if (cleanupFailure) throw cleanupFailure;
+	if (taskFailure) throw taskFailure;
 }
 
 console.log(

@@ -9,6 +9,7 @@ import {
 } from "../src/project/site-profile-presets.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 import {
+	deterministicSeoRegistryValidationNow,
 	renderSeoRegistryCsv,
 	renderSeoRegistryModule,
 	seoRegistryColumns,
@@ -930,7 +931,7 @@ export function renderClientSeoArtifacts(preset, profile, preparedAt) {
 		registryModule: renderSeoRegistryModule(
 			skeleton.rows,
 			skeleton.districtRegistry,
-			preparedAt,
+			deterministicSeoRegistryValidationNow(skeleton.rows),
 		),
 	};
 }

@@ -24,6 +24,15 @@ import {
 	siteProfileConfigForPreset,
 	validateCloneBootstrap,
 } from "./clone-preset.mjs";
+import {
+	hashStarterOwnedFiles,
+	readStarterOwnedManifest,
+	validateStarterVersion,
+} from "./starter-ownership.mjs";
+import {
+	readStarterReleaseManifest,
+	validateStarterTag,
+} from "./starter-release.mjs";
 
 const args = new Map(
 	process.argv.slice(2).map((arg) => {
@@ -68,11 +77,7 @@ const resolveRepositoryFile = (relativePath, label) => {
 resolveRepositoryFile(preset.brand.logoFile, "brand.logoFile");
 resolveRepositoryFile(preset.brand.faviconFile, "brand.faviconFile");
 const sourceTag = String(args.get("--source-tag") || "");
-if (sourceTag !== "starter-v2.1.0") {
-	throw new Error(
-		"clone:prepare requires the approved Plan 9 source tag starter-v2.1.0.",
-	);
-}
+validateStarterTag(sourceTag);
 
 const provenancePath = join(root, "docs", "CLONE_PROVENANCE.md");
 const bootstrapPath = join(root, "docs", "CLIENT_BOOTSTRAP.json");
@@ -100,7 +105,7 @@ if (!proofMode) {
 		sourceHead !== taggedHead
 	) {
 		throw new Error(
-			"clone:prepare must run from the exact immutable starter-v2.1.0 tag.",
+			"clone:prepare must run from the exact immutable released starter-v2.MINOR.PATCH tag.",
 		);
 	}
 	if (git("status", "--porcelain")) {
@@ -113,6 +118,21 @@ const sourceSha = String(args.get("--source-sha") || sourceHead);
 if (!/^[0-9a-f]{40}$/.test(sourceSha)) {
 	throw new Error("clone:prepare requires an exact 40-character source SHA.");
 }
+if (!proofMode && sourceSha !== sourceHead) {
+	throw new Error("clone:prepare source SHA must match the exact tagged HEAD.");
+}
+const starterManifest = readStarterOwnedManifest(root);
+const starterHashes = hashStarterOwnedFiles(root, starterManifest);
+const releaseManifestPath = args.get("--release-manifest");
+if (!releaseManifestPath || releaseManifestPath === true) {
+	throw new Error("clone:prepare requires --release-manifest=<released manifest JSON>.");
+}
+readStarterReleaseManifest(
+	isAbsolute(String(releaseManifestPath))
+		? String(releaseManifestPath)
+		: resolve(process.cwd(), String(releaseManifestPath)),
+	{ expectedTag: sourceTag, expectedSha: sourceSha, expectedHashes: starterHashes },
+);
 
 const configPath = join(root, "src", "project", "site.config.ts");
 const config = readFileSync(configPath, "utf8");
@@ -290,6 +310,17 @@ const outputManifest = {
 writeFileSync(
 	join(root, "docs", "CLONE_GENERATED_OUTPUTS.json"),
 	`${JSON.stringify(outputManifest, null, "\t")}\n`,
+);
+const starterVersion = validateStarterVersion({
+	schemaVersion: 1,
+	tag: sourceTag,
+	sha: sourceSha,
+	manifestVersion: starterManifest.schemaVersion,
+	hashes: starterHashes,
+}, { expectedTag: sourceTag, expectedSha: sourceSha });
+writeFileSync(
+	join(root, ".starter-version"),
+	`${JSON.stringify(starterVersion, null, "\t")}\n`,
 );
 validateCloneBootstrap(root);
 console.log(

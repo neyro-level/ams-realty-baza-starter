@@ -29,9 +29,20 @@ prove a live Timeweb connection.
    Secret Master. Do not commit credentials.
 5. Decide public/private URL, ACL and signed-download policy explicitly from
    the client requirement and provider evidence.
-6. Run clean migrations against staging with `PAYLOAD_DB_PUSH=false`.
-7. Validate Nginx placeholders, backup, monitoring and one jobs owner.
-8. Complete every item in `proofs/CLIENT_TIMEWEB_PROOF.md` before any client
+6. Build `DATABASE_URI` outside Git with `sslmode=verify-full`, an absolute
+   `sslrootcert` pointing to the Timeweb CA file, `connect_timeout=10` and
+   `options=-c statement_timeout=30000`. Keep `DATABASE_POOL_MAX` bounded at
+   the approved instance limit; the generated default is `10`.
+7. Before migrations, verify that the URI host equals the approved Timeweb
+   resource host and that the CA file is the provider CA copied from the
+   client Secret Master/runtime package. A wrong host, missing/wrong CA,
+   `sslmode` other than `verify-full`, or an unbounded timeout is a stop.
+8. Run clean migrations against staging with `PAYLOAD_DB_PUSH=false`.
+9. Run the restore drill from `backup/README.md` against a new database named
+   `restore_drill_<client>_<date>`. The command creates and always removes that
+   database; it refuses protected/non-temporary names and mismatched dump hash.
+10. Validate Nginx placeholders, backup, monitoring and one jobs owner.
+11. Complete every item in `proofs/CLIENT_TIMEWEB_PROOF.md` before any client
    production decision.
 
 ## Official contract checked 2026-09-21
@@ -48,5 +59,6 @@ prove a live Timeweb connection.
   https://timeweb.cloud/docs/dbaas/dbaas-manage/backup and
   https://timeweb.cloud/docs/dbaas/dbaas-manage/logical-backups.
 
-Static compatibility: `PROVEN`. Real upload, migration, restore drill and live
-rollout: `NOT PROVEN` until first client staging.
+Static compatibility and local restore tooling: `PROVEN`. Real Timeweb TLS,
+upload, migration, restore drill and live rollout: `NOT RUN` until an explicit
+first-client owner command.
