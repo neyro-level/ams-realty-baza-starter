@@ -44,6 +44,11 @@ const runtimeEnvSchema = z.object({
 
 	OUTBOUND_ALLOWED_HOSTS: optionalString,
 	EXTERNAL_IMAGE_HOSTS: optionalString,
+	ANALYTICS_PROVIDER: z
+		.enum(["yandex-metrika"])
+		.optional()
+		.or(z.literal("").transform(() => undefined)),
+	HSTS_PRELOAD: booleanString.default(false),
 	LEAD_CHANNELS: optionalString,
 	LEAD_OUTBOUND_HOSTS: optionalString,
 	MAX_BOT_TOKEN: optionalString,

@@ -39,8 +39,14 @@ export const projectSeoTemplatesInput = {
 		description:
 			"{category} {cityPhrase} — актуальные предложения[. {inventory}.]",
 	},
-	categoryGeoDistrict: {
-		title: "{category} {districtPhrase} {cityPhrase} — {brand}",
+	categoryGeoDistrictAdmin: {
+		title: "Купить квартиру в {districtAdjLocative} районе {cityPhrase} — цены",
+		h1: "Квартиры в {districtAdjLocative} районе {cityPhrase}",
+		description:
+			"Квартиры в {districtAdjLocative} районе {cityPhrase} — актуальные предложения[. {inventory}.]",
+	},
+	categoryGeoDistrictMicro: {
+		title: "Купить квартиру {districtPhrase} {cityPhrase} — цены",
 		h1: "{category} {districtPhrase} {cityPhrase}",
 		description:
 			"{category} {districtPhrase} {cityPhrase} — актуальные предложения[. {inventory}.]",
@@ -56,6 +62,11 @@ export const projectSeoTemplatesInput = {
 		h1: "Застройщики {cityPhrase}",
 		description:
 			"Застройщики и проверенные жилые комплексы {cityPhrase}[ — {inventory}.]",
+	},
+	developerRoot: {
+		title: "Застройщики — {brand}",
+		h1: "Застройщики",
+		description: "Проверенные застройщики и жилые комплексы[ — {inventory}.]",
 	},
 	developmentNormal: {
 		title: "{entityName} — {brand}",

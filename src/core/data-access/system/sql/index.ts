@@ -8,6 +8,12 @@ import type { Payload } from "payload";
 export const systemSqlLayer = "src/core/data-access/system/sql" as const;
 
 export const approvedSystemSqlOperations = {
+	createPublicGatewayBudgetFixtureRows: {
+		invariant:
+			"A bounded deterministic fixture is inserted with unique slugs in one isolated-test setup statement.",
+		reason:
+			"The 2000-row performance fixture must avoid per-document hooks and Local API round trips that would measure setup rather than the Public Gateway.",
+	},
 	claimLeadDeliveryRow: {
 		invariant: "Exactly one due pending delivery can transition to sending.",
 		reason:
@@ -60,6 +66,58 @@ function rowsFrom(result: unknown): Array<Record<string, unknown>> {
 		}
 	}
 	return [];
+}
+
+export async function createPublicGatewayBudgetFixtureRows(
+	payload: Payload,
+	input: { start: number; count: number; prefix: string; publishedAt: string },
+): Promise<number> {
+	if (
+		!Number.isInteger(input.start) ||
+		input.start < 1 ||
+		!Number.isInteger(input.count) ||
+		input.count < 0 ||
+		input.count > 2000 ||
+		!/^plan10-budget-$/.test(input.prefix)
+	) {
+		throw new Error("Invalid Public Gateway budget fixture request.");
+	}
+	if (input.count === 0) return 0;
+	const last = input.start + input.count - 1;
+	const result = await executeApprovedSystemSql(
+		payload,
+		"createPublicGatewayBudgetFixtureRows",
+		sql`
+		INSERT INTO properties (
+			origin, status, published_at, slug, market, category, deal_type,
+			price_minor, rooms, total_area, locality, district, city_ref_id,
+			title, updated_at, created_at
+		)
+		SELECT
+			'manual'::enum_properties_origin,
+			'active'::enum_properties_status,
+			${input.publishedAt}::timestamptz,
+			${input.prefix} || lpad(sequence::text, 4, '0'),
+			CASE WHEN sequence % 5 = 0 THEN 'newbuild' ELSE 'secondary' END::enum_properties_market,
+			CASE WHEN sequence % 7 = 0 THEN 'house' ELSE 'apartment' END::enum_properties_category,
+			CASE WHEN sequence % 11 = 0 THEN 'rent' ELSE 'sale' END::enum_properties_deal_type,
+			500000000::bigint + sequence::bigint * 1000000::bigint,
+			(sequence % 4) + 1,
+			35 + (sequence % 90),
+			'Приморск',
+			'Район ' || ((sequence % 12) + 1)::text,
+			(SELECT id FROM cities WHERE slug = 'primorsk' LIMIT 1),
+			'Plan 10 budget fixture ' || sequence::text,
+			${input.publishedAt}::timestamptz,
+			${input.publishedAt}::timestamptz
+		FROM generate_series(${input.start}::integer, ${last}::integer) AS sequence
+		ON CONFLICT (slug) DO UPDATE SET
+			city_ref_id = EXCLUDED.city_ref_id,
+			updated_at = EXCLUDED.updated_at
+		RETURNING id
+	`,
+	);
+	return rowsFrom(result).length;
 }
 
 export async function claimLeadDeliveryRow(

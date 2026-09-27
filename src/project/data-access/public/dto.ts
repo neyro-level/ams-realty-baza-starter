@@ -13,12 +13,14 @@ import type {
 	SiteFooterDTO,
 	SiteHeaderDTO,
 } from "@ams/realtbase-contracts";
+import { evaluateContentGate } from "@/core/seo/content-gate";
 import { leadConsentContext } from "@/project/legal.config";
 import {
 	projectBreadcrumbs,
 	projectGeoSwitcherOptions,
 	projectMenuLinks,
 } from "@/project/navigation";
+import { projectSeoMeta } from "@/project/seo/templates";
 import { siteConfig } from "@/project/site.config";
 import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
@@ -402,7 +404,32 @@ export function toShellDTO(
 export function toHomePageDTO(
 	page: PublicPageRecord | null,
 	brandName: string,
+	city: CityDTO,
 ): HomePageDTO {
+	const gate = evaluateContentGate(siteProfile, {
+		kind: "static",
+		url: "/",
+		canonical: "/",
+		profileStatus: siteProfile.staticRoutes.some(
+			(route) => route.path === "/" && route.indexable,
+		)
+			? "ACTIVE"
+			: "NOINDEX_AUTO",
+	});
+	const seo = projectSeoMeta(
+		"home",
+		{
+			brand: brandName,
+			city: {
+				approved: true,
+				nominative: city.name,
+				genitive: city.nameGenitive,
+				prepositional: city.nameLocative,
+				preposition: city.preposition,
+			},
+		},
+		"/",
+	);
 	return {
 		slug: "home",
 		eyebrow: "Недвижимость без лишней неопределённости",
@@ -410,12 +437,10 @@ export function toHomePageDTO(
 		lead:
 			page?.seo.description ||
 			"Подбираем объекты по вашим критериям и сопровождаем путь до сделки.",
-		seo: page?.seo ?? {
-			title: `${brandName} — недвижимость`,
-			description: "Подбор недвижимости и сопровождение сделки.",
-			canonicalPath: "/",
-			indexing: "noindex",
-			following: "follow",
+		seo: {
+			...seo,
+			indexing: gate.indexing,
+			following: gate.following,
 		},
 		breadcrumbs: projectBreadcrumbs([], "Главная"),
 		sections: [

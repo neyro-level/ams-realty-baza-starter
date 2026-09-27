@@ -4,6 +4,7 @@ import {
 	DeveloperView,
 	DevelopmentDetailsView,
 	GeoHubView,
+	type ListingFilterControlKey,
 	ListingView,
 	PropertyPageView,
 } from "@ams/realtbase-ui";
@@ -20,12 +21,10 @@ import {
 	buildPropertyJsonLd,
 	JsonLdScript,
 } from "@/project/seo/structured-data";
-import { projectSeoMeta } from "@/project/seo/templates";
+import { isFreshPriceCheckedAt, projectSeoMeta } from "@/project/seo/templates";
 import { siteProfile } from "@/project/site-profile";
-import { createProjectUrlGrammar } from "@/project/url-grammar";
 
 export const runtime = "nodejs";
-const grammar = createProjectUrlGrammar(siteProfile);
 
 const analyticsSurfaceByCategory = {
 	kvartiry: "apartments",
@@ -68,13 +67,7 @@ function routeSeo(
 	brandName: string,
 ): PageSEOContract {
 	if (data.kind === "developers") {
-		return {
-			title: "Застройщики",
-			description: "Застройщики и опубликованные проекты недвижимости.",
-			canonicalPath: "/zastroyshchiki/",
-			indexing: "noindex",
-			following: "follow",
-		};
+		return data.seo;
 	}
 	if (data.kind === "property") {
 		return projectSeoMeta(
@@ -82,8 +75,15 @@ function routeSeo(
 			{
 				brand: brandName,
 				entityName: data.value.title,
+				city: data.seoCity ?? undefined,
 				freshPrice: data.value.price
-					? { label: data.value.price.label, fresh: true }
+					? {
+							label: data.value.price.label,
+							fresh: isFreshPriceCheckedAt(
+								data.priceCheckedAt,
+								siteProfile.gate.priceStaleDays,
+							),
+						}
 					: undefined,
 			},
 			data.value.href,
@@ -156,6 +156,13 @@ export default async function CanonicalRuntimePage({
 									}
 								: undefined
 						}
+						filterControls={{
+							action: routePath,
+							keys: siteProfile.filterKeys[
+								listingCategory
+							] as readonly ListingFilterControlKey[],
+							values: listingQuery ?? {},
+						}}
 						analytics={{
 							page: routePath,
 							geo:
@@ -177,11 +184,13 @@ export default async function CanonicalRuntimePage({
 		case "developers":
 			return (
 				<>
-					{breadcrumb([
-						{ label: "Главная", href: "/" },
-						{ label: "Застройщики" },
-					])}
-					<DevelopersListView developers={result.data.value} />
+					{breadcrumb([...result.data.breadcrumbs.items])}
+					<DevelopersListView
+						developers={result.data.value}
+						title={result.data.h1}
+						description={result.data.intro}
+						breadcrumbs={result.data.breadcrumbs}
+					/>
 				</>
 			);
 		case "developer": {
@@ -215,13 +224,13 @@ export default async function CanonicalRuntimePage({
 						content={{ faq: development.faq }}
 						analytics={{
 							page: development.href,
-							geo: siteProfile.primaryGeo,
+							geo: result.data.geo,
 							surface: "new-buildings",
 							market: "sale",
 							entityKey: development.slug,
 						}}
 						leadContext={{
-							formKind: "general",
+							formKind: "development",
 							sourcePage: development.href,
 							...leadConsentContext(),
 						}}
@@ -230,25 +239,24 @@ export default async function CanonicalRuntimePage({
 			);
 		}
 		case "property": {
-			const propertyPageKey = result.data.value.pageKey;
-			const catalogHref =
-				propertyPageKey.kind === "property"
-					? grammar.buildUrl({
-							kind: "categoryRoot",
-							category: propertyPageKey.category,
-						})
-					: grammar.buildUrl({ kind: "home" });
 			return (
 				<>
-					{breadcrumb([
-						{ label: "Главная", href: "/" },
-						{ label: result.data.value.title },
-					])}
+					{breadcrumb([...result.data.value.breadcrumbs.items])}
 					<JsonLdScript data={buildPropertyJsonLd(result.data.value)} />
 					<PropertyPageView
 						property={result.data.value}
-						homeHref={grammar.buildUrl({ kind: "home" })}
-						catalogHref={catalogHref}
+						analytics={{
+							page: result.data.value.href,
+							geo: result.data.geo,
+							surface:
+								analyticsSurfaceByCategory[
+									result.data.value.pageKey.kind === "property"
+										? result.data.value.pageKey.category
+										: "kvartiry"
+								],
+							market: result.data.value.dealType,
+							entityKey: result.data.value.slug,
+						}}
 						leadContext={{
 							formKind: "property",
 							sourcePage: result.data.value.href,

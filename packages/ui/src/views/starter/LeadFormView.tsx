@@ -1,6 +1,6 @@
 "use client"; // interactive form state, validation, fetch, focus management
 
-import type { LeadFormContext, LeadFormKind } from "@ams/realtbase-contracts";
+import type { LeadFormContext } from "@ams/realtbase-contracts";
 import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { Button } from "../../components/ui/button";
 import {
@@ -25,6 +25,7 @@ import {
 	analyticsAttributes,
 	type PublicAnalyticsDimensions,
 } from "../shared/analytics-attributes";
+import { toIntakeFormKind } from "./lead-form-kind";
 
 type FormStatus =
 	| "default"
@@ -62,15 +63,6 @@ export type LeadFormViewProps = {
 	};
 	analytics?: PublicAnalyticsDimensions;
 };
-
-function toIntakeFormKind(
-	kind: LeadFormKind,
-): "property_request" | "callback" | "consultation" | "generic" {
-	if (kind === "property") return "property_request";
-	if (kind === "callback") return "callback";
-	if (kind === "general" || kind === "mortgage") return "consultation";
-	return "generic";
-}
 
 export function LeadFormView({
 	context,

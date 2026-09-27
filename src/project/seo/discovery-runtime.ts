@@ -7,7 +7,6 @@ import {
 } from "@/core/seo/discovery-feeds";
 import { getPublicSitemapEntries } from "@/project/data-access/public";
 import { getProjectIndexingPolicy } from "@/project/indexing-policy";
-import { resolveRuntimeRoute } from "@/project/routing/runtime-route";
 import { getSiteUrl } from "@/project/seo/site";
 import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
@@ -25,32 +24,30 @@ export async function getRuntimeDiscoveryShards() {
 					entry.path === "/" ? "/" : `${entry.path.replace(/\/+$/, "")}/`;
 				const pageKey = grammar.parseUrl(path);
 				if (!pageKey) return null;
-				const runtime = await resolveRuntimeRoute(path);
 				const gate =
-					runtime.decision.kind === "page"
-						? runtime.decision.gate
-						: pageKey.kind === "home" || pageKey.kind === "static"
-							? decideResolvedPage(
-									siteProfile,
+					entry.gate ??
+					(pageKey.kind === "home" || pageKey.kind === "static"
+						? decideResolvedPage(
+								siteProfile,
+								pageKey,
+								{
+									kind: "page",
 									pageKey,
-									{
-										kind: "page",
-										pageKey,
-										canonicalPath: path,
-										profileStatus: "ACTIVE",
-										lifecycle: "active",
-										market: null,
-										dataTier: null,
-										inventory: 0,
-									},
-									{
-										kind: "static",
-										url: path,
-										canonical: path,
-										profileStatus: "ACTIVE",
-									},
-								).gate
-							: null;
+									canonicalPath: path,
+									profileStatus: "ACTIVE",
+									lifecycle: "active",
+									market: null,
+									dataTier: null,
+									inventory: 0,
+								},
+								{
+									kind: "static",
+									url: path,
+									canonical: path,
+									profileStatus: "ACTIVE",
+								},
+							).gate
+						: null);
 				if (!gate) return null;
 				return {
 					group: entry.group,

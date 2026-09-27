@@ -9,6 +9,11 @@ import {
 	type PublicAnalyticsDimensions,
 } from "../shared/analytics-attributes";
 import { BreadcrumbsView } from "../shared/BreadcrumbsView";
+import { ListingFilterForm } from "./ListingFilterForm";
+import type {
+	ListingFilterControlKey,
+	ListingFilterValues,
+} from "./listing-filter-contract";
 import { NearbyView } from "./NearbyView";
 
 export type ListingPresentationState = {
@@ -22,11 +27,17 @@ export function ListingView({
 	pageHref,
 	filterState,
 	analytics,
+	filterControls,
 }: {
 	listing: ListingPageDTO;
 	pageHref?: (page: number) => string;
 	filterState?: ListingPresentationState;
 	analytics?: PublicAnalyticsDimensions;
+	filterControls?: {
+		action: string;
+		keys: readonly ListingFilterControlKey[];
+		values: ListingFilterValues;
+	};
 }) {
 	const developers = listing.items
 		.filter((item) => item.kind === "developer")
@@ -70,6 +81,7 @@ export function ListingView({
 			) : null}
 			<Section aria-labelledby="listing-results-title">
 				<Container>
+					{filterControls ? <ListingFilterForm {...filterControls} /> : null}
 					{filterState?.hasFilters ? (
 						<div
 							className="mb-8 flex flex-col gap-4 rounded-md border border-border bg-surface-subtle p-4 sm:flex-row sm:items-center sm:justify-between"

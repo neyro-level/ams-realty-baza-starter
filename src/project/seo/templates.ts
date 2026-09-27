@@ -19,9 +19,11 @@ export const projectSeoTemplateKeys = [
 	"geoHub",
 	"categoryRoot",
 	"categoryGeo",
-	"categoryGeoDistrict",
+	"categoryGeoDistrictAdmin",
+	"categoryGeoDistrictMicro",
 	"categoryGeoFacet",
 	"geoDevelopers",
+	"developerRoot",
 	"developmentNormal",
 	"developmentCollision",
 	"developer",
@@ -68,16 +70,12 @@ const templates = projectSeoTemplatesInput satisfies Record<
 	SeoTemplateDefinition
 >;
 
-const districtTemplateByType = {
-	admin_district: templates.categoryGeoDistrict,
-	microdistrict: templates.categoryGeoDistrict,
-} satisfies Record<ProjectDistrictType, SeoTemplateDefinition>;
-
 const cityRequired = new Set<ProjectSeoTemplateKey>([
 	"home",
 	"geoHub",
 	"categoryGeo",
-	"categoryGeoDistrict",
+	"categoryGeoDistrictAdmin",
+	"categoryGeoDistrictMicro",
 	"categoryGeoFacet",
 	"geoDevelopers",
 	"developmentCollision",
@@ -88,10 +86,7 @@ export function renderProjectSeoTemplate(
 	context: ProjectSeoTemplateContext,
 ): RenderedSeoTemplate {
 	const geo = context.city ?? context.region;
-	const definition =
-		templateKey === "categoryGeoDistrict"
-			? districtTemplateByType[context.districtType ?? "admin_district"]
-			: templates[templateKey];
+	const definition = templates[templateKey];
 	const inventory =
 		context.inventory === undefined
 			? undefined
@@ -104,7 +99,9 @@ export function renderProjectSeoTemplate(
 		? context.freshPrice.label.trim()
 		: undefined;
 	const requiresCity = cityRequired.has(templateKey);
-	const requiresDistrict = templateKey === "categoryGeoDistrict";
+	const requiresDistrict =
+		templateKey === "categoryGeoDistrictAdmin" ||
+		templateKey === "categoryGeoDistrictMicro";
 	const morphologyApproved =
 		(!requiresCity || isApprovedMorphology(geo)) &&
 		(!requiresDistrict || isApprovedMorphology(context.district));
@@ -117,6 +114,10 @@ export function renderProjectSeoTemplate(
 			cityPhrase: morphologyPhrase(geo, "prepositional", true),
 			geoGenitive: morphologyPhrase(geo, "genitive"),
 			districtPhrase: morphologyPhrase(context.district, "prepositional", true),
+			districtAdjLocative: morphologyPhrase(
+				context.district,
+				"prepositional",
+			)?.replace(/\s+(?:районе|округе)$/iu, ""),
 			facet: context.facet,
 			entityName: context.entityName,
 			inventory,
@@ -140,6 +141,20 @@ export function projectSeoMeta(
 		following: "follow",
 		morphologyApproved: rendered.morphologyApproved,
 	};
+}
+
+export function isFreshPriceCheckedAt(
+	checkedAt: string | null | undefined,
+	maxAgeDays: number,
+	now = new Date(),
+): boolean {
+	if (!checkedAt || !Number.isFinite(maxAgeDays) || maxAgeDays < 0)
+		return false;
+	const checked = new Date(checkedAt);
+	if (Number.isNaN(checked.getTime()) || checked.getTime() > now.getTime()) {
+		return false;
+	}
+	return now.getTime() - checked.getTime() <= maxAgeDays * 86_400_000;
 }
 
 export function isSeoMetaMorphologyApproved(seo: SeoMetaDTO): boolean {

@@ -1,3 +1,4 @@
+import type { ContentGateDecision } from "../../core/seo/content-gate.ts";
 import type { DiscoveryGroup } from "../../core/seo/discovery-feeds.ts";
 import { detectRuntimeEnvMode, runtimeEnv } from "../env.ts";
 import { projectStaticRoutes } from "../static-routes.ts";
@@ -16,6 +17,10 @@ export type PublicUrlEntry = {
 		| "never";
 	priority?: number;
 	indexable: boolean;
+	gate?: Pick<
+		ContentGateDecision,
+		"statusCode" | "indexing" | "following" | "canonical" | "includeInSitemap"
+	>;
 };
 
 export const staticPublicUrlEntries: readonly PublicUrlEntry[] =

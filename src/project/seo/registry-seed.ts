@@ -7,7 +7,8 @@ import type { ProjectSeoTemplateKey } from "./templates.ts";
 export const projectDistrictRouteRegistry = {
   "primorsk": {
     "kvartiry": [
-      "severnyy"
+      "severnyy",
+      "leninskiy"
     ]
   }
 } as const satisfies ProjectDistrictRouteRegistry;
@@ -147,10 +148,40 @@ export const projectSeoRegistrySeed: readonly SeoRegistryRow<ProjectSeoTemplateK
     "tier": "TEST",
     "minimumObjects": 10,
     "defaultRobots": "noindex,follow",
-    "templateKey": "categoryGeoDistrict",
-    "title": "Квартиры на Северном районе в Приморске — AMS Realty",
-    "h1": "Квартиры на Северном районе в Приморске",
-    "description": "Квартиры на Северном районе в Приморске — актуальные предложения. 12 объектов.",
+    "templateKey": "categoryGeoDistrictMicro",
+    "title": "Купить квартиру на Северном в Приморске — цены",
+    "h1": "Квартиры на Северном в Приморске",
+    "description": "Квартиры на Северном в Приморске — актуальные предложения. 12 объектов.",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "listing"
+  },
+  {
+    "pageKey": {
+      "kind": "categoryGeoDistrict",
+      "geo": "primorsk",
+      "category": "kvartiry",
+      "district": "leninskiy"
+    },
+    "url": "/primorsk/kvartiry/leninskiy/",
+    "canonical": "/primorsk/kvartiry/leninskiy/",
+    "entityRef": "district:leninskiy",
+    "targetPhrases": [
+      "fixture admin district catalog intent"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "categoryGeoDistrictAdmin",
+    "title": "Купить квартиру в Ленинском районе в Приморске — цены",
+    "h1": "Квартиры в Ленинском районе в Приморске",
+    "description": "Квартиры в Ленинском районе в Приморске — актуальные предложения. 9 объектов.",
     "status": "draft",
     "morphologyApproved": true,
     "release": "starter-v2.1.0",
@@ -239,6 +270,33 @@ export const projectSeoRegistrySeed: readonly SeoRegistryRow<ProjectSeoTemplateK
     "title": "Застройщики в Приморске — AMS Realty",
     "h1": "Застройщики в Приморске",
     "description": "Застройщики и проверенные жилые комплексы в Приморске — 7 объектов.",
+    "status": "draft",
+    "morphologyApproved": true,
+    "release": "starter-v2.1.0",
+    "contentGateRule": "developerGeo"
+  },
+  {
+    "pageKey": {
+      "kind": "developerRoot"
+    },
+    "url": "/zastroyshchiki/",
+    "canonical": "/zastroyshchiki/",
+    "entityRef": "developers:root",
+    "targetPhrases": [
+      "fixture developer root intent"
+    ],
+    "metric": "searchDemand",
+    "value": null,
+    "source": "fallback_no_data",
+    "snapshotDate": "2026-09-24",
+    "synthetic": true,
+    "tier": "TEST",
+    "minimumObjects": 10,
+    "defaultRobots": "noindex,follow",
+    "templateKey": "developerRoot",
+    "title": "Застройщики — AMS Realty",
+    "h1": "Застройщики",
+    "description": "Проверенные застройщики и жилые комплексы — 7 объектов.",
     "status": "draft",
     "morphologyApproved": true,
     "release": "starter-v2.1.0",

@@ -171,8 +171,8 @@ const runtimeDiscovery = readFileSync(
 	"utf8",
 );
 assert.match(runtimeDiscovery, /getPublicSitemapEntries/);
-assert.match(runtimeDiscovery, /resolveRuntimeRoute\(path\)/);
-assert.match(runtimeDiscovery, /runtime\.decision\.gate/);
+assert.doesNotMatch(runtimeDiscovery, /resolveRuntimeRoute\(path\)/);
+assert.match(runtimeDiscovery, /entry\.gate/);
 assert.match(runtimeDiscovery, /!entry\.lastModified/);
 assert.match(runtimeDiscovery, /group: entry\.group/);
 assert.equal(/function groupFor/.test(runtimeDiscovery), false);
@@ -183,6 +183,13 @@ assert.equal(
 	false,
 	"runtime discovery must not invent lastmod",
 );
+const sitemapProvider = readFileSync(
+	"src/project/data-access/public/provider.ts",
+	"utf8",
+);
+assert.match(sitemapProvider, /resolveRouteDecision/);
+assert.match(sitemapProvider, /decideResolvedPage/);
+assert.match(sitemapProvider, /gate,/);
 
 console.log(
 	"Discovery feeds verified: five profiles, groups, shards, lastmod, XML and robots.",

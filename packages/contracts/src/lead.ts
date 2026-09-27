@@ -2,6 +2,7 @@ export type LeadFormKind =
 	| "general"
 	| "callback"
 	| "property"
+	| "development"
 	| "mortgage"
 	| "sell"
 	| "rent";

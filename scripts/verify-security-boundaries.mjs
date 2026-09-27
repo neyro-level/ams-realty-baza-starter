@@ -194,19 +194,23 @@ requireIncludes(
 );
 
 const nextConfig = read("next.config.ts");
+const headerBuilder = read("src/core/security/headers.ts");
+for (const required of ["Content-Security-Policy", "publicCsp", "adminCsp"]) {
+	assert.ok(
+		nextConfig.includes(required),
+		`next.config.ts missing ${required}`,
+	);
+}
 for (const required of [
-	"Content-Security-Policy",
 	"Strict-Transport-Security",
 	"X-Content-Type-Options",
 	"Referrer-Policy",
 	"X-Frame-Options",
 	"Permissions-Policy",
-	"publicCsp",
-	"adminCsp",
 ]) {
 	assert.ok(
-		nextConfig.includes(required),
-		`next.config.ts missing ${required}`,
+		headerBuilder.includes(required),
+		`security header builder missing ${required}`,
 	);
 }
 assert.ok(
@@ -216,6 +220,16 @@ assert.ok(
 assert.ok(
 	nextConfig.includes("buildImageCspSrc"),
 	"CSP img-src must be assembled from EXTERNAL_IMAGE_HOSTS",
+);
+assert.ok(
+	nextConfig.includes("buildSecurityHeaders"),
+	"CSP and HSTS must use the tested environment-aware header builder",
+);
+assert.ok(
+	!read("deploy/nginx/start-baza.ams24.ru.conf").includes(
+		"includeSubDomains; preload",
+	),
+	"nginx must not bypass the HSTS_PRELOAD app opt-in",
 );
 
 const payloadConfig = read("payload.config.ts");
@@ -374,8 +388,6 @@ assert.match(
 const proxySource = read("src/proxy.ts");
 for (const required of [
 	"anonymousRawRestEdgeDecision",
-	'"/api/:path*"',
-	'"/obekty/:slug"',
 	"parseCurrentPropertyLifecyclePath",
 	"lookupCurrentPropertyLifecyclePreflight",
 	"overwriteLifecyclePreflightHeader",
@@ -385,6 +397,14 @@ for (const required of [
 		`proxy boundary missing ${required}`,
 	);
 }
+assert.ok(
+	(proxySource.includes('"/api/:path*"') &&
+		proxySource.includes('"/obekty/:slug"')) ||
+		proxySource.includes(
+			'"/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)"',
+		),
+	"proxy boundary must match API and property paths directly or through the canonical broad matcher",
+);
 assert.equal(
 	proxySource.includes("fetch("),
 	false,

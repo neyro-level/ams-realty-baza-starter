@@ -3,7 +3,20 @@ import { z } from "zod";
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const positiveIntegerSchema = z.coerce.number().int().min(1).max(10_000);
 const priceSchema = z.coerce.number().int().min(1).max(10_000_000_000);
+const areaSchema = z.coerce.number().positive().max(1_000_000);
 const roomSchema = z.coerce.number().int().min(0).max(100);
+const completionYearSchema = z.coerce.number().int().min(1900).max(2200);
+
+export const catalogQueryFilterKeys = [
+	"rooms",
+	"district",
+	"price",
+	"area",
+	"market",
+	"developer",
+	"completionYear",
+] as const;
+export type CatalogQueryFilterKey = (typeof catalogQueryFilterKeys)[number];
 
 const catalogSearchSchema = z
 	.object({
@@ -15,6 +28,11 @@ const catalogSearchSchema = z
 		priceTo: priceSchema.optional(),
 		rooms: z.array(roomSchema).max(8).optional(),
 		district: slugSchema.optional(),
+		areaFrom: areaSchema.optional(),
+		areaTo: areaSchema.optional(),
+		market: z.enum(["newbuild", "secondary"]).optional(),
+		developer: slugSchema.optional(),
+		completionYear: completionYearSchema.optional(),
 	})
 	.strict()
 	.superRefine((value, context) => {
@@ -23,6 +41,13 @@ const catalogSearchSchema = z
 				code: "custom",
 				path: ["priceFrom"],
 				message: "priceFrom must not exceed priceTo.",
+			});
+		}
+		if (value.areaFrom && value.areaTo && value.areaFrom > value.areaTo) {
+			context.addIssue({
+				code: "custom",
+				path: ["areaFrom"],
+				message: "areaFrom must not exceed areaTo.",
 			});
 		}
 	});
@@ -34,6 +59,11 @@ export type CatalogSearchParams = {
 	priceToMinor?: number;
 	rooms?: readonly number[];
 	district?: string;
+	areaFrom?: number;
+	areaTo?: number;
+	market?: "newbuild" | "secondary";
+	developer?: string;
+	completionYear?: number;
 	hasFilters: boolean;
 	queryString: string;
 };
@@ -49,9 +79,25 @@ export function parseCatalogSearchParams(
 		"priceTo",
 		"rooms",
 		"district",
+		"areaFrom",
+		"areaTo",
+		"market",
+		"developer",
+		"completionYear",
 	]);
 	if ([...params.keys()].some((key) => !allowed.has(key))) return null;
-	for (const key of ["page", "sort", "priceFrom", "priceTo", "district"]) {
+	for (const key of [
+		"page",
+		"sort",
+		"priceFrom",
+		"priceTo",
+		"district",
+		"areaFrom",
+		"areaTo",
+		"market",
+		"developer",
+		"completionYear",
+	]) {
 		if (params.getAll(key).length > 1) return null;
 	}
 
@@ -60,7 +106,18 @@ export function parseCatalogSearchParams(
 		.flatMap((value) => value.split(","))
 		.filter(Boolean);
 	const candidate = Object.fromEntries(
-		["page", "sort", "priceFrom", "priceTo", "district"].flatMap((key) => {
+		[
+			"page",
+			"sort",
+			"priceFrom",
+			"priceTo",
+			"district",
+			"areaFrom",
+			"areaTo",
+			"market",
+			"developer",
+			"completionYear",
+		].flatMap((key) => {
 			const value = params.get(key);
 			return value === null || value === "" ? [] : [[key, value]];
 		}),
@@ -85,6 +142,13 @@ export function parseCatalogSearchParams(
 		);
 	}
 	if (parsed.data.district) normalized.set("district", parsed.data.district);
+	if (parsed.data.areaFrom)
+		normalized.set("areaFrom", String(parsed.data.areaFrom));
+	if (parsed.data.areaTo) normalized.set("areaTo", String(parsed.data.areaTo));
+	if (parsed.data.market) normalized.set("market", parsed.data.market);
+	if (parsed.data.developer) normalized.set("developer", parsed.data.developer);
+	if (parsed.data.completionYear)
+		normalized.set("completionYear", String(parsed.data.completionYear));
 
 	return {
 		page: parsed.data.page,
@@ -97,9 +161,30 @@ export function parseCatalogSearchParams(
 			? { rooms: [...new Set(parsed.data.rooms)].sort((a, b) => a - b) }
 			: {}),
 		...(parsed.data.district ? { district: parsed.data.district } : {}),
+		...(parsed.data.areaFrom ? { areaFrom: parsed.data.areaFrom } : {}),
+		...(parsed.data.areaTo ? { areaTo: parsed.data.areaTo } : {}),
+		...(parsed.data.market ? { market: parsed.data.market } : {}),
+		...(parsed.data.developer ? { developer: parsed.data.developer } : {}),
+		...(parsed.data.completionYear
+			? { completionYear: parsed.data.completionYear }
+			: {}),
 		hasFilters: [...params.keys()].some((key) => key !== "page"),
 		queryString: normalized.toString(),
 	};
+}
+
+export function catalogFilterKeysForQuery(
+	query: CatalogSearchParams,
+): readonly CatalogQueryFilterKey[] {
+	return [
+		...(query.rooms ? (["rooms"] as const) : []),
+		...(query.district ? (["district"] as const) : []),
+		...(query.priceFromMinor || query.priceToMinor ? (["price"] as const) : []),
+		...(query.areaFrom || query.areaTo ? (["area"] as const) : []),
+		...(query.market ? (["market"] as const) : []),
+		...(query.developer ? (["developer"] as const) : []),
+		...(query.completionYear ? (["completionYear"] as const) : []),
+	];
 }
 
 export function pageHref(

@@ -37,10 +37,20 @@ const discovery = readFileSync(
 	resolve(root, "src/project/seo/discovery-runtime.ts"),
 	"utf8",
 );
+const provider = readFileSync(
+	resolve(root, "src/project/data-access/public/provider.ts"),
+	"utf8",
+);
 if (!runtime.includes("decidePage(decision, routeData)")) {
 	throw new Error("Runtime route must delegate page semantics to decidePage.");
 }
-if (!discovery.includes("runtime.decision.gate")) {
-	throw new Error("Discovery runtime must consume the decidePage Gate decision.");
+if (
+	!discovery.includes("entry.gate") ||
+	discovery.includes("resolveRuntimeRoute") ||
+	!provider.includes("decideResolvedPage")
+) {
+	throw new Error(
+		"Discovery runtime must consume batch Gate decisions without per-URL runtime resolution.",
+	);
 }
 console.log("content-gate ownership guard passed");

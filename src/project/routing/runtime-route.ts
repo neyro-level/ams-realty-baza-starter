@@ -1,6 +1,8 @@
 import "server-only";
 
 import type {
+	BreadcrumbDTO,
+	CityDTO,
 	DeveloperCardDTO,
 	DeveloperDetailsDTO,
 	DevelopmentCardDTO,
@@ -8,17 +10,20 @@ import type {
 	ListingPageDTO,
 	NapDTO,
 	PropertyDetailsDTO,
+	SeoMetaDTO,
 } from "@ams/realtbase-contracts";
-import { cache } from "react";
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
 import {
 	createRouteResolver,
+	decidePage as decideResolvedPage,
 	type PageDecision,
 	type PageKey,
 	type ResolverDataPort,
 	type ResolverPageRecord,
 	type ResolverResult,
+	resolveRouteDecision,
 } from "@/core/routing";
 import { geoCatalogContractFixtures } from "@/fixture/geo-catalog";
 import { fixtureProperties, getFixtureProperty } from "@/fixture/provider";
@@ -33,26 +38,39 @@ import {
 	getDeveloperRouteFacts,
 	getDevelopment,
 	getDevelopmentRouteFacts,
+	getGeoBySlug,
 	getGeoHub,
 	getListing,
 	getPropertyByPublicUrlId,
 	getPropertyRouteFacts,
-	listAllDevelopments,
+	listDevelopmentGateFactsForCities,
 	listDeveloperDevelopments,
 	listGeoDevelopers,
 	type PublicDevelopmentDetailsDTO,
+	type PublicDevelopmentGateFact,
 } from "@/project/data-access/public/geo-catalog";
 import { findPublicNap } from "@/project/data-access/public/nap";
 import { getOptionalPublicGatewayPayload } from "@/project/data-access/public/payload";
 import { findPublicRedirectByFromPath } from "@/project/data-access/public/payload-reads";
+import { starterFixtureIdentity } from "@/project/fixture-data/starter-dataset";
+import {
+	projectBreadcrumbs,
+	projectObjectBreadcrumbs,
+} from "@/project/navigation";
 import {
 	type CatalogSearchParams,
 	catalogCanonicalPath,
+	catalogFilterKeysForQuery,
 	parseCatalogSearchParams,
 	parsePageSearchParams,
 } from "@/project/routing/catalog-search-params";
 import { decidePage } from "@/project/routing/content-gate";
 import { getCachedDistrictRouteRegistry } from "@/project/routing/district-registry";
+import {
+	collectPassingDeveloperIds,
+	mergeDeveloperCards,
+	publishedDeveloperGeoSlugs,
+} from "@/project/routing/developer-surface";
 import { publicGatewayCacheTags } from "@/project/routing/public-gateway-cache";
 import {
 	projectSeoCategoryLabel,
@@ -73,6 +91,10 @@ export type RuntimeRouteData =
 	| {
 			kind: "developers";
 			value: readonly DeveloperCardDTO[];
+			breadcrumbs: BreadcrumbDTO;
+			h1: string;
+			intro: string;
+			seo: SeoMetaDTO;
 			developersWithPassingDevelopment: number;
 	  }
 	| {
@@ -87,10 +109,19 @@ export type RuntimeRouteData =
 	| {
 			kind: "development";
 			value: PublicDevelopmentDetailsDTO;
+			geo: string;
 			layoutCount: number;
 			progressPresent: boolean;
 	  }
-	| { kind: "property"; value: PropertyDetailsDTO };
+	| {
+			kind: "property";
+			value: PropertyDetailsDTO & { breadcrumbs: BreadcrumbDTO };
+			geo?: string;
+			seoCity: Parameters<typeof projectSeoMeta>[1]["city"] | null;
+			districtRaw: string | null;
+			gatePhotoCount: number;
+			priceCheckedAt: string | null;
+	  };
 
 type RuntimeRouteDecision =
 	| Exclude<ResolverResult, { kind: "page" }>
@@ -212,9 +243,35 @@ async function resolveFixtureRuntimeRoute(
 		pageKey.kind === "developerRoot" ||
 		pageKey.kind === "geoDevelopers"
 	) {
+		const templateKey =
+			pageKey.kind === "developerRoot" ? "developerRoot" : "geoDevelopers";
+		const context = {
+			brand: fixtureNap.brandName,
+			inventory: 1,
+			...(pageKey.kind === "geoDevelopers"
+				? {
+						city: {
+							approved: true,
+							nominative: geoCatalogContractFixtures.city.name,
+							genitive: geoCatalogContractFixtures.city.nameGenitive,
+							prepositional: geoCatalogContractFixtures.city.nameLocative,
+							preposition: geoCatalogContractFixtures.city.preposition,
+						},
+					}
+				: {}),
+		};
+		const rendered = renderProjectSeoTemplate(templateKey, context);
 		data = {
 			kind: "developers",
 			value: [geoCatalogContractFixtures.developer],
+			breadcrumbs: projectBreadcrumbs(
+				[{ pageKey: { kind: "home" }, label: "Главная" }],
+				"Застройщики",
+				{ grammar },
+			),
+			h1: rendered.h1,
+			intro: rendered.description,
+			seo: projectSeoMeta(templateKey, context, decision.canonicalPath),
 			developersWithPassingDevelopment: 1,
 		};
 	} else if (pageKey.kind === "developer") {
@@ -234,6 +291,7 @@ async function resolveFixtureRuntimeRoute(
 		data = {
 			kind: "development",
 			value: { ...geoCatalogContractFixtures.development, faq: [] },
+			geo: siteProfile.primaryGeo,
 			layoutCount: 1,
 			progressPresent: true,
 		};
@@ -242,7 +300,35 @@ async function resolveFixtureRuntimeRoute(
 			(candidate) => candidate.publicUrlId === pageKey.publicUrlId,
 		);
 		const details = property ? await getFixtureProperty(property.slug) : null;
-		if (details) data = { kind: "property", value: details };
+		if (details) {
+			data = {
+				kind: "property",
+				value: {
+					...details,
+					breadcrumbs: projectObjectBreadcrumbs(
+						{
+							category: pageKey.category,
+							city: { label: details.city, slug: siteProfile.primaryGeo },
+							currentLabel: details.title,
+						},
+						{ grammar },
+					),
+				},
+				geo: siteProfile.primaryGeo,
+				seoCity: {
+					approved: true,
+					nominative: geoCatalogContractFixtures.city.name,
+					genitive: geoCatalogContractFixtures.city.nameGenitive,
+					prepositional: geoCatalogContractFixtures.city.nameLocative,
+					preposition: geoCatalogContractFixtures.city.preposition,
+				},
+				districtRaw: details.district ?? null,
+				gatePhotoCount: details.gallery.filter(
+					(item) => item.kind === "managed",
+				).length,
+				priceCheckedAt: starterFixtureIdentity.snapshotAt,
+			};
+		}
 	}
 	if (!data) return { decision: { kind: "notFound", statusCode: 404 } };
 	const resolution: RuntimeRouteResolution = {
@@ -401,49 +487,60 @@ async function resolveRuntimeRouteUncached(
 		const data = new Map<string, RuntimeRouteData>();
 		const inventory = new Map<string, number>();
 		const keyOf = (pageKey: PageKey) => grammar.buildUrl(pageKey);
-		async function passingDevelopmentDeveloperIds(
-			developments: readonly DevelopmentCardDTO[],
-		): Promise<Set<string>> {
-			const decisions = await Promise.all(
-				developments.map(async (card) => {
-					const [details, facts] = await Promise.all([
-						getDevelopment(publicPayload, card.slug, brandName),
-						getDevelopmentRouteFacts(publicPayload, card.slug),
-					]);
-					if (!details || !facts || !card.developer) return null;
-					const pageKey = details.pageKey as PageKey;
-					const resolved = await createRouteResolver({
-						profile: siteProfile,
-						grammar,
-						port: createFixtureResolverDataPort({
-							grammar,
-							pages: [
-								{
-									pageKey,
-									inventory: 1,
-									record: {
-										lifecycle: "active",
-										geo: facts.geo,
-										market: "newbuild",
-										dataTier: facts.dataTier,
-									},
-								},
-							],
-						}),
-					}).resolvePath(details.href);
-					if (resolved.kind !== "page") return null;
-					const decision = decidePage(resolved, {
+		function passingDevelopmentDeveloperIds(
+			facts: readonly PublicDevelopmentGateFact[],
+			geoByCityId: ReadonlyMap<string, string>,
+		): Set<string> {
+			const decisions = facts.map((fact) => {
+				const geo = geoByCityId.get(fact.cityId) ?? null;
+				const pageKey: PageKey = {
+					kind: "development",
+					developmentKind: fact.developmentKind,
+					slug: fact.slug,
+				};
+				const canonicalPath = grammar.buildUrl(pageKey);
+				const record = {
+					lifecycle: "active" as const,
+					geo,
+					market: "newbuild" as const,
+					dataTier: fact.dataTier,
+				};
+				const route = resolveRouteDecision(siteProfile, pageKey, record, 1);
+				if (!route.available) {
+					return { developerId: fact.developerId, indexing: "noindex" as const };
+				}
+				const decision = decideResolvedPage(
+					siteProfile,
+					pageKey,
+					{
+						kind: "page",
+						pageKey,
+						canonicalPath,
+						profileStatus: route.profileStatus,
+						lifecycle: "active",
+						market: "newbuild",
+						dataTier: fact.dataTier,
+						inventory: 1,
+					},
+					{
 						kind: "development",
-						value: details,
-						layoutCount: facts.layoutCount,
-						progressPresent: facts.progressPresent,
-					});
-					return decision.robots.indexing === "index"
-						? card.developer.id
-						: null;
-				}),
-			);
-			return new Set(decisions.filter((id): id is string => id !== null));
+						url: canonicalPath,
+						canonical: canonicalPath,
+						profileStatus: route.profileStatus,
+						dataTier: fact.dataTier,
+						description: fact.description,
+						mediaCount: fact.mediaCount,
+						layoutCount: fact.layoutCount,
+						progressPresent: fact.progressPresent,
+						priceRows: fact.priceCheckedAt.map((checkedAt) => ({ checkedAt })),
+					},
+				);
+				return {
+					developerId: fact.developerId,
+					indexing: decision.robots.indexing,
+				};
+			});
+			return collectPassingDeveloperIds(decisions);
 		}
 
 		const port: ResolverDataPort = {
@@ -508,10 +605,9 @@ async function resolveRuntimeRouteUncached(
 					if (!catalogQuery) return null;
 					const enabledFilters = siteProfile.filterKeys[pageKey.category];
 					if (
-						(catalogQuery.rooms && !enabledFilters.includes("rooms")) ||
-						((catalogQuery.priceFromMinor || catalogQuery.priceToMinor) &&
-							!enabledFilters.includes("price")) ||
-						(catalogQuery.district && !enabledFilters.includes("district"))
+						catalogFilterKeysForQuery(catalogQuery).some(
+							(filter) => !enabledFilters.includes(filter),
+						)
 					)
 						return null;
 					const listing = await getListing(
@@ -532,6 +628,21 @@ async function resolveRuntimeRouteUncached(
 									: {}),
 								...(catalogQuery.district
 									? { district: catalogQuery.district }
+									: {}),
+								...(catalogQuery.areaFrom
+									? { areaFrom: catalogQuery.areaFrom }
+									: {}),
+								...(catalogQuery.areaTo
+									? { areaTo: catalogQuery.areaTo }
+									: {}),
+								...(catalogQuery.market
+									? { market: catalogQuery.market }
+									: {}),
+								...(catalogQuery.developer
+									? { developer: catalogQuery.developer }
+									: {}),
+								...(catalogQuery.completionYear
+									? { completionYear: catalogQuery.completionYear }
 									: {}),
 							},
 						},
@@ -557,26 +668,73 @@ async function resolveRuntimeRouteUncached(
 					pageKey.kind === "geoDevelopers" ||
 					pageKey.kind === "developerRoot"
 				) {
-					const geo =
-						pageKey.kind === "geoDevelopers"
-							? pageKey.geo
-							: siteProfile.primaryGeo;
 					if (queryString) return null;
-					const [developers, developments] = await Promise.all([
-						listGeoDevelopers(payload, geo),
-						listAllDevelopments(payload, { geo }),
-					]);
-					const passingDeveloperIds =
-						await passingDevelopmentDeveloperIds(developments);
+					const configuredGeos =
+						pageKey.kind === "geoDevelopers"
+							? [pageKey.geo]
+							: publishedDeveloperGeoSlugs(siteProfile);
+					const publishedCities = (
+						await Promise.all(
+							configuredGeos.map((slug) => getGeoBySlug(payload, slug)),
+						)
+					).filter((city): city is CityDTO => city !== null);
+					if (publishedCities.length === 0) return null;
+					const bundles = await Promise.all(
+						publishedCities.map(async (city) => ({
+							city,
+							developers: await listGeoDevelopers(payload, city.slug),
+						})),
+					);
+					const developers = mergeDeveloperCards(
+						bundles.map((bundle) => bundle.developers),
+					);
+					const developmentFacts = await listDevelopmentGateFactsForCities(
+						payload,
+						publishedCities.map((city) => Number(city.id)),
+					);
+					const passingDeveloperIds = passingDevelopmentDeveloperIds(
+						developmentFacts,
+						new Map(publishedCities.map((city) => [String(city.id), city.slug])),
+					);
+					const templateKey =
+						pageKey.kind === "developerRoot"
+							? "developerRoot"
+							: "geoDevelopers";
+					const activeCity =
+						pageKey.kind === "geoDevelopers" ? publishedCities[0] : null;
+					const context = {
+						brand: brandName,
+						inventory: developers.length,
+						...(activeCity
+							? {
+									city: {
+										approved: true,
+										nominative: activeCity.name,
+										genitive: activeCity.nameGenitive,
+										prepositional: activeCity.nameLocative,
+										preposition: activeCity.preposition,
+									},
+								}
+							: {}),
+					};
+					const rendered = renderProjectSeoTemplate(templateKey, context);
 					data.set(key, {
 						kind: "developers",
 						value: developers,
+						breadcrumbs: projectBreadcrumbs(
+							[{ pageKey: { kind: "home" }, label: "Главная" }],
+							"Застройщики",
+							{ grammar },
+						),
+						h1: rendered.h1,
+						intro: rendered.description,
+						seo: projectSeoMeta(templateKey, context, key),
 						developersWithPassingDevelopment: passingDeveloperIds.size,
 					});
 					inventory.set(key, developers.length);
 					return {
 						lifecycle: "active",
-						geo,
+						geo: pageKey.kind === "geoDevelopers" ? pageKey.geo : null,
 						market: null,
 						dataTier: null,
 					};
@@ -611,7 +769,28 @@ async function resolveRuntimeRouteUncached(
 					]);
 					if (!property || !propertyFacts) return null;
 					canonicalPageKey = property.pageKey as PageKey;
-					routeData = { kind: "property", value: property };
+					routeData = {
+						kind: "property",
+						value: {
+							...property,
+							breadcrumbs: projectObjectBreadcrumbs(
+								{
+									category: pageKey.category,
+									city: {
+										label: property.city,
+										...(propertyFacts.geo ? { slug: propertyFacts.geo } : {}),
+									},
+									currentLabel: property.title,
+								},
+								{ grammar },
+							),
+						},
+						...(propertyFacts.geo ? { geo: propertyFacts.geo } : {}),
+						seoCity: propertyFacts.seoCity,
+						districtRaw: propertyFacts.districtRaw,
+						gatePhotoCount: propertyFacts.gatePhotoCount,
+						priceCheckedAt: propertyFacts.priceCheckedAt,
+					};
 					facts = { ...propertyFacts, dataTier: null };
 				} else if (pageKey.kind === "development") {
 					if (queryString) return null;
@@ -624,6 +803,7 @@ async function resolveRuntimeRouteUncached(
 					routeData = {
 						kind: "development",
 						value: development,
+						geo: developmentFacts.geo,
 						layoutCount: developmentFacts.layoutCount,
 						progressPresent: developmentFacts.progressPresent,
 					};
@@ -640,21 +820,38 @@ async function resolveRuntimeRouteUncached(
 						getDeveloperRouteFacts(payload, pageKey.slug),
 					]);
 					if (!developer || !developerFacts) return null;
-					const [developmentPage, ownDevelopments] = await Promise.all([
+					const [developmentPage, developerCities] = await Promise.all([
 						listDeveloperDevelopments(payload, {
 							developerId: Number(developer.id),
 							page: developerQuery.page,
 							limit: 24,
 						}),
-						listAllDevelopments(payload, {
-							geo: siteProfile.primaryGeo,
-							developerId: Number(developer.id),
-						}),
+						Promise.all(
+							publishedDeveloperGeoSlugs(siteProfile).map((slug) =>
+								getGeoBySlug(payload, slug),
+							),
+						),
 					]);
 					if (developerQuery.page > Math.max(1, developmentPage.totalPages))
 						return null;
-					const passingDeveloperIds =
-						await passingDevelopmentDeveloperIds(ownDevelopments);
+					const publishedDeveloperCities = developerCities.filter(
+						(city): city is CityDTO => city !== null,
+					);
+					const developerGateFacts = await listDevelopmentGateFactsForCities(
+						payload,
+						publishedDeveloperCities.map((city) => Number(city.id)),
+					);
+					const passingDeveloperIds = passingDevelopmentDeveloperIds(
+						developerGateFacts.filter(
+							(fact) => fact.developerId === developer.id,
+						),
+						new Map(
+							publishedDeveloperCities.map((city) => [
+								String(city.id),
+								city.slug,
+							]),
+						),
+					);
 					canonicalPageKey = developer.pageKey as PageKey;
 					routeData = {
 						kind: "developer",

@@ -9,7 +9,7 @@ import {
 	createSafeNavigationBuilder,
 	type NavigationCandidate,
 } from "../core/navigation/index.ts";
-import type { SiteProfile } from "../core/profile/index.ts";
+import type { CatalogSurfaceSlug, SiteProfile } from "../core/profile/index.ts";
 import type { PageKey, UrlGrammar } from "../core/routing/index.ts";
 import type { ContentGateDecision } from "../core/seo/content-gate.ts";
 import type { PublicPageRecord } from "./data-access/public/pages.ts";
@@ -40,6 +40,12 @@ const categoryLabels = {
 	novostroyki: "Новостройки",
 	"kottedzhnye-poselki": "Коттеджные посёлки",
 } as const;
+
+type ObjectBreadcrumbInput = {
+	category: CatalogSurfaceSlug;
+	city?: { label: string; slug?: string };
+	currentLabel: string;
+};
 
 const staticPageLabels: Readonly<Record<string, string>> = {
 	"/uslugi/": "Услуги",
@@ -111,6 +117,38 @@ export function projectBreadcrumbs(
 		),
 		currentLabel,
 	});
+}
+
+export function projectObjectBreadcrumbs(
+	input: ObjectBreadcrumbInput,
+	contextInput: NavigationContext = {},
+): BreadcrumbDTO {
+	const ancestors: { pageKey: PageKeyDTO; label: string }[] = [
+		{ pageKey: { kind: "home" }, label: "Главная" },
+		{
+			pageKey: { kind: "categoryRoot", category: input.category },
+			label: categoryLabels[input.category],
+		},
+	];
+	if (input.city?.slug) {
+		ancestors.push({
+			pageKey: { kind: "geoHub", geo: input.city.slug },
+			label: input.city.label,
+		});
+	}
+	const breadcrumbs = projectBreadcrumbs(
+		ancestors,
+		input.currentLabel,
+		contextInput,
+	);
+	if (!input.city || input.city.slug) return breadcrumbs;
+	return {
+		items: [
+			...breadcrumbs.items.slice(0, -1),
+			{ label: input.city.label },
+			...breadcrumbs.items.slice(-1),
+		],
+	};
 }
 
 export function projectGeoSwitcherOptions(

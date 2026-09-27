@@ -26,6 +26,7 @@ import { getRuntimeClock } from "@/core/time/clock";
 import {
 	projectBreadcrumbs,
 	projectNavigationLinks,
+	projectObjectBreadcrumbs,
 } from "@/project/navigation";
 import type {
 	City,
@@ -36,6 +37,10 @@ import type {
 	Property,
 	Region,
 } from "@/project/payload-types";
+import {
+	allowedPropertyImageHosts,
+	countPropertyGatePhotos,
+} from "@/project/routing/property-gate-facts";
 import {
 	projectSeoCategoryLabel,
 	projectSeoFacetLabel,
@@ -132,7 +137,11 @@ export type PublicListingInput = {
 	surface: CatalogSurfaceSlug;
 	district?: string;
 	facet?: string;
-	query?: CatalogQueryInput;
+	query?: CatalogQueryInput & {
+		market?: Market;
+		developer?: string;
+		completionYear?: number;
+	};
 	page?: number;
 };
 
@@ -245,7 +254,7 @@ export async function getListing(
 	if (!Object.hasOwn(profile.geos, parsed.geo)) return null;
 	const city = await findGeoRecord(payload, parsed.geo);
 	if (!city) return null;
-	const query = (parsed.query as CatalogQueryInput | undefined) ?? {};
+	const query = (parsed.query as PublicListingInput["query"] | undefined) ?? {};
 	const queryDistrict =
 		typeof query.district === "string"
 			? slugSchema.safeParse(query.district)
@@ -259,6 +268,10 @@ export async function getListing(
 	if (districtSlug && !district) return null;
 	let markets = availableMarketsForSurface(profile, parsed.geo, parsed.surface);
 	if (markets.length === 0) return null;
+	if (query.market) {
+		markets = markets.filter((market) => market === query.market);
+		if (markets.length === 0) return null;
+	}
 	const facetResolution = parsed.facet
 		? catalogQueryForSeoFacet(profile, parsed.geo, parsed.surface, parsed.facet)
 		: { query: {} };
@@ -325,6 +338,8 @@ export async function getListing(
 				parsed.surface === "novostroyki"
 					? "residential_complex"
 					: "cottage_village",
+			developerSlug: query.developer,
+			completionYear: query.completionYear,
 			page,
 			limit: pageSize,
 		});
@@ -346,7 +361,13 @@ export async function getListing(
 	}
 
 	const propertyFilter = surfacePropertyFilter(parsed.surface);
-	const { district: _queryDistrict, ...catalogQuery } = query;
+	const {
+		district: _queryDistrict,
+		market: _queryMarket,
+		developer: _queryDeveloper,
+		completionYear: _queryCompletionYear,
+		...catalogQuery
+	} = query;
 	const result = await findPublicCatalogPropertiesByGeo(
 		payload,
 		{
@@ -390,18 +411,34 @@ export async function getPropertyByPublicUrlId(
 export async function getPropertyRouteFacts(
 	payload: Payload,
 	publicUrlId: number,
-): Promise<{ market: Market; geo: string | null } | null> {
+): Promise<{
+	market: Market;
+	geo: string | null;
+	seoCity: ReturnType<typeof cityMorphology> | null;
+	districtRaw: string | null;
+	gatePhotoCount: number;
+	priceCheckedAt: string | null;
+} | null> {
 	const result = await payload.find({
 		collection: "properties",
 		where: { publicUrlId: { equals: publicUrlId } },
 		depth: 1,
 		limit: 1,
 		page: 1,
-		select: { market: true, cityRef: true },
+		select: {
+			market: true,
+			cityRef: true,
+			district: true,
+			images: { kind: true, url: true, media: true },
+			lastSeenAt: true,
+		},
 		...gatewayAccess,
 	});
 	const property = result.docs[0] as
-		| Pick<Property, "market" | "cityRef">
+		| Pick<
+				Property,
+				"market" | "cityRef" | "district" | "images" | "lastSeenAt"
+		  >
 		| undefined;
 	if (!property) return null;
 	return {
@@ -409,6 +446,15 @@ export async function getPropertyRouteFacts(
 		geo: isObjectRelation<City>(property.cityRef)
 			? property.cityRef.slug
 			: null,
+		seoCity: isObjectRelation<City>(property.cityRef)
+			? cityMorphology(property.cityRef)
+			: null,
+		districtRaw: property.district?.trim() || null,
+		gatePhotoCount: countPropertyGatePhotos(
+			property.images,
+			allowedPropertyImageHosts(),
+		),
+		priceCheckedAt: property.lastSeenAt?.trim() || null,
 	};
 }
 
@@ -605,6 +651,93 @@ export async function listAllDevelopments(
 		rows.push(...(result.docs as Development[]));
 	}
 	return rows.map(toDevelopmentCardDTO);
+}
+
+export type PublicDevelopmentGateFact = {
+	developerId: string;
+	cityId: string;
+	slug: string;
+	developmentKind: "residential_complex" | "cottage_village";
+	dataTier: "A" | "B" | "C";
+	description: string;
+	mediaCount: number;
+	layoutCount: number;
+	progressPresent: boolean;
+	priceCheckedAt: readonly string[];
+};
+
+export async function listDevelopmentGateFactsForCities(
+	payload: Payload,
+	cityIds: readonly number[],
+): Promise<readonly PublicDevelopmentGateFact[]> {
+	if (cityIds.length === 0) return [];
+	const result = await payload.find({
+		collection: "developments",
+		where: {
+			and: [
+				{ city: { in: [...new Set(cityIds)] } },
+				{ status: { equals: "published" } },
+			],
+		},
+		depth: 1,
+		limit: 2_000,
+		page: 1,
+		select: {
+			slug: true,
+			kind: true,
+			city: true,
+			developer: true,
+			dataTier: true,
+			descriptions: true,
+			mediaItems: true,
+			layouts: true,
+			progress: true,
+			priceByRooms: true,
+		},
+		...gatewayAccess,
+	});
+	if (result.totalPages > 1) {
+		throw new Error(
+			"Development Gate facts exceed the bounded 2000-row public read budget.",
+		);
+	}
+	return (result.docs as Development[]).flatMap((development) => {
+		const developerId = isObjectRelation<Developer>(development.developer)
+			? String(development.developer.id)
+			: String(development.developer);
+		const cityId = isObjectRelation<City>(development.city)
+			? String(development.city.id)
+			: String(development.city);
+		if (!developerId || !cityId) return [];
+		return [
+			{
+				developerId,
+				cityId,
+				slug: development.slug,
+				developmentKind: development.kind,
+				dataTier: development.dataTier,
+				description:
+					development.descriptions?.find((item) => item.kind === "full")
+						?.text ??
+					development.descriptions?.find((item) => item.kind === "short")
+						?.text ??
+					"",
+				mediaCount:
+					development.mediaItems?.filter(
+						(item) =>
+							["hero", "gallery", "layout", "construction_progress"].includes(
+								item.mediaType,
+							) &&
+							isObjectRelation<Media>(item.media) &&
+							Boolean(item.media.url),
+					).length ?? 0,
+				layoutCount: development.layouts?.length ?? 0,
+				progressPresent: (development.progress?.length ?? 0) > 0,
+				priceCheckedAt:
+					development.priceByRooms?.map((row) => row.priceCheckedAt) ?? [],
+			},
+		];
+	});
 }
 
 export async function getDeveloper(
@@ -948,6 +1081,8 @@ async function findDevelopments(
 		cityId: number;
 		districtId?: number;
 		kind?: Development["kind"];
+		developerSlug?: string;
+		completionYear?: number;
 		page: number;
 		limit: number;
 	},
@@ -958,6 +1093,19 @@ async function findDevelopments(
 	];
 	if (input.districtId) and.push({ district: { equals: input.districtId } });
 	if (input.kind) and.push({ kind: { equals: input.kind } });
+	if (input.developerSlug) {
+		and.push({
+			"developer.slug": { equals: slugSchema.parse(input.developerSlug) },
+		});
+	}
+	if (input.completionYear) {
+		and.push({
+			deadline: {
+				greater_than_equal: `${input.completionYear}-01-01T00:00:00.000Z`,
+				less_than: `${input.completionYear + 1}-01-01T00:00:00.000Z`,
+			},
+		});
+	}
 	return payload.find({
 		collection: "developments",
 		where: { and },
@@ -1151,13 +1299,14 @@ function toDevelopmentDetailsDTO(
 				value: `${development.completenessScore}%`,
 			},
 		].filter((item): item is { label: string; value: string } => item != null),
-		breadcrumbs: projectBreadcrumbs(
-			[
-				{ label: "Главная", pageKey: { kind: "home" } },
-				{ label: city.title, pageKey: { kind: "geoHub", geo: city.slug } },
-			],
-			development.name,
-		),
+		breadcrumbs: projectObjectBreadcrumbs({
+			category:
+				development.kind === "cottage_village"
+					? "kottedzhnye-poselki"
+					: "novostroyki",
+			city: { label: city.title, slug: city.slug },
+			currentLabel: development.name,
+		}),
 		seo: projectSeoMeta("developmentNormal", seoContext, card.href),
 	};
 }
@@ -1239,7 +1388,9 @@ function listingDTO(
 	const totalPages = Math.ceil(total / pageSize);
 	const templateKey =
 		pageKey.kind === "categoryGeoDistrict"
-			? "categoryGeoDistrict"
+			? district?.districtType === "microdistrict"
+				? "categoryGeoDistrictMicro"
+				: "categoryGeoDistrictAdmin"
 			: pageKey.kind === "categoryGeoFacet"
 				? "categoryGeoFacet"
 				: "categoryGeo";

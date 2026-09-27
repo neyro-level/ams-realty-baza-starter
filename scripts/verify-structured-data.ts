@@ -46,29 +46,47 @@ assert.deepEqual(buildOrganizationJsonLd(fixtureNap), {
 	address: fixtureNap.address,
 });
 
+const breadcrumbItems = [
+	{ label: "Главная", href: "/" },
+	{ label: "Новостройки", href: "/novostroyki/" },
+	{ label: "Жилой комплекс" },
+];
+const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+	breadcrumbItems,
+	"/novostroyki/zhiloy-kompleks/",
+);
+assert.deepEqual(breadcrumbJsonLd, {
+	"@context": "https://schema.org",
+	"@type": "BreadcrumbList",
+	itemListElement: [
+		{
+			"@type": "ListItem",
+			position: 1,
+			name: "Главная",
+			item: "https://example.test/",
+		},
+		{
+			"@type": "ListItem",
+			position: 2,
+			name: "Новостройки",
+			item: "https://example.test/novostroyki/",
+		},
+		{
+			"@type": "ListItem",
+			position: 3,
+			name: "Жилой комплекс",
+			item: "https://example.test/novostroyki/zhiloy-kompleks/",
+		},
+	],
+});
+const jsonLdItems = breadcrumbJsonLd.itemListElement as Array<{
+	name: string;
+	item: string;
+}>;
 assert.deepEqual(
-	buildBreadcrumbJsonLd(
-		[{ label: "Главная", href: "/" }, { label: "Жилой комплекс" }],
-		"/novostroyki/zhiloy-kompleks/",
-	),
-	{
-		"@context": "https://schema.org",
-		"@type": "BreadcrumbList",
-		itemListElement: [
-			{
-				"@type": "ListItem",
-				position: 1,
-				name: "Главная",
-				item: "https://example.test/",
-			},
-			{
-				"@type": "ListItem",
-				position: 2,
-				name: "Жилой комплекс",
-				item: "https://example.test/novostroyki/zhiloy-kompleks/",
-			},
-		],
-	},
+	jsonLdItems.map((item) => item.name),
+	breadcrumbItems.map((item) => item.label),
+	"HTML breadcrumb labels and JSON-LD names share one DTO",
 );
 
 const development = {

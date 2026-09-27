@@ -58,6 +58,8 @@ export type ContentGateInput = ContentGateCommon &
 		| {
 				kind: "developerGeo";
 				developersWithPassingDevelopment: number;
+				registry: SeoRegistryRow | null;
+				intro: string;
 		  }
 		| {
 				kind: "developer";
@@ -178,6 +180,17 @@ function contentReasons(
 	const reasons: string[] = [];
 	let hardNoindex = false;
 	let visiblePriceRows: number | undefined;
+	const addRegistryReasons = (row: SeoRegistryRow | null): void => {
+		if (row?.status !== "approved" || row.synthetic) {
+			reasons.push("registry_metadata_not_approved");
+			return;
+		}
+		if (row.tier === "NONE") reasons.push("registry_tier_none");
+		if (!row.morphologyApproved) reasons.push("registry_morphology_unapproved");
+		if (!row.title.trim() || !row.h1.trim() || !row.description.trim()) {
+			reasons.push("registry_metadata_incomplete");
+		}
+	};
 
 	switch (input.kind) {
 		case "static":
@@ -186,21 +199,14 @@ function contentReasons(
 			validCount(input.inventory, "inventory");
 			validCount(input.ssrLinkCount, "ssrLinkCount");
 			const row = input.registry;
-			if (row?.status !== "approved" || row.synthetic) {
-				reasons.push("registry_metadata_not_approved");
-			} else {
-				if (row.tier === "NONE") reasons.push("registry_tier_none");
+			addRegistryReasons(row);
+			if (row?.status === "approved" && !row.synthetic) {
 				const minimum = Math.max(
 					row.minimumObjects,
 					row.tier === "NONE" ? 0 : profile.seoTiers.minInventory[row.tier],
 				);
 				if (input.inventory < minimum)
 					reasons.push("listing_inventory_below_tier");
-				if (!row.morphologyApproved)
-					reasons.push("registry_morphology_unapproved");
-				if (!row.title.trim() || !row.h1.trim() || !row.description.trim()) {
-					reasons.push("registry_metadata_incomplete");
-				}
 			}
 			if (input.intro.trim().length < profile.gate.listingIntroMinChars) {
 				reasons.push("listing_intro_too_short");
@@ -269,6 +275,24 @@ function contentReasons(
 			break;
 		}
 		case "developerGeo":
+			addRegistryReasons(input.registry);
+			if (
+				input.registry?.status === "approved" &&
+				!input.registry.synthetic
+			) {
+				const minimum = Math.max(
+					input.registry.minimumObjects,
+					input.registry.tier === "NONE"
+						? 0
+						: profile.seoTiers.minInventory[input.registry.tier],
+				);
+				if (input.developersWithPassingDevelopment < minimum) {
+					reasons.push("developer_geo_inventory_below_tier");
+				}
+			}
+			if (input.intro.trim().length < profile.gate.listingIntroMinChars) {
+				reasons.push("developer_geo_intro_too_short");
+			}
 			validCount(
 				input.developersWithPassingDevelopment,
 				"developersWithPassingDevelopment",

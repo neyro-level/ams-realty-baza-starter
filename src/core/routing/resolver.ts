@@ -47,7 +47,7 @@ export type ResolverResult =
 
 export type RouteResolver = ReturnType<typeof createRouteResolver>;
 
-type RouteDecision = {
+export type RouteDecision = {
 	available: boolean;
 	profileStatus: ProfileStatus;
 };
@@ -140,7 +140,7 @@ export function createRouteResolver(input: {
 		}
 
 		const inventory = await port.countInventory(pageKey);
-		const route = routeDecision(profile, pageKey, record, inventory);
+		const route = resolveRouteDecision(profile, pageKey, record, inventory);
 		if (!route.available) return notFound();
 		return {
 			kind: "page",
@@ -157,7 +157,7 @@ export function createRouteResolver(input: {
 	return { resolvePath };
 }
 
-function routeDecision(
+export function resolveRouteDecision(
 	profile: SiteProfile,
 	pageKey: PageKey,
 	record: ResolverPageRecord,

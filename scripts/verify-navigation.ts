@@ -17,6 +17,7 @@ import {
 	projectBreadcrumbs,
 	projectGeoSwitcherOptions,
 	projectMenuLinks,
+	projectObjectBreadcrumbs,
 } from "../src/project/navigation.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
@@ -210,6 +211,50 @@ assert.deepEqual(
 	"unknown persisted geo breadcrumb fails closed as text",
 );
 
+const activeObjectBreadcrumbs = projectObjectBreadcrumbs(
+	{
+		category: "kvartiry",
+		city: { label: "Приморск", slug: profile.primaryGeo },
+		currentLabel: "Квартира у моря",
+	},
+	{ profile, grammar },
+);
+assert.deepEqual(activeObjectBreadcrumbs.items, [
+	{
+		pageKey: { kind: "home" },
+		href: grammar.buildUrl({ kind: "home" }),
+		label: "Главная",
+		count: undefined,
+	},
+	{
+		pageKey: { kind: "categoryRoot", category: "kvartiry" },
+		href: grammar.buildUrl({ kind: "categoryRoot", category: "kvartiry" }),
+		label: "Квартиры",
+		count: undefined,
+	},
+	{
+		pageKey: { kind: "geoHub", geo: profile.primaryGeo },
+		href: grammar.buildUrl({ kind: "geoHub", geo: profile.primaryGeo }),
+		label: "Приморск",
+		count: undefined,
+	},
+	{ label: "Квартира у моря" },
+]);
+
+const inactiveDevelopmentBreadcrumbs = projectObjectBreadcrumbs(
+	{
+		category: "novostroyki",
+		city: { label: "Заречный", slug: "zarechnyy" },
+		currentLabel: "ЖК Проверочный",
+	},
+	{ profile, grammar },
+);
+assert.deepEqual(
+	inactiveDevelopmentBreadcrumbs.items.at(-2),
+	{ label: "Заречный" },
+	"inactive development city remains text",
+);
+
 function breadcrumbLinks(
 	items: typeof fixtureDeveloper.breadcrumbs.items,
 ): Array<{ pageKey: PageKey; href: string; label: string }> {
@@ -270,6 +315,15 @@ const breadcrumbSource = readFileSync(
 	"utf8",
 );
 assert.match(breadcrumbSource, /index === breadcrumbs\.items\.length - 1/);
+const runtimePageSource = readFileSync(
+	"src/app/(site)/[...segments]/page.tsx",
+	"utf8",
+);
+assert.doesNotMatch(
+	runtimePageSource,
+	/breadcrumb\(\s*\[\s*\{/,
+	"runtime page must consume canonical breadcrumb DTOs instead of literals",
+);
 
 console.log(
 	`verify:navigation passed (5 profiles; ${fixtureLinks.length} fixture links; zero 404/redirect/query links)`,

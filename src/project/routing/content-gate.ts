@@ -24,6 +24,7 @@ export type RuntimeGateData =
 			kind: "developers";
 			value: readonly DeveloperCardDTO[];
 			developersWithPassingDevelopment: number;
+			intro: string;
 	  }
 	| {
 			kind: "developer";
@@ -38,7 +39,12 @@ export type RuntimeGateData =
 			layoutCount: number;
 			progressPresent: boolean;
 	  }
-	| { kind: "property"; value: PropertyDetailsDTO };
+	| {
+			kind: "property";
+			value: PropertyDetailsDTO;
+			districtRaw: string | null;
+			gatePhotoCount: number;
+	  };
 
 function lifecycle(resolved: ResolverPageResult): EntityPageLifecycleState {
 	return resolved.lifecycle === "archived"
@@ -92,6 +98,8 @@ function inputFor(
 			...common,
 			kind: "developerGeo",
 			developersWithPassingDevelopment: data.developersWithPassingDevelopment,
+			registry: registry(resolved.canonicalPath),
+			intro: data.intro,
 		};
 	}
 	if (data.kind === "developer") {
@@ -130,10 +138,8 @@ function inputFor(
 		category: data.value.category,
 		rooms: "rooms" in details ? (details.rooms ?? null) : null,
 		district: data.value.district ?? null,
-		rawDistrictRef: null,
-		ownedPhotoCount: data.value.gallery.filter(
-			(item) => item.kind === "managed",
-		).length,
+		rawDistrictRef: data.districtRaw,
+		ownedPhotoCount: data.gatePhotoCount,
 		description: data.value.description,
 	};
 }

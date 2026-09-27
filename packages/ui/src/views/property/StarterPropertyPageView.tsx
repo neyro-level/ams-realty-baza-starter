@@ -1,4 +1,5 @@
 import type {
+	BreadcrumbDTO,
 	MarketingPageDTO,
 	PropertyDetailsDTO,
 } from "@ams/realtbase-contracts";
@@ -10,6 +11,11 @@ import {
 	CardHeader,
 } from "../../components/ui/card";
 import { Container, Section, SectionHeader } from "../../components/ui/layout";
+import {
+	analyticsAttributes,
+	type PublicAnalyticsDimensions,
+} from "../shared/analytics-attributes";
+import { BreadcrumbsView } from "../shared/BreadcrumbsView";
 import { LeadFormView } from "../starter/LeadFormView";
 import { StarterPropertyCard } from "./StarterPropertyCardView";
 import { StarterPropertyMediaGallery } from "./StarterPropertyMediaGallery";
@@ -18,14 +24,12 @@ export function PropertyPageView({
 	property,
 	leadContext,
 	legalCheck,
-	homeHref,
-	catalogHref,
+	analytics,
 }: {
-	property: PropertyDetailsDTO;
+	property: PropertyDetailsDTO & { breadcrumbs: BreadcrumbDTO };
 	leadContext: MarketingPageDTO["leadContext"];
 	legalCheck?: { href: string; evidenceLabel: string };
-	homeHref: string;
-	catalogHref: string;
+	analytics?: PublicAnalyticsDimensions;
 }) {
 	const categoryTitle = {
 		apartment: "О квартире",
@@ -36,14 +40,11 @@ export function PropertyPageView({
 		garage: "О гараже",
 	}[property.category];
 	return (
-		<>
+		<div {...analyticsAttributes("property_view", analytics)}>
 			<section id="section-property-gallery">
 				<Section space="hero">
 					<Container>
-						<nav className="mb-6 text-caption text-content-default">
-							<a href={homeHref}>Главная</a> / <a href={catalogHref}>Недвижимость</a>{" "}
-							/ {property.title}
-						</nav>
+						<BreadcrumbsView breadcrumbs={property.breadcrumbs} />
 						<div className="grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">
 							<div>
 								<div className="relative aspect-[16/9] overflow-hidden rounded-[var(--radius-lg)] bg-surface-subtle">
@@ -147,6 +148,6 @@ export function PropertyPageView({
 					</Container>
 				</Section>
 			</section>
-		</>
+		</div>
 	);
 }

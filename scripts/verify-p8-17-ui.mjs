@@ -19,11 +19,16 @@ for (const name of expectedExports)
 	assert.match(views, new RegExp(name), `${name} must be exported`);
 
 const lead = read("packages/ui/src/views/starter/LeadFormView.tsx");
-assert.match(lead, /development_price/);
+assert.match(lead, /toIntakeFormKind/);
 assert.match(lead, /context: entityContext/);
 assert.match(
+	read("packages/ui/src/views/starter/lead-form-kind.ts"),
+	/development_price/,
+);
+assert.doesNotMatch(
 	read("packages/ui/src/views/development/PriceRequestFormView.tsx"),
-	/intakeKind="development_price"/,
+	/intakeKind=/,
+	"development form kind must be mapped centrally",
 );
 
 const development = read(

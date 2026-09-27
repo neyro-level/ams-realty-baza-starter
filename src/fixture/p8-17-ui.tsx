@@ -92,9 +92,16 @@ export function P817FixtureView({
 	if (scenario === "property")
 		return (
 			<PropertyPageView
-				property={propertyDetails}
-				homeHref="/"
-				catalogHref="/kvartiry/"
+				property={{
+					...propertyDetails,
+					breadcrumbs: {
+						items: [
+							{ label: "Главная", href: "/" },
+							{ label: "Квартиры", href: "/kvartiry/" },
+							{ label: property.title },
+						],
+					},
+				}}
 				leadContext={{
 					...leadContext,
 					formKind: "property",

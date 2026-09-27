@@ -1,4 +1,4 @@
-import type { DeveloperCardDTO } from "@ams/realtbase-contracts";
+import type { BreadcrumbDTO, DeveloperCardDTO } from "@ams/realtbase-contracts";
 import { Button } from "../../components/ui/button";
 import {
 	Card,
@@ -9,21 +9,25 @@ import {
 } from "../../components/ui/card";
 import { Container, Section, SectionHeader } from "../../components/ui/layout";
 import { StarterFeedImage } from "../../lib/starter-image";
+import { BreadcrumbsView } from "../shared/BreadcrumbsView";
 
 export function DevelopersListView({
 	developers,
 	title = "Застройщики",
 	description,
 	headingLevel = "h1",
+	breadcrumbs,
 }: {
 	developers: readonly DeveloperCardDTO[];
 	title?: string;
 	description?: string;
 	headingLevel?: "h1" | "h2";
+	breadcrumbs?: BreadcrumbDTO;
 }) {
 	return (
 		<Section aria-labelledby="developers-title">
 			<Container>
+				{breadcrumbs ? <BreadcrumbsView breadcrumbs={breadcrumbs} /> : null}
 				{headingLevel === "h1" ? (
 					<header className="max-w-3xl">
 						<h1

@@ -1,22 +1,24 @@
-export {
-	createUrlGrammar,
-	isPlatformReservedRoot,
-	platformReservedRoots,
-	propertySurfaceSlugs,
-	transliterateToSlug,
-	type DevelopmentKind,
-	type PageKey,
-	type PropertySurfaceSlug,
-	type UrlGrammar,
-	type UrlGrammarInput,
-} from "./url-grammar.ts";
+export { decidePage, type PageDecision } from "./page-decision.ts";
 export {
 	createRouteResolver,
 	type ResolverDataPort,
-	type ResolverPageResult,
 	type ResolverPageRecord,
+	type ResolverPageResult,
 	type ResolverRedirectRecord,
 	type ResolverResult,
+	type RouteDecision,
 	type RouteResolver,
+	resolveRouteDecision,
 } from "./resolver.ts";
-export { decidePage, type PageDecision } from "./page-decision.ts";
+export {
+	createUrlGrammar,
+	type DevelopmentKind,
+	isPlatformReservedRoot,
+	type PageKey,
+	type PropertySurfaceSlug,
+	platformReservedRoots,
+	propertySurfaceSlugs,
+	transliterateToSlug,
+	type UrlGrammar,
+	type UrlGrammarInput,
+} from "./url-grammar.ts";

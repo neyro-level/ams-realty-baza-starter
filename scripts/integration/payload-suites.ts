@@ -32,6 +32,7 @@ import {
 	getDeveloper,
 	getDevelopment,
 	listDeveloperDevelopments,
+	listDevelopmentGateFactsForCities,
 	listDevelopments,
 	listGeoDevelopers,
 } from "../../src/project/data-access/public/geo-catalog.ts";
@@ -430,6 +431,22 @@ assert.ok(
 				query.page >= 1,
 		),
 	"developer aggregates and relation pagination must use bounded paged queries",
+);
+observedDevelopmentQueries.length = 0;
+const batchGateFacts = await listDevelopmentGateFactsForCities(boundedPayload, [
+	Number(developmentCity.id),
+]);
+assert.equal(
+	batchGateFacts.filter(
+		(fact) => fact.developerId === String(preparedDeveloper.id),
+	).length,
+	50,
+	"one batch facts read must preserve every published development",
+);
+assert.deepEqual(
+	observedDevelopmentQueries,
+	[{ limit: 2000, page: 1, pagination: undefined }],
+	"development Gate facts query count must remain one independently of entity count",
 );
 const draftDeveloper = await payload.create({
 	collection: "developers",

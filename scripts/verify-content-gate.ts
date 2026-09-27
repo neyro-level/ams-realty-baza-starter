@@ -10,6 +10,11 @@ import {
 	evaluateContentGate,
 } from "../src/core/seo/content-gate.ts";
 import type { SeoRegistryRow } from "../src/core/seo/registry.ts";
+import {
+	collectPassingDeveloperIds,
+	mergeDeveloperCards,
+	publishedDeveloperGeoSlugs,
+} from "../src/project/routing/developer-surface.ts";
 import { projectSeoRegistrySeed } from "../src/project/seo/registry-seed.ts";
 import { siteProfileFixtures } from "../src/project/site-profile.ts";
 
@@ -110,6 +115,8 @@ const passingCases: readonly ContentGateInput[] = [
 		...common,
 		kind: "developerGeo",
 		developersWithPassingDevelopment: 5,
+		registry: approvedRegistry,
+		intro: "Проверенное описание страницы застройщиков. ".repeat(20),
 	},
 	{
 		...common,
@@ -256,6 +263,59 @@ for (const testCase of requiredDecisionCases) {
 }
 
 const profile = siteProfileFixtures.multiGeo;
+assert.deepEqual(publishedDeveloperGeoSlugs(profile), [
+	"primorsk",
+	"zarechnyy",
+]);
+const developerCard = {
+	id: "developer-1",
+	slug: "developer-1",
+	pageKey: { kind: "developer" as const, slug: "developer-1" },
+	href: "/zastroyshchiki/developer-1/",
+	name: "Developer One",
+	developmentsCount: 1,
+	geoNames: ["Приморск"],
+};
+assert.deepEqual(
+	mergeDeveloperCards([
+		[developerCard],
+		[
+			{
+				...developerCard,
+				developmentsCount: 2,
+				geoNames: ["Заречный"],
+			},
+		],
+	])[0],
+	{
+		...developerCard,
+		developmentsCount: 3,
+		geoNames: ["Приморск", "Заречный"],
+	},
+);
+assert.deepEqual(
+	[
+		...collectPassingDeveloperIds([
+			{ developerId: "primary-failed", indexing: "noindex" },
+			{ developerId: "outside-primary-passed", indexing: "index" },
+		]),
+	],
+	["outside-primary-passed"],
+);
+const weakDeveloperGeo = evaluateContentGate(
+	profile,
+	{
+		...common,
+		kind: "developerGeo",
+		developersWithPassingDevelopment: profile.gate.developerGeoMin,
+		registry: null,
+		intro: "Коротко",
+	},
+	now,
+);
+assert.equal(weakDeveloperGeo.indexing, "noindex");
+assert.ok(weakDeveloperGeo.reasons.includes("registry_metadata_not_approved"));
+assert.ok(weakDeveloperGeo.reasons.includes("developer_geo_intro_too_short"));
 const weakListing: ContentGateInput = {
 	...common,
 	kind: "listing",

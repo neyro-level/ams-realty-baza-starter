@@ -12,6 +12,7 @@ import {
 	projectSeoRegistrySeed,
 } from "../src/project/seo/registry-seed.ts";
 import {
+	isFreshPriceCheckedAt,
 	projectSeoTemplateKeys,
 	renderProjectSeoTemplate,
 } from "../src/project/seo/templates.ts";
@@ -250,7 +251,7 @@ assert.equal(
 	"Квартиры, дома и новостройки в Ростове-на-Дону — 21 объект.",
 );
 
-const districtSnapshot = renderProjectSeoTemplate("categoryGeoDistrict", {
+const districtSnapshot = renderProjectSeoTemplate("categoryGeoDistrictMicro", {
 	brand: "AMS Realty",
 	category: "Квартиры",
 	city: {
@@ -270,11 +271,104 @@ const districtSnapshot = renderProjectSeoTemplate("categoryGeoDistrict", {
 	districtType: "microdistrict",
 	inventory: 22,
 });
+assert.equal(
+	districtSnapshot.title,
+	"Купить квартиру на Северном в Ростове-на-Дону — цены",
+);
 assert.equal(districtSnapshot.h1, "Квартиры на Северном в Ростове-на-Дону");
 assert.equal(
 	districtSnapshot.description,
 	"Квартиры на Северном в Ростове-на-Дону — актуальные предложения. 22 объекта.",
 );
+const materializedDistrict = projectSeoRegistrySeed.find(
+	(row) => row.entityRef === "district:severnyy",
+);
+assert.ok(materializedDistrict);
+const registryDistrictSnapshot = renderProjectSeoTemplate(
+	"categoryGeoDistrictMicro",
+	{
+		brand: "AMS Realty",
+		category: "Квартиры",
+		city: {
+			approved: true,
+			nominative: "Приморск",
+			genitive: "Приморска",
+			prepositional: "Приморске",
+			preposition: "в",
+		},
+		district: {
+			approved: true,
+			nominative: "Северный",
+			genitive: "Северного",
+			prepositional: "Северном",
+			preposition: "на",
+		},
+		districtType: "microdistrict",
+		inventory: 12,
+	},
+);
+function assertMaterializedMetadata(
+	row: Pick<SeoRegistryRow, "title" | "h1" | "description">,
+	rendered: Pick<SeoRegistryRow, "title" | "h1" | "description">,
+): void {
+	assert.deepEqual(
+		{ title: row.title, h1: row.h1, description: row.description },
+		{
+			title: rendered.title,
+			h1: rendered.h1,
+			description: rendered.description,
+		},
+		"Materialized SEO registry metadata differs from runtime rendering.",
+	);
+}
+assertMaterializedMetadata(materializedDistrict, registryDistrictSnapshot);
+for (const field of ["title", "h1", "description"] as const) {
+	assert.throws(
+		() =>
+			assertMaterializedMetadata(
+				{
+					...materializedDistrict,
+					[field]: `${materializedDistrict[field]} drift`,
+				},
+				registryDistrictSnapshot,
+			),
+		/Materialized SEO registry metadata differs/,
+	);
+}
+const adminDistrictSnapshot = renderProjectSeoTemplate(
+	"categoryGeoDistrictAdmin",
+	{
+		brand: "AMS Realty",
+		category: "Квартиры",
+		city: {
+			approved: true,
+			nominative: "Ростов-на-Дону",
+			genitive: "Ростова-на-Дону",
+			prepositional: "Ростове-на-Дону",
+			preposition: "в",
+		},
+		district: {
+			approved: true,
+			nominative: "Ленинский район",
+			genitive: "Ленинского района",
+			prepositional: "Ленинском районе",
+			preposition: "в",
+		},
+		districtType: "admin_district",
+		inventory: 9,
+	},
+);
+assert.equal(
+	adminDistrictSnapshot.title,
+	"Купить квартиру в Ленинском районе в Ростове-на-Дону — цены",
+);
+assert.equal(
+	adminDistrictSnapshot.h1,
+	"Квартиры в Ленинском районе в Ростове-на-Дону",
+);
+assert.equal(isFreshPriceCheckedAt("2026-09-01T12:00:00.000Z", 45, now), true);
+assert.equal(isFreshPriceCheckedAt("2026-07-01T12:00:00.000Z", 45, now), false);
+assert.equal(isFreshPriceCheckedAt("invalid", 45, now), false);
 assert.deepEqual(
 	[1, 2, 5, 11, 21, 24].map((value) =>
 		formatRussianPlural(value, ["объект", "объекта", "объектов"]),

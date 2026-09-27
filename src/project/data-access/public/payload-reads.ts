@@ -1,6 +1,11 @@
 import "server-only";
 
 import type { Payload, Where } from "payload";
+import type { City, Property } from "@/project/payload-types";
+import {
+	allowedPropertyImageHosts,
+	countPropertyGatePhotos,
+} from "@/project/routing/property-gate-facts";
 import { propertyLifecycleReadAccess } from "./access-mode.ts";
 import { publicGatewayPolicy } from "./policy";
 
@@ -18,7 +23,7 @@ const publicPropertyPublicationWhere: Where = {
 	],
 };
 
-type FacetRow = {
+export type PublicCatalogFacetRow = {
 	category?: string | null;
 	dealType?: string | null;
 	locality?: string | null;
@@ -32,18 +37,10 @@ function bump(map: Map<string, number>, key: string) {
 	map.set(key, (map.get(key) ?? 0) + 1);
 }
 
-export async function aggregatePublicCatalogFacets(
+export async function readPublicCatalogFacetRows(
 	payload: Payload,
 	where: Where,
-) {
-	const categories = new Map<string, number>();
-	const dealTypes = new Map<string, number>();
-	const cities = new Map<string, number>();
-	const districts = new Map<string, number>();
-	const rooms = new Map<number, number>();
-	let total = 0;
-	let priceMin: number | null = null;
-	let priceMax: number | null = null;
+): Promise<readonly PublicCatalogFacetRow[]> {
 	const result = await payload.find({
 		collection: "properties",
 		where,
@@ -59,8 +56,21 @@ export async function aggregatePublicCatalogFacets(
 		},
 		...access,
 	});
+	return result.docs as PublicCatalogFacetRow[];
+}
 
-	for (const doc of result.docs as FacetRow[]) {
+export function aggregatePublicCatalogFacetRows(
+	rows: readonly PublicCatalogFacetRow[],
+) {
+	const categories = new Map<string, number>();
+	const dealTypes = new Map<string, number>();
+	const cities = new Map<string, number>();
+	const districts = new Map<string, number>();
+	const rooms = new Map<number, number>();
+	let total = 0;
+	let priceMin: number | null = null;
+	let priceMax: number | null = null;
+	for (const doc of rows) {
 		total += 1;
 		if (doc.category) bump(categories, doc.category);
 		if (doc.dealType) bump(dealTypes, doc.dealType);
@@ -96,6 +106,15 @@ export async function aggregatePublicCatalogFacets(
 	};
 }
 
+export async function aggregatePublicCatalogFacets(
+	payload: Payload,
+	where: Where,
+) {
+	return aggregatePublicCatalogFacetRows(
+		await readPublicCatalogFacetRows(payload, where),
+	);
+}
+
 export async function countPublicSitemapProperties(
 	payload: Payload,
 ): Promise<number> {
@@ -116,6 +135,14 @@ export async function listPublicSitemapPropertiesPage(
 		publicUrlId: number;
 		category: "apartment" | "house" | "land" | "commercial" | "room" | "garage";
 		updatedAt: string;
+		market: "newbuild" | "secondary";
+		geo: string | null;
+		priceMinor: number | null;
+		area: number | null;
+		rooms: number | null;
+		district: string | null;
+		gatePhotoCount: number;
+		description: string;
 	}[]
 > {
 	const limit = Math.trunc(input.limit);
@@ -133,6 +160,14 @@ export async function listPublicSitemapPropertiesPage(
 		publicUrlId: number;
 		category: "apartment" | "house" | "land" | "commercial" | "room" | "garage";
 		updatedAt: string;
+		market: "newbuild" | "secondary";
+		geo: string | null;
+		priceMinor: number | null;
+		area: number | null;
+		rooms: number | null;
+		district: string | null;
+		gatePhotoCount: number;
+		description: string;
 	}[] = [];
 	let skipped = 0;
 	for (let page = 1; items.length < limit && page <= 50; page += 1) {
@@ -147,11 +182,20 @@ export async function listPublicSitemapPropertiesPage(
 				publicUrlId: true,
 				category: true,
 				updatedAt: true,
+				market: true,
+				cityRef: true,
+				priceMinor: true,
+				totalArea: true,
+				rooms: true,
+				district: true,
+				images: { kind: true, url: true, media: true },
+				description: true,
 			},
 			...access,
+			depth: 1,
 		});
 		if (!result.docs.length) break;
-		for (const doc of result.docs) {
+		for (const doc of result.docs as Property[]) {
 			if (!doc.slug || !doc.publicUrlId || !doc.category) continue;
 			if (skipped < offset) {
 				skipped += 1;
@@ -162,6 +206,20 @@ export async function listPublicSitemapPropertiesPage(
 				publicUrlId: doc.publicUrlId,
 				category: doc.category,
 				updatedAt: doc.updatedAt,
+				market: doc.market,
+				geo:
+					typeof doc.cityRef === "object" && doc.cityRef
+						? (doc.cityRef as City).slug
+						: null,
+				priceMinor: doc.priceMinor ?? null,
+				area: doc.totalArea ?? null,
+				rooms: doc.rooms ?? null,
+				district: doc.district?.trim() || null,
+				gatePhotoCount: countPropertyGatePhotos(
+					doc.images,
+					allowedPropertyImageHosts(),
+				),
+				description: doc.description ?? "",
 			});
 			if (items.length >= limit) break;
 		}

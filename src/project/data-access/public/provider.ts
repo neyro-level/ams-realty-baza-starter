@@ -1,6 +1,11 @@
 import "server-only";
 
 import { propertyCategorySurface } from "@/core/property/taxonomy";
+import {
+	decidePage as decideResolvedPage,
+	resolveRouteDecision,
+} from "@/core/routing";
+import { geoCatalogContractFixtures } from "@/fixture/geo-catalog";
 import { fixtureNap } from "@/fixture/site-settings";
 import { projectConfig } from "@/project/project.config";
 import {
@@ -161,19 +166,74 @@ export async function getPublicSitemapShard(
 			remaining,
 		);
 		entries.push(
-			...properties.map((property) => ({
-				group: "properties" as const,
-				path: urlGrammar.buildUrl({
+			...properties.map((property) => {
+				const pageKey = {
 					kind: "property" as const,
 					category: propertyCategorySurface[property.category],
 					semantic: property.slug,
 					publicUrlId: property.publicUrlId,
-				}),
-				lastModified: property.updatedAt,
-				changeFrequency: "daily" as const,
-				priority: 0.8,
-				indexable: true,
-			})),
+				};
+				const path = urlGrammar.buildUrl(pageKey);
+				const record = {
+					lifecycle: "active" as const,
+					geo: property.geo,
+					market: property.market,
+					dataTier: null,
+				};
+				const route = resolveRouteDecision(siteProfile, pageKey, record, 1);
+				const gate = route.available
+					? decideResolvedPage(
+							siteProfile,
+							pageKey,
+							{
+								kind: "page",
+								pageKey,
+								canonicalPath: path,
+								profileStatus: route.profileStatus,
+								lifecycle: "active",
+								market: property.market,
+								dataTier: null,
+								inventory: 1,
+							},
+							property.market === "newbuild"
+								? {
+										kind: "newbuildLot",
+										url: path,
+										canonical: path,
+										profileStatus: route.profileStatus,
+									}
+								: {
+										kind: "secondary",
+										url: path,
+										canonical: path,
+										profileStatus: route.profileStatus,
+										priceMinor: property.priceMinor,
+										area: property.area,
+										category: property.category,
+										rooms: property.rooms,
+										district: property.district,
+										rawDistrictRef: property.district,
+										ownedPhotoCount: property.gatePhotoCount,
+										description: property.description,
+									},
+						).gate
+					: {
+							statusCode: 404 as const,
+							indexing: "noindex" as const,
+							following: "follow" as const,
+							canonical: path,
+							includeInSitemap: false,
+						};
+				return {
+					group: "properties" as const,
+					path,
+					lastModified: property.updatedAt,
+					changeFrequency: "daily" as const,
+					priority: 0.8,
+					indexable: true,
+					gate,
+				};
+			}),
 		);
 	}
 
@@ -192,17 +252,23 @@ export async function getPublicHomePage() {
 	const payload = await getOptionalPublicGatewayPayload();
 	if (!payload) {
 		return {
-			page: toHomePageDTO(null, fixtureNap.brandName),
+			page: toHomePageDTO(
+				null,
+				fixtureNap.brandName,
+				geoCatalogContractFixtures.city,
+			),
 			featured: null,
 			nap: fixtureNap,
 		} as const;
 	}
 	const nap = await findPublicNap(payload);
-	const [page, catalog] = await Promise.all([
+	const [page, catalog, city] = await Promise.all([
 		findPublicPage(payload, "home", nap.brandName),
 		findPublicCatalogProperties(payload, { limit: 1, page: 1 }),
+		getGeoBySlug(payload, siteProfile.primaryGeo),
 	]);
-	const home = toHomePageDTO(page, nap.brandName);
+	if (!city) throw new Error("Primary city is missing for the home page.");
+	const home = toHomePageDTO(page, nap.brandName, city);
 	const featured = catalog.items[0];
 
 	return {

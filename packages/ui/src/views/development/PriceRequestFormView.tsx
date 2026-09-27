@@ -16,7 +16,6 @@ export function PriceRequestFormView({
 	return (
 		<LeadFormView
 			context={leadContext}
-			intakeKind="development_price"
 			entityContext={{ development: developmentSlug, geo }}
 			analytics={analytics}
 			title="Запросить актуальные цены"

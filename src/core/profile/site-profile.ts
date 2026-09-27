@@ -23,6 +23,15 @@ export const catalogSurfaceSlugs = [
 	"novostroyki",
 	"kottedzhnye-poselki",
 ] as const;
+export const catalogFilterKeys = [
+	"rooms",
+	"district",
+	"price",
+	"area",
+	"market",
+	"developer",
+	"completionYear",
+] as const;
 export const markets = ["newbuild", "secondary"] as const;
 export const seoTierMetrics = ["broad39", "wordstat", "searchDemand"] as const;
 export const moduleStates = ["active", "prepared", "disabled"] as const;
@@ -37,6 +46,7 @@ export type ProfileStatus = (typeof profileStatuses)[number];
 export type GeoMode = (typeof geoModes)[number];
 export type SitePreset = (typeof sitePresets)[number];
 export type CatalogSurfaceSlug = (typeof catalogSurfaceSlugs)[number];
+export type CatalogFilterKey = (typeof catalogFilterKeys)[number];
 export type Market = (typeof markets)[number];
 export type SeoTierMetric = (typeof seoTierMetrics)[number];
 export type ModuleState = (typeof moduleStates)[number];
@@ -59,10 +69,6 @@ const geoSlugSchema = z
 	.string()
 	.min(1)
 	.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Geo slug must be lowercase ASCII.");
-const facetSchema = z
-	.string()
-	.min(1)
-	.regex(/^[a-z][a-zA-Z0-9]*$/, "Facet key must be a stable identifier.");
 const isoDateSchema = z.iso.date();
 const staticPathSchema = z
 	.string()
@@ -88,13 +94,17 @@ const marketStatusSchema = z.strictObject({
 	newbuild: statusSchema,
 	secondary: statusSchema,
 });
+const filterKeySchema = z.enum(catalogFilterKeys);
 const filterKeysSchema = z.strictObject(
 	Object.fromEntries(
 		catalogSurfaceSlugs.map((surface) => [
 			surface,
-			z.array(facetSchema).max(20),
+			z.array(filterKeySchema).max(catalogFilterKeys.length),
 		]),
-	) as Record<CatalogSurfaceSlug, z.ZodArray<typeof facetSchema>>,
+	) as unknown as Record<
+		CatalogSurfaceSlug,
+		z.ZodArray<typeof filterKeySchema>
+	>,
 );
 const seoFacetValueSchema = z.union([
 	z.string().min(1).max(120),
@@ -109,7 +119,7 @@ const seoFacetSchema = z.strictObject({
 	geo: geoSlugSchema,
 	category: z.enum(catalogSurfaceSlugs),
 	filter: z.strictObject({
-		key: facetSchema,
+		key: filterKeySchema,
 		value: seoFacetValueSchema,
 	}),
 });

@@ -15,6 +15,7 @@ export type PublicAnalyticsDimensions = {
 export function analyticsAttributes(
 	event:
 		| "listing_view"
+		| "property_view"
 		| "development_view"
 		| "development_price_request_submit",
 	dimensions?: PublicAnalyticsDimensions,
