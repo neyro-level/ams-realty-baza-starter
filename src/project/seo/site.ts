@@ -1,6 +1,7 @@
 import type { ContentGateDecision } from "../../core/seo/content-gate.ts";
 import type { DiscoveryGroup } from "../../core/seo/discovery-feeds.ts";
 import { detectRuntimeEnvMode, runtimeEnv } from "../env.ts";
+import { requireApprovedProductionPublicOrigin } from "../public-origin.ts";
 import { projectStaticRoutes } from "../static-routes.ts";
 
 export type PublicUrlEntry = {
@@ -35,6 +36,9 @@ export function getSiteUrl(): string {
 			);
 		}
 		return "http://localhost:3000";
+	}
+	if (detectRuntimeEnvMode() === "runtime") {
+		return requireApprovedProductionPublicOrigin(configured);
 	}
 	try {
 		const url = new URL(configured);

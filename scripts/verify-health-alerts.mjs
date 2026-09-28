@@ -253,6 +253,22 @@ const productionLike = {
 };
 assert.equal(evaluateRuntimeEnv(productionLike, "runtime").ok, true);
 assert.doesNotThrow(() => parseProjectEnv(productionLike, "runtime"));
+for (const invalidOrigin of [
+	"http://start-baza.ams24.ru",
+	"https://foreign.example.test",
+	"https://user:password@start-baza.ams24.ru",
+	"https://start-baza.ams24.ru/path",
+	"https://start-baza.ams24.ru/?query=1",
+	"https://start-baza.ams24.ru/#fragment",
+]) {
+	assert.ok(
+		evaluateRuntimeEnv(
+			{ ...productionLike, NEXT_PUBLIC_SERVER_URL: invalidOrigin },
+			"runtime",
+		).missing.includes("NEXT_PUBLIC_SERVER_URL"),
+		`production public origin must reject ${invalidOrigin}`,
+	);
+}
 assert.equal(
 	evaluateRuntimeEnv(
 		{
