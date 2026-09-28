@@ -125,6 +125,7 @@
 		"verify:indexing-regression": "pnpm verify:seo-contracts && pnpm verify:content-gate && pnpm verify:discovery-feeds && pnpm verify:health-alerts",
 		"verify:robots-route": "node --experimental-strip-types scripts/verify-robots-route.mjs",
 		"verify:tracking-query-params": "node --experimental-strip-types scripts/verify-tracking-query-params.ts",
+		"verify:tracking-traffic": "node --experimental-strip-types scripts/verify-tracking-traffic.ts",
 		"verify:seo-registry": "node --experimental-strip-types scripts/verify-seo-registry.ts",
 		"seo:registry:generate": "node --experimental-strip-types scripts/seo-registry.ts",
 		"seo:registry:import-demand": "node --experimental-strip-types scripts/seo-registry-import-demand.ts",
