@@ -77,6 +77,7 @@ import {
 	publicGatewayCacheTags,
 	publicGatewayRouteCacheIdentity,
 } from "@/project/routing/public-gateway-cache";
+import { getCachedFilteredCatalogRoute } from "@/project/routing/filtered-catalog-cache";
 import {
 	projectSeoCategoryForms,
 	projectSeoActiveCategoriesList,
@@ -970,6 +971,24 @@ async function resolveRuntimeRoutePersisted(
 		pageKey,
 		functionalQueryString,
 	);
+	const catalogQuery =
+		pageKey?.kind === "categoryRoot" ||
+		pageKey?.kind === "categoryGeo" ||
+		pageKey?.kind === "categoryGeoDistrict" ||
+		pageKey?.kind === "categoryGeoFacet"
+			? parseCatalogSearchParams(functionalQueryString)
+			: null;
+	const filteredCatalogKey =
+		catalogQuery &&
+		catalogFilterKeysForQuery(catalogQuery).length > 0 &&
+		pageKey
+			? `filtered-catalog:${grammar.buildUrl(pageKey)}?${catalogQuery.queryString}`
+			: null;
+	if (filteredCatalogKey) {
+		return getCachedFilteredCatalogRoute(filteredCatalogKey, () =>
+			resolveRuntimeRouteUncached(pathname, functionalQueryString),
+		);
+	}
 	if (!cacheIdentity) {
 		return resolveRuntimeRouteUncached(pathname, functionalQueryString);
 	}

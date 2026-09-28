@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { buildPublicEntityInvalidationTargets } from "../src/core/cache/entity-change-targets.ts";
 import { executeInternalRevalidation } from "../src/core/cache/internal-route-executor.ts";
 import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
@@ -99,6 +100,18 @@ assert.equal(
 	publicGatewayRouteCacheIdentity(profile, catalogPageKey, "page=10001"),
 	null,
 	"Out-of-bound pages must never enter persistent cache identity.",
+);
+
+const runtimeRoute = readFileSync("src/project/routing/runtime-route.ts", "utf8");
+assert.match(
+	runtimeRoute,
+	/getCachedFilteredCatalogRoute\(filteredCatalogKey[\s\S]{0,240}resolveRuntimeRouteUncached/,
+	"normalized functional catalog filters must use the bounded per-runtime cache",
+);
+assert.match(
+	runtimeRoute,
+	/if \(filteredCatalogKey\)[\s\S]{0,320}if \(!cacheIdentity\)/,
+	"the filtered cache path must remain outside persistent Next cache",
 );
 
 const canonicalMoveTargets = buildPublicEntityInvalidationTargets({
