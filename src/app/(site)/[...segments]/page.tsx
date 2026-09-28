@@ -112,7 +112,7 @@ export async function generateMetadata({
 		canonicalPath: result.decision.canonicalPath,
 		indexing: result.decision.robots.indexing,
 		following: result.decision.robots.following,
-	}, getProjectIndexingPolicy());
+	}, { globalIndexingPolicy: getProjectIndexingPolicy() });
 }
 
 export default async function CanonicalRuntimePage({

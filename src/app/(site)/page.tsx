@@ -19,7 +19,9 @@ export const revalidate = 3600;
 
 export async function generateMetadata() {
 	const home = await getPublicHomePage();
-	return toMetadata(home.page.seo, getProjectIndexingPolicy());
+	return toMetadata(home.page.seo, {
+		globalIndexingPolicy: getProjectIndexingPolicy(),
+	});
 }
 
 export default async function HomePage() {

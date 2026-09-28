@@ -98,7 +98,7 @@ assert.ok(
 );
 assert.ok(
 	readFileSync("src/app/layout.tsx", "utf8").includes(
-		"metadataRobotsForPolicy(getProjectIndexingPolicy())",
+		"toPublicSiteMetadata",
 	),
 );
 

@@ -12,5 +12,7 @@ export async function MarketingRoute({ slug }: { slug: string }) {
 
 export async function generateMarketingMetadata(slug: string) {
 	const page = await getPublicMarketingPage(slug);
-	return page ? toMetadata(page.seo, getProjectIndexingPolicy()) : {};
+	return page
+		? toMetadata(page.seo, { globalIndexingPolicy: getProjectIndexingPolicy() })
+		: {};
 }
