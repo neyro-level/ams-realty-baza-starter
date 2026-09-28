@@ -122,6 +122,7 @@
 		"verify:max-adapter": "node --experimental-strip-types scripts/verify-max-adapter.mjs",
 		"verify:custom-webhook-adapter": "node --experimental-strip-types scripts/verify-custom-webhook-adapter.mjs",
 		"verify:seo-contracts": "node --experimental-strip-types scripts/verify-seo-contracts.mjs && node scripts/quality/page-metadata-ownership.mjs && node --experimental-strip-types scripts/verify-robots-route.mjs",
+		"verify:indexing-regression": "pnpm verify:seo-contracts && pnpm verify:content-gate && pnpm verify:discovery-feeds && pnpm verify:health-alerts",
 		"verify:robots-route": "node --experimental-strip-types scripts/verify-robots-route.mjs",
 		"verify:seo-registry": "node --experimental-strip-types scripts/verify-seo-registry.ts",
 		"seo:registry:generate": "node --experimental-strip-types scripts/seo-registry.ts",
