@@ -214,6 +214,7 @@ export function renderDiscoveryRobots(input: {
 	publicOrigin: string;
 	indexingEnabled: boolean;
 	sitemapIndexPath?: string;
+	cleanParam?: string;
 }): string {
 	const origin = normalizedOrigin(input.publicOrigin);
 	if (!input.indexingEnabled) {
@@ -228,6 +229,7 @@ export function renderDiscoveryRobots(input: {
 		"Disallow: /api/",
 		`Sitemap: ${sitemap}`,
 		`Host: ${origin.host}`,
+		...(input.cleanParam ? [`Clean-param: ${input.cleanParam}`] : []),
 		"",
 	].join("\n");
 }

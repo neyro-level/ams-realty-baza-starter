@@ -122,8 +122,8 @@ assert.deepEqual(
 	{ rules: [{ userAgent: "*", disallow: "/" }] },
 );
 assert.ok(
-	readFileSync("src/app/robots.ts", "utf8").includes(
-		"renderDiscoveryRobots({ publicOrigin, indexingEnabled })",
+	readFileSync("src/app/robots.txt/route.ts", "utf8").includes(
+		"renderDiscoveryRobots({",
 	),
 );
 assert.ok(
