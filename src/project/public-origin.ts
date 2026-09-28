@@ -4,8 +4,7 @@ import { siteConfig } from "./site.config.ts";
 export const starterDemoPublicDomain = "start-baza.ams24.ru";
 
 export function approvedPublicHostname(): string | null {
-	const projectKind: "starter-demo" | "client" = siteConfig.projectKind;
-	return projectKind === "starter-demo"
+	return (siteConfig.projectKind as "starter-demo" | "client") === "starter-demo"
 		? starterDemoPublicDomain
 		: clientReadinessConfig.domain;
 }
