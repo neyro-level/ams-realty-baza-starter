@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { composeFinalRobots } from "../src/core/seo/final-robots.ts";
+import { toOpenGraphImage } from "../src/core/seo/page-metadata.ts";
 import { serializeJsonLdSafely } from "../src/core/seo/json-ld.ts";
 import {
 	resolvePropertyPageLifecycle,
@@ -27,6 +28,35 @@ assert.deepEqual(metadataRobotsForPolicy("noindex"), {
 	index: false,
 	follow: false,
 });
+assert.deepEqual(
+	toOpenGraphImage({
+		kind: "managed",
+		src: "/media/og.jpg",
+		alt: "Managed OG",
+	}),
+	{ url: "/media/og.jpg", alt: "Managed OG", width: undefined, height: undefined },
+);
+assert.deepEqual(
+	toOpenGraphImage({
+		kind: "external",
+		src: "https://images.example.test/og.jpg",
+		alt: "External OG",
+	}),
+	{
+		url: "https://images.example.test/og.jpg",
+		alt: "External OG",
+		width: undefined,
+		height: undefined,
+	},
+);
+assert.equal(
+	toOpenGraphImage({
+		kind: "external",
+		src: "http://images.example.test/og.jpg",
+		alt: "Rejected OG",
+	}),
+	undefined,
+);
 assert.deepEqual(
 	composeFinalRobots("noindex", { indexing: "index", following: "follow" }),
 	{ index: false, follow: false },
