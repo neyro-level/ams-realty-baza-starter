@@ -1,8 +1,12 @@
 import type { MetadataRoute } from "next";
+import {
+	composeFinalRobots,
+	type GlobalIndexingPolicy,
+} from "../core/seo/final-robots.ts";
 import { clientReadinessConfig } from "./client-readiness.config.ts";
 import { type ProjectKind, siteConfig } from "./site.config.ts";
 
-export type IndexingPolicy = "public" | "noindex";
+export type IndexingPolicy = GlobalIndexingPolicy;
 
 export function resolveIndexingPolicy(input: {
 	projectKind: ProjectKind;
@@ -20,9 +24,10 @@ export function getProjectIndexingPolicy(): IndexingPolicy {
 }
 
 export function metadataRobotsForPolicy(policy: IndexingPolicy) {
-	return policy === "public"
-		? { index: true, follow: true }
-		: { index: false, follow: false };
+	return composeFinalRobots(policy, {
+		indexing: "index",
+		following: "follow",
+	});
 }
 
 export function buildRobots(

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { composeFinalRobots } from "../src/core/seo/final-robots.ts";
 import { serializeJsonLdSafely } from "../src/core/seo/json-ld.ts";
 import {
 	resolvePropertyPageLifecycle,
@@ -26,6 +27,46 @@ assert.deepEqual(metadataRobotsForPolicy("noindex"), {
 	index: false,
 	follow: false,
 });
+assert.deepEqual(
+	composeFinalRobots("noindex", { indexing: "index", following: "follow" }),
+	{ index: false, follow: false },
+	"global noindex must never be raised by an indexable page",
+);
+assert.deepEqual(
+	composeFinalRobots("public", { indexing: "index", following: "follow" }),
+	{ index: true, follow: true },
+);
+assert.deepEqual(
+	composeFinalRobots(
+		resolveIndexingPolicy({
+			projectKind: "client",
+			productionIndexing: "noindex",
+		}),
+		{ indexing: "index", following: "follow" },
+	),
+	{ index: false, follow: false },
+	"client noindex policy must never be raised by an indexable page",
+);
+assert.deepEqual(
+	composeFinalRobots(
+		resolveIndexingPolicy({
+			projectKind: "client",
+			productionIndexing: "public",
+		}),
+		{ indexing: "index", following: "follow" },
+	),
+	{ index: true, follow: true },
+);
+assert.deepEqual(
+	composeFinalRobots("public", { indexing: "noindex", following: "follow" }),
+	{ index: false, follow: true },
+	"page-level Content Gate noindex must narrow a public client policy",
+);
+assert.deepEqual(
+	composeFinalRobots("public", { indexing: "noindex", following: "follow" }),
+	{ index: false, follow: true },
+	"archived lifecycle noindex must stay noindex",
+);
 assert.deepEqual(buildRobots("noindex", fixtureOrigin), {
 	rules: [{ userAgent: "*", disallow: "/" }],
 });

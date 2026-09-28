@@ -1,15 +1,16 @@
 import type { PageSEOContract } from "@ams/realtbase-contracts";
 import type { Metadata } from "next";
+import { composeFinalRobots, type GlobalIndexingPolicy } from "./final-robots";
 
-export function toMetadata(seo: PageSEOContract): Metadata {
+export function toMetadata(
+	seo: PageSEOContract,
+	globalIndexingPolicy: GlobalIndexingPolicy,
+): Metadata {
 	return {
 		title: seo.title,
 		description: seo.description,
 		alternates: { canonical: seo.canonicalPath },
-		robots: {
-			index: seo.indexing === "index",
-			follow: seo.following === "follow",
-		},
+		robots: composeFinalRobots(globalIndexingPolicy, seo),
 		openGraph: seo.openGraph
 			? {
 					title: seo.openGraph.title ?? seo.title,
