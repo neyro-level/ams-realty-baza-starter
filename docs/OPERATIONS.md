@@ -146,7 +146,7 @@ Fallback: owner email / AMS operations inbox, not a messenger used for lead deli
 
 ## External uptime monitoring
 
-External monitor is independent of AMS Server and watches public homepage, `/api/internal/healthz` availability from outside, and TLS/HTTP. Feed overdue on the external contour uses `max(2 hours, 3 × refreshIntervalMinutes)`. Internal healthz remains the source for feed/jobs/lead condition alerts.
+External monitor is independent of AMS Server and watches public homepage, `/api/internal/healthz` availability from outside, and TLS/HTTP. It also checks `/robots.txt`, `/sitemap.xml` and at least one expected sitemap shard whenever public indexing is enabled. A sitemap response error, or an empty sitemap after the same monitor previously observed public URLs, is alertable. Feed overdue on the external contour uses `max(2 hours, 3 × refreshIntervalMinutes)`. Internal healthz remains the source for feed/jobs/lead condition alerts.
 
 ## Payload Jobs, media, CSP и raw REST
 
