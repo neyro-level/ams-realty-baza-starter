@@ -68,6 +68,15 @@ for (const [fixtureName, profile] of Object.entries(siteProfileFixtures)) {
 			"page=1&sort=recommended",
 		),
 	);
+	assert.deepEqual(
+		publicGatewayRouteCacheIdentity(
+			profile,
+			catalogPageKey,
+			"page=2&sort=priceAsc&utm_source=yandex&yclid=123",
+		),
+		identity,
+		"tracking parameters never create a distinct persistent cache identity",
+	);
 }
 
 const profile = siteProfileFixtures.multiGeo;

@@ -27,8 +27,35 @@ export type TrackingQueryParam = (typeof trackingQueryParams)[number];
 
 const trackingQueryParamSet = new Set<string>(trackingQueryParams);
 
-export function isTrackingQueryParam(parameter: string): parameter is TrackingQueryParam {
+export type QueryParamPartition = {
+  functionalQueryString: string;
+  trackingQueryString: string;
+};
+
+export function isTrackingQueryParam(
+  parameter: string,
+): parameter is TrackingQueryParam {
   return trackingQueryParamSet.has(parameter);
+}
+
+/**
+ * Keeps attribution-only parameters available to the browser while isolating
+ * all server-side content decisions to the functional part of the request.
+ */
+export function separateTrackingQueryParams(
+  queryString: string,
+): QueryParamPartition {
+  const functional = new URLSearchParams();
+  const tracking = new URLSearchParams();
+
+  for (const [key, value] of new URLSearchParams(queryString)) {
+    (isTrackingQueryParam(key) ? tracking : functional).append(key, value);
+  }
+
+  return {
+    functionalQueryString: functional.toString(),
+    trackingQueryString: tracking.toString(),
+  };
 }
 
 export function cleanParamDirective(): string {

@@ -15,6 +15,7 @@ import type {
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
+import { separateTrackingQueryParams } from "@/core/seo/tracking-query-params";
 import {
 	createRouteResolver,
 	decidePage as decideResolvedPage,
@@ -957,6 +958,8 @@ async function resolveRuntimeRoutePersisted(
 	pathname: string,
 	queryString = "",
 ): Promise<RuntimeRouteResolution> {
+	const functionalQueryString =
+		separateTrackingQueryParams(queryString).functionalQueryString;
 	const grammar = createProjectUrlGrammar(
 		siteProfile,
 		await getCachedDistrictRouteRegistry(),
@@ -965,13 +968,13 @@ async function resolveRuntimeRoutePersisted(
 	const cacheIdentity = publicGatewayRouteCacheIdentity(
 		siteProfile,
 		pageKey,
-		queryString,
+		functionalQueryString,
 	);
 	if (!cacheIdentity) {
-		return resolveRuntimeRouteUncached(pathname, queryString);
+		return resolveRuntimeRouteUncached(pathname, functionalQueryString);
 	}
 	const cached = unstable_cache(
-		() => resolveRuntimeRouteUncached(pathname, queryString),
+		() => resolveRuntimeRouteUncached(pathname, functionalQueryString),
 		["public-gateway-route", pathname, ...cacheIdentity.keyParts],
 		{
 			tags: publicGatewayCacheTags(pageKey),

@@ -11,6 +11,7 @@ import {
 	parseCatalogSearchParams,
 	parsePageSearchParams,
 } from "../src/project/routing/catalog-search-params.ts";
+import { separateTrackingQueryParams } from "../src/core/seo/tracking-query-params.ts";
 
 assert.deepEqual(
 	[...catalogQueryFilterKeys].sort(),
@@ -92,6 +93,33 @@ assert.deepEqual(parsePageSearchParams("page=2"), {
 });
 assert.equal(parsePageSearchParams("sort=newest"), null);
 
+assert.deepEqual(
+	separateTrackingQueryParams("yclid=123&utm_source=yandex&page=2"),
+	{
+		functionalQueryString: "page=2",
+		trackingQueryString: "yclid=123&utm_source=yandex",
+	},
+);
+assert.deepEqual(
+	parseCatalogSearchParams("yclid=123&utm_source=yandex"),
+	clean,
+	"tracking-only catalog requests use the clean content query",
+);
+assert.deepEqual(
+	parseCatalogSearchParams("page=2&gclid=abc"),
+	pageTwo,
+	"tracking values never change normalized pagination",
+);
+assert.deepEqual(parsePageSearchParams("page=2&ysclid=abc"), {
+	page: 2,
+	queryString: "page=2",
+});
+assert.equal(
+	parseCatalogSearchParams("unknown=value&utm_source=yandex"),
+	null,
+	"unknown functional keys remain fail-closed",
+);
+
 const catchAllPage = readFileSync(
 	"src/app/(site)/[...segments]/page.tsx",
 	"utf8",
@@ -115,6 +143,7 @@ const runtimeRoute = readFileSync(
 	"utf8",
 );
 assert.match(runtimeRoute, /catalogFilterKeysForQuery\(catalogQuery\)/);
+assert.match(runtimeRoute, /separateTrackingQueryParams\(queryString\)/);
 assert.match(
 	listingView,
 	/<a href=\{pageHref\(listing\.pagination\.nextPage\)\}>/,
