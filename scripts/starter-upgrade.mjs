@@ -50,6 +50,16 @@ function readJsonBounded(path, maxBytes = limits.archiveBytes) {
 
 export function validateUpgradeArchive(value) {
 	if (!value || typeof value !== "object" || Array.isArray(value) || value.schemaVersion !== 1) throw new Error("Upgrade archive schemaVersion must equal 1.");
+	if (!value.from || typeof value.from !== "object" || Array.isArray(value.from)) {
+		throw new Error("Upgrade archive must declare its exact source starter version.");
+	}
+	const from = validateStarterVersion({
+		schemaVersion: 1,
+		tag: value.from.tag,
+		sha: value.from.sha,
+		manifestVersion: 1,
+		hashes: { "archive/source": "0".repeat(64) },
+	});
 	if (!Array.isArray(value.entries) || !value.entries.length || value.entries.length > limits.files) throw new Error("Upgrade archive file count is invalid or exceeds the limit.");
 	const seen = new Set();
 	let expandedBytes = 0;
@@ -68,13 +78,168 @@ export function validateUpgradeArchive(value) {
 		if (expandedBytes > limits.expandedBytes) throw new Error("Upgrade archive exceeds the expanded-size limit.");
 		contents.set(path, content);
 	}
-	const hashes = Object.fromEntries([...contents].map(([path, content]) => [path, digest(content)]));
+	const sourceHashes = Object.fromEntries([...contents].map(([path, content]) => [path, digest(content)]));
+	const compositePaths = validateComposites(value.composites, contents);
+	const packageMerge = validatePackageMerge(value.packageMerge, contents, compositePaths);
+	const regeneration = value.regeneration;
+	if (!regeneration || typeof regeneration !== "object" || Array.isArray(regeneration) || regeneration.schemaVersion !== 1 || !Array.isArray(regeneration.steps)) {
+		throw new Error("Upgrade archive requires a schemaVersion 1 regeneration contract.");
+	}
+	const regenerated = new Map();
+	for (const [index, step] of regeneration.steps.entries()) {
+		if (!step || typeof step !== "object" || Array.isArray(step)) {
+			throw new Error(`Regeneration step ${index} must be an object.`);
+		}
+		const script = safeRelativePath(step.script, `regeneration.steps[${index}].script`);
+		if (!script.startsWith("scripts/") || !contents.has(script)) {
+			throw new Error(`Regeneration script must be an archived scripts/ file: ${script}.`);
+		}
+		if (!step.outputs || typeof step.outputs !== "object" || Array.isArray(step.outputs) || !Object.keys(step.outputs).length) {
+			throw new Error(`Regeneration step ${index} must declare output hashes.`);
+		}
+		for (const [outputPath, outputHash] of Object.entries(step.outputs)) {
+			const path = safeRelativePath(outputPath, `regeneration.steps[${index}].outputs`);
+			if (!/^[0-9a-f]{64}$/.test(outputHash)) {
+				throw new Error(`Regeneration output hash is invalid: ${path}.`);
+			}
+			if (contents.has(path)) {
+				throw new Error(`Generated output must not be archived as a platform file: ${path}.`);
+			}
+			if (regenerated.has(path)) {
+				throw new Error(`Regeneration output is declared more than once: ${path}.`);
+			}
+			regenerated.set(path, outputHash);
+		}
+	}
+	const migrationPaths = [...contents.keys()].filter((path) => path.startsWith("migrations/"));
+	const migrationOwners = value.migrationOwners;
+	if (!migrationPaths.length && migrationOwners !== undefined) {
+		throw new Error("Upgrade archive declares migration owners without migrations.");
+	}
+	if (migrationPaths.length) {
+		if (!migrationOwners || typeof migrationOwners !== "object" || Array.isArray(migrationOwners)) {
+			throw new Error("Upgrade archive migrations require an explicit migrationOwners contract.");
+		}
+		for (const migrationPath of migrationPaths) {
+			const owners = migrationOwners[migrationPath];
+			if (!Array.isArray(owners) || !owners.length) {
+				throw new Error(`Migration owner contract is missing: ${migrationPath}.`);
+			}
+			for (const ownerPath of owners) {
+				const normalizedOwner = safeRelativePath(ownerPath, "migration owner path");
+				if (!normalizedOwner.startsWith("src/project/collections/")) {
+					throw new Error(`Migration owner must be a collection schema file: ${normalizedOwner}.`);
+				}
+				if (!contents.has(normalizedOwner)) {
+					throw new Error(`Migration owner is absent from upgrade archive: ${normalizedOwner}.`);
+				}
+			}
+		}
+		for (const migrationPath of Object.keys(migrationOwners)) {
+			if (!migrationPaths.includes(migrationPath)) {
+				throw new Error(`Migration owner contract references an absent migration: ${migrationPath}.`);
+			}
+		}
+	}
 	const release = validateStarterReleaseManifest(value.release, {
 		expectedTag: value.tag,
 		expectedSha: value.sha,
-		expectedHashes: hashes,
+		expectedHashes: sourceHashes,
 	});
-	return { tag: release.tag, sha: release.sha, manifestVersion: release.starterOwnedManifestVersion, hashes, contents };
+	const hashes = Object.fromEntries(Object.entries(sourceHashes).filter(([path]) => !compositePaths.includes(path)));
+	return {
+		from: { tag: from.tag, sha: from.sha },
+		tag: release.tag,
+		sha: release.sha,
+		manifestVersion: release.starterOwnedManifestVersion,
+		hashes,
+		contents,
+		compositePaths,
+		packageMerge,
+		regeneration: regeneration.steps.map((step) => ({ script: step.script, outputs: step.outputs })),
+		regenerated,
+	};
+}
+
+function readPackageNameList(value, label) {
+	if (!Array.isArray(value) || new Set(value).size !== value.length || value.some((item) => typeof item !== "string" || !item)) {
+		throw new Error(`${label} must be an array of unique package names.`);
+	}
+	return value;
+}
+
+function validateComposites(value, contents) {
+	if (!Array.isArray(value) || value.length !== 1) {
+		throw new Error("Upgrade archive must declare exactly one composite-file contract.");
+	}
+	const [composite] = value;
+	if (!composite || typeof composite !== "object" || Array.isArray(composite)) {
+		throw new Error("Composite-file contract must be an object.");
+	}
+	const path = safeRelativePath(composite.path, "composite path");
+	if (path !== "package.json" || composite.strategy !== "structured" || composite.handler !== "package-json") {
+		throw new Error("Only package.json may use the structured composite-file handler.");
+	}
+	if (!contents.has(path)) throw new Error("Composite-file source is absent from the upgrade archive.");
+	return [path];
+}
+
+function validatePackageMerge(value, contents, compositePaths) {
+	if (!value || typeof value !== "object" || Array.isArray(value) || value.schemaVersion !== 1) {
+		throw new Error("Upgrade archive requires a schemaVersion 1 packageMerge contract.");
+	}
+	if (!compositePaths.includes("package.json") || !contents.has("package.json")) throw new Error("Package merge requires package.json in the upgrade archive.");
+	const preserve = value.preserve;
+	if (!preserve || typeof preserve !== "object" || Array.isArray(preserve)) {
+		throw new Error("Package merge must declare approved client extensions.");
+	}
+	const sections = ["dependencies", "devDependencies", "scripts"];
+	if (Object.keys(preserve).some((key) => !sections.includes(key))) {
+		throw new Error("Package merge preserve contract contains an unsupported section.");
+	}
+	const contract = Object.fromEntries(sections.map((section) => [
+		section,
+		readPackageNameList(preserve[section] ?? [], `packageMerge.preserve.${section}`),
+	]));
+	try {
+		const source = JSON.parse(contents.get("package.json").toString("utf8"));
+		if (!source || typeof source !== "object" || Array.isArray(source)) throw new Error("not an object");
+	} catch {
+		throw new Error("Upgrade archive package.json must contain a JSON object.");
+	}
+	return contract;
+}
+
+function mergePackageJson(currentSource, upstreamSource, contract) {
+	let current;
+	let upstream;
+	try {
+		current = JSON.parse(currentSource);
+		upstream = JSON.parse(upstreamSource);
+	} catch {
+		throw new Error("Package merge requires valid current and upstream package.json objects.");
+	}
+	if (!current || typeof current !== "object" || Array.isArray(current) || !upstream || typeof upstream !== "object" || Array.isArray(upstream)) {
+		throw new Error("Package merge requires valid current and upstream package.json objects.");
+	}
+	if (typeof current.name !== "string" || !current.name) throw new Error("Package merge requires a client package name.");
+	const merged = structuredClone(upstream);
+	merged.name = current.name;
+	for (const section of ["dependencies", "devDependencies", "scripts"]) {
+		if (merged[section] !== undefined && (!merged[section] || typeof merged[section] !== "object" || Array.isArray(merged[section]))) {
+			throw new Error(`Upstream package ${section} must be an object when declared.`);
+		}
+		for (const key of contract[section]) {
+			if (current[section]?.[key] !== undefined) {
+				if (typeof current[section][key] !== "string" || !current[section][key]) {
+					throw new Error(`Approved client package extension is invalid: ${section}.${key}.`);
+				}
+				merged[section] ??= {};
+				merged[section][key] = current[section][key];
+			}
+		}
+	}
+	return `${JSON.stringify(merged, null, "\t")}\n`;
 }
 
 function writeJson(path, value) {
@@ -148,16 +313,20 @@ export function runStarterUpgrade({ root = process.cwd(), archivePath, recover =
 	const previousVersionPath = join(absoluteRoot, ".starter-version");
 	const previousVersionSource = readFileSync(previousVersionPath, "utf8");
 	const previous = readVersion(absoluteRoot);
-	assertNoDirtyClientOwnedPaths(absoluteRoot, new Set(Object.keys(previous.hashes)));
 	const next = validateUpgradeArchive(readJsonBounded(archivePath));
+	const compositePaths = new Set(next.compositePaths);
+	assertNoDirtyClientOwnedPaths(absoluteRoot, new Set(Object.keys(previous.hashes).filter((path) => !compositePaths.has(path))));
 	if (previous.tag === next.tag && previous.sha === next.sha && JSON.stringify(previous.hashes) === JSON.stringify(next.hashes)) {
 		return { status: "already-current", tag: next.tag, sha: next.sha };
+	}
+	if (previous.tag !== next.from.tag || previous.sha !== next.from.sha) {
+		throw new Error(`Upgrade archive source does not match client starter version: expected ${next.from.tag}@${next.from.sha}.`);
 	}
 
 	const conflicts = [];
 	const writes = [];
 	const deletes = [];
-	const allPaths = new Set([...Object.keys(previous.hashes), ...Object.keys(next.hashes)]);
+	const allPaths = new Set([...Object.keys(previous.hashes), ...Object.keys(next.hashes)].filter((path) => !compositePaths.has(path)));
 	for (const path of [...allPaths].sort()) {
 		const target = safeTarget(absoluteRoot, path);
 		const exists = existsSync(target);
@@ -191,11 +360,19 @@ export function runStarterUpgrade({ root = process.cwd(), archivePath, recover =
 		writeJson(reportPath, report);
 		return report;
 	}
+	const packagePath = safeTarget(absoluteRoot, "package.json", { allowMissingLeaf: false });
+	if (!existsSync(packagePath) || !lstatSync(packagePath).isFile()) throw new Error("Client package.json is missing.");
+	const mergedPackage = mergePackageJson(
+		readFileSync(packagePath, "utf8"),
+		next.contents.get("package.json").toString("utf8"),
+		next.packageMerge,
+	);
 
 	const backupRoot = join(stateRoot, "backups", `${previous.sha}-to-${next.sha}`);
-	const touched = [...new Set([...writes, ...deletes])].sort();
+	const regenerated = [...next.regenerated.keys()].sort();
+	const touched = [...new Set([...writes, ...deletes, ...regenerated, "package.json"])].sort();
 	const backups = touched.map((path) => ({ path, ...backupFile(absoluteRoot, backupRoot, path) }));
-	const journal = { schemaVersion: 1, status: "pending", backupRoot, previousVersion: previousVersionSource, backups, writes, deletes };
+	const journal = { schemaVersion: 1, status: "pending", backupRoot, previousVersion: previousVersionSource, backups, writes, deletes, composite: next.compositePaths, regenerated };
 	writeJson(journalPath, journal);
 	let applied = 0;
 	for (const path of writes) {
@@ -208,11 +385,28 @@ export function runStarterUpgrade({ root = process.cwd(), archivePath, recover =
 		if (interruptAfter && applied >= interruptAfter) throw new Error("Synthetic starter upgrade interruption.");
 	}
 	for (const path of deletes) rmSync(safeTarget(absoluteRoot, path), { force: true });
+	const packageTemporary = `${packagePath}.starter-upgrade.tmp`;
+	writeFileSync(packageTemporary, mergedPackage);
+	renameSync(packageTemporary, packagePath);
+	applied += 1;
+	if (interruptAfter && applied >= interruptAfter) throw new Error("Synthetic starter upgrade interruption.");
+	for (const step of next.regeneration) {
+		const script = safeTarget(absoluteRoot, step.script, { allowMissingLeaf: false });
+		execFileSync(process.execPath, [script], { cwd: absoluteRoot, stdio: "pipe" });
+		for (const [path, expectedHash] of Object.entries(step.outputs)) {
+			const output = safeTarget(absoluteRoot, path, { allowMissingLeaf: false });
+			if (!existsSync(output) || !lstatSync(output).isFile() || digest(readFileSync(output)) !== expectedHash) {
+				throw new Error(`Generated output does not match the regeneration contract: ${path}.`);
+			}
+		}
+		applied += 1;
+		if (interruptAfter && applied >= interruptAfter) throw new Error("Synthetic starter upgrade interruption.");
+	}
 	const nextVersion = validateStarterVersion({ schemaVersion: 1, tag: next.tag, sha: next.sha, manifestVersion: next.manifestVersion, hashes: next.hashes });
 	writeJson(previousVersionPath, nextVersion);
 	journal.status = "complete";
 	writeJson(journalPath, journal);
-	const report = { schemaVersion: 1, status: "applied", from: { tag: previous.tag, sha: previous.sha }, to: { tag: next.tag, sha: next.sha }, writes, deletes, backupRoot };
+	const report = { schemaVersion: 1, status: "applied", from: { tag: previous.tag, sha: previous.sha }, to: { tag: next.tag, sha: next.sha }, writes, deletes, composite: next.compositePaths, regenerated, backupRoot };
 	writeJson(reportPath, report);
 	return report;
 }

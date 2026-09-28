@@ -4,6 +4,7 @@ import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from "
 import { isAbsolute, relative, resolve, sep } from "node:path";
 
 const digestPattern = /^[0-9a-f]{64}$/;
+const ownerKinds = ["platform", "client", "generated", "composite"];
 
 function normalizePath(value, label) {
 	if (typeof value !== "string" || !value.trim()) {
@@ -23,6 +24,41 @@ function normalizePath(value, label) {
 
 function containsPath(parent, child) {
 	return child === parent || child.startsWith(`${parent}/`);
+}
+
+function readRules(value, label, { composite = false, allowEmpty = false } = {}) {
+	if (!Array.isArray(value) || (!allowEmpty && !value.length)) {
+		throw new Error(`${label} must ${allowEmpty ? "be an array" : "contain at least one rule"}.`);
+	}
+	return value.map((rule, index) => {
+		if (!rule || typeof rule !== "object" || Array.isArray(rule)) {
+			throw new Error(`${label}[${index}] must be an object.`);
+		}
+		if (!['file', 'tree'].includes(rule.type)) {
+			throw new Error(`${label}[${index}].type must be file or tree.`);
+		}
+		const path = normalizePath(rule.path, `${label}[${index}].path`);
+		const except = rule.except === undefined
+			? []
+			: rule.except.map((entry, exceptIndex) => {
+				const excluded = normalizePath(entry, `${label}[${index}].except[${exceptIndex}]`);
+				if (rule.type !== "tree" || !containsPath(path, excluded) || excluded === path) {
+					throw new Error(`${label}[${index}].except must name a child of its tree.`);
+				}
+				return excluded;
+			});
+		if (new Set(except).size !== except.length) {
+			throw new Error(`${label}[${index}] contains duplicate exceptions.`);
+		}
+		if (composite) {
+			if (rule.type !== "file" || rule.strategy !== "structured") {
+				throw new Error(`${label}[${index}] must be a structured file rule.`);
+			}
+		} else if (rule.strategy !== undefined) {
+			throw new Error(`${label}[${index}].strategy is only valid for composite files.`);
+		}
+		return { path, type: rule.type, except, ...(composite ? { strategy: rule.strategy } : {}) };
+	});
 }
 
 function assertContainedPath(root, relativePath) {
@@ -53,38 +89,25 @@ export function readStarterOwnedManifest(root = process.cwd(), manifestPath = "s
 	const absolute = assertContainedPath(root, normalizedManifestPath);
 	if (!existsSync(absolute)) throw new Error(`Starter ownership manifest is missing: ${normalizedManifestPath}.`);
 	const manifest = JSON.parse(readFileSync(absolute, "utf8"));
-	if (manifest.schemaVersion !== 1) throw new Error("starter-owned schemaVersion must equal 1.");
-	if (!Array.isArray(manifest.include) || !manifest.include.length) {
-		throw new Error("starter-owned include must contain at least one rule.");
+	if (manifest.schemaVersion !== 2) throw new Error("starter-owned schemaVersion must equal 2.");
+	const cloneRuntimeScope = readRules(manifest.cloneRuntimeScope, "cloneRuntimeScope");
+	if (!manifest.ownership || typeof manifest.ownership !== "object" || Array.isArray(manifest.ownership)) {
+		throw new Error("starter-owned ownership must be an object.");
 	}
-	if (!Array.isArray(manifest.exclude)) throw new Error("starter-owned exclude must be an array.");
-	const include = manifest.include.map((rule, index) => {
-		if (!rule || typeof rule !== "object" || Array.isArray(rule)) {
-			throw new Error(`starter-owned include[${index}] must be an object.`);
-		}
-		if (!['file', 'tree'].includes(rule.type)) {
-			throw new Error(`starter-owned include[${index}].type must be file or tree.`);
-		}
-		return { path: normalizePath(rule.path, `include[${index}].path`), type: rule.type };
-	});
-	const exclude = manifest.exclude.map((entry, index) => normalizePath(entry, `exclude[${index}]`));
-	const allRulePaths = include.map((rule) => rule.path);
-	if (new Set(allRulePaths).size !== allRulePaths.length || new Set(exclude).size !== exclude.length) {
-		throw new Error("starter-owned contains duplicate paths.");
+	const keys = Object.keys(manifest.ownership).sort();
+	if (JSON.stringify(keys) !== JSON.stringify([...ownerKinds].sort())) {
+		throw new Error("starter-owned ownership must declare platform, client, generated and composite rules.");
 	}
-	for (let left = 0; left < include.length; left += 1) {
-		for (let right = left + 1; right < include.length; right += 1) {
-			if (containsPath(include[left].path, include[right].path) || containsPath(include[right].path, include[left].path)) {
-				throw new Error(`Starter ownership rules overlap: ${include[left].path} and ${include[right].path}.`);
-			}
-		}
-		for (const excluded of exclude) {
-			if (containsPath(include[left].path, excluded) || containsPath(excluded, include[left].path)) {
-				throw new Error(`Starter and client ownership overlap: ${include[left].path} and ${excluded}.`);
-			}
-		}
+	const ownership = Object.fromEntries(ownerKinds.map((owner) => [
+		owner,
+		readRules(manifest.ownership[owner], `ownership.${owner}`, { composite: owner === "composite", allowEmpty: owner !== "platform" && owner !== "composite" }),
+	]));
+	const allRules = ownerKinds.flatMap((owner) => ownership[owner].map((rule) => ({ ...rule, owner })));
+	const allRulePaths = allRules.map((rule) => rule.path);
+	if (new Set(allRulePaths).size !== allRulePaths.length) {
+		throw new Error("starter-owned contains duplicate ownership paths.");
 	}
-	for (const rule of include) {
+	for (const rule of [...cloneRuntimeScope, ...allRules]) {
 		const path = assertContainedPath(root, rule.path);
 		if (!existsSync(path)) throw new Error(`Starter-owned rule points to an unknown path: ${rule.path}.`);
 		const stats = lstatSync(path);
@@ -92,7 +115,11 @@ export function readStarterOwnedManifest(root = process.cwd(), manifestPath = "s
 			throw new Error(`Starter-owned rule type does not match path: ${rule.path}.`);
 		}
 	}
-	return { schemaVersion: 1, include, exclude, manifestPath: normalizedManifestPath };
+	const scopePaths = cloneRuntimeScope.map((rule) => rule.path);
+	if (new Set(scopePaths).size !== scopePaths.length) throw new Error("starter-owned contains duplicate runtime scope paths.");
+	const parsed = { schemaVersion: 2, cloneRuntimeScope, ownership, manifestPath: normalizedManifestPath };
+	validateCloneRuntimeOwnership(root, parsed);
+	return parsed;
 }
 
 function walkFiles(root, relativePath) {
@@ -123,15 +150,33 @@ function candidateFiles(root, rule) {
 	return rule.type === "file" ? result.filter((path) => path === rule.path) : result.filter((path) => containsPath(rule.path, path));
 }
 
+function ruleFiles(root, rule) {
+	return candidateFiles(root, rule).filter((path) => !rule.except.some((excluded) => containsPath(excluded, path)));
+}
+
+function validateCloneRuntimeOwnership(root, manifest) {
+	const runtimeFiles = new Set(manifest.cloneRuntimeScope.flatMap((rule) => candidateFiles(root, rule)));
+	const ownersByFile = new Map([...runtimeFiles].map((path) => [path, []]));
+	for (const owner of ownerKinds) {
+		for (const rule of manifest.ownership[owner]) {
+			for (const path of ruleFiles(root, rule)) {
+				if (ownersByFile.has(path)) ownersByFile.get(path).push(owner);
+			}
+		}
+	}
+	for (const [path, owners] of ownersByFile) {
+		if (!owners.length) throw new Error(`Unclassified tracked runtime source: ${path}.`);
+		if (owners.length > 1) throw new Error(`Runtime ownership overlap: ${path} (${owners.join(", ")}).`);
+	}
+	return ownersByFile;
+}
+
 export function starterOwnedFiles(root = process.cwd(), manifest = readStarterOwnedManifest(root)) {
 	const files = new Set();
-	for (const rule of manifest.include) {
-		const matches = candidateFiles(root, rule);
+	for (const rule of manifest.ownership.platform) {
+		const matches = ruleFiles(root, rule);
 		if (!matches.length) throw new Error(`Starter-owned rule has no tracked files: ${rule.path}.`);
 		for (const path of matches) {
-			if (manifest.exclude.some((excluded) => containsPath(excluded, path))) {
-				throw new Error(`Tracked file has mixed starter/client ownership: ${path}.`);
-			}
 			assertContainedPath(root, path);
 			files.add(path);
 		}

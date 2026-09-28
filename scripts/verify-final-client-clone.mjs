@@ -418,7 +418,7 @@ for (const entry of selectedMatrix) {
 				status: "released",
 				tag: "starter-v2.2.0",
 				sha: git(root, ["rev-parse", "HEAD"]).trim(),
-				starterOwnedManifestVersion: 1,
+				starterOwnedManifestVersion: 2,
 				hashes: hashStarterOwnedFiles(clone),
 			}),
 		);

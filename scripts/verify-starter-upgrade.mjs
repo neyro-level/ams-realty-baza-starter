@@ -7,23 +7,78 @@ import { join } from "node:path";
 import { runStarterUpgrade, validateUpgradeArchive } from "./starter-upgrade.mjs";
 
 const hash = (value) => createHash("sha256").update(value).digest("hex");
+const architecture = readFileSync(join(process.cwd(), "docs", "03_ARCHITECTURE.md"), "utf8");
+const packageScripts = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")).scripts;
+assert.match(architecture, /Фоновое и автоматическое обновление запрещены/);
+assert.match(architecture, /snapshot, а не runtime-зависимость/);
+assert.match(architecture, /только явная команда владельца/);
+assert.match(packageScripts["starter:upgrade"], /starter-upgrade\.mjs/);
+assert.doesNotMatch(packageScripts.dev, /starter:upgrade/);
+assert.doesNotMatch(packageScripts.start, /starter:upgrade/);
 const oldSha = "1".repeat(40);
 const newSha = "2".repeat(40);
 const oldContent = Buffer.from("old core\n");
 const newContent = Buffer.from("new core\n");
+const oldGlobals = Buffer.from(".platform { color: old; }\n");
+const newGlobals = Buffer.from(".platform { color: new; }\n");
 const migration = Buffer.from("export async function up() {}\n");
+const collectionOwner = Buffer.from("export const collection = 'example';\n");
+const regenerated = Buffer.from("new generated output\n");
+const regenerationScript = Buffer.from([
+	'import { mkdirSync, writeFileSync } from "node:fs";',
+	'import { join } from "node:path";',
+	'mkdirSync(join(process.cwd(), "src", "project"), { recursive: true });',
+	'writeFileSync(join(process.cwd(), "src", "project", "generated.txt"), "new generated output\\n");',
+	'writeFileSync(join(process.cwd(), "src", "project", "brand.css"), ":root { --brand: new; }\\n");',
+].join("\n"));
+const generatedBrand = Buffer.from(":root { --brand: new; }\n");
+const previousPackage = {
+	name: "client-realty",
+	private: true,
+	dependencies: { next: "16.0.0", payload: "3.0.0", "@aws-sdk/client-s3": "3.800.0" },
+	scripts: { dev: "client-dev", client: "client-only" },
+};
+const upstreamPackage = {
+	name: "ams-realty-baza-starter",
+	private: true,
+	dependencies: { next: "16.0.1", payload: "3.0.1" },
+	scripts: { dev: "next dev", build: "next build" },
+};
 
 function archive(entries = [
+	["package.json", Buffer.from(`${JSON.stringify(upstreamPackage)}\n`)],
+	["src/app/globals.css", newGlobals],
 	["src/core/example.txt", newContent],
+	["scripts/regenerate-example.mjs", regenerationScript],
+	["src/project/collections/Example.ts", collectionOwner],
 	["migrations/20260927_upgrade.ts", migration],
 ]) {
 	const rows = entries.map(([path, content]) => ({ type: "file", path, size: content.length, sha256: hash(content), contentBase64: content.toString("base64") }));
 	const hashes = Object.fromEntries(rows.map((entry) => [entry.path, entry.sha256]));
 	return {
 		schemaVersion: 1,
+		from: { tag: "starter-v2.1.0", sha: oldSha },
 		tag: "starter-v2.2.0",
 		sha: newSha,
 		entries: rows,
+		migrationOwners: {
+			"migrations/20260927_upgrade.ts": ["src/project/collections/Example.ts"],
+		},
+		packageMerge: {
+			schemaVersion: 1,
+			preserve: { dependencies: ["@aws-sdk/client-s3"], devDependencies: [], scripts: ["client"] },
+		},
+		composites: [{ path: "package.json", strategy: "structured", handler: "package-json" }],
+		regeneration: {
+			schemaVersion: 1,
+			steps: [{
+				script: "scripts/regenerate-example.mjs",
+				outputs: {
+					"src/project/generated.txt": hash(regenerated),
+					"src/project/brand.css": hash(generatedBrand),
+				},
+			}],
+		},
 		release: { schemaVersion: 1, status: "released", tag: "starter-v2.2.0", sha: newSha, starterOwnedManifestVersion: 1, hashes },
 	};
 }
@@ -31,8 +86,14 @@ function archive(entries = [
 function fixture() {
 	const root = mkdtempSync(join(tmpdir(), "starter-upgrade-"));
 	mkdirSync(join(root, "src/core"), { recursive: true });
+	mkdirSync(join(root, "src/app"), { recursive: true });
+	mkdirSync(join(root, "src/project"), { recursive: true });
 	writeFileSync(join(root, "src/core/example.txt"), oldContent);
-	writeFileSync(join(root, ".starter-version"), JSON.stringify({ schemaVersion: 1, tag: "starter-v2.1.0", sha: oldSha, manifestVersion: 1, hashes: { "src/core/example.txt": hash(oldContent) } }));
+	writeFileSync(join(root, "src/app/globals.css"), oldGlobals);
+	writeFileSync(join(root, "src/project/brand.css"), ":root { --brand: old; }\n");
+	writeFileSync(join(root, "package.json"), `${JSON.stringify(previousPackage, null, "\t")}\n`);
+	writeFileSync(join(root, "src/project/generated.txt"), "client-stale generated output\n");
+	writeFileSync(join(root, ".starter-version"), JSON.stringify({ schemaVersion: 1, tag: "starter-v2.1.0", sha: oldSha, manifestVersion: 1, hashes: { "src/app/globals.css": hash(oldGlobals), "src/core/example.txt": hash(oldContent) } }));
 	const archivePath = join(root, "upgrade.json");
 	writeFileSync(archivePath, JSON.stringify(archive()));
 	return { root, archivePath };
@@ -45,8 +106,20 @@ function fixture() {
 		assert.equal(result.status, "applied");
 		assert.deepEqual(readFileSync(join(root, "src/core/example.txt")), newContent);
 		assert.deepEqual(readFileSync(join(root, "migrations/20260927_upgrade.ts")), migration);
+		assert.deepEqual(readFileSync(join(root, "src/project/collections/Example.ts")), collectionOwner);
+		assert.deepEqual(readFileSync(join(root, "src/project/generated.txt")), regenerated);
+		assert.deepEqual(readFileSync(join(root, "src/project/brand.css")), generatedBrand);
+		assert.equal(readFileSync(join(root, "src/app/globals.css"), "utf8"), newGlobals.toString("utf8"));
+		const packageAfter = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+		assert.equal(packageAfter.name, "client-realty");
+		assert.equal(packageAfter.dependencies.next, "16.0.1");
+		assert.equal(packageAfter.dependencies.payload, "3.0.1");
+		assert.equal(packageAfter.dependencies["@aws-sdk/client-s3"], "3.800.0");
+		assert.equal(packageAfter.scripts.build, "next build");
+		assert.equal(packageAfter.scripts.client, "client-only");
 		assert.equal(JSON.parse(readFileSync(join(root, ".starter-version"), "utf8")).sha, newSha);
 		assert.equal(runStarterUpgrade({ root, archivePath }).status, "already-current");
+		assert.deepEqual(readFileSync(join(root, "src/project/generated.txt")), regenerated, "regeneration is idempotent");
 	} finally { rmSync(root, { recursive: true, force: true }); }
 }
 
@@ -72,6 +145,10 @@ function fixture() {
 		assert.equal(readFileSync(join(root, "src/core/example.txt"), "utf8"), "client change\n");
 		assert.deepEqual(readFileSync(join(root, "src/core/example.txt.rej")), newContent);
 		assert.equal(JSON.parse(readFileSync(join(root, ".starter-version"), "utf8")).sha, oldSha);
+		const report = JSON.parse(readFileSync(join(root, ".starter-upgrade/report.json"), "utf8"));
+		assert.equal(report.status, "conflicts");
+		assert.deepEqual(report.conflicts, [{ path: "src/core/example.txt", reason: "locally-modified" }]);
+		assert.ok(!existsSync(join(root, "migrations/20260927_upgrade.ts")), "conflict must prevent every platform write");
 	} finally { rmSync(root, { recursive: true, force: true }); }
 }
 
@@ -80,10 +157,39 @@ for (const [mutate, pattern] of [
 	[(value) => { value.entries[0].sha256 = "0".repeat(64); }, /hash mismatch/],
 	[(value) => { value.release.status = "candidate"; }, /released/],
 	[(value) => { value.entries[0].size = 17 * 1024 * 1024; }, /excessive/],
+	[(value) => { delete value.packageMerge; }, /packageMerge contract/],
+	[(value) => { value.packageMerge.preserve.dependencies = ["@aws-sdk/client-s3", "@aws-sdk/client-s3"]; }, /unique package names/],
+	[(value) => { delete value.composites; }, /composite-file contract/],
+	[(value) => { value.composites[0].path = "src/app/globals.css"; }, /Only package.json/],
+	[(value) => { value.entries.push({ ...value.entries[0], path: "src/project/brand.css" }); }, /Generated output must not be archived/],
+	[(value) => { delete value.from; }, /source starter version/],
+	[(value) => { delete value.migrationOwners; }, /migrationOwners/],
+	[(value) => { value.migrationOwners["migrations/20260927_upgrade.ts"] = ["src/project/collections/Missing.ts"]; }, /absent from upgrade archive/],
+	[(value) => { value.migrationOwners["migrations/20260927_upgrade.ts"] = ["src/project/routing/runtime-route.ts"]; }, /collection schema file/],
+	[(value) => { delete value.regeneration; }, /regeneration contract/],
+	[(value) => { value.regeneration.steps[0].outputs["src/project/generated.txt"] = "0".repeat(64); }, /Generated output does not match/],
+	[(value) => { value.regeneration.steps[0].script = "src/project/generated.txt"; }, /archived scripts/],
+	[(value) => { value.entries.push({ ...value.entries[0], path: "src/project/generated.txt" }); }, /Generated output must not be archived/],
 ]) {
 	const value = archive();
 	mutate(value);
-	assert.throws(() => validateUpgradeArchive(value), pattern);
+	if (pattern.source.includes("does not match")) {
+		const { root, archivePath } = fixture();
+		try { writeFileSync(archivePath, JSON.stringify(value)); assert.throws(() => runStarterUpgrade({ root, archivePath }), pattern); }
+		finally { rmSync(root, { recursive: true, force: true }); }
+	} else {
+		assert.throws(() => validateUpgradeArchive(value), pattern);
+	}
+}
+
+{
+	const { root, archivePath } = fixture();
+	try {
+		const value = archive();
+		value.from.sha = "f".repeat(40);
+		writeFileSync(archivePath, JSON.stringify(value));
+		assert.throws(() => runStarterUpgrade({ root, archivePath }), /source does not match/);
+	} finally { rmSync(root, { recursive: true, force: true }); }
 }
 
 {
@@ -105,7 +211,8 @@ for (const [mutate, pattern] of [
 		assert.equal(runStarterUpgrade({ root, recover: true }).status, "recovered");
 		assert.deepEqual(readFileSync(join(root, "src/core/example.txt")), oldContent);
 		assert.ok(!existsSync(join(root, "migrations/20260927_upgrade.ts")));
+		assert.equal(readFileSync(join(root, "src/project/generated.txt"), "utf8"), "client-stale generated output\n");
 	} finally { rmSync(root, { recursive: true, force: true }); }
 }
 
-console.log("starter upgrade: PASS (clean, conflict, hostile archive, symlink, interruption recovery)");
+console.log("starter upgrade: PASS (clean, regeneration, conflict, hostile archive, symlink, interruption recovery)");

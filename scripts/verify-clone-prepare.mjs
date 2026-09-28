@@ -200,14 +200,20 @@ try {
 	writeFileSync(
 		join(fixture, "starter-owned.json"),
 		JSON.stringify({
-			schemaVersion: 1,
-			include: [
-				{ path: "starter-owned.json", type: "file" },
-				{ path: "scripts/clone-prepare.mjs", type: "file" },
-				{ path: "scripts/clone-preset.mjs", type: "file" },
-				{ path: "scripts/starter-ownership.mjs", type: "file" },
+			schemaVersion: 2,
+			cloneRuntimeScope: [
+				{ path: "scripts", type: "tree" },
+				{ path: "package.json", type: "file" },
 			],
-			exclude: ["src/project", "src/app", "docs/seo"],
+			ownership: {
+				platform: [
+					{ path: "starter-owned.json", type: "file" },
+					{ path: "scripts", type: "tree" },
+				],
+				client: [],
+				generated: [],
+				composite: [{ path: "package.json", type: "file", strategy: "structured" }],
+			},
 		}, null, 2),
 	);
 	const seoTemplates = JSON.parse(
@@ -478,7 +484,7 @@ try {
 			status: "released",
 			tag: sourceTag,
 			sha: sourceSha,
-			starterOwnedManifestVersion: 1,
+			starterOwnedManifestVersion: 2,
 			hashes: hashStarterOwnedFiles(fixture),
 		}),
 	);
@@ -524,7 +530,7 @@ try {
 	);
 	assert.equal(starterVersion.tag, sourceTag);
 	assert.equal(starterVersion.sha, sourceSha);
-	assert.equal(starterVersion.manifestVersion, 1);
+	assert.equal(starterVersion.manifestVersion, 2);
 	assert.ok(starterVersion.hashes["scripts/clone-prepare.mjs"]);
 	assert.doesNotMatch(JSON.stringify(starterVersion), /([a-z]:\\|\/Users\/|\\Users\\)/i);
 	assert.match(
