@@ -255,6 +255,12 @@ export function compileCloneIntake(input) {
 	const seo = object(input.seo, "$.seo");
 	object(seo.facets, "$.seo.facets");
 	object(seo.tiers, "$.seo.tiers");
+	const searchConsole = object(seo.searchConsole, "$.seo.searchConsole");
+	for (const engine of ["yandex", "google"]) {
+		if (searchConsole[engine] !== null) {
+			string(searchConsole[engine], `$.seo.searchConsole.${engine}`);
+		}
+	}
 	const hosts = assertExactKeys(
 		input.hostAllowlists,
 		["outbound", "externalImages", "leadOutbound"],
@@ -290,6 +296,7 @@ export function compileCloneIntake(input) {
 		},
 		seoFacets: { ...seo.facets },
 		seoTiers: { ...seo.tiers },
+		searchConsole: { ...searchConsole },
 		staticRoutes: staticRoutes.filter(
 			(route) => route.path !== "/sdat" || categoryStatus.arenda !== "OUT",
 		),

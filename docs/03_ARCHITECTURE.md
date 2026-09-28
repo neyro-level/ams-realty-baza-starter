@@ -172,9 +172,10 @@ PREPARED_OFF/OUT не создают требования и считаются 
 них вручную появилась в Registry.
 
 Категория SEO хранится как явный набор `nominativePlural`,
-`accusativeSingular`, `genitivePlural` в project-owned template inputs. Районные
-шаблоны получают эти формы и утверждённые формы города/района как данные;
-renderer не склоняет слова и не содержит литералы конкретной категории.
+`nominativePluralLower`, `accusativeSingular`, `genitivePlural`, `dealVerb` в
+project-owned template inputs. Районные шаблоны получают эти формы и
+утверждённые формы города/района как данные; renderer не склоняет слова и не
+содержит литералы конкретной категории.
 
 ## Client clone boundary
 

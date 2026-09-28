@@ -69,6 +69,7 @@
 		"minInventory": { "P1": 5, "P2": 5, "TEST": 10 },
 		"unmeasuredPolicy": "TEST"
 	},
+	"searchConsole": { "yandex": null, "google": null },
 	"gate": {
 		"listingIntroMinChars": 600,
 		"propertyPhotosMin": 3,

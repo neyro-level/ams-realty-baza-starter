@@ -267,6 +267,7 @@ try {
 			minInventory: { P1: 5, P2: 5, TEST: 10 },
 			unmeasuredPolicy: "TEST",
 		},
+		searchConsole: { yandex: null, google: null },
 		staticRoutes: [
 			{ path: "/", changeFrequency: "daily", priority: 1, indexable: true },
 		],
@@ -314,6 +315,19 @@ try {
 			new RegExp(`Client preset requires explicit ${requiredField}`),
 		);
 	}
+	const missingSearchConsole = { ...preset };
+	delete missingSearchConsole.searchConsole;
+	writeFileSync(presetPath, JSON.stringify(missingSearchConsole));
+	assert.throws(() => readClonePreset(presetPath), /requires searchConsole/);
+	for (const engine of ["yandex", "google"]) {
+		const invalidSearchConsole = structuredClone(preset);
+		invalidSearchConsole.searchConsole[engine] = "";
+		writeFileSync(presetPath, JSON.stringify(invalidSearchConsole));
+		assert.throws(
+			() => readClonePreset(presetPath),
+			new RegExp(`searchConsole\\.${engine} must be a non-empty string or null`),
+		);
+	}
 	const missingCategoryForm = structuredClone(preset);
 	delete missingCategoryForm.seoTemplates.categoryLabels.kvartiry
 		.genitivePlural;
@@ -322,6 +336,17 @@ try {
 		() => readClonePreset(presetPath),
 		/seoTemplates\.categoryLabels\.kvartiry\.genitivePlural/,
 	);
+	for (const requiredForm of ["nominativePluralLower", "dealVerb"]) {
+		const missingRequiredForm = structuredClone(preset);
+		delete missingRequiredForm.seoTemplates.categoryLabels.kvartiry[
+			requiredForm
+		];
+		writeFileSync(presetPath, JSON.stringify(missingRequiredForm));
+		assert.throws(
+			() => readClonePreset(presetPath),
+			new RegExp(`seoTemplates\\.categoryLabels\\.kvartiry\\.${requiredForm}`),
+		);
+	}
 	writeFileSync(presetPath, JSON.stringify({ schemaVersion: 2 }));
 	assert.throws(
 		() => readClonePreset(presetPath),

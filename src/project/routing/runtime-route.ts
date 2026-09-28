@@ -77,11 +77,15 @@ import {
 } from "@/project/routing/public-gateway-cache";
 import {
 	projectSeoCategoryForms,
+	projectSeoActiveCategoriesList,
 	projectSeoMeta,
 	renderProjectSeoTemplate,
 } from "@/project/seo/templates";
 import { siteConfig } from "@/project/site.config";
-import { siteProfile } from "@/project/site-profile";
+import {
+	activeProjectGeoCategorySurfaces,
+	siteProfile,
+} from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
 
 export type RuntimeRouteData =
@@ -209,7 +213,13 @@ async function resolveFixtureRuntimeRoute(
 	};
 	let data: RuntimeRouteData | undefined;
 	if (pageKey.kind === "geoHub") {
-		const context = { brand: fixtureNap.brandName, city: cityMorphology };
+		const context = {
+			brand: fixtureNap.brandName,
+			city: cityMorphology,
+			activeCategoriesList: projectSeoActiveCategoriesList(
+				activeProjectGeoCategorySurfaces(siteProfile, pageKey.geo),
+			),
+		};
 		data = {
 			kind: "geoHub",
 			value: {

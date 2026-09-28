@@ -123,6 +123,7 @@ type PresetOverrides = Partial<
 		| "geoCategoryStatus"
 		| "marketStatus"
 		| "developersSurface"
+		| "searchConsole"
 		| "seoFacets"
 		| "filterKeys"
 		| "seoTiers"
@@ -207,6 +208,7 @@ export function createPresetSiteProfileConfig(
 			root: input.preset === "SECONDARY_FIRST" ? "NOINDEX_AUTO" : "ACTIVE",
 			byGeo: developersByGeo,
 		},
+		searchConsole: input.searchConsole ?? { yandex: null, google: null },
 		filterKeys: input.filterKeys ?? defaultFilterKeys,
 		seoFacets: input.seoFacets ?? {},
 		seoTiers: input.seoTiers ?? {

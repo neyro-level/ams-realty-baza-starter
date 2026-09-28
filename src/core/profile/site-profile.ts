@@ -152,6 +152,10 @@ const siteProfileInputSchema = z.strictObject({
 		root: statusSchema,
 		byGeo: z.record(geoSlugSchema, statusSchema),
 	}),
+	searchConsole: z.strictObject({
+		yandex: z.string().min(1).nullable(),
+		google: z.string().min(1).nullable(),
+	}),
 	filterKeys: filterKeysSchema,
 	seoFacets: z.record(geoSlugSchema, seoFacetSchema),
 	seoTiers: z.strictObject({

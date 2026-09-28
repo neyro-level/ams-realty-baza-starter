@@ -14,11 +14,19 @@ import {
 } from "../src/project/seo/registry-seed.ts";
 import {
 	isFreshPriceCheckedAt,
+	projectSeoActiveCategoriesList,
 	projectSeoCategoryForms,
+	projectHomeSeoTemplateKey,
 	projectSeoTemplateKeys,
 	renderProjectSeoTemplate,
 } from "../src/project/seo/templates.ts";
-import { siteProfile } from "../src/project/site-profile.ts";
+import { assertProjectSeoTemplateClaimsAreSourced } from "../src/project/seo/claim-guard.ts";
+import { projectSeoClaimSourcesInput } from "../src/project/seo/claim-sources.ts";
+import { projectSeoTemplatesInput } from "../src/project/seo/template-inputs.ts";
+import {
+	activeProjectGeoCategorySurfaces,
+	siteProfile,
+} from "../src/project/site-profile.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 import {
 	districtRegistryFromBootstrap,
@@ -188,10 +196,34 @@ assertSeoRegistry({
 	buildUrl: grammar.buildUrl,
 	now,
 });
-assert.deepEqual(
-	new Set(projectSeoRegistrySeed.map((row) => row.templateKey)),
-	new Set(projectSeoTemplateKeys),
+const seededTemplateKeys = new Set(
+	projectSeoRegistrySeed.map((row) => row.templateKey),
 );
+assertProjectSeoTemplateClaimsAreSourced(
+	projectSeoTemplatesInput,
+	projectSeoClaimSourcesInput,
+);
+assert.throws(
+	() =>
+		assertProjectSeoTemplateClaimsAreSourced(
+			{ home: { title: "Лучший выбор", h1: "Выбор", description: "" } },
+			{},
+		),
+	/SEO template claim requires a sourced project decision: best/,
+);
+assert.doesNotThrow(() =>
+	assertProjectSeoTemplateClaimsAreSourced(
+		{ home: { title: "Лучший выбор", h1: "Выбор", description: "" } },
+		{ best: { decision: "docs/claims/award-2026.md" } },
+	),
+);
+assert.ok(
+	[...seededTemplateKeys].every((key) =>
+		(projectSeoTemplateKeys as readonly string[]).includes(key),
+	),
+);
+assert.ok(seededTemplateKeys.has("homeSingleGeo"));
+assert.ok(!seededTemplateKeys.has("homeMultiGeo"));
 assert.ok(
 	projectSeoRegistrySeed.every(
 		(row) =>
@@ -232,8 +264,26 @@ const unapproved = renderProjectSeoTemplate("categoryGeo", {
 });
 assert.equal(unapproved.morphologyApproved, false);
 
+const facetSnapshot = renderProjectSeoTemplate("categoryGeoFacet", {
+	brand: "AMS Realty",
+	category: projectSeoCategoryForms("kvartiry"),
+	city: {
+		approved: true,
+		nominative: "Ростов-на-Дону",
+		genitive: "Ростова-на-Дону",
+		prepositional: "Ростове-на-Дону",
+		preposition: "в",
+	},
+	facet: "Вторичные",
+});
+assert.equal(facetSnapshot.h1, "Вторичные квартиры в Ростове-на-Дону");
+
 const geoHubSnapshot = renderProjectSeoTemplate("geoHub", {
 	brand: "AMS Realty",
+	activeCategoriesList: projectSeoActiveCategoriesList([
+		"kvartiry",
+		"novostroyki",
+	]),
 	city: {
 		approved: true,
 		nominative: "Ростов-на-Дону",
@@ -245,8 +295,52 @@ const geoHubSnapshot = renderProjectSeoTemplate("geoHub", {
 });
 assert.equal(
 	geoHubSnapshot.description,
-	"Квартиры, дома и новостройки в Ростове-на-Дону — 21 объект.",
+	"квартиры и новостройки в Ростове-на-Дону — 21 объект.",
 );
+assert.throws(
+	() => projectSeoActiveCategoriesList([]),
+	/Geo hub SEO requires at least one active category/,
+);
+const localCategoryProfile = structuredClone(siteProfile);
+for (const category of Object.keys(
+	localCategoryProfile.categoryStatus,
+) as (keyof typeof localCategoryProfile.categoryStatus)[]) {
+	localCategoryProfile.categoryStatus[category] = "PREPARED_OFF";
+	localCategoryProfile.geoCategoryStatus.primorsk[category] = "PREPARED_OFF";
+}
+localCategoryProfile.categoryStatus.kvartiry = "ACTIVE";
+localCategoryProfile.categoryStatus.doma = "ACTIVE";
+localCategoryProfile.categoryStatus.novostroyki = "ACTIVE";
+localCategoryProfile.geoCategoryStatus.primorsk.kvartiry = "ACTIVE";
+localCategoryProfile.geoCategoryStatus.primorsk.doma = "PREPARED_OFF";
+localCategoryProfile.geoCategoryStatus.primorsk.novostroyki = "ACTIVE";
+assert.deepEqual(
+	activeProjectGeoCategorySurfaces(localCategoryProfile, "primorsk"),
+	["kvartiry", "novostroyki"],
+);
+
+const singleGeoHomeSnapshot = renderProjectSeoTemplate("homeSingleGeo", {
+	brand: "AMS Realty",
+	city: {
+		approved: true,
+		nominative: "Ростов-на-Дону",
+		genitive: "Ростова-на-Дону",
+		prepositional: "Ростове-на-Дону",
+		preposition: "в",
+	},
+});
+assert.equal(singleGeoHomeSnapshot.title, "Недвижимость Ростова-на-Дону — AMS Realty");
+assert.equal(projectHomeSeoTemplateKey("SINGLE_GEO"), "homeSingleGeo");
+
+const multiGeoHomeSnapshot = renderProjectSeoTemplate("homeMultiGeo", {
+	brand: "AMS Realty",
+});
+assert.equal(multiGeoHomeSnapshot.title, "Недвижимость — AMS Realty");
+assert.doesNotMatch(
+	`${multiGeoHomeSnapshot.title} ${multiGeoHomeSnapshot.h1} ${multiGeoHomeSnapshot.description}`,
+	/Ростов-на-Дону/u,
+);
+assert.equal(projectHomeSeoTemplateKey("MULTI_GEO"), "homeMultiGeo");
 
 const districtSnapshot = renderProjectSeoTemplate("categoryGeoDistrictMicro", {
 	brand: "AMS Realty",
@@ -272,7 +366,8 @@ assert.equal(
 	districtSnapshot.title,
 	"Купить квартиру на Северном в Ростове-на-Дону — цены",
 );
-assert.equal(districtSnapshot.h1, "Квартиры на Северном в Ростове-на-Дону");
+assert.equal(districtSnapshot.h1, "Квартиры на Северном");
+assert.doesNotMatch(districtSnapshot.h1, /Ростов-на-Дону/u);
 assert.equal(
 	districtSnapshot.description,
 	"Квартиры на Северном в Ростове-на-Дону — актуальные предложения. 22 объекта.",
@@ -307,6 +402,65 @@ assert.equal(
 	"Купить квартиру в Ленинском районе Ростова-на-Дону — цены",
 );
 assert.equal(explicitAdminDistrictSnapshot.morphologyApproved, true);
+
+const rentalAdminDistrictSnapshot = renderProjectSeoTemplate(
+	"categoryGeoDistrictAdmin",
+	{
+		brand: "AMS Realty",
+		category: projectSeoCategoryForms("arenda"),
+		city: {
+			approved: true,
+			nominative: "Ростов-на-Дону",
+			genitive: "Ростова-на-Дону",
+			prepositional: "Ростове-на-Дону",
+			preposition: "в",
+		},
+		district: {
+			approved: true,
+			nominative: "Ленинский",
+			genitive: "Ленинского",
+			prepositional: "Ленинском районе",
+			preposition: "в",
+		},
+		districtType: "admin_district",
+		districtAdjLocative: "Ленинском",
+		districtAdjGenitive: "Ленинского",
+	},
+);
+assert.equal(
+	rentalAdminDistrictSnapshot.title,
+	"Снять объект в аренду в Ленинском районе Ростова-на-Дону — цены",
+);
+
+const rentalMicrodistrictSnapshot = renderProjectSeoTemplate(
+	"categoryGeoDistrictMicro",
+	{
+		brand: "AMS Realty",
+		category: projectSeoCategoryForms("arenda"),
+		city: {
+			approved: true,
+			nominative: "Ростов-на-Дону",
+			genitive: "Ростова-на-Дону",
+			prepositional: "Ростове-на-Дону",
+			preposition: "в",
+		},
+		district: {
+			approved: true,
+			nominative: "Северный",
+			genitive: "Северного",
+			prepositional: "Северном",
+			preposition: "на",
+		},
+		districtType: "microdistrict",
+	},
+);
+assert.equal(
+	rentalMicrodistrictSnapshot.title,
+	"Снять объект в аренду на Северном в Ростове-на-Дону — цены",
+);
+for (const rendered of [rentalAdminDistrictSnapshot, rentalMicrodistrictSnapshot]) {
+	assert.doesNotMatch(`${rendered.title} ${rendered.h1} ${rendered.description}`, /Купить/u);
+}
 
 assert.throws(
 	() =>

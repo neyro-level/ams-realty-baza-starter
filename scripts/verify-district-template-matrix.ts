@@ -51,6 +51,8 @@ const microDistrict = {
 let snapshots = 0;
 for (const slug of categories) {
 	const forms = projectSeoCategoryForms(slug);
+	assert.ok(forms.nominativePluralLower.trim());
+	assert.ok(forms.dealVerb.trim());
 	for (const city of cities) {
 		const admin = renderProjectSeoTemplate("categoryGeoDistrictAdmin", {
 			brand: "Matrix",
@@ -63,7 +65,7 @@ for (const slug of categories) {
 		});
 		assert.equal(
 			admin.title,
-			`Купить ${forms.accusativeSingular} в Ленинском районе ${city.genitive} — цены`,
+			`${forms.dealVerb} ${forms.accusativeSingular} в Ленинском районе ${city.genitive} — цены`,
 		);
 		assert.equal(
 			admin.h1,
@@ -80,15 +82,33 @@ for (const slug of categories) {
 		});
 		assert.equal(
 			micro.title,
-			`Купить ${forms.accusativeSingular} на Северном в ${city.prepositional} — цены`,
+			`${forms.dealVerb} ${forms.accusativeSingular} на Северном в ${city.prepositional} — цены`,
 		);
 		assert.equal(
 			micro.h1,
-			`${forms.nominativePlural} на Северном в ${city.prepositional}`,
+			`${forms.nominativePlural} на Северном`,
 		);
+		if (slug === "arenda") {
+			assert.doesNotMatch(`${admin.title} ${micro.title}`, /Купить/u);
+		}
 		snapshots += 1;
 	}
 }
+
+assert.deepEqual(projectSeoCategoryForms("kvartiry"), {
+	nominativePlural: "Квартиры",
+	nominativePluralLower: "квартиры",
+	accusativeSingular: "квартиру",
+	genitivePlural: "квартир",
+	dealVerb: "Купить",
+});
+assert.deepEqual(projectSeoCategoryForms("arenda"), {
+	nominativePlural: "Аренда недвижимости",
+	nominativePluralLower: "аренда недвижимости",
+	accusativeSingular: "объект в аренду",
+	genitivePlural: "предложений аренды",
+	dealVerb: "Снять",
+});
 
 assert.equal(snapshots, 9 * 2 * 2);
 assert.equal(
@@ -121,7 +141,7 @@ assert.throws(
 			district: microDistrict,
 			districtType: "microdistrict",
 		}),
-	/SEO template requires categoryAccusative/,
+	/SEO template requires dealVerb/,
 );
 
 console.log(`district template matrix passed: ${snapshots} snapshots`);

@@ -81,7 +81,7 @@
 		"seo": {
 			"type": "object",
 			"additionalProperties": false,
-			"required": ["facets", "tiers"],
+			"required": ["facets", "tiers", "searchConsole"],
 			"properties": {
 				"facets": { "type": "object" },
 				"tiers": {
@@ -93,6 +93,15 @@
 						"minInventory",
 						"unmeasuredPolicy"
 					]
+				},
+				"searchConsole": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["yandex", "google"],
+					"properties": {
+						"yandex": { "type": ["string", "null"], "minLength": 1 },
+						"google": { "type": ["string", "null"], "minLength": 1 }
+					}
 				}
 			}
 		},

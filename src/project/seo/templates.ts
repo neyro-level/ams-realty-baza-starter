@@ -1,4 +1,5 @@
 import type { SeoMetaDTO } from "@ams/realtbase-contracts";
+import type { GeoMode } from "../../core/profile/index.ts";
 import {
 	type ApprovedMorphology,
 	formatRussianPlural,
@@ -15,7 +16,8 @@ import {
 } from "./template-inputs.ts";
 
 export const projectSeoTemplateKeys = [
-	"home",
+	"homeSingleGeo",
+	"homeMultiGeo",
 	"geoHub",
 	"categoryRoot",
 	"categoryGeo",
@@ -34,12 +36,15 @@ export type ProjectSeoTemplateKey = (typeof projectSeoTemplateKeys)[number];
 export type ProjectDistrictType = "admin_district" | "microdistrict";
 export type ProjectSeoCategoryForms = {
 	nominativePlural: string;
+	nominativePluralLower: string;
 	accusativeSingular: string;
 	genitivePlural: string;
+	dealVerb: string;
 };
 
 export type ProjectSeoTemplateContext = {
 	brand: string;
+	activeCategoriesList?: string;
 	category?: ProjectSeoCategoryForms;
 	city?: ApprovedMorphology;
 	region?: ApprovedMorphology;
@@ -72,6 +77,20 @@ export function projectSeoCategoryForms(slug: string): ProjectSeoCategoryForms {
 	return forms;
 }
 
+export function projectSeoActiveCategoriesList(
+	categories: readonly string[],
+): string {
+	const labels = categories.map(
+		(category) => projectSeoCategoryForms(category).nominativePluralLower,
+	);
+	if (labels.length === 0) {
+		throw new Error("Geo hub SEO requires at least one active category.");
+	}
+	if (labels.length === 1) return labels[0];
+	if (labels.length === 2) return labels.join(" и ");
+	return `${labels.slice(0, -1).join(", ")} и ${labels.at(-1)}`;
+}
+
 export function projectSeoFacetLabel(slug: string): string {
 	const label = projectSeoFacetLabels[slug];
 	if (!label) throw new Error(`Project SEO facet label is missing: ${slug}.`);
@@ -84,7 +103,7 @@ const templates = projectSeoTemplatesInput satisfies Record<
 >;
 
 const cityRequired = new Set<ProjectSeoTemplateKey>([
-	"home",
+	"homeSingleGeo",
 	"geoHub",
 	"categoryGeo",
 	"categoryGeoDistrictAdmin",
@@ -93,6 +112,12 @@ const cityRequired = new Set<ProjectSeoTemplateKey>([
 	"geoDevelopers",
 	"developmentCollision",
 ]);
+
+export function projectHomeSeoTemplateKey(
+	geoMode: GeoMode,
+): "homeSingleGeo" | "homeMultiGeo" {
+	return geoMode === "MULTI_GEO" ? "homeMultiGeo" : "homeSingleGeo";
+}
 
 export function renderProjectSeoTemplate(
 	templateKey: ProjectSeoTemplateKey,
@@ -128,10 +153,13 @@ export function renderProjectSeoTemplate(
 		definition,
 		{
 			brand: context.brand,
+			activeCategoriesList: context.activeCategoriesList?.trim(),
 			category: context.category?.nominativePlural,
+			categoryLower: context.category?.nominativePluralLower,
 			categoryNominativePlural: context.category?.nominativePlural,
 			categoryAccusative: context.category?.accusativeSingular,
 			categoryGenitivePlural: context.category?.genitivePlural,
+			dealVerb: context.category?.dealVerb,
 			cityPhrase: morphologyPhrase(geo, "prepositional", true),
 			cityGenitive: morphologyPhrase(geo, "genitive"),
 			geoGenitive: morphologyPhrase(geo, "genitive"),

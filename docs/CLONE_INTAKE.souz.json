@@ -188,7 +188,8 @@
 			"bands": { "P1": 500, "P2": 100, "TEST": 50 },
 			"minInventory": { "P1": 5, "P2": 5, "TEST": 10 },
 			"unmeasuredPolicy": "NONE"
-		}
+		},
+		"searchConsole": { "yandex": null, "google": null }
 	},
 	"legacy": {
 		"routes": [

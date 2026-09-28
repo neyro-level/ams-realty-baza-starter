@@ -51,6 +51,10 @@ export const projectSiteProfileConfig = {
 			"primorsk": "ACTIVE"
 		}
 	},
+	"searchConsole": {
+		"yandex": null,
+		"google": null
+	},
 	"filterKeys": {
 		"kvartiry": [
 			"rooms",

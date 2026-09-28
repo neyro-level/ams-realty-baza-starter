@@ -20,7 +20,10 @@ import {
 	projectGeoSwitcherOptions,
 	projectMenuLinks,
 } from "@/project/navigation";
-import { projectSeoMeta } from "@/project/seo/templates";
+import {
+	projectHomeSeoTemplateKey,
+	projectSeoMeta,
+} from "@/project/seo/templates";
 import { siteConfig } from "@/project/site.config";
 import { siteProfile } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
@@ -417,7 +420,7 @@ export function toHomePageDTO(
 			: "NOINDEX_AUTO",
 	});
 	const seo = projectSeoMeta(
-		"home",
+		projectHomeSeoTemplateKey(siteProfile.geoMode),
 		{
 			brand: brandName,
 			city: {

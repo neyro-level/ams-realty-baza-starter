@@ -124,6 +124,9 @@ rejected((value) => {
 rejected((value) => {
 	delete value.markets.byCity.aksay;
 }, /\$\.markets\.byCity: missing explicit decision for aksay/);
+rejected((value) => {
+	delete value.seo.searchConsole;
+}, /\$\.seo\.searchConsole: must be an object/);
 
 writeFileSync(
 	join(temporary, "proof.json"),

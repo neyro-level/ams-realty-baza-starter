@@ -49,6 +49,7 @@ const ownedFields = [
 	"geoCategoryStatus",
 	"marketStatus",
 	"developersSurface",
+	"searchConsole",
 	"filterKeys",
 	"seoFacets",
 	"seoTiers",

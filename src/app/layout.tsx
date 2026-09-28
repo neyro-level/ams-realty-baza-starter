@@ -6,7 +6,9 @@ import {
 	metadataRobotsForPolicy,
 } from "@/project/indexing-policy";
 import { getSiteUrl } from "@/project/seo/site";
+import { searchConsoleVerificationMetadata } from "@/project/seo/search-console";
 import { siteConfig } from "@/project/site.config";
+import { siteProfile } from "@/project/site-profile";
 
 import "./globals.css";
 
@@ -16,6 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 		metadataBase: new URL(getSiteUrl()),
 		title: shell.header.brandName,
 		robots: metadataRobotsForPolicy(getProjectIndexingPolicy()),
+		verification: searchConsoleVerificationMetadata(siteProfile.searchConsole),
 	};
 }
 

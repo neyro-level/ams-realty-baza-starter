@@ -43,11 +43,15 @@ import {
 } from "@/project/routing/property-gate-facts";
 import {
 	projectSeoCategoryForms,
+	projectSeoActiveCategoriesList,
 	projectSeoFacetLabel,
 	projectSeoMeta,
 	renderProjectSeoTemplate,
 } from "@/project/seo/templates";
-import { siteProfile } from "@/project/site-profile";
+import {
+	activeProjectGeoCategorySurfaces,
+	siteProfile,
+} from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
 import { isFreshDevelopmentPrice } from "../../../core/developments/domain.ts";
 import {
@@ -176,9 +180,11 @@ export async function getGeoHub(
 	]);
 	const pageKey = { kind: "geoHub", geo } as const;
 	const href = safeBuildUrl(pageKey, grammar);
+	const geoSurfaces = activeProjectGeoCategorySurfaces(siteProfile, geo);
 	const seoContext = {
 		brand: brandName,
 		city: cityMorphology(city),
+		activeCategoriesList: projectSeoActiveCategoriesList(geoSurfaces),
 	};
 	const renderedSeo = renderProjectSeoTemplate("geoHub", seoContext);
 	return {
@@ -192,7 +198,7 @@ export async function getGeoHub(
 		),
 		seo: projectSeoMeta("geoHub", seoContext, href),
 		categoryLinks: projectNavigationLinks(
-			activeSurfaces(siteProfile).map((surface) => ({
+			geoSurfaces.map((surface) => ({
 				pageKey: { kind: "categoryGeo", geo, category: surface },
 				label: surfaceLabel(surface),
 			})),

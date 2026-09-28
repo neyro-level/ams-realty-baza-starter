@@ -49,7 +49,8 @@ const fontDefinitions = {
 	Roboto: { importName: "Roboto", subsets: ["cyrillic", "latin"], weight: "400" },
 };
 const seoTemplateKeys = [
-	"home",
+	"homeSingleGeo",
+	"homeMultiGeo",
 	"geoHub",
 	"categoryRoot",
 	"categoryGeo",
@@ -71,6 +72,21 @@ function requiredString(value, label) {
 		throw new Error(`Clone preset requires ${label}.`);
 	}
 	return value.trim();
+}
+
+function validateSearchConsole(value) {
+	if (!value || typeof value !== "object" || Array.isArray(value)) {
+		throw new Error("Clone preset requires searchConsole.");
+	}
+	const result = {};
+	for (const engine of ["yandex", "google"]) {
+		const token = value[engine];
+		if (token !== null && (typeof token !== "string" || !token.trim())) {
+			throw new Error(`searchConsole.${engine} must be a non-empty string or null.`);
+		}
+		result[engine] = token === null ? null : token.trim();
+	}
+	return result;
 }
 
 function assertSlug(value, label) {
@@ -252,8 +268,10 @@ function validateSeoInputs(input) {
 		}
 		for (const form of [
 			"nominativePlural",
+			"nominativePluralLower",
 			"accusativeSingular",
 			"genitivePlural",
+			"dealVerb",
 		]) {
 			requiredString(
 				forms[form],
@@ -395,6 +413,7 @@ export function siteProfileConfigForPreset(preset) {
 		geoCategoryStatus: preset.geoCategoryStatus,
 		marketStatus: preset.marketStatus,
 		developersSurface: preset.developersSurface,
+		searchConsole: preset.searchConsole,
 		seoFacets: preset.seoFacets,
 		filterKeys: preset.filterKeys,
 		seoTiers: preset.seoTiers,
@@ -535,6 +554,7 @@ export function readClonePreset(file) {
 	}
 	validateProfileReadiness(preset);
 	preset.clientReadiness = validateClientReadiness(preset.clientReadiness);
+	preset.searchConsole = validateSearchConsole(preset.searchConsole);
 	const hasInlineTemplates = preset.seoTemplates !== undefined;
 	const hasTemplateFile = preset.seoTemplateFile !== undefined;
 	if (hasInlineTemplates === hasTemplateFile) {
@@ -658,7 +678,7 @@ export function renderProjectCopyFromConfig(config) {
 }
 
 export function renderSeoTemplateInputs(preset) {
-	return `/** Generated project-owned SEO copy inputs from clone preset v2. */\nexport const projectSeoCategoryLabelsInput = ${JSON.stringify(
+	return `/** Generated project-owned SEO copy inputs from clone preset v3. */\nexport const projectSeoCategoryLabelsInput = ${JSON.stringify(
 		preset.seoTemplates.categoryLabels,
 		null,
 		"\t",
@@ -720,6 +740,23 @@ function approvedGeoMorphology(geo) {
 
 export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 	const brandName = preset.brandName ?? preset.nap?.brandName;
+	const activeCategoriesListForGeo = (geo) => {
+		const labels = Object.entries(profile.categoryStatus).flatMap(
+			([category, globalStatus]) => {
+				const localStatus = profile.geoCategoryStatus[geo.slug]?.[category];
+				return (globalStatus === "ACTIVE" || globalStatus === "NOINDEX_AUTO") &&
+					(localStatus === "ACTIVE" || localStatus === "NOINDEX_AUTO")
+					? [preset.seoTemplates.categoryLabels[category].nominativePluralLower]
+					: [];
+			},
+		);
+		if (labels.length === 0) {
+			throw new Error(`Geo hub requires active categories: ${geo.slug}.`);
+		}
+		if (labels.length === 1) return labels[0];
+		if (labels.length === 2) return labels.join(" и ");
+		return `${labels.slice(0, -1).join(", ")} и ${labels.at(-1)}`;
+	};
 	const districtRegistry = {};
 	for (const geo of preset.geos) {
 		for (const district of geo.districts) {
@@ -754,6 +791,10 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 			preset.seoTemplates.templates[templateKey],
 			{
 				brand: brandName,
+				activeCategoriesList:
+					templateKey === "geoHub" && geo
+						? activeCategoriesListForGeo(geo)
+						: undefined,
 				geoGenitive: geoMorphology?.genitive,
 				cityPhrase: geoMorphology
 					? `${geoMorphology.preposition} ${geoMorphology.prepositional}`
@@ -766,11 +807,17 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 				category: category
 					? preset.seoTemplates.categoryLabels[category].nominativePlural
 					: undefined,
+				categoryLower: category
+					? preset.seoTemplates.categoryLabels[category].nominativePluralLower
+					: undefined,
 				categoryNominativePlural: category
 					? preset.seoTemplates.categoryLabels[category].nominativePlural
 					: undefined,
 				categoryAccusative: category
 					? preset.seoTemplates.categoryLabels[category].accusativeSingular
+					: undefined,
+				dealVerb: category
+					? preset.seoTemplates.categoryLabels[category].dealVerb
 					: undefined,
 				categoryGenitivePlural: category
 					? preset.seoTemplates.categoryLabels[category].genitivePlural
@@ -807,7 +854,8 @@ export function buildClientSeoSkeleton(preset, profile, preparedAt) {
 	const primary = preset.geos.find((geo) => geo.slug === preset.primaryGeo);
 	add({
 		pageKey: { kind: "home" },
-		templateKey: "home",
+		templateKey:
+			profile.geoMode === "MULTI_GEO" ? "homeMultiGeo" : "homeSingleGeo",
 		geo: primary,
 		entityRef: null,
 		contentGateRule: "listing",

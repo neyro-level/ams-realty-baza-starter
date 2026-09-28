@@ -1,49 +1,67 @@
-/** Project-owned SEO copy inputs. Client clones replace this file from preset v2. */
+/** Project-owned SEO copy inputs. Client clones replace this file from preset v3. */
 export const projectSeoCategoryLabelsInput = {
 	kvartiry: {
 		nominativePlural: "Квартиры",
+		nominativePluralLower: "квартиры",
 		accusativeSingular: "квартиру",
 		genitivePlural: "квартир",
+		dealVerb: "Купить",
 	},
 	doma: {
 		nominativePlural: "Дома",
+		nominativePluralLower: "дома",
 		accusativeSingular: "дом",
 		genitivePlural: "домов",
+		dealVerb: "Купить",
 	},
 	uchastki: {
 		nominativePlural: "Участки",
+		nominativePluralLower: "участки",
 		accusativeSingular: "участок",
 		genitivePlural: "участков",
+		dealVerb: "Купить",
 	},
 	"kommercheskaya-nedvizhimost": {
 		nominativePlural: "Коммерческая недвижимость",
+		nominativePluralLower: "коммерческая недвижимость",
 		accusativeSingular: "коммерческую недвижимость",
 		genitivePlural: "объектов коммерческой недвижимости",
+		dealVerb: "Купить",
 	},
 	komnaty: {
 		nominativePlural: "Комнаты",
+		nominativePluralLower: "комнаты",
 		accusativeSingular: "комнату",
 		genitivePlural: "комнат",
+		dealVerb: "Купить",
 	},
 	garazhi: {
 		nominativePlural: "Гаражи",
+		nominativePluralLower: "гаражи",
 		accusativeSingular: "гараж",
 		genitivePlural: "гаражей",
+		dealVerb: "Купить",
 	},
 	arenda: {
-		nominativePlural: "Аренда",
+		nominativePlural: "Аренда недвижимости",
+		nominativePluralLower: "аренда недвижимости",
 		accusativeSingular: "объект в аренду",
 		genitivePlural: "предложений аренды",
+		dealVerb: "Снять",
 	},
 	novostroyki: {
 		nominativePlural: "Новостройки",
+		nominativePluralLower: "новостройки",
 		accusativeSingular: "новостройку",
 		genitivePlural: "новостроек",
+		dealVerb: "Купить",
 	},
 	"kottedzhnye-poselki": {
 		nominativePlural: "Коттеджные посёлки",
+		nominativePluralLower: "коттеджные посёлки",
 		accusativeSingular: "коттеджный посёлок",
 		genitivePlural: "коттеджных посёлков",
+		dealVerb: "Купить",
 	},
 } as const;
 
@@ -54,15 +72,20 @@ export const projectSeoFacetLabelsInput = {
 } as const;
 
 export const projectSeoTemplatesInput = {
-	home: {
+	homeSingleGeo: {
 		title: "Недвижимость {geoGenitive} — {brand}",
 		h1: "Недвижимость {geoGenitive}",
 		description: "Подбор недвижимости[ {cityPhrase}][ — {inventory}.]",
 	},
+	homeMultiGeo: {
+		title: "Недвижимость — {brand}",
+		h1: "Недвижимость",
+		description: "Подбор недвижимости и сопровождение сделок[ — {inventory}.]",
+	},
 	geoHub: {
 		title: "Недвижимость {geoGenitive} — {brand}",
 		h1: "Недвижимость {geoGenitive}",
-		description: "Квартиры, дома и новостройки[ {cityPhrase}][ — {inventory}.]",
+		description: "{activeCategoriesList}[ {cityPhrase}][ — {inventory}.]",
 	},
 	categoryRoot: {
 		title: "{category} — {brand}",
@@ -77,33 +100,33 @@ export const projectSeoTemplatesInput = {
 	},
 	categoryGeoDistrictAdmin: {
 		title:
-			"Купить {categoryAccusative} в {districtAdjLocative} районе {cityGenitive} — цены",
+			"{dealVerb} {categoryAccusative} в {districtAdjLocative} районе {cityGenitive} — цены",
 		h1: "{categoryNominativePlural} в {districtAdjLocative} районе {cityGenitive}",
 		description:
 			"{categoryNominativePlural} в {districtAdjLocative} районе {cityGenitive} — актуальные предложения[. {inventory}.]",
 	},
 	categoryGeoDistrictMicro: {
-		title: "Купить {categoryAccusative} {districtPhrase} {cityPhrase} — цены",
-		h1: "{categoryNominativePlural} {districtPhrase} {cityPhrase}",
+		title: "{dealVerb} {categoryAccusative} {districtPhrase} {cityPhrase} — цены",
+		h1: "{categoryNominativePlural} {districtPhrase}",
 		description:
 			"{categoryNominativePlural} {districtPhrase} {cityPhrase} — актуальные предложения[. {inventory}.]",
 	},
 	categoryGeoFacet: {
-		title: "{facet} {category} {cityPhrase} — {brand}",
-		h1: "{facet} {category} {cityPhrase}",
+		title: "{facet} {categoryLower} {cityPhrase} — {brand}",
+		h1: "{facet} {categoryLower} {cityPhrase}",
 		description:
-			"{facet} {category} {cityPhrase} — актуальные предложения[. {inventory}.]",
+			"{facet} {categoryLower} {cityPhrase} — актуальные предложения[. {inventory}.]",
 	},
 	geoDevelopers: {
 		title: "Застройщики {cityPhrase} — {brand}",
 		h1: "Застройщики {cityPhrase}",
 		description:
-			"Застройщики и проверенные жилые комплексы {cityPhrase}[ — {inventory}.]",
+			"Застройщики и жилые комплексы {cityPhrase}[ — {inventory}.]",
 	},
 	developerRoot: {
 		title: "Застройщики — {brand}",
 		h1: "Застройщики",
-		description: "Проверенные застройщики и жилые комплексы[ — {inventory}.]",
+		description: "Застройщики и жилые комплексы[ — {inventory}.]",
 	},
 	developmentNormal: {
 		title: "{entityName} — {brand}",
