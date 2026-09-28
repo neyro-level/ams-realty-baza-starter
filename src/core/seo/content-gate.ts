@@ -16,7 +16,7 @@ export type ContentGateCommon = {
 	ownerOverride?: ContentGateOverride;
 };
 
-type PriceRow = { checkedAt: string };
+type PriceRow = { checkedAt: string; source: string };
 
 export type ContentGateInput = ContentGateCommon &
 	(
@@ -49,11 +49,21 @@ export type ContentGateInput = ContentGateCommon &
 		| {
 				kind: "development";
 				dataTier: "A" | "B" | "C";
+				developerPresent: boolean;
+				cityPresent: boolean;
+				addressPresent: boolean;
+				coordinatesPresent: boolean;
+				classPresent: boolean;
+				completionOrDeadlinePresent: boolean;
+				salesStatusPresent: boolean;
+				completed: boolean;
 				description: string;
-				mediaCount: number;
-				layoutCount: number;
+				descriptionSource: string | null;
+				descriptionCheckedAt: string | null;
+				validPriceRows: readonly PriceRow[];
+				validMediaCount: number;
+				validLayoutCount: number;
 				progressPresent: boolean;
-				priceRows: readonly PriceRow[];
 		  }
 		| {
 				kind: "developerGeo";
@@ -241,9 +251,17 @@ function contentReasons(
 				reasons.push("newbuild_lot_not_self_canonical");
 			break;
 		case "development": {
-			validCount(input.mediaCount, "mediaCount");
-			validCount(input.layoutCount, "layoutCount");
-			const ages = input.priceRows.map((row) => ageDays(row.checkedAt, now));
+			validCount(input.validMediaCount, "validMediaCount");
+			validCount(input.validLayoutCount, "validLayoutCount");
+			const sourcedPriceRows = input.validPriceRows.filter(
+				(row) => row.source.trim().length > 0 && row.checkedAt.trim().length > 0,
+			);
+			if (sourcedPriceRows.length !== input.validPriceRows.length) {
+				reasons.push("development_prices_not_sourced");
+			}
+			const ages = sourcedPriceRows.map((row) =>
+				ageDays(row.checkedAt, now),
+			);
 			visiblePriceRows = ages.filter(
 				(age) => age <= profile.gate.priceStaleDays,
 			).length;
@@ -251,19 +269,30 @@ function contentReasons(
 				hardNoindex = true;
 				reasons.push("development_tier_c");
 			} else {
+				if (!input.developerPresent) reasons.push("development_developer_missing");
+				if (!input.cityPresent) reasons.push("development_city_missing");
+				if (!input.addressPresent) reasons.push("development_address_missing");
+				if (!input.coordinatesPresent) reasons.push("development_coordinates_missing");
+				if (!input.classPresent) reasons.push("development_class_missing");
+				if (!input.completionOrDeadlinePresent)
+					reasons.push("development_completion_missing");
+				if (!input.salesStatusPresent)
+					reasons.push("development_sales_status_missing");
+				if (!input.descriptionSource?.trim() || !input.descriptionCheckedAt)
+					reasons.push("development_description_not_sourced");
 				const threshold =
 					input.dataTier === "A"
 						? profile.gate.developmentA
 						: profile.gate.developmentB;
 				if (visiblePriceRows < threshold.priceRowsMin)
 					reasons.push("development_prices_below_tier");
-				if (input.mediaCount < threshold.mediaMin)
+				if (input.validMediaCount < threshold.mediaMin)
 					reasons.push("development_media_below_tier");
-				if (input.layoutCount < threshold.layoutsMin)
+				if (input.validLayoutCount < threshold.layoutsMin)
 					reasons.push("development_layouts_below_tier");
 				if (input.description.trim().length < threshold.descriptionMinChars)
 					reasons.push("development_description_below_tier");
-				if (threshold.progressRequired && !input.progressPresent)
+				if (threshold.progressRequired && !input.completed && !input.progressPresent)
 					reasons.push("development_progress_missing");
 			}
 			if (
@@ -276,10 +305,7 @@ function contentReasons(
 		}
 		case "developerGeo":
 			addRegistryReasons(input.registry);
-			if (
-				input.registry?.status === "approved" &&
-				!input.registry.synthetic
-			) {
+			if (input.registry?.status === "approved" && !input.registry.synthetic) {
 				const minimum = Math.max(
 					input.registry.minimumObjects,
 					input.registry.tier === "NONE"

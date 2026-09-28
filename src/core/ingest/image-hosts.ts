@@ -62,6 +62,17 @@ export function validateExternalImageUrl(
 	return { ok: true, url: url.toString(), host };
 }
 
+export function validateHttpsExternalImageUrl(
+	value: string,
+	allowedHosts: ReadonlySet<string>,
+): ImageHostValidationResult {
+	const validation = validateExternalImageUrl(value, allowedHosts);
+	if (!validation.ok || !validation.url.startsWith("https://")) {
+		return { ok: false, code: "feed.image_url_invalid" };
+	}
+	return validation;
+}
+
 export type NextImageRemotePattern = {
 	protocol: "https";
 	hostname: string;

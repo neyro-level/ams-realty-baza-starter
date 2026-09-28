@@ -7,6 +7,7 @@ import {
 	buildDevelopmentSemanticSlug,
 	computeDevelopmentCompletenessScore,
 	developmentUrlSlug,
+	isDevelopmentTierCPublicPassport,
 	isFreshDevelopmentPrice,
 } from "../src/core/developments/domain.ts";
 
@@ -80,6 +81,36 @@ assert.equal(
 );
 assert.equal(isFreshDevelopmentPrice("not-a-date", referenceDate), false);
 
+const tierCPublicPassport = {
+	id: 1,
+	slug: "solnechnyy",
+	kind: "residential_complex" as const,
+	name: "ЖК Солнечный",
+	city: { id: 2, slug: "primorsk", title: "Приморск" },
+	salesStatus: "on_sale" as const,
+	salesAvailability: "confirmed" as const,
+};
+assert.equal(isDevelopmentTierCPublicPassport(tierCPublicPassport), true);
+assert.equal(
+	isDevelopmentTierCPublicPassport({ ...tierCPublicPassport, developer: null }),
+	true,
+);
+assert.equal(
+	isDevelopmentTierCPublicPassport({ ...tierCPublicPassport, name: "" }),
+	false,
+);
+assert.equal(
+	isDevelopmentTierCPublicPassport({ ...tierCPublicPassport, city: null }),
+	false,
+);
+assert.equal(
+	isDevelopmentTierCPublicPassport({
+		...tierCPublicPassport,
+		salesAvailability: "unknown",
+	}),
+	false,
+);
+
 assert.equal(
 	computeDevelopmentCompletenessScore({
 		name: "Солнечный",
@@ -113,6 +144,8 @@ assert.equal(
 assert.doesNotThrow(() =>
 	assertDevelopmentMediaItems([
 		{
+			kind: "managed",
+			media: 1,
 			mediaType: "construction_progress",
 			capturedAt: "2026-09-25T12:00:00.000Z",
 		},
@@ -120,12 +153,17 @@ assert.doesNotThrow(() =>
 );
 assert.throws(
 	() => assertDevelopmentMediaItems([{ mediaType: "construction_progress" }]),
-	/requires capturedAt/,
+	/must be managed or external/,
 );
 assert.throws(
 	() =>
 		assertDevelopmentMediaItems([
-			{ mediaType: "gallery", capturedAt: "invalid" },
+			{
+				kind: "managed",
+				media: 1,
+				mediaType: "gallery",
+				capturedAt: "invalid",
+			},
 		]),
 	/must be ISO 8601/,
 );

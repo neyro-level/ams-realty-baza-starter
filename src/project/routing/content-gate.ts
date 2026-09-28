@@ -12,7 +12,10 @@ import {
 	type PageDecision,
 	type ResolverPageResult,
 } from "@/core/routing";
-import type { ContentGateInput } from "@/core/seo/content-gate";
+import type {
+	ContentGateCommon,
+	ContentGateInput,
+} from "@/core/seo/content-gate";
 import { projectSeoRegistrySeed } from "@/project/seo/registry-seed";
 import { isSeoMetaMorphologyApproved } from "@/project/seo/templates";
 import { siteProfile } from "@/project/site-profile";
@@ -36,8 +39,10 @@ export type RuntimeGateData =
 	| {
 			kind: "development";
 			value: DevelopmentDetailsDTO;
-			layoutCount: number;
-			progressPresent: boolean;
+			gateFacts: Omit<
+				Extract<ContentGateInput, { kind: "development" }>,
+				keyof ContentGateCommon | "kind"
+			>;
 	  }
 	| {
 			kind: "property";
@@ -116,14 +121,7 @@ function inputFor(
 		return {
 			...common,
 			kind: "development",
-			dataTier: resolved.dataTier ?? "C",
-			description: data.value.description ?? "",
-			mediaCount: data.value.gallery.length,
-			layoutCount: data.layoutCount,
-			progressPresent: data.progressPresent,
-			priceRows: data.value.priceByRooms.map(({ priceCheckedAt }) => ({
-				checkedAt: priceCheckedAt,
-			})),
+			...data.gateFacts,
 		};
 	}
 	if (resolved.market === "newbuild") {

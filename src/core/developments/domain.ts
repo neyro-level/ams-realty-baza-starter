@@ -12,6 +12,16 @@ export type DevelopmentMediaType =
 	| "document"
 	| "video";
 
+export type DevelopmentTierCPublicPassport = {
+	id: string | number;
+	slug: string;
+	kind: DevelopmentKind;
+	name: string;
+	city: { id: string | number; slug: string; title: string };
+	salesStatus: DevelopmentSalesStatus;
+	salesAvailability: DevelopmentSalesAvailability;
+};
+
 export const DEVELOPMENT_PRICE_FRESH_DAYS = 45;
 
 type DevelopmentRecord = Record<string, unknown>;
@@ -24,12 +34,60 @@ const cottageOnlyFields = [
 	"villageClass",
 ] as const;
 
+const developmentKinds: readonly DevelopmentKind[] = [
+	"residential_complex",
+	"cottage_village",
+];
+const developmentSalesStatuses: readonly DevelopmentSalesStatus[] = [
+	"on_sale",
+	"sales_finished",
+	"completed",
+];
+const developmentSalesAvailabilities: readonly DevelopmentSalesAvailability[] = [
+	"in_inventory",
+	"confirmed",
+	"none",
+];
+
 function meaningful(value: unknown): boolean {
 	if (value === undefined || value === null || value === "" || value === false)
 		return false;
 	if (Array.isArray(value)) return value.some(meaningful);
 	if (typeof value === "object") return Object.values(value).some(meaningful);
 	return true;
+}
+
+function nonEmptyString(value: unknown): value is string {
+	return typeof value === "string" && value.trim().length > 0;
+}
+
+export function isDevelopmentTierCPublicPassport(
+	value: unknown,
+): value is DevelopmentTierCPublicPassport {
+	if (!value || typeof value !== "object") return false;
+	const record = value as DevelopmentRecord;
+	const city = record.city;
+	if (!city || typeof city !== "object") return false;
+	const cityRecord = city as DevelopmentRecord;
+	return (
+		(record.id !== null && record.id !== undefined && String(record.id).trim()) !==
+			"" &&
+		nonEmptyString(record.slug) &&
+		/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(record.slug) &&
+		developmentKinds.includes(record.kind as DevelopmentKind) &&
+		nonEmptyString(record.name) &&
+		(cityRecord.id !== null &&
+			cityRecord.id !== undefined &&
+			String(cityRecord.id).trim()) !== "" &&
+		nonEmptyString(cityRecord.slug) &&
+		nonEmptyString(cityRecord.title) &&
+		developmentSalesStatuses.includes(
+			record.salesStatus as DevelopmentSalesStatus,
+		) &&
+		developmentSalesAvailabilities.includes(
+			record.salesAvailability as DevelopmentSalesAvailability,
+		)
+	);
 }
 
 export function isFreshDevelopmentPrice(
@@ -75,6 +133,17 @@ export function assertDevelopmentMediaItems(value: unknown): void {
 		if (!item || typeof item !== "object")
 			throw new Error("Development media item is invalid.");
 		const record = item as DevelopmentRecord;
+		if (record.kind !== "managed" && record.kind !== "external") {
+			throw new Error(
+				"Development media item kind must be managed or external.",
+			);
+		}
+		if (record.kind === "managed" && !meaningful(record.media)) {
+			throw new Error("Managed development media requires media.");
+		}
+		if (record.kind === "external" && !meaningful(record.externalUrl)) {
+			throw new Error("External development media requires externalUrl.");
+		}
 		if (
 			record.mediaType === "construction_progress" &&
 			!meaningful(record.capturedAt)

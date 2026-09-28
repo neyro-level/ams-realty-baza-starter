@@ -545,7 +545,9 @@ export interface Development {
   lotsCount?: number | null;
   mediaItems?:
     | {
-        media: number | Media;
+        kind: 'managed' | 'external';
+        media?: (number | null) | Media;
+        externalUrl?: string | null;
         mediaType: 'hero' | 'gallery' | 'layout' | 'construction_progress' | 'document' | 'video';
         capturedAt?: string | null;
         rights: string;
@@ -1386,7 +1388,9 @@ export interface DevelopmentsSelect<T extends boolean = true> {
   mediaItems?:
     | T
     | {
+        kind?: T;
         media?: T;
+        externalUrl?: T;
         mediaType?: T;
         capturedAt?: T;
         rights?: T;

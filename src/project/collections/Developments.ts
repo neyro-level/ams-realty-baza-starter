@@ -148,11 +148,18 @@ export const Developments: CollectionConfig = {
 			type: "array",
 			fields: [
 				{
+					name: "kind",
+					type: "select",
+					required: true,
+					defaultValue: "managed",
+					options: ["managed", "external"],
+				},
+				{
 					name: "media",
 					type: "relationship",
 					relationTo: "media",
-					required: true,
 				},
+				{ name: "externalUrl", type: "text" },
 				{
 					name: "mediaType",
 					type: "select",

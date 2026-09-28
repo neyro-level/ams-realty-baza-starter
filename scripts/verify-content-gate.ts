@@ -102,13 +102,29 @@ const passingCases: readonly ContentGateInput[] = [
 		kind: "development",
 		lifecycle: activeLifecycle,
 		dataTier: "A",
+		developerPresent: true,
+		cityPresent: true,
+		addressPresent: true,
+		coordinatesPresent: true,
+		classPresent: true,
+		completionOrDeadlinePresent: true,
+		salesStatusPresent: true,
+		completed: false,
 		description: "Описание жилого комплекса. ".repeat(70),
-		mediaCount: 8,
-		layoutCount: 1,
+		descriptionSource: "official-developer",
+		descriptionCheckedAt: "2026-09-20T00:00:00.000Z",
+		validMediaCount: 8,
+		validLayoutCount: 1,
 		progressPresent: true,
-		priceRows: [
-			{ checkedAt: "2026-09-20T00:00:00.000Z" },
-			{ checkedAt: "2026-09-21T00:00:00.000Z" },
+		validPriceRows: [
+			{
+				checkedAt: "2026-09-20T00:00:00.000Z",
+				source: "official-developer",
+			},
+			{
+				checkedAt: "2026-09-21T00:00:00.000Z",
+				source: "official-developer",
+			},
 		],
 	},
 	{
@@ -177,17 +193,11 @@ const requiredDecisionCases = [
 		row: approvedRow(7),
 		input(row: SeoRegistryRow): ContentGateInput {
 			return {
+				...passingDevelopment,
 				url: row.url,
 				canonical: row.canonical,
 				profileStatus: "ACTIVE",
-				lifecycle: activeLifecycle,
-				kind: "development",
 				dataTier: "C",
-				description: "Описание проекта. ".repeat(100),
-				mediaCount: 12,
-				layoutCount: 4,
-				progressPresent: true,
-				priceRows: [{ checkedAt: "2026-09-20T00:00:00.000Z" }],
 			};
 		},
 		reason: "development_tier_c",
@@ -197,19 +207,19 @@ const requiredDecisionCases = [
 		row: approvedRow(7),
 		input(row: SeoRegistryRow): ContentGateInput {
 			return {
+				...passingDevelopment,
 				url: row.url,
 				canonical: row.canonical,
 				profileStatus: "ACTIVE",
-				lifecycle: activeLifecycle,
-				kind: "development",
-				dataTier: "A",
-				description: "Описание проекта. ".repeat(100),
-				mediaCount: 12,
-				layoutCount: 4,
-				progressPresent: true,
-				priceRows: [
-					{ checkedAt: "2026-08-01T00:00:00.000Z" },
-					{ checkedAt: "2026-08-02T00:00:00.000Z" },
+				validPriceRows: [
+					{
+						checkedAt: "2026-08-01T00:00:00.000Z",
+						source: "official-developer",
+					},
+					{
+						checkedAt: "2026-08-02T00:00:00.000Z",
+						source: "official-developer",
+					},
 				],
 			};
 		},
@@ -419,7 +429,12 @@ const staleDevelopment = evaluateContentGate(
 	profile,
 	{
 		...passingDevelopment,
-		priceRows: [{ checkedAt: "2026-07-25T00:00:00.000Z" }],
+		validPriceRows: [
+			{
+				checkedAt: "2026-07-25T00:00:00.000Z",
+				source: "official-developer",
+			},
+		],
 	},
 	now,
 );
@@ -431,7 +446,12 @@ const expiredDevelopment = evaluateContentGate(
 	profile,
 	{
 		...passingDevelopment,
-		priceRows: [{ checkedAt: "2026-05-01T00:00:00.000Z" }],
+		validPriceRows: [
+			{
+				checkedAt: "2026-05-01T00:00:00.000Z",
+				source: "official-developer",
+			},
+		],
 	},
 	now,
 );
@@ -450,7 +470,187 @@ const tierC = evaluateContentGate(
 	now,
 );
 assert.equal(tierC.indexing, "noindex");
+
+assert.equal(tierC.statusCode, 200);
+assert.equal(tierC.following, "follow");
+assert.equal(tierC.canonical, passingDevelopment.url);
+assert.equal(tierC.includeInSitemap, false);
 assert.equal(tierC.overrideAudit?.result, "denied");
+
+const missingDevelopmentPassportCases: readonly {
+	name: string;
+	input: Extract<ContentGateInput, { kind: "development" }>;
+}[] = [
+	{
+		name: "developer",
+		input: { ...passingDevelopment, developerPresent: false },
+	},
+	{
+		name: "city",
+		input: { ...passingDevelopment, cityPresent: false },
+	},
+	{
+		name: "address",
+		input: { ...passingDevelopment, addressPresent: false },
+	},
+	{
+		name: "coordinates",
+		input: { ...passingDevelopment, coordinatesPresent: false },
+	},
+	{
+		name: "class",
+		input: { ...passingDevelopment, classPresent: false },
+	},
+	{
+		name: "completion or deadline",
+		input: { ...passingDevelopment, completionOrDeadlinePresent: false },
+	},
+	{
+		name: "sales status",
+		input: { ...passingDevelopment, salesStatusPresent: false },
+	},
+	{
+		name: "description source",
+		input: { ...passingDevelopment, descriptionSource: null },
+	},
+	{
+		name: "description checkedAt",
+		input: { ...passingDevelopment, descriptionCheckedAt: null },
+	},
+];
+
+for (const testCase of missingDevelopmentPassportCases) {
+	const decision = evaluateContentGate(profile, testCase.input, now);
+	assert.equal(decision.statusCode, 200, testCase.name);
+	assert.equal(decision.indexing, "noindex", testCase.name);
+	assert.equal(decision.following, "follow", testCase.name);
+	assert.equal(decision.canonical, passingDevelopment.url, testCase.name);
+	assert.equal(decision.includeInSitemap, false, testCase.name);
+}
+
+const tierB = evaluateContentGate(
+	profile,
+	{
+		...passingDevelopment,
+		dataTier: "B",
+		description: "Проверенное описание жилого комплекса для публичной карточки. ".repeat(
+			12,
+		),
+		validPriceRows: [
+			{
+				checkedAt: "2026-09-20T00:00:00.000Z",
+				source: "official-developer",
+			},
+		],
+		validMediaCount: 3,
+		validLayoutCount: 0,
+		progressPresent: false,
+	},
+	now,
+);
+assert.equal(tierB.statusCode, 200);
+assert.equal(tierB.indexing, "index");
+assert.equal(tierB.following, "follow");
+assert.equal(tierB.includeInSitemap, true);
+assert.equal(tierB.dataTier, "B");
+assert.equal(tierB.visiblePriceRows, 1);
+assert.equal(tierB.reasons.includes("development_layouts_below_tier"), false);
+assert.equal(tierB.reasons.includes("development_progress_missing"), false);
+
+const tierBShortDescription = evaluateContentGate(
+	profile,
+	{
+		...passingDevelopment,
+		dataTier: "B",
+		description: "Короткое описание.",
+		validPriceRows: [
+			{
+				checkedAt: "2026-09-20T00:00:00.000Z",
+				source: "official-developer",
+			},
+		],
+		validMediaCount: 3,
+		validLayoutCount: 0,
+		progressPresent: false,
+	},
+	now,
+);
+assert.equal(tierBShortDescription.indexing, "noindex");
+assert.ok(
+	tierBShortDescription.reasons.includes("development_description_below_tier"),
+);
+
+const tierBStalePrice = evaluateContentGate(
+	profile,
+	{
+		...passingDevelopment,
+		dataTier: "B",
+		description: "Проверенное описание жилого комплекса для публичной карточки. ".repeat(
+			12,
+		),
+		validPriceRows: [
+			{
+				checkedAt: "2026-08-01T00:00:00.000Z",
+				source: "official-developer",
+			},
+		],
+		validMediaCount: 3,
+		validLayoutCount: 0,
+		progressPresent: false,
+	},
+	now,
+);
+assert.equal(tierBStalePrice.indexing, "noindex");
+assert.equal(tierBStalePrice.visiblePriceRows, 0);
+assert.ok(tierBStalePrice.reasons.includes("development_prices_below_tier"));
+
+const developmentWithoutDescriptionSource = evaluateContentGate(
+	profile,
+	{ ...passingDevelopment, descriptionSource: null },
+	now,
+);
+assert.equal(developmentWithoutDescriptionSource.indexing, "noindex");
+assert.ok(
+	developmentWithoutDescriptionSource.reasons.includes(
+		"development_description_not_sourced",
+	),
+);
+
+const developmentWithoutDescriptionCheckedAt = evaluateContentGate(
+	profile,
+	{ ...passingDevelopment, descriptionCheckedAt: null },
+	now,
+);
+assert.equal(developmentWithoutDescriptionCheckedAt.indexing, "noindex");
+assert.ok(
+	developmentWithoutDescriptionCheckedAt.reasons.includes(
+		"development_description_not_sourced",
+	),
+);
+
+const developmentWithUnprovenancedPrice = evaluateContentGate(
+	profile,
+	{
+		...passingDevelopment,
+		validPriceRows: [
+			{ checkedAt: "2026-09-20T00:00:00.000Z", source: "" },
+			{ checkedAt: "2026-09-21T00:00:00.000Z", source: "" },
+		],
+	},
+	now,
+);
+assert.equal(developmentWithUnprovenancedPrice.indexing, "noindex");
+assert.equal(developmentWithUnprovenancedPrice.visiblePriceRows, 0);
+assert.ok(
+	developmentWithUnprovenancedPrice.reasons.includes(
+		"development_prices_not_sourced",
+	),
+);
+assert.ok(
+	developmentWithUnprovenancedPrice.reasons.includes(
+		"development_prices_below_tier",
+	),
+);
 
 assert.throws(
 	() =>
@@ -467,7 +667,12 @@ assert.throws(
 			profile,
 			{
 				...passingDevelopment,
-				priceRows: [{ checkedAt: "2026-09-25T00:00:00.000Z" }],
+				validPriceRows: [
+					{
+						checkedAt: "2026-09-25T00:00:00.000Z",
+						source: "official-developer",
+					},
+				],
 			},
 			now,
 		),

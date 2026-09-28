@@ -6,6 +6,10 @@ const orchestration = readFileSync(
 	"src/project/routing/content-gate.ts",
 	"utf8",
 );
+const developmentGateway = readFileSync(
+	"src/project/data-access/public/geo-catalog.ts",
+	"utf8",
+);
 const metadata = readFileSync("src/app/(site)/[...segments]/page.tsx", "utf8");
 const discovery = readFileSync("src/project/seo/discovery-runtime.ts", "utf8");
 const resolver = readFileSync("src/core/routing/resolver.ts", "utf8");
@@ -16,8 +20,24 @@ assert.match(runtime, /getDevelopmentRouteFacts/);
 assert.match(runtime, /getDeveloperRouteFacts/);
 assert.match(orchestration, /export function decidePage/);
 assert.match(orchestration, /ownedPhotoCount/);
-assert.match(orchestration, /layoutCount/);
+assert.match(orchestration, /gateFacts/);
 assert.match(orchestration, /descriptionSource/);
+for (const fact of [
+	"developerPresent",
+	"cityPresent",
+	"addressPresent",
+	"coordinatesPresent",
+	"classPresent",
+	"completionOrDeadlinePresent",
+	"salesStatusPresent",
+	"descriptionSource",
+	"descriptionCheckedAt",
+	"validPriceRows",
+	"validMediaCount",
+	"validLayoutCount",
+]) {
+	assert.match(developmentGateway, new RegExp(fact));
+}
 assert.match(metadata, /indexing:\s*result\.decision\.robots\.indexing/);
 assert.match(metadata, /following:\s*result\.decision\.robots\.following/);
 assert.doesNotMatch(metadata, /indexing:\s*["']index["']/);

@@ -22,6 +22,8 @@ import {
 	type SiteProfile,
 } from "@/core/profile";
 import type { UrlGrammar } from "@/core/routing";
+import type { ContentGateInput } from "@/core/seo/content-gate";
+import { validateHttpsExternalImageUrl } from "@/core/ingest/image-hosts";
 import { getRuntimeClock } from "@/core/time/clock";
 import {
 	projectBreadcrumbs,
@@ -53,7 +55,10 @@ import {
 	siteProfile,
 } from "@/project/site-profile";
 import { createProjectUrlGrammar } from "@/project/url-grammar";
-import { isFreshDevelopmentPrice } from "../../../core/developments/domain.ts";
+import {
+	isDevelopmentTierCPublicPassport,
+	isFreshDevelopmentPrice,
+} from "../../../core/developments/domain.ts";
 import {
 	type CatalogQueryInput,
 	findPublicCatalogPropertiesByGeo,
@@ -155,6 +160,124 @@ export type PublicListingInput = {
 export type PublicDevelopmentDetailsDTO = DevelopmentDetailsDTO & {
 	faq: readonly { question: string; answer: string }[];
 };
+
+type DevelopmentGateInput = Extract<ContentGateInput, { kind: "development" }>;
+
+export type PublicDevelopmentGateFacts = Pick<
+	DevelopmentGateInput,
+	| "developerPresent"
+	| "cityPresent"
+	| "addressPresent"
+	| "coordinatesPresent"
+	| "classPresent"
+	| "completionOrDeadlinePresent"
+	| "salesStatusPresent"
+	| "completed"
+	| "description"
+	| "descriptionSource"
+	| "descriptionCheckedAt"
+	| "validPriceRows"
+	| "validMediaCount"
+	| "validLayoutCount"
+	| "progressPresent"
+	| "dataTier"
+>;
+
+function nonEmptyText(value: unknown): boolean {
+	return typeof value === "string" && value.trim().length > 0;
+}
+
+function effectiveDevelopmentDescription(development: Development) {
+	const description =
+		development.descriptions?.find((item) => item.kind === "full") ??
+		development.descriptions?.find((item) => item.kind === "short");
+	const source = description?.source;
+	const checkedAt = description?.checkedAt;
+	return {
+		text: description?.text ?? "",
+		source:
+			typeof source === "string" && source.trim().length > 0
+				? source.trim()
+				: null,
+		checkedAt:
+			typeof checkedAt === "string" && checkedAt.trim().length > 0
+				? checkedAt
+				: null,
+	};
+}
+
+export function countDevelopmentGateMedia(
+	items: Development["mediaItems"],
+	allowedHosts = allowedPropertyImageHosts(),
+): number {
+	return (items ?? []).filter((item) => {
+		if (
+			!["hero", "gallery", "layout", "construction_progress"].includes(
+				item.mediaType,
+			) ||
+			!nonEmptyText(item.rights) ||
+			!nonEmptyText(item.source) ||
+			!nonEmptyText(item.checkedAt)
+		) {
+			return false;
+		}
+		if (item.kind === "managed") {
+			return isObjectRelation<Media>(item.media) && Boolean(item.media.url);
+		}
+		return (
+			item.kind === "external" &&
+			typeof item.externalUrl === "string" &&
+			validateHttpsExternalImageUrl(item.externalUrl, allowedHosts).ok
+		);
+	}).length;
+}
+
+function toDevelopmentGateFacts(
+	development: Development,
+): PublicDevelopmentGateFacts {
+	const description = effectiveDevelopmentDescription(development);
+	return {
+		developerPresent: Boolean(relationId(development.developer)),
+		cityPresent: Boolean(relationId(development.city)),
+		addressPresent: nonEmptyText(development.address),
+		coordinatesPresent:
+			development.coordinates?.latitude != null &&
+			development.coordinates.longitude != null,
+		classPresent: nonEmptyText(development.class),
+		completionOrDeadlinePresent:
+			nonEmptyText(development.completion) ||
+			nonEmptyText(development.deadline),
+		salesStatusPresent:
+			development.salesStatus === "on_sale" ||
+			development.salesStatus === "sales_finished" ||
+			development.salesStatus === "completed",
+		completed: development.salesStatus === "completed",
+		description: description.text,
+		descriptionSource: description.source,
+		descriptionCheckedAt: description.checkedAt,
+		validPriceRows:
+			development.priceByRooms?.flatMap((row) => {
+				const { priceCheckedAt, source } = row;
+				if (
+					!Number.isFinite(row.priceFromMinor) ||
+					row.priceFromMinor <= 0 ||
+					typeof priceCheckedAt !== "string" ||
+					priceCheckedAt.trim().length === 0 ||
+					typeof source !== "string" ||
+					source.trim().length === 0
+				) {
+					return [];
+				}
+				return [{ checkedAt: priceCheckedAt, source: source.trim() }];
+			}) ?? [],
+		validMediaCount: countDevelopmentGateMedia(development.mediaItems),
+		validLayoutCount:
+			development.layouts?.filter((layout) => nonEmptyText(layout.title))
+				.length ?? 0,
+		progressPresent: (development.progress?.length ?? 0) > 0,
+		dataTier: development.dataTier,
+	};
+}
 
 export async function getGeoBySlug(
 	payload: Payload,
@@ -487,18 +610,14 @@ export async function getDevelopment(
 		...gatewayAccess,
 	});
 	const development = result.docs[0] as Development | undefined;
-	return development ? toDevelopmentDetailsDTO(development, brandName) : null;
+	if (!development || !isDevelopmentTierCPublicPassport(development)) return null;
+	return toDevelopmentDetailsDTO(development, brandName);
 }
 
 export async function getDevelopmentRouteFacts(
 	payload: Payload,
 	slug: string,
-): Promise<{
-	geo: string;
-	dataTier: Development["dataTier"];
-	layoutCount: number;
-	progressPresent: boolean;
-} | null> {
+): Promise<(PublicDevelopmentGateFacts & { geo: string }) | null> {
 	const result = await payload.find({
 		collection: "developments",
 		where: {
@@ -510,12 +629,25 @@ export async function getDevelopmentRouteFacts(
 		depth: 1,
 		limit: 1,
 		page: 1,
-		select: { city: true, dataTier: true, layouts: true, progress: true },
+		select: {
+			city: true,
+			developer: true,
+			address: true,
+			coordinates: true,
+			class: true,
+			completion: true,
+			deadline: true,
+			salesStatus: true,
+			dataTier: true,
+			descriptions: true,
+			mediaItems: true,
+			layouts: true,
+			progress: true,
+			priceByRooms: true,
+		},
 		...gatewayAccess,
 	});
-	const development = result.docs[0] as
-		| Pick<Development, "city" | "dataTier" | "layouts" | "progress">
-		| undefined;
+	const development = result.docs[0] as Development | undefined;
 	if (!development) return null;
 	const city = isObjectRelation<City>(development.city)
 		? development.city
@@ -523,9 +655,7 @@ export async function getDevelopmentRouteFacts(
 	return city
 		? {
 				geo: city.slug,
-				dataTier: development.dataTier,
-				layoutCount: development.layouts?.length ?? 0,
-				progressPresent: (development.progress?.length ?? 0) > 0,
+				...toDevelopmentGateFacts(development),
 			}
 		: null;
 }
@@ -667,13 +797,7 @@ export type PublicDevelopmentGateFact = {
 	cityId: string;
 	slug: string;
 	developmentKind: "residential_complex" | "cottage_village";
-	dataTier: "A" | "B" | "C";
-	description: string;
-	mediaCount: number;
-	layoutCount: number;
-	progressPresent: boolean;
-	priceCheckedAt: readonly string[];
-};
+} & PublicDevelopmentGateFacts;
 
 export async function listDevelopmentGateFactsForCities(
 	payload: Payload,
@@ -696,6 +820,12 @@ export async function listDevelopmentGateFactsForCities(
 			kind: true,
 			city: true,
 			developer: true,
+			address: true,
+			coordinates: true,
+			class: true,
+			completion: true,
+			deadline: true,
+			salesStatus: true,
 			dataTier: true,
 			descriptions: true,
 			mediaItems: true,
@@ -724,26 +854,7 @@ export async function listDevelopmentGateFactsForCities(
 				cityId,
 				slug: development.slug,
 				developmentKind: development.kind,
-				dataTier: development.dataTier,
-				description:
-					development.descriptions?.find((item) => item.kind === "full")
-						?.text ??
-					development.descriptions?.find((item) => item.kind === "short")
-						?.text ??
-					"",
-				mediaCount:
-					development.mediaItems?.filter(
-						(item) =>
-							["hero", "gallery", "layout", "construction_progress"].includes(
-								item.mediaType,
-							) &&
-							isObjectRelation<Media>(item.media) &&
-							Boolean(item.media.url),
-					).length ?? 0,
-				layoutCount: development.layouts?.length ?? 0,
-				progressPresent: (development.progress?.length ?? 0) > 0,
-				priceCheckedAt:
-					development.priceByRooms?.map((row) => row.priceCheckedAt) ?? [],
+				...toDevelopmentGateFacts(development),
 			},
 		];
 	});
@@ -1167,11 +1278,9 @@ function toDevelopmentCardDTO(development: Development): DevelopmentCardDTO {
 	const district = isObjectRelation<District>(development.district)
 		? development.district
 		: undefined;
-	const developer = objectRelation<Developer>(
-		development.developer,
-		"developer",
-		development.id,
-	);
+	const developer = isObjectRelation<Developer>(development.developer)
+		? development.developer
+		: undefined;
 	const pageKey = {
 		kind: "development",
 		developmentKind: development.kind,
@@ -1188,12 +1297,14 @@ function toDevelopmentCardDTO(development: Development): DevelopmentCardDTO {
 		cityName: city.title,
 		districtName: district?.title,
 		address: development.address ?? undefined,
-		developer: {
-			id: String(developer.id),
-			name: developer.name,
-			pageKey: { kind: "developer", slug: developer.slug },
-			href: safeBuildUrl({ kind: "developer", slug: developer.slug }),
-		},
+		developer: developer
+			? {
+					id: String(developer.id),
+					name: developer.name,
+					pageKey: { kind: "developer", slug: developer.slug },
+					href: safeBuildUrl({ kind: "developer", slug: developer.slug }),
+				}
+			: undefined,
 		primaryMedia: primaryDevelopmentMedia(development),
 		priceFrom: price
 			? {

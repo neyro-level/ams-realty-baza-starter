@@ -66,6 +66,7 @@ proof.
 | Public font | Allowlisted generated `src/project/font.generated.ts` via `next/font/google`; current Manrope, variable `--font-project`, Cyrillic + Latin, `display: swap`, SIL OFL 1.1; system fallback only |
 | Geo-catalog runtime | `docs/platform/GEO_CATALOG_CONTRACT.md`; canonical resolver/catch-all cutover и guarded cleanup реализованы |
 | Content Gate runtime | `decidePage` — единый owner robots/canonical/discovery; resolver отдаёт route facts, metadata и sitemap consume Gate decision |
+| Development Gate media | Засчитываются только managed project media либо approved external HTTPS URL: exact allowlisted host, допустимый media kind, field-level source/rights/checkedAt и прохождение security/media guards; uncontrolled hotlink не засчитывается |
 | SEO templates | Core хранит только renderer/morphology/plural engine; project config владеет ключами и русскими шаблонами, brand приходит из `site-settings` Gateway, unapproved morphology всегда `noindex,follow` |
 | SEO Registry | `docs/seo/SEO_REGISTRY_SEED.csv` — единственный editable owner; строки начинаются как `draft`, получают `approved` только после реальных evidence и утверждённой morphology; synthetic строки не утверждаются; validated generation создаёт runtime `src/project/seo/registry-seed.ts`, CMS ownership запрещён |
 | Geo modes | `SINGLE_GEO | MULTI_GEO`; validated SiteProfile separates geo `published` from `hubStatus`; SINGLE_GEO owns exactly one routable primary hub |

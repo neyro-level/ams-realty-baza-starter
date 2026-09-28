@@ -46,6 +46,7 @@ import {
 	listDevelopmentGateFactsForCities,
 	listDeveloperDevelopments,
 	listGeoDevelopers,
+	type PublicDevelopmentGateFacts,
 	type PublicDevelopmentDetailsDTO,
 	type PublicDevelopmentGateFact,
 } from "@/project/data-access/public/geo-catalog";
@@ -117,8 +118,7 @@ export type RuntimeRouteData =
 			kind: "development";
 			value: PublicDevelopmentDetailsDTO;
 			geo: string;
-			layoutCount: number;
-			progressPresent: boolean;
+			gateFacts: PublicDevelopmentGateFacts;
 	  }
 	| {
 			kind: "property";
@@ -305,8 +305,29 @@ async function resolveFixtureRuntimeRoute(
 			kind: "development",
 			value: { ...geoCatalogContractFixtures.development, faq: [] },
 			geo: siteProfile.primaryGeo,
-			layoutCount: 1,
-			progressPresent: true,
+			gateFacts: {
+				developerPresent: true,
+				cityPresent: true,
+				addressPresent: true,
+				coordinatesPresent: true,
+				classPresent: true,
+				completionOrDeadlinePresent: true,
+				salesStatusPresent: true,
+				completed: false,
+				description: geoCatalogContractFixtures.development.description ?? "",
+				descriptionSource: "fixture-owner-specification",
+				descriptionCheckedAt: "2026-09-24T12:00:00.000Z",
+				validPriceRows: geoCatalogContractFixtures.development.priceByRooms.map(
+					({ priceCheckedAt }) => ({
+						checkedAt: priceCheckedAt,
+						source: "fixture-owner-specification",
+					}),
+				),
+				validMediaCount: geoCatalogContractFixtures.development.gallery.length,
+				validLayoutCount: 1,
+				progressPresent: true,
+				dataTier: "A",
+			},
 		};
 	} else if (pageKey.kind === "property") {
 		const property = fixtureProperties.find(
@@ -540,12 +561,7 @@ async function resolveRuntimeRouteUncached(
 						url: canonicalPath,
 						canonical: canonicalPath,
 						profileStatus: route.profileStatus,
-						dataTier: fact.dataTier,
-						description: fact.description,
-						mediaCount: fact.mediaCount,
-						layoutCount: fact.layoutCount,
-						progressPresent: fact.progressPresent,
-						priceRows: fact.priceCheckedAt.map((checkedAt) => ({ checkedAt })),
+						...fact,
 					},
 				);
 				return {
@@ -817,8 +833,7 @@ async function resolveRuntimeRouteUncached(
 						kind: "development",
 						value: development,
 						geo: developmentFacts.geo,
-						layoutCount: developmentFacts.layoutCount,
-						progressPresent: developmentFacts.progressPresent,
+						gateFacts: developmentFacts,
 					};
 					facts = {
 						geo: developmentFacts.geo,
