@@ -6,21 +6,21 @@
  * decision and regression coverage.
  */
 export const trackingQueryParams = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_content",
-  "utm_term",
-  "utm_id",
-  "utm_referrer",
-  "utm_media",
-  "utm_group",
-  "utm_expid",
-  "yclid",
-  "ysclid",
-  "yrclid",
-  "gclid",
-  "_openstat",
+	"utm_source",
+	"utm_medium",
+	"utm_campaign",
+	"utm_content",
+	"utm_term",
+	"utm_id",
+	"utm_referrer",
+	"utm_media",
+	"utm_group",
+	"utm_expid",
+	"yclid",
+	"ysclid",
+	"yrclid",
+	"gclid",
+	"_openstat",
 ] as const;
 
 export type TrackingQueryParam = (typeof trackingQueryParams)[number];
@@ -28,14 +28,14 @@ export type TrackingQueryParam = (typeof trackingQueryParams)[number];
 const trackingQueryParamSet = new Set<string>(trackingQueryParams);
 
 export type QueryParamPartition = {
-  functionalQueryString: string;
-  trackingQueryString: string;
+	functionalQueryString: string;
+	trackingQueryString: string;
 };
 
 export function isTrackingQueryParam(
-  parameter: string,
+	parameter: string,
 ): parameter is TrackingQueryParam {
-  return trackingQueryParamSet.has(parameter);
+	return trackingQueryParamSet.has(parameter);
 }
 
 /**
@@ -43,21 +43,25 @@ export function isTrackingQueryParam(
  * all server-side content decisions to the functional part of the request.
  */
 export function separateTrackingQueryParams(
-  queryString: string,
+	queryString: string,
 ): QueryParamPartition {
-  const functional = new URLSearchParams();
-  const tracking = new URLSearchParams();
+	const functional = new URLSearchParams();
+	const tracking = new URLSearchParams();
 
-  for (const [key, value] of new URLSearchParams(queryString)) {
-    (isTrackingQueryParam(key) ? tracking : functional).append(key, value);
-  }
+	for (const [key, value] of new URLSearchParams(queryString)) {
+		(isTrackingQueryParam(key) ? tracking : functional).append(key, value);
+	}
 
-  return {
-    functionalQueryString: functional.toString(),
-    trackingQueryString: tracking.toString(),
-  };
+	return {
+		functionalQueryString: functional.toString(),
+		trackingQueryString: tracking.toString(),
+	};
+}
+
+export function cleanParamValue(): string {
+	return trackingQueryParams.join("&");
 }
 
 export function cleanParamDirective(): string {
-  return `Clean-param: ${trackingQueryParams.join("&")}`;
+	return `Clean-param: ${cleanParamValue()}`;
 }

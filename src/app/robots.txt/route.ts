@@ -1,26 +1,9 @@
 import { renderDiscoveryRobots } from "../../core/seo/discovery-feeds.ts";
+import { cleanParamValue } from "../../core/seo/tracking-query-params.ts";
 import { getProjectIndexingPolicy } from "../../project/indexing-policy.ts";
 import { getSiteUrl } from "../../project/seo/site.ts";
 
 export const revalidate = 3600;
-
-const cleanParam = [
-	"utm_source",
-	"utm_medium",
-	"utm_campaign",
-	"utm_content",
-	"utm_term",
-	"utm_id",
-	"utm_referrer",
-	"utm_media",
-	"utm_group",
-	"utm_expid",
-	"yclid",
-	"ysclid",
-	"yrclid",
-	"gclid",
-	"_openstat",
-].join("&");
 
 export async function GET() {
 	const indexingEnabled = getProjectIndexingPolicy() === "public";
@@ -28,7 +11,7 @@ export async function GET() {
 		renderDiscoveryRobots({
 			publicOrigin: getSiteUrl(),
 			indexingEnabled,
-			cleanParam: indexingEnabled ? cleanParam : undefined,
+			cleanParam: indexingEnabled ? cleanParamValue() : undefined,
 		}),
 		{
 			headers: {
