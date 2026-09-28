@@ -8,6 +8,7 @@ import {
 } from "@ams/realtbase-ui";
 import { toMetadata } from "@/core/seo/page-metadata";
 import { getPublicHomePage } from "@/project/data-access/public";
+import { getProjectIndexingPolicy } from "@/project/indexing-policy";
 import {
 	buildOrganizationJsonLd,
 	buildWebsiteJsonLd,
@@ -18,7 +19,9 @@ export const revalidate = 3600;
 
 export async function generateMetadata() {
 	const home = await getPublicHomePage();
-	return toMetadata(home.page.seo);
+	return toMetadata(home.page.seo, {
+		globalIndexingPolicy: getProjectIndexingPolicy(),
+	});
 }
 
 export default async function HomePage() {

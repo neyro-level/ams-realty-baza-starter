@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { composeFinalRobots } from "../src/core/seo/final-robots.ts";
+import { toOpenGraphImage } from "../src/core/seo/page-metadata.ts";
 import { serializeJsonLdSafely } from "../src/core/seo/json-ld.ts";
 import {
 	resolvePropertyPageLifecycle,
@@ -26,6 +28,75 @@ assert.deepEqual(metadataRobotsForPolicy("noindex"), {
 	index: false,
 	follow: false,
 });
+assert.deepEqual(
+	toOpenGraphImage({
+		kind: "managed",
+		src: "/media/og.jpg",
+		alt: "Managed OG",
+	}),
+	{ url: "/media/og.jpg", alt: "Managed OG", width: undefined, height: undefined },
+);
+assert.deepEqual(
+	toOpenGraphImage({
+		kind: "external",
+		src: "https://images.example.test/og.jpg",
+		alt: "External OG",
+	}),
+	{
+		url: "https://images.example.test/og.jpg",
+		alt: "External OG",
+		width: undefined,
+		height: undefined,
+	},
+);
+assert.equal(
+	toOpenGraphImage({
+		kind: "external",
+		src: "http://images.example.test/og.jpg",
+		alt: "Rejected OG",
+	}),
+	undefined,
+);
+assert.deepEqual(
+	composeFinalRobots("noindex", { indexing: "index", following: "follow" }),
+	{ index: false, follow: false },
+	"global noindex must never be raised by an indexable page",
+);
+assert.deepEqual(
+	composeFinalRobots("public", { indexing: "index", following: "follow" }),
+	{ index: true, follow: true },
+);
+assert.deepEqual(
+	composeFinalRobots(
+		resolveIndexingPolicy({
+			projectKind: "client",
+			productionIndexing: "noindex",
+		}),
+		{ indexing: "index", following: "follow" },
+	),
+	{ index: false, follow: false },
+	"client noindex policy must never be raised by an indexable page",
+);
+assert.deepEqual(
+	composeFinalRobots(
+		resolveIndexingPolicy({
+			projectKind: "client",
+			productionIndexing: "public",
+		}),
+		{ indexing: "index", following: "follow" },
+	),
+	{ index: true, follow: true },
+);
+assert.deepEqual(
+	composeFinalRobots("public", { indexing: "noindex", following: "follow" }),
+	{ index: false, follow: true },
+	"page-level Content Gate noindex must narrow a public client policy",
+);
+assert.deepEqual(
+	composeFinalRobots("public", { indexing: "noindex", following: "follow" }),
+	{ index: false, follow: true },
+	"archived lifecycle noindex must stay noindex",
+);
 assert.deepEqual(buildRobots("noindex", fixtureOrigin), {
 	rules: [{ userAgent: "*", disallow: "/" }],
 });
@@ -51,13 +122,13 @@ assert.deepEqual(
 	{ rules: [{ userAgent: "*", disallow: "/" }] },
 );
 assert.ok(
-	readFileSync("src/app/robots.ts", "utf8").includes(
-		"renderDiscoveryRobots({ publicOrigin, indexingEnabled })",
+	readFileSync("src/app/robots.txt/route.ts", "utf8").includes(
+		"renderDiscoveryRobots({",
 	),
 );
 assert.ok(
 	readFileSync("src/app/layout.tsx", "utf8").includes(
-		"metadataRobotsForPolicy(getProjectIndexingPolicy())",
+		"toPublicSiteMetadata",
 	),
 );
 

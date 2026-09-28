@@ -52,6 +52,9 @@ assert.ok(
 	operations.includes("Independent alert channel"),
 	"Operations must pin an independent alert channel",
 );
+assert.match(operations, /`\/robots\.txt`, `\/sitemap\.xml`/);
+assert.match(operations, /expected sitemap shard/);
+assert.match(operations, /previously observed public URLs/);
 assert.ok(
 	operations.includes("ALERT_WEBHOOK_URL"),
 	"Operations must name the primary alert destination",

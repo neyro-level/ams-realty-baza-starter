@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { clientReadinessConfig } from "./client-readiness.config.ts";
+import { isApprovedProductionPublicOrigin } from "./public-origin.ts";
 import { siteConfig } from "./site.config.ts";
 
 const booleanString = z
@@ -181,6 +182,9 @@ export function evaluateRuntimeEnv(
 		const siteUrl = env.NEXT_PUBLIC_SERVER_URL?.trim();
 		if (siteUrl && !isHttpOrigin(siteUrl))
 			addInvalid(missing, "NEXT_PUBLIC_SERVER_URL");
+		if (siteUrl && !isApprovedProductionPublicOrigin(siteUrl)) {
+			addInvalid(missing, "NEXT_PUBLIC_SERVER_URL");
+		}
 		if (env.PAYLOAD_DB_PUSH === "true") addInvalid(missing, "PAYLOAD_DB_PUSH");
 		if ((env.CACHE_INVALIDATION_MODE?.trim() || "http") === "http") {
 			if (!env.REVALIDATE_SECRET?.trim())

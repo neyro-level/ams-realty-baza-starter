@@ -12,6 +12,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { toMetadata } from "@/core/seo/page-metadata";
 import { projectCopy } from "@/project/copy";
+import { getProjectIndexingPolicy } from "@/project/indexing-policy";
 import { leadConsentContext } from "@/project/legal.config";
 import { pageHref } from "@/project/routing/catalog-search-params";
 import { resolveRuntimeRoute } from "@/project/routing/runtime-route";
@@ -111,7 +112,7 @@ export async function generateMetadata({
 		canonicalPath: result.decision.canonicalPath,
 		indexing: result.decision.robots.indexing,
 		following: result.decision.robots.following,
-	});
+	}, { globalIndexingPolicy: getProjectIndexingPolicy() });
 }
 
 export default async function CanonicalRuntimePage({

@@ -191,6 +191,12 @@ assert.match(sitemapProvider, /resolveRouteDecision/);
 assert.match(sitemapProvider, /decideResolvedPage/);
 assert.match(sitemapProvider, /gate,/);
 
+const sitemapRoute = readFileSync("src/app/sitemap.ts", "utf8");
+assert.match(sitemapRoute, /console\.error\("Sitemap discovery failed"/);
+assert.match(sitemapRoute, /throw error/);
+assert.doesNotMatch(sitemapRoute, /catch\s*\{\s*return/);
+assert.match(sitemapRoute, /shards\.length \? shards\.map/);
+
 console.log(
 	"Discovery feeds verified: five profiles, groups, shards, lastmod, XML and robots.",
 );
