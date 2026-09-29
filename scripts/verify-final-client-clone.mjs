@@ -13,7 +13,10 @@ import {
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { hashStarterOwnedFiles, starterOwnedFiles } from "./starter-ownership.mjs";
+import {
+	hashStarterOwnedFiles,
+	starterOwnedFiles,
+} from "./starter-ownership.mjs";
 
 const root = process.cwd();
 const matrix = [
@@ -34,7 +37,13 @@ const matrix = [
 		geoCount: 1,
 	},
 	{ name: "multi-geo", preset: "MIXED", geoMode: "MULTI_GEO", geoCount: 2 },
-	{ name: "districts-legacy", preset: "MIXED", geoMode: "SINGLE_GEO", geoCount: 1, districtsLegacy: true },
+	{
+		name: "districts-legacy",
+		preset: "MIXED",
+		geoMode: "SINGLE_GEO",
+		geoCount: 1,
+		districtsLegacy: true,
+	},
 ];
 const runtimeMatrix = process.env.AMS_CLONE_RUNTIME === "1";
 const selectedProfile = process.env.AMS_CLONE_PROFILE;
@@ -77,17 +86,20 @@ function safeFailure(entry, step, error) {
 			: "unknown";
 	const diagnostic =
 		process.env.AMS_CLONE_DEBUG === "1"
-			? `\n${[error?.stdout, error?.stderr, error?.message]
-					.filter((value) => value !== undefined && String(value).trim())
-					.map(String)
-					.join("\n") || "unknown failure"}`
+			? `\n${
+					[error?.stdout, error?.stderr, error?.message]
+						.filter((value) => value !== undefined && String(value).trim())
+						.map(String)
+						.join("\n") || "unknown failure"
+				}`
 			: "";
 	return new Error(
 		`verify:clone-matrix: ${entry.name} FAIL at ${step} (exit ${exitCode}); command output omitted and disposable worktree removed${diagnostic}`,
 	);
 }
 
-const wait = (milliseconds) => new Promise((resolvePromise) => setTimeout(resolvePromise, milliseconds));
+const wait = (milliseconds) =>
+	new Promise((resolvePromise) => setTimeout(resolvePromise, milliseconds));
 
 async function availablePort() {
 	return new Promise((resolvePromise, reject) => {
@@ -96,13 +108,17 @@ async function availablePort() {
 		server.listen(0, "127.0.0.1", () => {
 			const address = server.address();
 			const port = typeof address === "object" && address ? address.port : 0;
-			server.close((error) => error ? reject(error) : resolvePromise(port));
+			server.close((error) => (error ? reject(error) : resolvePromise(port)));
 		});
 	});
 }
 
 function docker(args, options = {}) {
-	return execFileSync("docker", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options }).trim();
+	return execFileSync("docker", args, {
+		encoding: "utf8",
+		stdio: ["ignore", "pipe", "pipe"],
+		...options,
+	}).trim();
 }
 
 function dockerContainerExists(containerName) {
@@ -110,7 +126,11 @@ function dockerContainerExists(containerName) {
 		docker(["inspect", "--format", "{{.Id}}", containerName]);
 		return true;
 	} catch (error) {
-		if (error?.status === 1 && /no such object/i.test(String(error?.stderr ?? ""))) return false;
+		if (
+			error?.status === 1 &&
+			/no such object/i.test(String(error?.stderr ?? ""))
+		)
+			return false;
 		throw error;
 	}
 }
@@ -127,7 +147,18 @@ function processExists(processId) {
 async function waitForPostgres(containerName) {
 	for (let attempt = 0; attempt < 60; attempt += 1) {
 		try {
-			if (docker(["exec", containerName, "pg_isready", "-U", "postgres", "-d", "clone_runtime"]).includes("accepting connections")) return;
+			if (
+				docker([
+					"exec",
+					containerName,
+					"pg_isready",
+					"-U",
+					"postgres",
+					"-d",
+					"clone_runtime",
+				]).includes("accepting connections")
+			)
+				return;
 		} catch {}
 		await wait(1000);
 	}
@@ -137,7 +168,9 @@ async function waitForPostgres(containerName) {
 async function waitForHttp(origin, serverProcess, serverLogs) {
 	for (let attempt = 0; attempt < 90; attempt += 1) {
 		if (serverProcess.exitCode !== null) {
-			throw new Error(`Disposable Next runtime exited before readiness. ${serverLogs().slice(-1000)}`);
+			throw new Error(
+				`Disposable Next runtime exited before readiness. ${serverLogs().slice(-1000)}`,
+			);
 		}
 		try {
 			const response = await fetch(`${origin}/robots.txt`);
@@ -145,19 +178,26 @@ async function waitForHttp(origin, serverProcess, serverLogs) {
 		} catch {}
 		await wait(1000);
 	}
-	throw new Error(`Disposable Next runtime did not become ready. ${serverLogs().slice(-1000)}`);
+	throw new Error(
+		`Disposable Next runtime did not become ready. ${serverLogs().slice(-1000)}`,
+	);
 }
 
 function findStatusPath(bootstrap, status) {
-	for (const [category, value] of Object.entries(bootstrap.categoryStatus ?? {})) {
+	for (const [category, value] of Object.entries(
+		bootstrap.categoryStatus ?? {},
+	)) {
 		if (value === status) return `/${category}/`;
 	}
-	for (const [geo, categories] of Object.entries(bootstrap.geoCategoryStatus ?? {})) {
+	for (const [geo, categories] of Object.entries(
+		bootstrap.geoCategoryStatus ?? {},
+	)) {
 		for (const [category, value] of Object.entries(categories)) {
 			if (value === status) return `/${geo}/${category}/`;
 		}
 	}
-	for (const geo of bootstrap.geos ?? []) if (geo.hubStatus === status) return `/${geo.slug}/`;
+	for (const geo of bootstrap.geos ?? [])
+		if (geo.hubStatus === status) return `/${geo.slug}/`;
 	return null;
 }
 
@@ -165,7 +205,11 @@ async function proveRuntime(origin, bootstrap) {
 	const request = async (path, expected) => {
 		const response = await fetch(new URL(path, origin), { redirect: "manual" });
 		const body = await response.text();
-		assert.equal(response.status, expected, `${path} expected ${expected}, got ${response.status}: ${body.slice(0, 500)}`);
+		assert.equal(
+			response.status,
+			expected,
+			`${path} expected ${expected}, got ${response.status}: ${body.slice(0, 500)}`,
+		);
 		return { response, body };
 	};
 	const activePath = `/${bootstrap.primaryGeo}/`;
@@ -178,14 +222,25 @@ async function proveRuntime(origin, bootstrap) {
 	const legacy = bootstrap.legacyRoutes?.[0];
 	assert.ok(legacy, "runtime proof requires an exact legacy route");
 	const legacyResult = await request(legacy.from, 301);
-	assert.equal(new URL(legacyResult.response.headers.get("location"), origin).pathname, legacy.to);
+	assert.equal(
+		new URL(legacyResult.response.headers.get("location"), origin).pathname,
+		legacy.to,
+	);
 	const direct = await request(legacy.to, 200);
-	assert.ok(direct.response.status < 300, "legacy target must not redirect again");
-	const draft = bootstrap.seoRegistry.rows.find((row) => row.status === "draft" && row.url === activePath)
-		?? bootstrap.seoRegistry.rows.find((row) => row.status === "draft");
+	assert.ok(
+		direct.response.status < 300,
+		"legacy target must not redirect again",
+	);
+	const draft =
+		bootstrap.seoRegistry.rows.find(
+			(row) => row.status === "draft" && row.url === activePath,
+		) ?? bootstrap.seoRegistry.rows.find((row) => row.status === "draft");
 	assert.ok(draft, "runtime proof requires a draft registry row");
 	const draftResult = await request(draft.url, 200);
-	assert.match(`${draftResult.response.headers.get("x-robots-tag") ?? ""}\n${draftResult.body}`, /noindex/i);
+	assert.match(
+		`${draftResult.response.headers.get("x-robots-tag") ?? ""}\n${draftResult.body}`,
+		/noindex/i,
+	);
 	const robots = await request("/robots.txt", 200);
 	assert.match(robots.body, /user-agent:/i);
 	assert.match(robots.body, /disallow:\s*\//i);
@@ -208,7 +263,8 @@ for (const entry of selectedMatrix) {
 			cwd: root,
 			stdio: "pipe",
 		});
-		for (const relativePath of new Set([...starterOwnedFiles(root),
+		for (const relativePath of new Set([
+			...starterOwnedFiles(root),
 			"public/brand/logo.svg",
 			"scripts/seo-registry.ts",
 			"scripts/seo-registry-output.mjs",
@@ -250,17 +306,21 @@ for (const entry of selectedMatrix) {
 							prepositional: "Тестограде",
 							preposition: "в",
 						},
-						districts: entry.districtsLegacy ? [{
-							slug: "centralnyy",
-							name: "Центральный район",
-							type: "admin_district",
-							locative: "Центральном районе",
-							adjLocative: "Центральном",
-							adjGenitive: "Центрального",
-							preposition: "в",
-							synonyms: ["Центр"],
-							parent: null,
-						}] : [],
+						districts: entry.districtsLegacy
+							? [
+									{
+										slug: "centralnyy",
+										name: "Центральный район",
+										type: "admin_district",
+										locative: "Центральном районе",
+										adjLocative: "Центральном",
+										adjGenitive: "Центрального",
+										preposition: "в",
+										synonyms: ["Центр"],
+										parent: null,
+									},
+								]
+							: [],
 					},
 					...Array.from({ length: entry.geoCount - 1 }, (_, index) =>
 						entry.geoMode === "MULTI_GEO"
@@ -335,11 +395,19 @@ for (const entry of selectedMatrix) {
 					},
 					geos,
 					categoryStatus,
-					geoCategoryStatus: Object.fromEntries(geos.map((geo) => [geo.slug, categoryStatus])),
+					geoCategoryStatus: Object.fromEntries(
+						geos.map((geo) => [geo.slug, categoryStatus]),
+					),
 					seoFacets: {},
 					seoTiers: clientExample.seoTiers,
 					staticRoutes: clientExample.staticRoutes,
-					legacyRoutes: [{ from: `/legacy-${entry.name}`, to: `/${primarySlug}/`, statusCode: 301 }],
+					legacyRoutes: [
+						{
+							from: `/legacy-${entry.name}`,
+							to: `/${primarySlug}/`,
+							statusCode: 301,
+						},
+					],
 					legacyPatterns: clientExample.legacyPatterns,
 					nap: {
 						phone: "+7 900 000-00-00",
@@ -459,13 +527,32 @@ for (const entry of selectedMatrix) {
 			step = "build prepared client";
 			pnpm(clone, ["build"], proofEnvironment);
 			step = "start disposable PostgreSQL";
-			containerName = `ams-plan11-${process.pid}-${entry.name}`.replace(/[^a-z0-9_.-]/g, "-");
-				docker(["run", "-d", "--rm", "--name", containerName, "-e", "POSTGRES_PASSWORD=fixture-clone-runtime-password", "-e", "POSTGRES_DB=clone_runtime", "-p", "127.0.0.1::5432", "postgres:18-alpine"]);
+			containerName = `ams-plan11-${process.pid}-${entry.name}`.replace(
+				/[^a-z0-9_.-]/g,
+				"-",
+			);
+			docker([
+				"run",
+				"-d",
+				"--rm",
+				"--name",
+				containerName,
+				"-e",
+				"POSTGRES_PASSWORD=fixture-clone-runtime-password",
+				"-e",
+				"POSTGRES_DB=clone_runtime",
+				"-p",
+				"127.0.0.1::5432",
+				"postgres:18-alpine",
+			]);
 			await waitForPostgres(containerName);
 			const mapped = docker(["port", containerName, "5432/tcp"]);
 			const databasePort = mapped.split(":").at(-1).trim();
 			const appPort = await availablePort();
 			const origin = `http://127.0.0.1:${appPort}`;
+			const bootstrap = JSON.parse(
+				readFileSync(join(clone, "docs/CLIENT_BOOTSTRAP.json"), "utf8"),
+			);
 			const mediaDir = join(clone, ".runtime-media");
 			mkdirSync(mediaDir, { recursive: true });
 			const runtimeEnvironment = {
@@ -474,9 +561,11 @@ for (const entry of selectedMatrix) {
 				TZ: "Europe/Moscow",
 				DATABASE_URI: `postgresql://postgres:fixture-clone-runtime-password@127.0.0.1:${databasePort}/clone_runtime`,
 				PAYLOAD_SECRET: "clone-runtime-payload-secret-at-least-32-characters",
-				REVALIDATE_SECRET: "clone-runtime-revalidate-secret-at-least-32-characters",
-				INTERNAL_HEALTH_SECRET: "clone-runtime-health-secret-at-least-32-characters",
-				NEXT_PUBLIC_SERVER_URL: origin,
+				REVALIDATE_SECRET:
+					"clone-runtime-revalidate-secret-at-least-32-characters",
+				INTERNAL_HEALTH_SECRET:
+					"clone-runtime-health-secret-at-least-32-characters",
+				NEXT_PUBLIC_SERVER_URL: `https://${bootstrap.domain}`,
 				INTERNAL_REVALIDATE_BASE_URL: origin,
 				MEDIA_DIR: mediaDir,
 				ARCHIVE_RETENTION_DAYS: "30",
@@ -488,20 +577,36 @@ for (const entry of selectedMatrix) {
 			step = "seed geo";
 			pnpm(clone, ["clone:seed-geo"], runtimeEnvironment);
 			step = "start disposable client runtime";
-			serverProcess = spawn(process.execPath, [process.env.npm_execpath, "exec", "next", "start", "-p", String(appPort)], {
-				cwd: clone,
-				env: { ...runtimeEnvironment, NODE_ENV: "production" },
-				stdio: ["ignore", "pipe", "pipe"],
+			serverProcess = spawn(
+				process.execPath,
+				[
+					process.env.npm_execpath,
+					"exec",
+					"next",
+					"start",
+					"-p",
+					String(appPort),
+				],
+				{
+					cwd: clone,
+					env: { ...runtimeEnvironment, NODE_ENV: "production" },
+					stdio: ["ignore", "pipe", "pipe"],
+				},
+			);
+			serverProcess.stdout.on("data", (chunk) => {
+				serverOutput = `${serverOutput}${chunk}`.slice(-10000);
 			});
-			serverProcess.stdout.on("data", (chunk) => { serverOutput = `${serverOutput}${chunk}`.slice(-10000); });
-			serverProcess.stderr.on("data", (chunk) => { serverOutput = `${serverOutput}${chunk}`.slice(-10000); });
+			serverProcess.stderr.on("data", (chunk) => {
+				serverOutput = `${serverOutput}${chunk}`.slice(-10000);
+			});
 			await waitForHttp(origin, serverProcess, () => serverOutput);
 			step = "run HTTP smoke";
-			const bootstrap = JSON.parse(readFileSync(join(clone, "docs/CLIENT_BOOTSTRAP.json"), "utf8"));
 			try {
 				await proveRuntime(origin, bootstrap);
 			} catch (error) {
-				throw new Error(`${String(error?.message ?? error)}\n${serverOutput.slice(-2000)}`);
+				throw new Error(
+					`${String(error?.message ?? error)}\n${serverOutput.slice(-2000)}`,
+				);
 			}
 		}
 		assert.equal(
@@ -561,21 +666,36 @@ for (const entry of selectedMatrix) {
 	} finally {
 		if (serverProcess && serverProcess.exitCode === null) {
 			try {
-				if (process.platform === "win32") execFileSync("taskkill", ["/PID", String(serverProcess.pid), "/T", "/F"], { stdio: "ignore" });
+				if (process.platform === "win32")
+					execFileSync(
+						"taskkill",
+						["/PID", String(serverProcess.pid), "/T", "/F"],
+						{ stdio: "ignore" },
+					);
 				else serverProcess.kill("SIGTERM");
 			} catch {}
 			await wait(250);
-			if (processExists(serverProcess.pid)) cleanupFailure ??= new Error(`Disposable process leaked: ${serverProcess.pid}`);
+			if (processExists(serverProcess.pid))
+				cleanupFailure ??= new Error(
+					`Disposable process leaked: ${serverProcess.pid}`,
+				);
 		}
 		serverProcess?.stdout?.destroy();
 		serverProcess?.stderr?.destroy();
 		serverProcess?.unref();
 		if (containerName) {
-			try { docker(["rm", "-f", containerName]); } catch {}
 			try {
-				if (dockerContainerExists(containerName)) cleanupFailure ??= new Error(`Disposable container leaked: ${containerName}`);
+				docker(["rm", "-f", containerName]);
+			} catch {}
+			try {
+				if (dockerContainerExists(containerName))
+					cleanupFailure ??= new Error(
+						`Disposable container leaked: ${containerName}`,
+					);
 			} catch (error) {
-				cleanupFailure ??= new Error(`Unable to prove disposable container cleanup: ${String(error?.message ?? error)}`);
+				cleanupFailure ??= new Error(
+					`Unable to prove disposable container cleanup: ${String(error?.message ?? error)}`,
+				);
 			}
 		}
 		try {
@@ -586,7 +706,8 @@ for (const entry of selectedMatrix) {
 		} catch {
 			rmSync(clone, { recursive: true, force: true });
 		}
-		if (existsSync(clone)) cleanupFailure ??= new Error(`Disposable worktree leaked: ${clone}`);
+		if (existsSync(clone))
+			cleanupFailure ??= new Error(`Disposable worktree leaked: ${clone}`);
 		rmSync(presetPath, { force: true });
 	}
 	if (cleanupFailure) throw cleanupFailure;
