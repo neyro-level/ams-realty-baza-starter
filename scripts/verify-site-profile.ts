@@ -281,6 +281,20 @@ assert.throws(
 			geoMode: "SINGLE_GEO",
 			primaryGeo: "primorsk",
 			geos: { primorsk: { published: true, hubStatus: "ACTIVE" } },
+			legacyRoutes: [
+				{ from: "/old-a", to: "/kvartiry", statusCode: 301 },
+			],
+		}),
+	/legacyRoutes\[0\]\.to must be a canonical project URL/,
+);
+assert.throws(
+	() =>
+		createPresetSiteProfileConfig({
+			projectKind: "starter-demo",
+			preset: "MIXED",
+			geoMode: "SINGLE_GEO",
+			primaryGeo: "primorsk",
+			geos: { primorsk: { published: true, hubStatus: "ACTIVE" } },
 			categoryStatus: { kvartiry: "ACTIVE" } as never,
 		}),
 	/categoryStatus/,
