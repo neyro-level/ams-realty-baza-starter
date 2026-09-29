@@ -102,11 +102,11 @@
 		},
 		{
 			"command": "verify:runtime-seo-templates",
-			"capabilities": [
-				"legacy-canonical-targets",
-				"seo-template-matrix",
-				"seo-crawl-matrix"
-			]
+			"capabilities": ["legacy-canonical-targets", "seo-template-matrix"]
+		},
+		{
+			"command": "verify:seo-crawl-matrix",
+			"capabilities": ["seo-crawl-matrix"]
 		},
 		{
 			"command": "verify:content-gate",

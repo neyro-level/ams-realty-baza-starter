@@ -99,6 +99,7 @@
 		"verify:runtime-cutover": "node --experimental-strip-types scripts/verify-runtime-cutover.ts",
 		"verify:runtime-content-gate": "node scripts/verify-runtime-content-gate.mjs",
 		"verify:runtime-seo-templates": "node scripts/verify-runtime-seo-templates.mjs",
+		"verify:seo-crawl-matrix": "node scripts/verify-seo-crawl-matrix.mjs",
 		"verify:district-template-matrix": "node --experimental-strip-types scripts/verify-district-template-matrix.ts",
 		"verify:structured-data": "node --experimental-strip-types scripts/verify-structured-data.ts",
 		"verify:catalog-query": "node --experimental-strip-types scripts/verify-catalog-query.ts",
