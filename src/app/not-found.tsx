@@ -4,7 +4,7 @@ import { projectCopy } from "@/project/copy";
 
 export default function NotFound() {
 	return (
-		<main>
+		<div>
 			<Section space="hero">
 				<Container size="narrow" className="text-center">
 					<p className="text-label font-bold uppercase tracking-wide-role text-action-primary">
@@ -28,6 +28,6 @@ export default function NotFound() {
 					</div>
 				</Container>
 			</Section>
-		</main>
+		</div>
 	);
 }

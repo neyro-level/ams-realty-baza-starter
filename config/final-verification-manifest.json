@@ -189,7 +189,7 @@
 			"capabilities": ["ui-core", "design-source-of-truth"]
 		},
 		{
-			"command": "verify:ui-browser",
+			"command": "verify:ui-browser:final",
 			"capabilities": ["ui-browser-proof"]
 		},
 		{
