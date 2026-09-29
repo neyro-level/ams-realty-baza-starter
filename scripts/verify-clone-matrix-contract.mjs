@@ -27,12 +27,12 @@ for (const step of [
 	"run HTTP smoke",
 	"verify:site-profile",
 	"dockerContainerExists",
-	"git worktree remove",
 ]) {
 	assert.ok(source.includes(step), `clone matrix missing step ${step}`);
 }
 
 assert.match(runtimeOwner, /AMS_CLONE_RUNTIME\s*=\s*"1"/);
+assert.match(source, /\["worktree",\s*"remove",\s*"--force"/);
 assert.match(
 	source,
 	/NEXT_PUBLIC_SERVER_URL:\s*`https:\/\/\$\{bootstrap\.domain\}`/,
