@@ -18,6 +18,11 @@ Anti-goals: новый visual language без owner approval; вторая primi
 
 `src/project/brand.css` — единственный источник 20–30 generated project brand primitives: base/status colors, approved main radii и font family. `src/app/globals.css` — единственный semantic/component token map: typography scale/weights, containers, section rhythm, easing, shadows, component roles и shadcn mappings. Он потребляет brand primitives только через `var()`/`color-mix()`.
 
+Brand primitives генерируются из approved preset schema v3 при подготовке
+snapshot clone. `starter:upgrade` не превращает client brand в starter-owned
+слой: ownership определяется `starter-owned.json` schema v2, а конфликт
+останавливает upgrade без тихой перезаписи.
+
 Другой CSS может описывать grid, flex, positioning, sizing relationships и responsive composition, но получает design values через `var(--*)`. Component-specific literals не образуют второй набор токенов.
 
 ## Token taxonomy

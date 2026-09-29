@@ -2,6 +2,12 @@
 
 Статус: `ACTIVE / CANONICAL GEO-CATALOG RUNTIME`.
 
+Текущая release identity не выводится из этого файла: canonical SHA/tag/Gate
+содержатся в `STARTER_RELEASE_STATE.md`. Индексацией владеет связка
+`src/project/indexing-policy.ts` + canonical resolver/Gate: tracking parameters
+не меняют content/canonical, а неизвестный functional query остаётся
+fail-closed. Production origin допускается только как approved HTTPS origin.
+
 ## Текущий публичный runtime
 
 P8-23A переключает динамический public runtime на canonical resolver. Статические

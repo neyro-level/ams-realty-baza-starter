@@ -3,6 +3,9 @@
 Статус: `Live owner-operated demo on AMS Server`. Контур `start-baza.ams24.ru` уже существует. Этот файл описывает факт и rollout, а не «первый сервер с нуля». PII retention days остаются `NEEDS_OWNER`; starter demo не объявляется PII-production-ready.
 
 Этот файл хранит только проектные runbooks. Архитектурные инварианты находятся в `03_ARCHITECTURE.md`, а release gates — в `05_RELEASE_CHECKLIST.md`.
+Точная текущая release identity и отсутствие/наличие live proof фиксируются в
+`STARTER_RELEASE_STATE.md`; существование demo-контура само по себе не является
+proof для текущего SHA.
 
 ## Live contour (AMS Server)
 
@@ -36,6 +39,7 @@ database: local PostgreSQL 18 on AMS Server for this owner-approved starter depl
 storage: persistent MEDIA_DIR, no S3 runtime
 secrets: isolated project-specific Secret Master scope
 indexing: noindex until owner explicitly promotes the instance
+public origin: exact https://start-baza.ams24.ru with no path/query/hash
 ```
 
 Immutable artifact format: full Next.js Docker image built from `Dockerfile` outside the production host. Server runtime uses `deploy/compose/start-baza.compose.yml`; public proxy uses `deploy/nginx/start-baza.ams24.ru.conf`. Release identity is recorded by `pnpm release:manifest`; generated `.release/` files are local evidence and are not committed. Обязательные границы: отдельная команда владельца, clean SourceCraft `main`, exact SHA, отсутствие build на production host, один rollout и live smoke. Известный рабочий artifact сохраняется для rollback.

@@ -7,26 +7,17 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Plan №8 v6 сохранён как historical evidence:
-  `docs/plan8/S8_25_FINAL_EXECUTION_REPORT.md`. Принятый implementation SHA —
-  `bd570ee40db9e25f73a24013be836dd3876282ac`; docs-only reconciliation слит в
-  SourceCraft `main@c5803cfbac5d2c1817451fdee6aa96e3b975934e`.
-- Последний исполненный execution source —
-  `docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md`, Plan №10 v4 `APPROVED`.
-  Все 22/22 узла закрыты тремя SourceCraft PR/Gate/merge cycles; итоговый
-  implementation merge — SourceCraft
-  `main@c08ea05721d434670885ad45b0f473f2642a155c`. В graph Plan №10 активных
-  задач нет. S15, release tag и production остаются отдельным
-  owner/release gate; репозиторное зеркало выполняется только по явной команде
-  владельца и не заменяет release proof. `.beads` не коммитится.
-- Текущий architecture source —
-  `docs/AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md`, Plan №11
-  `v4 APPROVED`, стадия `APPROVAL_HANDOFF`. Владелец утвердил exact v4 фразой
-  `План утверждён`.
-- Operational graph Plan №11 импортирован в локальный stealth Beads и прошёл
-  reconciliation `CLEAN`: `4 epic + 26 task`, drift `0`, cycles `0`.
-  Developer goal активен; текущая READY implementation-задача —
-  `ams11-b1-t1`. `.beads` не коммитится.
+- Текущий execution source — локальный approved Plan №12 v4
+  `docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md`.
+  Его operational graph импортирован в stealth Beads и reconciled `CLEAN`:
+  `10 epic + 89 task`, drift `0`, cycles `0`; `.beads` не коммитится.
+- Plan №11 исполнен и читается только как `EXECUTION_COMPLETE / EVIDENCE`.
+  Post-merge evidence: `docs/evidence/plan11/POST_MERGE_DELIVERY.md`.
+- Текущее состояние release/tag/SHA/Gate хранится только в
+  `docs/STARTER_RELEASE_STATE.md`; исторические планы не переопределяют его.
+- Статусы старых plans/evidence определяет
+  `docs/HISTORICAL_DOCUMENT_POLICY.md`; пути со статусом `HISTORICAL`,
+  `SUPERSEDED` или `EVIDENCE ONLY` запрещено читать как execution queue.
 
 - `start-baza.ams24.ru` — owner-operated demo/template verification contour on AMS Server. Runtime: local PostgreSQL + persistent `MEDIA_DIR`. S3 и Timeweb Managed PostgreSQL не являются starter runtime; клиентский clone принимает собственное topology decision (`docs/CLONE_ONBOARDING.md`).
 
@@ -38,25 +29,25 @@
    `04_BACKLOG.md` по scope.
 4. `docs/PROJECT.md` — решения этого starter instance.
 5. `docs/DESIGN.md` или `docs/OPERATIONS.md` по scope.
-6. `docs/AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md` — текущий
-   architecture scope; до approval не читать как execution queue.
-7. `docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md` — исполненный exact scope Plan
-   №10; читать как execution contract/evidence, а не как READY-очередь.
-8. Профильный ADR/module/research документ, только когда он входит в scope.
-9. `docs/plan8/`, `docs/proofs/` и `docs/legacy/` — только для evidence.
+6. `docs/STARTER_RELEASE_STATE.md` — текущая release identity и proof state.
+7. `docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md`
+   — текущий approved execution source Plan №12 v4.
+8. `docs/HISTORICAL_DOCUMENT_POLICY.md` перед чтением старого plan/evidence.
+9. Профильный ADR/module/research документ, только когда он входит в scope.
 
 ## Invariants
 
 - Один независимый stream = одна branch/worktree = один Pull Request.
 - Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
-- Планы №6–10 исполнены и не являются очередью работ. Существующий tag
-  `starter-freeze` остаётся историческим. Целевой tag `starter-v2.1.0` может
-  создаваться только после отдельного S15 preflight и по
-  отдельной явной release-команде владельца; production также требует
-  отдельной команды.
+- Планы №6–11 исполнены и не являются очередью работ. `starter-freeze` —
+  исторический tag; новый `starter-v2.MINOR.PATCH` выбирается и создаётся только
+  отдельной release-командой после завершения Plan №12. Production и mirror
+  также требуют отдельных явных команд.
 - Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.
 - Автономность не отменяет COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.
 - Production выполняется только по отдельной явной команде владельца.
+- Client Master Plan создаётся только от immutable released starter tag и
+  exact 40-character SourceCraft SHA этого tag; moving `main` не baseline.
 - Новые пароли, API tokens, SSH keys, database credentials и service credentials хранятся только в Secret Master. Для доступа к секретам использовать trigger `подключись к секрет мастеру`; для Git-доступов SourceCraft/GitHub — trigger `подключись к гид-сервису`. Значения секретов не печатать в чат, markdown, логи или git.
 - UI работает через замороженные presentation contracts и Public Gateway/fixture provider по режиму.
 - Payload не диктует форму UI; public data проходит через Gateway и DTO.

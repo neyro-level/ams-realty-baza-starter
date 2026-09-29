@@ -18,13 +18,29 @@ domain: start-baza.ams24.ru, noindex
 Это owner-operated verification contour. Его Nginx/Compose и локальное
 хранилище относятся только к starter demo.
 
+## Client Master Plan baseline
+
+Новый client Master Plan до импорта в Task Manager обязан зафиксировать оба
+неизменяемых значения:
+
+```text
+Starter tag: starter-v2.MINOR.PATCH
+Starter SourceCraft SHA: <exact 40-char SHA resolved from that tag>
+```
+
+Tag, SHA и release manifest должны описывать один опубликованный release.
+`main`, `origin/main`, branch name, `latest` или directory snapshot не являются
+допустимым baseline. Если tag ещё не опубликован либо SHA не совпал, подготовка
+плана и clone останавливается.
+
 ## B. One-day client clone checklist
 
 Этот маршрут выполняется последовательно. Переход к следующему шагу разрешён
 только после проверки output текущего. Неизвестное решение — `STOP`, а не
 скрытый default. Исходная точка — отдельный clean repository на опубликованном
 `starter-v2.MINOR.PATCH` с release manifest того же tag/SHA. Plan 11 не создаёт
-tag и не разрешает использовать непубликованный `starter-v2.2.0`.
+tag, а Plan 12 также не разрешает использовать непубликованный target. Текущий
+released-tag status проверяется по `STARTER_RELEASE_STATE.md`.
 
 ### 1. Intake
 
@@ -44,7 +60,7 @@ tag и не разрешает использовать непубликован
 - Input: clean checkout exact released tag, preset, exact 40-char SHA и release
   manifest из опубликованного release package.
 - Command:
-  `pnpm clone:prepare --preset-file=C:/secure/client-intake.preset.json --source-tag=starter-v2.2.0 --source-sha=<exact-tag-sha> --release-manifest=C:/secure/starter-v2.2.0.manifest.json`.
+  `pnpm clone:prepare --preset-file=C:/secure/client-intake.preset.json --source-tag=starter-v2.MINOR.PATCH --source-sha=<exact-tag-sha> --release-manifest=C:/secure/starter-v2.MINOR.PATCH.manifest.json`.
 - Output: client identity, SiteProfile, brand primitives, SEO seed,
   `docs/CLIENT_BOOTSTRAP.json`, provenance и generated-output hashes; demo
   fixture runtime удалён. Повтор с тем же preset — no-op.

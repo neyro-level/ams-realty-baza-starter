@@ -1,6 +1,6 @@
 # Upstream Candidates
 
-Статус: `ACTIVE / EMPTY REGISTER` (проверено после Plan №10 B1/B2).
+Статус: `ACTIVE / EMPTY REGISTER` (проверено в Plan №12 EPIC-09).
 
 Этот реестр хранит только наблюдения о потенциально reusable улучшениях,
 обнаруженных в проекте. Он не является backlog, вторым task store или
@@ -35,7 +35,8 @@ fixtures, migrations and client data upstream не переносятся.
    перенести минимальный platform fix и targeted regression test.
 4. Провести full diff review и соответствующий exact-head SourceCraft Gate.
 5. Только после merge записать canonical SHA как `PROMOTED`. Client получает
-   исправление позже обычным reviewable `starter:upgrade`; reverse/bidirectional
+   исправление позже явным reviewable `starter:upgrade` из immutable tag+SHA;
+   reverse/bidirectional
    sync, прямой cherry-pick client commit и автоматический merge запрещены.
 
 STOP: нет neutral reproduction, ownership не platform/starter, candidate

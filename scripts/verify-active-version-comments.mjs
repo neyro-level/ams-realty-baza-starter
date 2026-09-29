@@ -6,13 +6,35 @@ const root = process.cwd();
 const activeDocs = [
 	"README.md",
 	"PROJECT.md",
+	"02_PRODUCT_STRUCTURE.md",
 	"03_ARCHITECTURE.md",
+	"04_BACKLOG.md",
+	"05_RELEASE_CHECKLIST.md",
 	"CLONE_ONBOARDING.md",
 	"DESIGN.md",
+	"HISTORICAL_DOCUMENT_POLICY.md",
 	"OPERATIONS.md",
+	"STARTER_RELEASE_STATE.md",
+	"UPSTREAM_CANDIDATES.md",
 ].map((file) => join(root, "docs", file));
 const ignoredScriptDirectories = new Set(["demo", "fixtures"]);
-const stalePresetVersion = new RegExp("\\bpreset\\s+v" + "2\\b", "i");
+const staleCodeRules = [
+	{
+		pattern: new RegExp("\\bpreset\\s+v" + "2\\b", "i"),
+		message: "uses obsolete preset version 2",
+	},
+];
+const staleDocumentRules = [
+	...staleCodeRules,
+	{
+		pattern: new RegExp("\\bstarter-v2\\." + "(?:1|2)\\.0\\b", "i"),
+		message: "uses an obsolete concrete target release tag",
+	},
+	{
+		pattern: new RegExp("\\bPLAN\\s+" + "11\\s+v4\\s+APPROVED\\b", "i"),
+		message: "presents completed Plan 11 as the active status",
+	},
+];
 
 function filesUnder(directory, extensions, ignoredDirectories = new Set()) {
 	return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -26,31 +48,58 @@ function filesUnder(directory, extensions, ignoredDirectories = new Set()) {
 	});
 }
 
-function assertNoStalePresetVersion(content, path) {
-	assert.doesNotMatch(
-		content,
-		stalePresetVersion,
-		`${path} uses obsolete preset version 2`,
-	);
+function assertNoStaleVersion(content, path, rules = staleCodeRules) {
+	for (const rule of rules) {
+		assert.doesNotMatch(content, rule.pattern, `${path} ${rule.message}`);
+	}
 }
 
 assert.throws(
 	() =>
-		assertNoStalePresetVersion("/** Generated from preset v" + "2. */", "fixture"),
+		assertNoStaleVersion("/** Generated from preset v" + "2. */", "fixture"),
 	/obsolete preset version 2/,
 );
 assert.doesNotThrow(() =>
-	assertNoStalePresetVersion("Clone preset schemaVersion 2 is obsolete.", "fixture"),
+	assertNoStaleVersion("Clone preset schemaVersion 2 is obsolete.", "fixture"),
+);
+assert.throws(
+	() =>
+		assertNoStaleVersion(
+			"Target tag: starter-v2." + "2.0",
+			"fixture",
+			staleDocumentRules,
+		),
+	/obsolete concrete target release tag/,
+);
+assert.throws(
+	() =>
+		assertNoStaleVersion(
+			"Status: PLAN " + "11 v4 APPROVED",
+			"fixture",
+			staleDocumentRules,
+		),
+	/completed Plan 11/,
+);
+assert.doesNotThrow(() =>
+	assertNoStaleVersion("starter-owned.json schema v2", "fixture"),
 );
 
-const activeFiles = [
+const activeCodeFiles = [
 	...filesUnder(join(root, "src"), new Set(["ts", "tsx"])),
-	...filesUnder(join(root, "scripts"), new Set(["ts", "mjs"]), ignoredScriptDirectories),
-	join(root, "AGENTS.md"),
-	...activeDocs,
+	...filesUnder(
+		join(root, "scripts"),
+		new Set(["ts", "mjs"]),
+		ignoredScriptDirectories,
+	),
 ];
-for (const path of activeFiles) {
-	assertNoStalePresetVersion(readFileSync(path, "utf8"), path);
+const activeDocumentFiles = [join(root, "AGENTS.md"), ...activeDocs];
+for (const path of activeCodeFiles) {
+	assertNoStaleVersion(readFileSync(path, "utf8"), path);
+}
+for (const path of activeDocumentFiles) {
+	assertNoStaleVersion(readFileSync(path, "utf8"), path, staleDocumentRules);
 }
 
-console.log(`Active version-comment guard passed (${activeFiles.length} files).`);
+console.log(
+	`Active version-comment guard passed (${activeCodeFiles.length + activeDocumentFiles.length} files).`,
+);

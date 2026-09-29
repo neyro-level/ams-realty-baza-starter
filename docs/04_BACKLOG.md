@@ -1,6 +1,6 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 11 v4 APPROVED / TASK MANAGER CLEAN / DEVELOPER ACTIVE`.
+Статус: `ACTIVE / PLAN 12 v4 APPROVED / TASK MANAGER CLEAN / DEVELOPER ACTIVE`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
@@ -14,34 +14,21 @@ tag и production не входили в Developer graph и не разреше�
 команды владельца. Репозиторное зеркало выполняется отдельно и не разрешает
 release.
 
-Plan №10 «Clone-Ready 2.1» (`docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md`, v4
-APPROVED) исполнен полностью: Task Manager `22/22` closed, три approved
-`MERGE_AFTER_GATE` batch приняты PR 174/175/176, итоговый implementation merge
-— SourceCraft `main@c08ea05721d434670885ad45b0f473f2642a155c`.
-Production, tag и live target execution планом не разрешались.
+Планы №10 и №11 исполнены и остаются `EXECUTION_COMPLETE / EVIDENCE`.
+Текущие accepted SHA/tag/Gate/proof status принадлежат
+`STARTER_RELEASE_STATE.md`, а не этим историческим планам.
 
 ## NOW
 
-- Plan №11 «Clone Factory 2.2» находится в стадии `APPROVAL_HANDOFF`:
-  `docs/AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md`,
-  `v4 APPROVED`. Владелец утвердил exact v4; Task Manager import завершён,
-  reconciliation `CLEAN`, Developer goal активен.
-- `DECIDED P11-OD-01`: `komnaty=OUT`; отдельная route/schema/readiness-модель
-  не заявляется.
-- `DECIDED P11-OD-02`: `garazhi=OUT`; отдельная route/schema/readiness-модель
-  не заявляется.
-- `DECIDED P11-OD-03`: только 20–30 brand primitives живут в
-  `src/project/brand.css`, semantic/component map остаётся в
-  `src/app/globals.css`; Core, DESIGN и guards обновляются в B3-T1. До
-  реализации B3 текущий runtime canon не изменён.
-- `DECIDED P11-OD-04`: точные формы Souz baseline для Ростова-на-Дону,
-  Ленинского и Ворошиловского районов, Северного и Центра утверждены владельцем
-  и зафиксированы в Plan №11.
-- Повторный финальный аудит exact v4 выполнен: blockers `0`, cycles `0`, owner
-  decisions `0`, Night Run `READY_WITH_LIMITS`. Task Manager содержит
-  `4 epic + 26 task`; inventory drift `0`, graph cycles `0`.
-- Текущая READY implementation-задача — `ams11-b1-t1`; остальные узлы
-  открываются только по утверждённым зависимостям.
+- Текущий execution source — approved Plan №12 v4; operational graph содержит
+  `10 epic + 89 task`, reconciliation `CLEAN`, drift `0`, cycles `0`.
+- Developer последовательно выполняет READY-задачи Plan №12. Production,
+  release tag и GitHub mirror исключены из его authority.
+- Approved ownership: brand primitives — `src/project/brand.css`, semantic и
+  component tokens — `src/app/globals.css`; starter update boundary —
+  `starter-owned.json` schema v2; clone input — preset schema v3.
+- Souz reference ограничен source-backed subset; universal geo coverage
+  доказывается отдельной synthetic non-production fixture.
 - Поддерживать канонические документы и runtime без скрытого расширения scope.
 - Любая новая реализация начинается approved task contract и batch-owned
   рабочим потоком от актуального SourceCraft `main`.
@@ -50,11 +37,12 @@ Production, tag и live target execution планом не разрешалис�
 
 ## NEXT — только по команде владельца
 
-- Выполнить S15 preflight и создать immutable tag `starter-v2.1.0` только по
-  отдельной release-команде владельца.
+- После полного Plan №12 proof выбрать и создать следующий immutable
+  `starter-v2.MINOR.PATCH` только по отдельной release-команде владельца.
 - Выполнить release starter demo на `start-baza.ams24.ru`, включая immutable
   artifact, rollout, live smoke и rollback point.
-- Начать client clone только из exact `starter-v2.1.0` и утверждённого preset.
+- Начать client clone только из exact released tag + SourceCraft SHA и
+  утверждённого preset schema v3.
 - Для client production определить реальные `leadRetentionDays`,
   `archiveRetentionDays`, legal/indexing и topology decisions.
 

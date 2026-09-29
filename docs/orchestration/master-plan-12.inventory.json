@@ -1,0 +1,5541 @@
+{
+  "schema_version": 2,
+  "beads_prefix": "ams12",
+  "source": {
+    "plan_id": "AMS-REALTY-BAZA-STARTER-FINAL-COMMERCIAL-FREEZE",
+    "path": "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+    "version": "v4",
+    "status": "APPROVED",
+    "approved_by": "owner",
+    "approved_at": "2026-09-29T08:34:01+03:00",
+    "sha256": "dd8f1b2e2f19d7202128c958951c886336e061b08f8cdfd9eb0cbdeffd098ef4",
+    "epic_anchors": [
+      "EPIC-01",
+      "EPIC-02",
+      "EPIC-03",
+      "EPIC-04",
+      "EPIC-05",
+      "EPIC-06",
+      "EPIC-07",
+      "EPIC-08",
+      "EPIC-09",
+      "EPIC-10"
+    ]
+  },
+  "repositories": [
+    {
+      "key": "starter",
+      "remote": "https://git.sourcecraft.dev/integrator-p/ams-realty-baza-starter.git",
+      "default_branch": "main"
+    }
+  ],
+  "nodes": [
+    {
+      "key": "E01",
+      "title": "STARTER OWNERSHIP V2 AND UPGRADE BOUNDARY",
+      "type": "epic",
+      "source_anchor": "EPIC-01",
+      "goal": "Deliver the exact approved Plan 12 EPIC-01 outcome: STARTER OWNERSHIP V2 AND UPGRADE BOUNDARY.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-01 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-01 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:first",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E01-T1",
+      "title": "`starter-owned.json` schema v2",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "T1 — `starter-owned.json` schema v2",
+      "goal": "Implement the exact approved EPIC-01 / T1 contract: `starter-owned.json` schema v2.",
+      "scope": [
+        "Exact Plan 12 EPIC-01 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-01 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E01-T2",
+      "title": "Platform coverage",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "T2 — Platform coverage",
+      "goal": "Implement the exact approved EPIC-01 / T2 contract: Platform coverage.",
+      "scope": [
+        "Exact Plan 12 EPIC-01 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-01 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E01-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E01-T3",
+      "title": "Collection/migration invariant",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "T3 — Collection/migration invariant",
+      "goal": "Implement the exact approved EPIC-01 / T3 contract: Collection/migration invariant.",
+      "scope": [
+        "Exact Plan 12 EPIC-01 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-01 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E01-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E01-T4",
+      "title": "Generated-file regeneration contract",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "T4 — Generated-file regeneration contract",
+      "goal": "Implement the exact approved EPIC-01 / T4 contract: Generated-file regeneration contract.",
+      "scope": [
+        "Exact Plan 12 EPIC-01 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-01 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E01-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E01-T5",
+      "title": "`package.json` structured merge",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "T5 — `package.json` structured merge",
+      "goal": "Implement the exact approved EPIC-01 / T5 contract: `package.json` structured merge.",
+      "scope": [
+        "Exact Plan 12 EPIC-01 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-01 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E01-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E01-T6",
+      "title": "Composite-file framework",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "T6 — Composite-file framework",
+      "goal": "Implement the exact approved EPIC-01 / T6 contract: Composite-file framework.",
+      "scope": [
+        "Exact Plan 12 EPIC-01 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-01 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E01-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E01-T7",
+      "title": "Client modification safety",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "T7 — Client modification safety",
+      "goal": "Implement the exact approved EPIC-01 / T7 contract: Client modification safety.",
+      "scope": [
+        "Exact Plan 12 EPIC-01 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-01 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E01-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E01-T8",
+      "title": "Snapshot remains default",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "T8 — Snapshot remains default",
+      "goal": "Implement the exact approved EPIC-01 / T8 contract: Snapshot remains default.",
+      "scope": [
+        "Exact Plan 12 EPIC-01 / T8 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-01 / T8 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E01-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E01-D",
+      "title": "Deliver EPIC-01",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "EPIC-01",
+      "goal": "Deliver EPIC-01 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-01 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E01-T1",
+        "E01-T2",
+        "E01-T3",
+        "E01-T4",
+        "E01-T5",
+        "E01-T6",
+        "E01-T7",
+        "E01-T8"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02",
+      "title": "GLOBAL INDEXING, METADATA, DISCOVERY AND PUBLIC ORIGIN",
+      "type": "epic",
+      "source_anchor": "EPIC-02",
+      "goal": "Deliver the exact approved Plan 12 EPIC-02 outcome: GLOBAL INDEXING, METADATA, DISCOVERY AND PUBLIC ORIGIN.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-02 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-02 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:first",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E02-T1",
+      "title": "Final robots composition",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "T1 — Final robots composition",
+      "goal": "Implement the exact approved EPIC-02 / T1 contract: Final robots composition.",
+      "scope": [
+        "Exact Plan 12 EPIC-02 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-02 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02-T2",
+      "title": "Single metadata adapter",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "T2 — Single metadata adapter",
+      "goal": "Implement the exact approved EPIC-02 / T2 contract: Single metadata adapter.",
+      "scope": [
+        "Exact Plan 12 EPIC-02 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-02 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E02-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02-T3",
+      "title": "OG completeness",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "T3 — OG completeness",
+      "goal": "Implement the exact approved EPIC-02 / T3 contract: OG completeness.",
+      "scope": [
+        "Exact Plan 12 EPIC-02 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-02 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E02-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02-T4",
+      "title": "Production HTTPS fail-closed",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "T4 — Production HTTPS fail-closed",
+      "goal": "Implement the exact approved EPIC-02 / T4 contract: Production HTTPS fail-closed.",
+      "scope": [
+        "Exact Plan 12 EPIC-02 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-02 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E02-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02-T5",
+      "title": "Sitemap failure semantics",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "T5 — Sitemap failure semantics",
+      "goal": "Implement the exact approved EPIC-02 / T5 contract: Sitemap failure semantics.",
+      "scope": [
+        "Exact Plan 12 EPIC-02 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-02 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E02-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02-T6",
+      "title": "Sitemap monitor",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "T6 — Sitemap monitor",
+      "goal": "Implement the exact approved EPIC-02 / T6 contract: Sitemap monitor.",
+      "scope": [
+        "Exact Plan 12 EPIC-02 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-02 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E02-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02-T7",
+      "title": "Exact custom robots route contract",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "T7 — Exact custom robots route contract",
+      "goal": "Implement the exact approved EPIC-02 / T7 contract: Exact custom robots route contract.",
+      "scope": [
+        "Exact Plan 12 EPIC-02 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-02 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E02-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02-T8",
+      "title": "Regression matrix",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "T8 — Regression matrix",
+      "goal": "Implement the exact approved EPIC-02 / T8 contract: Regression matrix.",
+      "scope": [
+        "Exact Plan 12 EPIC-02 / T8 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-02 / T8 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E02-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E02-D",
+      "title": "Deliver EPIC-02",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "EPIC-02",
+      "goal": "Deliver EPIC-02 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-02 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E02-T1",
+        "E02-T2",
+        "E02-T3",
+        "E02-T4",
+        "E02-T5",
+        "E02-T6",
+        "E02-T7",
+        "E02-T8"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03",
+      "title": "INCOMING TRAFFIC, QUERY NORMALIZATION, CRAWL LOAD AND LEGACY REDIRECTS",
+      "type": "epic",
+      "source_anchor": "EPIC-03",
+      "goal": "Deliver the exact approved Plan 12 EPIC-03 outcome: INCOMING TRAFFIC, QUERY NORMALIZATION, CRAWL LOAD AND LEGACY REDIRECTS.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-03 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-03 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:first",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E03-T1",
+      "title": "Canonical tracking-parameter registry",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "T1 — Canonical tracking-parameter registry",
+      "goal": "Implement the exact approved EPIC-03 / T1 contract: Canonical tracking-parameter registry.",
+      "scope": [
+        "Exact Plan 12 EPIC-03 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-03 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03-T2",
+      "title": "Strip tracking only from content interpretation",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "T2 — Strip tracking only from content interpretation",
+      "goal": "Implement the exact approved EPIC-03 / T2 contract: Strip tracking only from content interpretation.",
+      "scope": [
+        "Exact Plan 12 EPIC-03 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-03 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E03-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03-T3",
+      "title": "Paid traffic acceptance",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "T3 — Paid traffic acceptance",
+      "goal": "Implement the exact approved EPIC-03 / T3 contract: Paid traffic acceptance.",
+      "scope": [
+        "Exact Plan 12 EPIC-03 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-03 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E03-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03-T4",
+      "title": "Yandex `Clean-param`",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "T4 — Yandex `Clean-param`",
+      "goal": "Implement the exact approved EPIC-03 / T4 contract: Yandex `Clean-param`.",
+      "scope": [
+        "Exact Plan 12 EPIC-03 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-03 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E03-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03-T5",
+      "title": "Filter-query resource protection",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "T5 — Filter-query resource protection",
+      "goal": "Implement the exact approved EPIC-03 / T5 contract: Filter-query resource protection.",
+      "scope": [
+        "Exact Plan 12 EPIC-03 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-03 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E03-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03-T6",
+      "title": "Owner waiver record for isolated query-load proof",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "T6 — Owner waiver record for isolated query-load proof",
+      "goal": "Record the owner-approved EPIC-03 / T6 waiver without making an isolated-load or performance PASS claim.",
+      "scope": [
+        "Exact Plan 12 EPIC-03 / T6 owner-waiver contract and declared evidence",
+        "Only the canonical plan-source change needed to record the waiver"
+      ],
+      "acceptance_criteria": [
+        "OD12-02 and its no-performance-claim limitation are recorded in the canonical plan source",
+        "No new isolated database/load suite is added or run by T6",
+        "Exact source diff is inside the waiver-record scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Exact canonical-plan source/version/hash agreement",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E03-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03-T7",
+      "title": "Legacy target canonicality",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "T7 — Legacy target canonicality",
+      "goal": "Implement the exact approved EPIC-03 / T7 contract: Legacy target canonicality.",
+      "scope": [
+        "Exact Plan 12 EPIC-03 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-03 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E03-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03-T8",
+      "title": "Parameterized legacy apartment route",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "T8 — Parameterized legacy apartment route",
+      "goal": "Implement the exact approved EPIC-03 / T8 contract: Parameterized legacy apartment route.",
+      "scope": [
+        "Exact Plan 12 EPIC-03 / T8 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-03 / T8 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E03-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E03-D",
+      "title": "Deliver EPIC-03",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "EPIC-03",
+      "goal": "Deliver EPIC-03 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-03 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E03-T1",
+        "E03-T2",
+        "E03-T3",
+        "E03-T4",
+        "E03-T5",
+        "E03-T6",
+        "E03-T7",
+        "E03-T8"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04",
+      "title": "SEO TEMPLATE CORRECTNESS AND SEARCH-CONSOLE OWNERSHIP",
+      "type": "epic",
+      "source_anchor": "EPIC-04",
+      "goal": "Deliver the exact approved Plan 12 EPIC-04 outcome: SEO TEMPLATE CORRECTNESS AND SEARCH-CONSOLE OWNERSHIP.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-04 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-04 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:first",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E04-T1",
+      "title": "Category grammatical forms",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T1 — Category grammatical forms",
+      "goal": "Implement the exact approved EPIC-04 / T1 contract: Category grammatical forms.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-T2",
+      "title": "Facet template",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T2 — Facet template",
+      "goal": "Implement the exact approved EPIC-04 / T2 contract: Facet template.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E04-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-T3",
+      "title": "Rent templates",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T3 — Rent templates",
+      "goal": "Implement the exact approved EPIC-04 / T3 contract: Rent templates.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E04-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-T4",
+      "title": "Dynamic active-category list",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T4 — Dynamic active-category list",
+      "goal": "Implement the exact approved EPIC-04 / T4 contract: Dynamic active-category list.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E04-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-T5",
+      "title": "Home SINGLE_GEO / MULTI_GEO split",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T5 — Home SINGLE_GEO / MULTI_GEO split",
+      "goal": "Implement the exact approved EPIC-04 / T5 contract: Home SINGLE_GEO / MULTI_GEO split.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E04-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-T6",
+      "title": "Microdistrict H1 parity",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T6 — Microdistrict H1 parity",
+      "goal": "Implement the exact approved EPIC-04 / T6 contract: Microdistrict H1 parity.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E04-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-T7",
+      "title": "Remove unsupported marketing claims",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T7 — Remove unsupported marketing claims",
+      "goal": "Implement the exact approved EPIC-04 / T7 contract: Remove unsupported marketing claims.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E04-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-T8",
+      "title": "Search engine verification input",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T8 — Search engine verification input",
+      "goal": "Implement the exact approved EPIC-04 / T8 contract: Search engine verification input.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T8 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T8 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E04-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-T9",
+      "title": "Version-comment guard",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "T9 — Version-comment guard",
+      "goal": "Implement the exact approved EPIC-04 / T9 contract: Version-comment guard.",
+      "scope": [
+        "Exact Plan 12 EPIC-04 / T9 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-04 / T9 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E04-T8"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E04-D",
+      "title": "Deliver EPIC-04",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "EPIC-04",
+      "goal": "Deliver EPIC-04 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-04 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E04-T1",
+        "E04-T2",
+        "E04-T3",
+        "E04-T4",
+        "E04-T5",
+        "E04-T6",
+        "E04-T7",
+        "E04-T8",
+        "E04-T9"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05",
+      "title": "DEVELOPMENT CONTENT GATE AND MEDIA SEMANTICS",
+      "type": "epic",
+      "source_anchor": "EPIC-05",
+      "goal": "Deliver the exact approved Plan 12 EPIC-05 outcome: DEVELOPMENT CONTENT GATE AND MEDIA SEMANTICS.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-05 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-05 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:first",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E05-T1",
+      "title": "Development Gate factual input",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "T1 — Development Gate factual input",
+      "goal": "Implement the exact approved EPIC-05 / T1 contract: Development Gate factual input.",
+      "scope": [
+        "Exact Plan 12 EPIC-05 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-05 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05-T2",
+      "title": "Valid approved media definition",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "T2 — Valid approved media definition",
+      "goal": "Implement the exact approved EPIC-05 / T2 contract: Valid approved media definition.",
+      "scope": [
+        "Exact Plan 12 EPIC-05 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-05 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E05-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05-T3",
+      "title": "Tier A canonical Gate",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "T3 — Tier A canonical Gate",
+      "goal": "Implement the exact approved EPIC-05 / T3 contract: Tier A canonical Gate.",
+      "scope": [
+        "Exact Plan 12 EPIC-05 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-05 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E05-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05-T4",
+      "title": "Tier B canonical Gate",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "T4 — Tier B canonical Gate",
+      "goal": "Implement the exact approved EPIC-05 / T4 contract: Tier B canonical Gate.",
+      "scope": [
+        "Exact Plan 12 EPIC-05 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-05 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E05-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05-T5",
+      "title": "Tier C",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "T5 — Tier C",
+      "goal": "Implement the exact approved EPIC-05 / T5 contract: Tier C.",
+      "scope": [
+        "Exact Plan 12 EPIC-05 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-05 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E05-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05-T6",
+      "title": "Provenance",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "T6 — Provenance",
+      "goal": "Implement the exact approved EPIC-05 / T6 contract: Provenance.",
+      "scope": [
+        "Exact Plan 12 EPIC-05 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-05 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E05-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05-T7",
+      "title": "Missing passport negative matrix",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "T7 — Missing passport negative matrix",
+      "goal": "Implement the exact approved EPIC-05 / T7 contract: Missing passport negative matrix.",
+      "scope": [
+        "Exact Plan 12 EPIC-05 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-05 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E05-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05-T8",
+      "title": "Documentation reconciliation",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "T8 — Documentation reconciliation",
+      "goal": "Implement the exact approved EPIC-05 / T8 contract: Documentation reconciliation.",
+      "scope": [
+        "Exact Plan 12 EPIC-05 / T8 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-05 / T8 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E05-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E05-D",
+      "title": "Deliver EPIC-05",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "EPIC-05",
+      "goal": "Deliver EPIC-05 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-05 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E05-T1",
+        "E05-T2",
+        "E05-T3",
+        "E05-T4",
+        "E05-T5",
+        "E05-T6",
+        "E05-T7",
+        "E05-T8"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06",
+      "title": "UI OWNERSHIP HARDENING AND CLONE-SAFE THEME",
+      "type": "epic",
+      "source_anchor": "EPIC-06",
+      "goal": "Deliver the exact approved Plan 12 EPIC-06 outcome: UI OWNERSHIP HARDENING AND CLONE-SAFE THEME.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-06 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-06 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:first",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E06-T1",
+      "title": "Preserve the approved two-file ownership boundary",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "T1 — Preserve the approved two-file ownership boundary",
+      "goal": "Implement the exact approved EPIC-06 / T1 contract: Preserve the approved two-file ownership boundary.",
+      "scope": [
+        "Exact Plan 12 EPIC-06 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-06 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06-T2",
+      "title": "Upgrade preservation and regeneration",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "T2 — Upgrade preservation and regeneration",
+      "goal": "Implement the exact approved EPIC-06 / T2 contract: Upgrade preservation and regeneration.",
+      "scope": [
+        "Exact Plan 12 EPIC-06 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-06 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E06-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06-T3",
+      "title": "Verification theme does not ship",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "T3 — Verification theme does not ship",
+      "goal": "Implement the exact approved EPIC-06 / T3 contract: Verification theme does not ship.",
+      "scope": [
+        "Exact Plan 12 EPIC-06 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-06 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E06-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06-T4",
+      "title": "Brand-derived home article surfaces",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "T4 — Brand-derived home article surfaces",
+      "goal": "Implement the exact approved EPIC-06 / T4 contract: Brand-derived home article surfaces.",
+      "scope": [
+        "Exact Plan 12 EPIC-06 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-06 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E06-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06-T5",
+      "title": "Typography consolidation",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "T5 — Typography consolidation",
+      "goal": "Implement the exact approved EPIC-06 / T5 contract: Typography consolidation.",
+      "scope": [
+        "Exact Plan 12 EPIC-06 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-06 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E06-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06-T6",
+      "title": "Tracking consolidation",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "T6 — Tracking consolidation",
+      "goal": "Implement the exact approved EPIC-06 / T6 contract: Tracking consolidation.",
+      "scope": [
+        "Exact Plan 12 EPIC-06 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-06 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E06-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06-T7",
+      "title": "Updated token guard",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "T7 — Updated token guard",
+      "goal": "Implement the exact approved EPIC-06 / T7 contract: Updated token guard.",
+      "scope": [
+        "Exact Plan 12 EPIC-06 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-06 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E06-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06-T8",
+      "title": "Clone proof",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "T8 — Clone proof",
+      "goal": "Implement the exact approved EPIC-06 / T8 contract: Clone proof.",
+      "scope": [
+        "Exact Plan 12 EPIC-06 / T8 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-06 / T8 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E06-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E06-D",
+      "title": "Deliver EPIC-06",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "EPIC-06",
+      "goal": "Deliver EPIC-06 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-06 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E06-T1",
+        "E06-T2",
+        "E06-T3",
+        "E06-T4",
+        "E06-T5",
+        "E06-T6",
+        "E06-T7",
+        "E06-T8"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky",
+        "wave:first"
+      ]
+    },
+    {
+      "key": "E07",
+      "title": "HONEST SOUZ REFERENCE + SYNTHETIC UNIVERSAL GEO COVERAGE",
+      "type": "epic",
+      "source_anchor": "EPIC-07",
+      "goal": "Deliver the exact approved Plan 12 EPIC-07 outcome: HONEST SOUZ REFERENCE + SYNTHETIC UNIVERSAL GEO COVERAGE.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-07 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-07 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [
+        "E03",
+        "E04",
+        "E05"
+      ],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:contract",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "E07-T1",
+      "title": "Make `SOUZ_MATRIX.json` claims exact and source-backed",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T1 — Make `SOUZ_MATRIX.json` claims exact and source-backed",
+      "goal": "Implement the exact approved EPIC-07 / T1 contract: Make `SOUZ_MATRIX.json` claims exact and source-backed.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E03-D",
+        "E04-D",
+        "E05-D"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-T2",
+      "title": "Add a separate synthetic universal geo matrix",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T2 — Add a separate synthetic universal geo matrix",
+      "goal": "Implement the exact approved EPIC-07 / T2 contract: Add a separate synthetic universal geo matrix.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E07-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-T3",
+      "title": "District SEO classification in both matrices",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T3 — District SEO classification in both matrices",
+      "goal": "Implement the exact approved EPIC-07 / T3 contract: District SEO classification in both matrices.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E07-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-T4",
+      "title": "Static/service surfaces",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T4 — Static/service surfaces",
+      "goal": "Implement the exact approved EPIC-07 / T4 contract: Static/service surfaces.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E07-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-T5",
+      "title": "Journal",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T5 — Journal",
+      "goal": "Implement the exact approved EPIC-07 / T5 contract: Journal.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E07-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-T6",
+      "title": "Developer root",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T6 — Developer root",
+      "goal": "Implement the exact approved EPIC-07 / T6 contract: Developer root.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E07-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-T7",
+      "title": "Legacy apartment details",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T7 — Legacy apartment details",
+      "goal": "Implement the exact approved EPIC-07 / T7 contract: Legacy apartment details.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E07-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-T8",
+      "title": "Reference-integrity negative fixtures",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T8 — Reference-integrity negative fixtures",
+      "goal": "Implement the exact approved EPIC-07 / T8 contract: Reference-integrity negative fixtures.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T8 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T8 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E07-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-T9",
+      "title": "Reference matrix semantics",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "T9 — Reference matrix semantics",
+      "goal": "Implement the exact approved EPIC-07 / T9 contract: Reference matrix semantics.",
+      "scope": [
+        "Exact Plan 12 EPIC-07 / T9 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-07 / T9 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E07-T8"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E07-D",
+      "title": "Deliver EPIC-07",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E07",
+      "source_anchor": "EPIC-07",
+      "goal": "Deliver EPIC-07 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-07 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E07-T1",
+        "E07-T2",
+        "E07-T3",
+        "E07-T4",
+        "E07-T5",
+        "E07-T6",
+        "E07-T7",
+        "E07-T8",
+        "E07-T9"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard",
+        "wave:contract"
+      ]
+    },
+    {
+      "key": "E08",
+      "title": "END-TO-END STARTER UPGRADE PROPAGATION PROOF",
+      "type": "epic",
+      "source_anchor": "EPIC-08",
+      "goal": "Deliver the exact approved Plan 12 EPIC-08 outcome: END-TO-END STARTER UPGRADE PROPAGATION PROOF.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-08 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-08 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [
+        "E01",
+        "E02",
+        "E03",
+        "E04",
+        "E05",
+        "E06",
+        "E07"
+      ],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:integration",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E08-T1",
+      "title": "Build a realistic old client clone",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E08",
+      "source_anchor": "T1 — Build a realistic old client clone",
+      "goal": "Implement the exact approved EPIC-08 / T1 contract: Build a realistic old client clone.",
+      "scope": [
+        "Exact Plan 12 EPIC-08 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-08 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E01-D",
+        "E02-D",
+        "E03-D",
+        "E04-D",
+        "E05-D",
+        "E06-D",
+        "E07-D"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:integration"
+      ]
+    },
+    {
+      "key": "E08-T2",
+      "title": "Platform delta fixture",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E08",
+      "source_anchor": "T2 — Platform delta fixture",
+      "goal": "Implement the exact approved EPIC-08 / T2 contract: Platform delta fixture.",
+      "scope": [
+        "Exact Plan 12 EPIC-08 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-08 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E08-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:integration"
+      ]
+    },
+    {
+      "key": "E08-T3",
+      "title": "Apply upgrade without manual copying",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E08",
+      "source_anchor": "T3 — Apply upgrade without manual copying",
+      "goal": "Implement the exact approved EPIC-08 / T3 contract: Apply upgrade without manual copying.",
+      "scope": [
+        "Exact Plan 12 EPIC-08 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-08 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E08-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:integration"
+      ]
+    },
+    {
+      "key": "E08-T4",
+      "title": "Post-upgrade verification",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E08",
+      "source_anchor": "T4 — Post-upgrade verification",
+      "goal": "Implement the exact approved EPIC-08 / T4 contract: Post-upgrade verification.",
+      "scope": [
+        "Exact Plan 12 EPIC-08 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-08 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E08-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:integration"
+      ]
+    },
+    {
+      "key": "E08-T5",
+      "title": "Conflict fixture",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E08",
+      "source_anchor": "T5 — Conflict fixture",
+      "goal": "Implement the exact approved EPIC-08 / T5 contract: Conflict fixture.",
+      "scope": [
+        "Exact Plan 12 EPIC-08 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-08 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E08-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:integration"
+      ]
+    },
+    {
+      "key": "E08-T6",
+      "title": "Generated drift fixture",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E08",
+      "source_anchor": "T6 — Generated drift fixture",
+      "goal": "Implement the exact approved EPIC-08 / T6 contract: Generated drift fixture.",
+      "scope": [
+        "Exact Plan 12 EPIC-08 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-08 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E08-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:integration"
+      ]
+    },
+    {
+      "key": "E08-T7",
+      "title": "Migration safety",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E08",
+      "source_anchor": "T7 — Migration safety",
+      "goal": "Implement the exact approved EPIC-08 / T7 contract: Migration safety.",
+      "scope": [
+        "Exact Plan 12 EPIC-08 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-08 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E08-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:integration"
+      ]
+    },
+    {
+      "key": "E08-D",
+      "title": "Deliver EPIC-08",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E08",
+      "source_anchor": "EPIC-08",
+      "goal": "Deliver EPIC-08 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-08 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E08-T1",
+        "E08-T2",
+        "E08-T3",
+        "E08-T4",
+        "E08-T5",
+        "E08-T6",
+        "E08-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky",
+        "wave:integration"
+      ]
+    },
+    {
+      "key": "E09",
+      "title": "ACTIVE DOCUMENTATION AND SOURCE-OF-TRUTH RECONCILIATION",
+      "type": "epic",
+      "source_anchor": "EPIC-09",
+      "goal": "Deliver the exact approved Plan 12 EPIC-09 outcome: ACTIVE DOCUMENTATION AND SOURCE-OF-TRUTH RECONCILIATION.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-09 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-09 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [
+        "E08"
+      ],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:docs",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "E09-T1",
+      "title": "Create one release-state authority",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E09",
+      "source_anchor": "T1 — Create one release-state authority",
+      "goal": "Implement the exact approved EPIC-09 / T1 contract: Create one release-state authority.",
+      "scope": [
+        "Exact Plan 12 EPIC-09 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-09 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E08-D"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:docs"
+      ]
+    },
+    {
+      "key": "E09-T2",
+      "title": "Plan 11 evidence status",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E09",
+      "source_anchor": "T2 — Plan 11 evidence status",
+      "goal": "Implement the exact approved EPIC-09 / T2 contract: Plan 11 evidence status.",
+      "scope": [
+        "Exact Plan 12 EPIC-09 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-09 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E09-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:docs"
+      ]
+    },
+    {
+      "key": "E09-T3",
+      "title": "Reconcile active docs",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E09",
+      "source_anchor": "T3 — Reconcile active docs",
+      "goal": "Implement the exact approved EPIC-09 / T3 contract: Reconcile active docs.",
+      "scope": [
+        "Exact Plan 12 EPIC-09 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-09 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E09-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:docs"
+      ]
+    },
+    {
+      "key": "E09-T4",
+      "title": "Master Plan baseline rule",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E09",
+      "source_anchor": "T4 — Master Plan baseline rule",
+      "goal": "Implement the exact approved EPIC-09 / T4 contract: Master Plan baseline rule.",
+      "scope": [
+        "Exact Plan 12 EPIC-09 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-09 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E09-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:docs"
+      ]
+    },
+    {
+      "key": "E09-T5",
+      "title": "Historical-document policy",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E09",
+      "source_anchor": "T5 — Historical-document policy",
+      "goal": "Implement the exact approved EPIC-09 / T5 contract: Historical-document policy.",
+      "scope": [
+        "Exact Plan 12 EPIC-09 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-09 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E09-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:docs"
+      ]
+    },
+    {
+      "key": "E09-T6",
+      "title": "Active-version guard",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E09",
+      "source_anchor": "T6 — Active-version guard",
+      "goal": "Implement the exact approved EPIC-09 / T6 contract: Active-version guard.",
+      "scope": [
+        "Exact Plan 12 EPIC-09 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-09 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E09-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:docs"
+      ]
+    },
+    {
+      "key": "E09-D",
+      "title": "Deliver EPIC-09",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E09",
+      "source_anchor": "EPIC-09",
+      "goal": "Deliver EPIC-09 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-09 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E09-T1",
+        "E09-T2",
+        "E09-T3",
+        "E09-T4",
+        "E09-T5",
+        "E09-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard",
+        "wave:docs"
+      ]
+    },
+    {
+      "key": "E10",
+      "title": "FINAL VERIFICATION AND COMMERCIAL CLONE GATE",
+      "type": "epic",
+      "source_anchor": "EPIC-10",
+      "goal": "Deliver the exact approved Plan 12 EPIC-10 outcome: FINAL VERIFICATION AND COMMERCIAL CLONE GATE.",
+      "scope": [
+        "Exact approved Plan 12 EPIC-10 contract",
+        "No work outside the epic and global execution contracts"
+      ],
+      "acceptance_criteria": [
+        "All EPIC-10 task acceptance requirements have concrete evidence",
+        "The epic is delivered by exactly one SourceCraft PR, exact-head risk-based Gate and merge"
+      ],
+      "depends_on": [
+        "E09"
+      ],
+      "propagate_dependencies_to_children": false,
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:final",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E10-T1",
+      "title": "Full existing verification",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "T1 — Full existing verification",
+      "goal": "Implement the exact approved EPIC-10 / T1 contract: Full existing verification.",
+      "scope": [
+        "Exact Plan 12 EPIC-10 / T1 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-10 / T1 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E09-D"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final"
+      ]
+    },
+    {
+      "key": "E10-T2",
+      "title": "New mandatory suites",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "T2 — New mandatory suites",
+      "goal": "Implement the exact approved EPIC-10 / T2 contract: New mandatory suites.",
+      "scope": [
+        "Exact Plan 12 EPIC-10 / T2 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-10 / T2 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E10-T1"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final"
+      ]
+    },
+    {
+      "key": "E10-T3",
+      "title": "Five-profile clone matrix",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "T3 — Five-profile clone matrix",
+      "goal": "Implement the exact approved EPIC-10 / T3 contract: Five-profile clone matrix.",
+      "scope": [
+        "Exact Plan 12 EPIC-10 / T3 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-10 / T3 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E10-T2"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final"
+      ]
+    },
+    {
+      "key": "E10-T4",
+      "title": "Tracking traffic smoke",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "T4 — Tracking traffic smoke",
+      "goal": "Implement the exact approved EPIC-10 / T4 contract: Tracking traffic smoke.",
+      "scope": [
+        "Exact Plan 12 EPIC-10 / T4 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-10 / T4 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E10-T3"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final"
+      ]
+    },
+    {
+      "key": "E10-T5",
+      "title": "SEO crawl matrix",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "T5 — SEO crawl matrix",
+      "goal": "Implement the exact approved EPIC-10 / T5 contract: SEO crawl matrix.",
+      "scope": [
+        "Exact Plan 12 EPIC-10 / T5 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-10 / T5 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E10-T4"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final"
+      ]
+    },
+    {
+      "key": "E10-T6",
+      "title": "Performance/load",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "T6 — Performance/load",
+      "goal": "Implement the exact approved EPIC-10 / T6 contract: Performance/load.",
+      "scope": [
+        "Exact Plan 12 EPIC-10 / T6 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-10 / T6 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E10-T5"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final"
+      ]
+    },
+    {
+      "key": "E10-T7",
+      "title": "UI representative browser proof",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "T7 — UI representative browser proof",
+      "goal": "Implement the exact approved EPIC-10 / T7 contract: UI representative browser proof.",
+      "scope": [
+        "Exact Plan 12 EPIC-10 / T7 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-10 / T7 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E10-T6"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final"
+      ]
+    },
+    {
+      "key": "E10-T8",
+      "title": "Security regression",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "T8 — Security regression",
+      "goal": "Implement the exact approved EPIC-10 / T8 contract: Security regression.",
+      "scope": [
+        "Exact Plan 12 EPIC-10 / T8 requirements and declared evidence",
+        "Only the smallest repository change needed for this task"
+      ],
+      "acceptance_criteria": [
+        "Every requirement under EPIC-10 / T8 is implemented or evidenced exactly as the plan requires",
+        "Exact diff is inside task scope and acceptance-to-evidence mapping is complete"
+      ],
+      "required_checks": [
+        "Task-specific checks and negative fixtures named in Plan 12",
+        "Exact diff scope and acceptance-to-evidence review"
+      ],
+      "depends_on": [
+        "E10-T7"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "task acceptance would require guessing or weakening a fail-closed contract"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final"
+      ]
+    },
+    {
+      "key": "E10-D",
+      "title": "Deliver EPIC-10",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E10",
+      "source_anchor": "EPIC-10",
+      "goal": "Deliver EPIC-10 through one SourceCraft Pull Request, exact-head COMMERCIAL Gate and authorized merge.",
+      "scope": [
+        "Review the complete epic diff and evidence",
+        "Create one SourceCraft PR, run one risk-appropriate exact-head Gate and merge only when green"
+      ],
+      "acceptance_criteria": [
+        "The EPIC-10 Pull Request contains only approved scope",
+        "Review has no unresolved blocker and the exact-head Gate is green",
+        "Merged main SHA and delivery evidence are recorded"
+      ],
+      "required_checks": [
+        "full epic diff review",
+        "scope check",
+        "risk-based local checks",
+        "one SourceCraft exact-head Gate",
+        "post-merge main verification"
+      ],
+      "depends_on": [
+        "E10-T1",
+        "E10-T2",
+        "E10-T3",
+        "E10-T4",
+        "E10-T5",
+        "E10-T6",
+        "E10-T7",
+        "E10-T8"
+      ],
+      "required_context": [
+        "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "docs/03_ARCHITECTURE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "commit",
+        "push",
+        "create_pr",
+        "review",
+        "run_gate",
+        "merge"
+      ],
+      "stop_conditions": [
+        "approved Plan 12 source or inventory drift",
+        "scope expansion or a new architecture decision",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check",
+        "unrelated repository change",
+        "PR head changes after review or Gate",
+        "SourceCraft Gate is red, missing or unverifiable"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky",
+        "wave:final"
+      ]
+    }
+  ]
+}

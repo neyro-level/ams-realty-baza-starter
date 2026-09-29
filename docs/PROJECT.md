@@ -4,19 +4,11 @@
 `MEDIA_DIR` на AMS Server. Он проверяет шаблон, но не задаёт production-топологию
 клиентского клона. Закупка клиентской инфраструктуры **не входит в этот план**.
 
-Plan №8 v6 исполнен. Переносимая geo-first catalog platform, P8-23A canonical
-route cutover и P8-23B cleanup находятся в текущем runtime. Канонический
-контракт: `docs/platform/GEO_CATALOG_CONTRACT.md`. Plan №9 v6 S0-S14 исполнен
-через approved delivery batches; принятый implementation baseline —
-`5ff1e4ec7b572bab72ebc8cfa5a9af7597009188`, входящий в текущий SourceCraft
-`main`; execution graph Plan №9 `48/48` closed.
-S15, release tag и production не выполнялись и остаются owner gates. Plan №10
-v4 полностью исполнен: B1 добавил preset schema v3 и geo seed, B2 — актуальную
-SEO template matrix и bounded public runtime, B3 — проверяемый release package
-без rollout. Итоговый implementation merge — SourceCraft
-`main@c08ea05721d434670885ad45b0f473f2642a155c`.
-Репозиторное GitHub-зеркало синхронизируется отдельно и не является release
-proof.
+Планы №8–11 исполнены и являются history/evidence. Текущий implementation
+source — approved Plan №12 v4. Точные принятый `main`, release tag, последний
+Gate, clone matrix, upgrade proof и live status читаются только из
+`docs/STARTER_RELEASE_STATE.md`. GitHub mirror, новый tag и production остаются
+отдельными owner actions и не выводятся из факта merge.
 
 ## Зафиксировано
 
@@ -36,6 +28,7 @@ proof.
 | Secrets | Secret Master `https://infisical.ams24.ru` |
 | Env mapping | Canonical knobs → starter env (no CRM / telegram keys): `DATABASE` → `DATABASE_URI`; public origin → `NEXT_PUBLIC_SERVER_URL`; media → `MEDIA_DIR`; Payload secret → `PAYLOAD_SECRET`; ISR secret → `REVALIDATE_SECRET`; lead channels → `LEAD_CHANNELS` (`max`, `custom-webhook` only) |
 | Demo domain | `start-baza.ams24.ru`, `noindex` |
+| Public origin | В production только exact `https://<approved-host>` без credentials/path/query/hash; source — `src/project/public-origin.ts` |
 | Indexing policy | `src/project/indexing-policy.ts`: `starter-demo` всегда `noindex`; client обязан выбрать `productionIndexing = public | noindex`, причём `public` разрешён только при production `projectKind`, совпадающих domain/canonical origin и approved legal content |
 | Jobs owner | exactly one runtime with `JOBS_AUTORUN=true` |
 | Dispatcher interval | `project.config.ts` → `dispatcherIntervalMinutes = 5` |
@@ -57,6 +50,8 @@ proof.
 | Lead delivery policy | `project.config.ts` → one validated `leadDelivery` policy; routing is `all-enabled`, max attempts derive from retry ladder length |
 | Channel capability risk | MAX sends an idempotency header but native provider idempotency and external lookup are unproven; custom webhook uses required HMAC + idempotency header with receiver registry; both may return unknown delivery certainty after transport failure |
 | Indexed catalog filters | `category`, `dealType`, `city`, `district`, `rooms` in `project.config.ts`; other query params are `noindex` |
+| Tracking/Clean-param | Canonical registry отделяет attribution params от functional query; browser URL сохраняется, content/Gate/canonical/cache их игнорируют; public `robots.txt` выдаёт тот же registry как Yandex `Clean-param` |
+| Filter load protection | Filtered catalog requests обходят persistent cache; unfiltered page/sort identity и tag fan-out имеют конечные лимиты |
 | Sitemap | shards of 50_000 URLs, `generateSitemaps`, generation `revalidate` 3600s |
 | Staging | client: separate Managed PostgreSQL + S3 + secrets; no production PII dump. Starter demo остаётся на local PG + MEDIA_DIR |
 | Backup | starter: automatic `pg_dump` + `MEDIA_DIR` snapshot; client: automatic managed DB + object-storage backup, rotation, integrity check |
@@ -72,13 +67,15 @@ proof.
 | Geo modes | `SINGLE_GEO | MULTI_GEO`; validated SiteProfile separates geo `published` from `hubStatus`; SINGLE_GEO owns exactly one routable primary hub |
 | District/facet routes | Published Payload districts are cached per `geo×category`; project `seoFacets` owns clean facet slugs and filters; registry invalidation uses the authenticated `registry` tag |
 | Clone preset | Только schema v3: `MIXED | NEWBUILD_FIRST | SECONDARY_FIRST`; optional overrides валидируются canonical SiteProfile schema; `clone:prepare` generates the complete explicit SiteProfile matrix plus `docs/CLIENT_BOOTSTRAP.json` |
+| Upgrade boundary | Clone — snapshot immutable tag+SHA; `starter:upgrade` запускается только явно и меняет только `starter-owned.json` schema v2 paths, сохраняя client-owned слой и останавливаясь на conflict |
+| Souz scope | `docs/reference/SOUZ_MATRIX.json` — только source-backed reference subset; universal geo capability доказывает отдельная synthetic non-production matrix без выдуманных Souz-фактов |
 | Clone geo seed | `clone:seed-geo` идемпотентно применяет approved city/district morphology через project-owned privileged gateway; direct DB/anonymous REST не используются |
 | Client fixture boundary | `projectKind=client` never falls back to starter demo properties when Payload data is absent; empty client data produces an empty/not-found runtime result |
 | Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |
 | Development model | Одна `developments` entity с `kind = residential_complex | cottage_village` и strict kind-specific validation |
 | Plan 8 delivery | `EXECUTION_COMPLETE`; production и release tag остаются отдельными owner actions; repository mirror — отдельная операционная синхронизация |
 | Plan 9 delivery | S0-S14 `EXECUTION_COMPLETE`; accepted implementation baseline `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` is contained in current SourceCraft `main`; S15 excluded |
-| Target release tag | `starter-v2.1.0`; only after a separate S15 preflight and owner release command |
+| Release tag | Текущий released tag и следующий target не выводятся из plan history; authority — `STARTER_RELEASE_STATE.md`, создание нового `starter-v2.MINOR.PATCH` требует отдельной owner release command |
 | Plan 10 delivery | `EXECUTION_COMPLETE`; 22/22 tasks closed through PR 174/175/176; canonical implementation merge `c08ea05721d434670885ad45b0f473f2642a155c`. Production, tag and actual live proof were not authorized by plan execution |
 
 ## Optional modules

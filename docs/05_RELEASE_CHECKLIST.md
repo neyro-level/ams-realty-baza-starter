@@ -1,11 +1,9 @@
 # Release Checklist
 
-Статус: `ACTIVE RELEASE CONTRACT / PLAN 10 EXECUTION COMPLETE / NO CURRENT
-RELEASE AUTHORIZATION`. Итоговый Plan №10 implementation merge
-`c08ea05721d434670885ad45b0f473f2642a155c` входит в SourceCraft `main`, но
-S15, release tag и production не запускались. Репозиторное GitHub-
-зеркало синхронизируется отдельно и не является release proof. Owner-operated
-demo contour существует. PII
+Статус: `ACTIVE RELEASE CONTRACT / PLAN 12 IMPLEMENTATION ACTIVE / NO CURRENT
+RELEASE AUTHORIZATION`. Текущие accepted SHA/tag/Gate/proof читаются из
+`STARTER_RELEASE_STATE.md`. Plan №12 не разрешает новый tag, GitHub mirror или
+production. Owner-operated demo contour существует. PII
 retention days остаются `NEEDS_OWNER`; implementation proof не заменяет
 отдельный release, rollout и live smoke.
 

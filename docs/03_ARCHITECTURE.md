@@ -12,14 +12,11 @@ Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Plan №8 v6
-и Plan №9 v6 остаются historical evidence. Plan №10 v4 исполнен тремя approved
-delivery batches; execution graph закрыт `22/22`, итоговый implementation merge
-— SourceCraft `main@c08ea05721d434670885ad45b0f473f2642a155c`.
-GitHub получает только отдельный явный fast-forward mirror canonical `main`.
-S15, production и target tag `starter-v2.1.0` остаются отдельными owner actions
-после завершённого implementation scope Plan №10. Репозиторное зеркало —
-отдельная операционная синхронизация и не является S15/release proof.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Планы
+№8–11 — historical/evidence; текущий execution source — approved Plan №12 v4.
+Canonical SHA, tag, последний Gate и proof state принадлежат только
+`STARTER_RELEASE_STATE.md`. GitHub mirror, новый immutable tag и production —
+отдельные owner actions после Plan №12.
 
 ## Delivery baseline
 
@@ -38,7 +35,7 @@ S15, production и target tag `starter-v2.1.0` остаются отдельны
   PostgreSQL запускается только для первых трёх scope, build — только для
   `dependency-runtime`; каждый RISKY сначала выполняет STANDARD и затем только
   доказательство выбранного риска.
-- Исполненные Plan №9/10 применяли Gate к delivery batch, а не повторно к
+- Исполненные планы применяли Gate к delivery batch/epic, а не повторно к
   каждому task checkpoint: constituent tasks сохраняют evidence, но один
   exact-head SHA, один PR и один Gate закрывают batch. Несовместимые risk scopes
   в одном batch запрещены.
@@ -47,9 +44,9 @@ S15, production и target tag `starter-v2.1.0` остаются отдельны
   previous image/env rollback point. Текущий Dockerfile копирует весь `/app` и
   не использует standalone allowlist; release hardening остаётся отдельной
   RISKY-задачей до первого client production и не выполняется этим inventory.
-- Наблюдаемый SourceCraft tag `starter-freeze` остаётся историческим. Новый
-  target tag `starter-v2.1.0` требует отдельного S15 preflight и
-  отдельной release-команды владельца.
+- Наблюдаемый SourceCraft tag `starter-freeze` остаётся историческим. Следующий
+  `starter-v2.MINOR.PATCH` выбирается только в отдельном release scope и не
+  создаётся Developer-планом.
 
 ## Stack и ownership
 
@@ -62,6 +59,26 @@ S15, production и target tag `starter-v2.1.0` остаются отдельны
 Текущий lock snapshot: Next.js `16.3.5`, React `19.2.8`, Payload `3.90.1`.
 Фактические версии всегда определяют `package.json`, lockfile и runtime files.
 Major upgrade требует отдельного решения и targeted proof.
+
+## Plan 12 hardened contracts
+
+- `starter-owned.json` schema v2 определяет только обновляемый starter layer;
+  clone остаётся snapshot exact tag+SHA, а upgrade — явной conflict-safe
+  операцией без runtime dependency.
+- Preset schema v3 генерирует project brand primitives в
+  `src/project/brand.css`; `src/app/globals.css` владеет только semantic и
+  component mapping.
+- `src/project/indexing-policy.ts` и canonical resolver/Gate — authority для
+  indexability. Tracking registry не участвует в content/canonical/cache и тем
+  же списком формирует Yandex `Clean-param`.
+- Filtered catalog requests не получают persistent cache identity; unfiltered
+  page/sort keys, TTL и invalidation tags ограничены.
+- Souz matrix — честный source-backed subset; reusable geo capability
+  доказывается отдельной synthetic non-production fixture.
+- Development Gate принимает managed media либо allowlisted external HTTPS с
+  type/source/rights/checkedAt; construction progress также требует capturedAt.
+- Production public origin обязан быть exact approved HTTPS origin без
+  credentials, path, query или hash.
 
 ## Geo-catalog platform: current and target
 
@@ -187,7 +204,7 @@ project-owned template inputs. Районные шаблоны получают 
 preset. Повторный запуск с тем же входом обязан быть byte-stable.
 
 `clone:prepare` принимает только утверждённый preset и exact source tag
-`starter-v2.1.0`; обычный запуск требует clean checkout и совпадение tag с
+`starter-v2.MINOR.PATCH`; обычный запуск требует clean checkout и совпадение tag с
 `HEAD`. Preset определяет project identity, catalog-first режим,
 `SINGLE_GEO | MULTI_GEO`, проверенную морфологию, NAP, indexing, brand/feed и
 development Excel readiness. Генерируемые владельцы —
