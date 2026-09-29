@@ -19,6 +19,7 @@ export const legacyRouteRoots = [
 export type LegacyRouteMatch =
 	| { kind: "route"; destination: string; statusCode: 301 }
 	| { kind: "property"; slug: string; statusCode: 301 }
+	| { kind: "legacyApartment"; slug: string; statusCode: 301 }
 	| { kind: "none" };
 
 function normalizedSource(pathname: string): string {
@@ -41,6 +42,13 @@ function matchPropertyPattern(
 	return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) ? slug : null;
 }
 
+const legacyApartmentPath =
+	/^\/kvartiry-rostova\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/;
+
+function matchLegacyApartmentPath(pathname: string): string | null {
+	return pathname.match(legacyApartmentPath)?.[1] ?? null;
+}
+
 export function matchLegacyRoute(pathname: string): LegacyRouteMatch {
 	const normalized = normalizedSource(pathname);
 	const route = legacyRouteManifest.routes.find(
@@ -57,6 +65,10 @@ export function matchLegacyRoute(pathname: string): LegacyRouteMatch {
 		if (pattern.kind !== "property") continue;
 		const slug = matchPropertyPattern(pattern.from, pathname);
 		if (slug) return { kind: "property", slug, statusCode: pattern.statusCode };
+	}
+	const legacyApartmentSlug = matchLegacyApartmentPath(pathname);
+	if (legacyApartmentSlug) {
+		return { kind: "legacyApartment", slug: legacyApartmentSlug, statusCode: 301 };
 	}
 	return { kind: "none" };
 }
