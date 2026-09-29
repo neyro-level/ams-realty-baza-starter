@@ -9,7 +9,10 @@ import { createFixtureResolverDataPort } from "../src/fixture/resolver.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
 import { parseCatalogSearchParams } from "../src/project/routing/catalog-search-params.ts";
 import { publicGatewayRouteCacheIdentity } from "../src/project/routing/public-gateway-cache.ts";
-import { siteProfile } from "../src/project/site-profile.ts";
+import {
+	createProjectSiteProfile,
+	siteProfile,
+} from "../src/project/site-profile.ts";
 import { createPresetSiteProfileConfig } from "../src/project/site-profile-presets.ts";
 import { createProjectUrlGrammar } from "../src/project/url-grammar.ts";
 
@@ -17,18 +20,20 @@ const generatedProfile = (
 	preset: "NEWBUILD_FIRST" | "SECONDARY_FIRST" | "MIXED",
 	geoMode: "SINGLE_GEO" | "MULTI_GEO",
 ) =>
-	createPresetSiteProfileConfig({
-		projectKind: "starter-demo",
-		preset,
-		geoMode,
-		primaryGeo: "testograd",
-		geos: {
-			testograd: { published: true, hubStatus: "ACTIVE" },
-			...(geoMode === "MULTI_GEO"
-				? { vtorograd: { published: true, hubStatus: "ACTIVE" as const } }
-				: {}),
-		},
-	});
+	createProjectSiteProfile(
+		createPresetSiteProfileConfig({
+			projectKind: "starter-demo",
+			preset,
+			geoMode,
+			primaryGeo: "testograd",
+			geos: {
+				testograd: { published: true, hubStatus: "ACTIVE" },
+				...(geoMode === "MULTI_GEO"
+					? { vtorograd: { published: true, hubStatus: "ACTIVE" as const } }
+					: {}),
+			},
+		}),
+	);
 
 const profiles = [
 	{ name: "souz", profile: siteProfile },
