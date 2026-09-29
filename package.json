@@ -69,6 +69,7 @@
 		"verify:client:readiness": "pnpm verify:client-readiness",
 		"verify:client-clone-proof": "node scripts/verify-final-client-clone.mjs",
 		"verify:clone-matrix": "node scripts/verify-clone-runtime-matrix.mjs",
+		"verify:clone-matrix-contract": "node scripts/verify-clone-matrix-contract.mjs",
 		"verify:db-restore-drill": "node scripts/verify-db-restore-drill.mjs",
 		"verify:clone-presets": "node scripts/verify-final-client-clone.mjs",
 		"verify:souz-parity": "node --experimental-strip-types scripts/verify-souz-parity.mjs",
