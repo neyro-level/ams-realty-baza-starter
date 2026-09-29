@@ -113,6 +113,34 @@
 			"sources": ["SOUZ-MODULE-JOURNAL"]
 		}
 	},
+	"districtSeoClassification": {
+		"policy": {
+			"allowed": ["P1", "P2", "TEST", "filter-only"],
+			"publishFromRecordExistence": false,
+			"unverifiedTierFallback": "filter-only",
+			"sources": ["SOUZ-9.5", "PLAN12-OD12-01"]
+		},
+		"rostov-na-donu/leninskiy": {
+			"classification": "filter-only",
+			"publicationClaim": false,
+			"sources": ["PLAN12-OD12-01"]
+		},
+		"rostov-na-donu/voroshilovskiy": {
+			"classification": "filter-only",
+			"publicationClaim": false,
+			"sources": ["PLAN12-OD12-01"]
+		},
+		"rostov-na-donu/severnyy": {
+			"classification": "filter-only",
+			"publicationClaim": false,
+			"sources": ["PLAN12-OD12-01"]
+		},
+		"rostov-na-donu/tsentr": {
+			"classification": "filter-only",
+			"publicationClaim": false,
+			"sources": ["PLAN12-OD12-01"]
+		}
+	},
 	"expectedPreset": {
 		"geoMode": "SINGLE_GEO",
 		"primaryGeo": "rostov-na-donu",

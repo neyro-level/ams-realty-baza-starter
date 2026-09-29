@@ -61,6 +61,10 @@ function assertCapabilities(matrix) {
 		"normalization",
 		"urlBuilding",
 	]);
+	assert.deepEqual(matrix.seoPolicy, {
+		allowedClassifications: ["P1", "P2", "TEST", "filter-only"],
+		publishFromRecordExistence: false,
+	});
 }
 
 function assertExactGeo(matrix) {
@@ -108,6 +112,10 @@ function assertExactGeo(matrix) {
 	assert.deepEqual(
 		new Set(allDistricts.map(({ published }) => published)),
 		new Set([true, false]),
+	);
+	assert.deepEqual(
+		new Set(allDistricts.map(({ seoClassification }) => seoClassification)),
+		new Set(["P1", "P2", "TEST", "filter-only"]),
 	);
 }
 
@@ -162,6 +170,14 @@ assert.throws(
 	"Single publication state must fail",
 );
 
+const inferredPublication = structuredClone(matrix);
+inferredPublication.seoPolicy.publishFromRecordExistence = true;
+assert.throws(
+	() => verify(inferredPublication),
+	undefined,
+	"District existence must not imply page publication",
+);
+
 console.log(
-	"verify:template-geo-matrix PASS (1 fictional city, 8 administrative districts, 4 microdistricts, 5 safeguards, 5 negative cases)",
+	"verify:template-geo-matrix PASS (1 fictional city, 8 administrative districts, 4 microdistricts, all 4 SEO classes, 5 safeguards, 6 negative cases)",
 );

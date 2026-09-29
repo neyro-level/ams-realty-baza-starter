@@ -163,6 +163,35 @@ function assertReferenceScope(reference) {
 	]);
 }
 
+function assertDistrictSeoClassification(reference) {
+	const matrix = reference.districtSeoClassification;
+	assert.deepEqual(matrix.policy.allowed, ["P1", "P2", "TEST", "filter-only"]);
+	assert.equal(matrix.policy.publishFromRecordExistence, false);
+	assert.equal(matrix.policy.unverifiedTierFallback, "filter-only");
+	for (const ref of matrix.policy.sources) {
+		assert.ok(Object.hasOwn(reference.source.sections, ref));
+	}
+
+	const entries = Object.entries(matrix).filter(([key]) => key !== "policy");
+	assert.deepEqual(
+		entries.map(([key]) => key),
+		[
+			"rostov-na-donu/leninskiy",
+			"rostov-na-donu/voroshilovskiy",
+			"rostov-na-donu/severnyy",
+			"rostov-na-donu/tsentr",
+		],
+	);
+	for (const [key, entry] of entries) {
+		assert.equal(entry.classification, "filter-only", `${key} classification`);
+		assert.equal(entry.publicationClaim, false, `${key} publicationClaim`);
+		assert.ok(entry.sources.length > 0, `${key} sources`);
+		for (const ref of entry.sources) {
+			assert.ok(Object.hasOwn(reference.source.sections, ref));
+		}
+	}
+}
+
 function assertEveryFieldHasSource(reference) {
 	const sourcePrefixes = Object.keys(reference.fieldSources).sort(
 		(left, right) => right.length - left.length,
@@ -288,6 +317,7 @@ assert.equal(
 assert.equal(reference.source.version, "4.1.1 FINAL");
 referencedSections(reference);
 assertReferenceScope(reference);
+assertDistrictSeoClassification(reference);
 assertEveryFieldHasSource(reference);
 verifyParity(reference, rawPreset);
 
@@ -308,6 +338,18 @@ assert.throws(
 	"Reference matrix must reject a behavior without source coverage",
 );
 
+const inferredDistrictPage = structuredClone(reference);
+inferredDistrictPage.districtSeoClassification["rostov-na-donu/leninskiy"] = {
+	classification: "P1",
+	publicationClaim: true,
+	sources: [],
+};
+assert.throws(
+	() => assertDistrictSeoClassification(inferredDistrictPage),
+	undefined,
+	"Souz district existence must not infer page publication",
+);
+
 const parsedPreset = readClonePreset(presetPath);
 const acceptedProfile = siteProfileConfigForPreset(parsedPreset);
 assert.equal(acceptedProfile.primaryGeo, "rostov-na-donu");
@@ -318,5 +360,5 @@ assert.equal(acceptedProfile.categoryStatus.arenda, "OUT");
 verifyNegativeFixtures(reference, rawPreset, driftFixture);
 
 console.log(
-	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, ${driftFixture.cases.length + 2} negative drift cases)`,
+	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, ${driftFixture.cases.length + 3} negative drift cases)`,
 );

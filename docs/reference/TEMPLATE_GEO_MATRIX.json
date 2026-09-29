@@ -13,6 +13,10 @@
 		"publicationStates": [true, false],
 		"behaviors": ["morphology", "normalization", "urlBuilding"]
 	},
+	"seoPolicy": {
+		"allowedClassifications": ["P1", "P2", "TEST", "filter-only"],
+		"publishFromRecordExistence": false
+	},
 	"city": {
 		"slug": "testograd",
 		"nominative": "Тестоград",
@@ -26,6 +30,7 @@
 			"slug": "severnyy",
 			"locative": "Северном",
 			"genitive": "Северного",
+			"seoClassification": "P1",
 			"published": true
 		},
 		{
@@ -33,6 +38,7 @@
 			"slug": "yuzhnyy",
 			"locative": "Южном",
 			"genitive": "Южного",
+			"seoClassification": "P2",
 			"published": true
 		},
 		{
@@ -40,6 +46,7 @@
 			"slug": "zapadnyy",
 			"locative": "Западном",
 			"genitive": "Западного",
+			"seoClassification": "TEST",
 			"published": true
 		},
 		{
@@ -47,6 +54,7 @@
 			"slug": "vostochnyy",
 			"locative": "Восточном",
 			"genitive": "Восточного",
+			"seoClassification": "filter-only",
 			"published": true
 		},
 		{
@@ -54,6 +62,7 @@
 			"slug": "tsentralnyy",
 			"locative": "Центральном",
 			"genitive": "Центрального",
+			"seoClassification": "P1",
 			"published": false
 		},
 		{
@@ -61,6 +70,7 @@
 			"slug": "pribrezhnyy",
 			"locative": "Прибрежном",
 			"genitive": "Прибрежного",
+			"seoClassification": "P2",
 			"published": false
 		},
 		{
@@ -68,6 +78,7 @@
 			"slug": "lesnoy",
 			"locative": "Лесном",
 			"genitive": "Лесного",
+			"seoClassification": "TEST",
 			"published": false
 		},
 		{
@@ -75,6 +86,7 @@
 			"slug": "stepnoy",
 			"locative": "Степном",
 			"genitive": "Степного",
+			"seoClassification": "filter-only",
 			"published": false
 		}
 	],
@@ -85,6 +97,7 @@
 			"locative": "Солнечном",
 			"genitive": "Солнечного",
 			"preposition": "в",
+			"seoClassification": "P1",
 			"published": true
 		},
 		{
@@ -93,6 +106,7 @@
 			"locative": "Речном",
 			"genitive": "Речного",
 			"preposition": "в",
+			"seoClassification": "P2",
 			"published": true
 		},
 		{
@@ -101,6 +115,7 @@
 			"locative": "Старой слободе",
 			"genitive": "Старой слободы",
 			"preposition": "в",
+			"seoClassification": "TEST",
 			"published": false
 		},
 		{
@@ -109,6 +124,7 @@
 			"locative": "Лесной поляне",
 			"genitive": "Лесной поляны",
 			"preposition": "на",
+			"seoClassification": "filter-only",
 			"published": false
 		}
 	],
