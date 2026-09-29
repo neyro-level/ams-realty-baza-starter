@@ -220,6 +220,18 @@
 		"syntheticRegistryFallbackAllowed": false,
 		"sources": ["SOUZ-4.4", "SOUZ-18", "SOUZ-30"]
 	},
+	"metadataTemplateExamples": [
+		{
+			"kind": "categoryGeoDistrictMicro",
+			"title": "Купить квартиру на Северном в Ростове-на-Дону — цены",
+			"sources": ["SOUZ-17.3", "PLAN11-OD11-04"]
+		},
+		{
+			"kind": "categoryGeoDistrictAdmin",
+			"title": "Купить дом в Ленинском районе Ростова-на-Дону — цены",
+			"sources": ["SOUZ-17.3", "PLAN11-OD11-04"]
+		}
+	],
 	"expectedPreset": {
 		"geoMode": "SINGLE_GEO",
 		"primaryGeo": "rostov-na-donu",

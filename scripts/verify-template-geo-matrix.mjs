@@ -141,6 +141,14 @@ assert.throws(
 	"Default client export must fail",
 );
 
+const indexableSynthetic = structuredClone(matrix);
+indexableSynthetic.safeguards.indexing = "index";
+assert.throws(
+	() => verify(indexableSynthetic),
+	undefined,
+	"Synthetic indexing must fail",
+);
+
 const realLookingCity = structuredClone(matrix);
 realLookingCity.city.slug = "rostov-na-donu";
 assert.throws(
@@ -179,5 +187,5 @@ assert.throws(
 );
 
 console.log(
-	"verify:template-geo-matrix PASS (1 fictional city, 8 administrative districts, 4 microdistricts, all 4 SEO classes, 5 safeguards, 6 negative cases)",
+	"verify:template-geo-matrix PASS (1 fictional city, 8 administrative districts, 4 microdistricts, all 4 SEO classes, 5 safeguards, 7 negative cases)",
 );

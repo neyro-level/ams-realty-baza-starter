@@ -294,6 +294,26 @@ function assertLegacyApartmentContract(reference) {
 	assert.match(preflightSource, /grammar\.buildUrl/);
 }
 
+function assertMetadataTemplateExamples(reference) {
+	assert.deepEqual(reference.metadataTemplateExamples, [
+		{
+			kind: "categoryGeoDistrictMicro",
+			title: "Купить квартиру на Северном в Ростове-на-Дону — цены",
+			sources: ["SOUZ-17.3", "PLAN11-OD11-04"],
+		},
+		{
+			kind: "categoryGeoDistrictAdmin",
+			title: "Купить дом в Ленинском районе Ростова-на-Дону — цены",
+			sources: ["SOUZ-17.3", "PLAN11-OD11-04"],
+		},
+	]);
+	for (const example of reference.metadataTemplateExamples) {
+		for (const ref of example.sources) {
+			assert.ok(Object.hasOwn(reference.source.sections, ref));
+		}
+	}
+}
+
 function assertEveryFieldHasSource(reference) {
 	const sourcePrefixes = Object.keys(reference.fieldSources).sort(
 		(left, right) => right.length - left.length,
@@ -424,6 +444,7 @@ assertStaticServiceSurfaces(reference);
 assertJournalContract(reference);
 assertDeveloperRootContract(reference);
 assertLegacyApartmentContract(reference);
+assertMetadataTemplateExamples(reference);
 assertEveryFieldHasSource(reference);
 verifyParity(reference, rawPreset);
 
@@ -503,6 +524,31 @@ assert.throws(
 	"Missing legacy apartment detail pattern must fail",
 );
 
+const marketStatusDrift = structuredClone(rawPreset);
+marketStatusDrift.marketStatus["rostov-na-donu"].secondary = "PREPARED_OFF";
+assert.throws(
+	() => verifyParity(reference, marketStatusDrift),
+	undefined,
+	"Market status drift must fail",
+);
+
+const geoStatusDrift = structuredClone(rawPreset);
+geoStatusDrift.geos[0].hubStatus = "PREPARED_OFF";
+assert.throws(
+	() => verifyParity(reference, geoStatusDrift),
+	undefined,
+	"Geo status drift must fail",
+);
+
+const metadataTemplateDrift = structuredClone(reference);
+metadataTemplateDrift.metadataTemplateExamples[0].title =
+	"Квартиры на Северном";
+assert.throws(
+	() => assertMetadataTemplateExamples(metadataTemplateDrift),
+	undefined,
+	"Metadata template drift must fail",
+);
+
 const parsedPreset = readClonePreset(presetPath);
 const acceptedProfile = siteProfileConfigForPreset(parsedPreset);
 assert.equal(acceptedProfile.primaryGeo, "rostov-na-donu");
@@ -513,5 +559,5 @@ assert.equal(acceptedProfile.categoryStatus.arenda, "OUT");
 verifyNegativeFixtures(reference, rawPreset, driftFixture);
 
 console.log(
-	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, journal, developer-root and typed legacy-detail contracts guarded, ${driftFixture.cases.length + 8} negative drift cases)`,
+	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, 2 exact metadata examples, journal, developer-root and typed legacy-detail contracts guarded, ${driftFixture.cases.length + 11} negative drift cases)`,
 );
