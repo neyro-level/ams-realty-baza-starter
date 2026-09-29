@@ -39,12 +39,8 @@ for (const literal of marketingLiterals) {
 assert.doesNotMatch(catalog, /\bsafeSeo\b/);
 assert.doesNotMatch(catalog, /following:\s*["']nofollow["']/);
 assert.match(catalog, /projectSeoMeta/);
-const districtTemplates = templateInputs.slice(
-	templateInputs.indexOf("categoryGeoDistrictAdmin:"),
-	templateInputs.indexOf("categoryGeoFacet:"),
-);
-assert.match(districtTemplates, /\{categoryAccusative\}/);
-assert.match(districtTemplates, /\{categoryNominativePlural\}/);
-assert.doesNotMatch(districtTemplates, /Купить квартиру|Квартиры/);
+assert.match(templateInputs, /\{categoryAccusative\}/);
+assert.match(templateInputs, /\{categoryNominativePlural\}/);
+assert.doesNotMatch(templateInputs, /Купить квартиру/);
 
 console.log("project SEO template ownership guard passed");

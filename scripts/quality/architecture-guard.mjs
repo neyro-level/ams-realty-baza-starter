@@ -131,6 +131,11 @@ const siteProfileConfigPath = path.join(
 	"project",
 	"site-profile.config.ts",
 );
+const siteConfigSource = readFileSync(
+	path.join(root, "src", "project", "site.config.ts"),
+	"utf8",
+);
+const clientProject = /projectKind:\s*["']client["']/.test(siteConfigSource);
 if (existsSync(siteProfileConfigPath)) {
 	const siteProfileConfig = readFileSync(siteProfileConfigPath, "utf8");
 	if (
@@ -153,6 +158,7 @@ if (existsSync(siteProfileConfigPath)) {
 				"src/project/site-profile.config.ts",
 				siteProfileConfig,
 			),
+			clientProject,
 		),
 	);
 }

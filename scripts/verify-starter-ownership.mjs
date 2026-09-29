@@ -32,7 +32,7 @@ for (const path of [
 	assert.ok(files.some((file) => file.startsWith(path)), `platform owns ${path}`);
 }
 assert.ok(files.includes("src/app/api/public/leads/route.ts"));
-assert.ok(files.includes("src/app/robots.ts"));
+assert.ok(files.includes("src/app/robots.txt/route.ts"));
 assert.ok(files.includes("src/app/sitemap.ts"));
 for (const path of files) {
 	assert.ok(

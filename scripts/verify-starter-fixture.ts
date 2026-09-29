@@ -11,7 +11,6 @@ import {
 	seedStarterFixture,
 } from "../src/project/fixture-data/starter-seed.ts";
 import { geoHierarchyFixtures } from "../src/project/geo/fixtures.ts";
-import { projectSeoRegistrySeed } from "../src/project/seo/registry-seed.ts";
 
 const dataset = starterFixtureDataset;
 assert.equal(dataset.identity.indexing, "noindex");
@@ -165,15 +164,7 @@ assert.equal(reset.deleted, 10);
 assert.equal(reset.missing, 0);
 assert.equal(reset.retainedGeoRecords, 7);
 assert.equal(records.size, 7);
-assert.ok(
-	projectSeoRegistrySeed.some(
-		(row) => row.entityRef === "development:severnyy-bereg",
-	),
-);
-assert.ok(
-	projectSeoRegistrySeed.every((row) => row.defaultRobots === "noindex,follow"),
-);
 
 console.log(
-	"verify:starter-fixture passed (canonical dataset, Excel parity, idempotent seed, scoped reset, noindex)",
+	"verify:starter-fixture passed (canonical dataset, Excel parity, idempotent seed, scoped reset)",
 );

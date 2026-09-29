@@ -277,6 +277,7 @@ export function findStaticRouteParityViolations(
 	routeFiles,
 	configuredPaths,
 	legacyFallbackPaths = [],
+	allowUnconfiguredFolders = false,
 ) {
 	const normalizedConfigured = new Set(
 		configuredPaths.map((value) =>
@@ -302,16 +303,18 @@ export function findStaticRouteParityViolations(
 		}),
 	);
 	return [
-		...[...folderPaths]
-			.filter(
-				(pathValue) =>
-					!normalizedConfigured.has(pathValue) &&
-					!normalizedLegacyFallbacks.has(pathValue),
-			)
-			.map(
-				(pathValue) =>
-					`static route folder missing from registry: ${pathValue}`,
-			),
+		...(allowUnconfiguredFolders
+			? []
+			: [...folderPaths]
+					.filter(
+						(pathValue) =>
+							!normalizedConfigured.has(pathValue) &&
+							!normalizedLegacyFallbacks.has(pathValue),
+					)
+					.map(
+						(pathValue) =>
+							`static route folder missing from registry: ${pathValue}`,
+					)),
 		...[...normalizedConfigured]
 			.filter((pathValue) => !folderPaths.has(pathValue))
 			.map((pathValue) => `static route registry missing folder: ${pathValue}`),

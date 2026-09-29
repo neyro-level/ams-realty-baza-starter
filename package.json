@@ -60,6 +60,7 @@
 		"starter:upgrade": "node scripts/starter-upgrade.mjs",
 		"verify:starter-drift": "node scripts/starter-drift.mjs --mode=warn",
 		"verify:starter-upgrade": "node scripts/verify-starter-upgrade.mjs",
+		"verify:starter-upgrade-propagation": "node scripts/verify-starter-upgrade-propagation.mjs",
 		"verify:starter-drift-modes": "node scripts/verify-starter-drift.mjs",
 		"verify:clone-init": "node --experimental-strip-types scripts/verify-clone-init.mjs",
 		"verify:clone-bootstrap": "node scripts/verify-clone-bootstrap.mjs",

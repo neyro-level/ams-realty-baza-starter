@@ -37,7 +37,7 @@ export function toOpenGraphImage(image: MediaDTO | undefined) {
 
 export function toMetadata(
 	seo: PageSEOContract,
-	options: PublicMetadataOptions,
+	options: PublicMetadataOptions = { globalIndexingPolicy: "public" },
 ): Metadata {
 	return {
 		title: seo.title,

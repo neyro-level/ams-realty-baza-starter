@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { deriveSeoTier } from "../src/core/seo/registry.ts";
 import { siteProfile } from "../src/project/site-profile.ts";
 import {
 	loadProjectDistrictRegistry,
@@ -41,7 +42,7 @@ assert.deepEqual(
 			value: 600,
 			source: siteProfile.seoTiers.metric,
 			snapshotDate: "2026-09-25",
-			tier: "P1",
+			tier: deriveSeoTier(600, siteProfile.seoTiers),
 			synthetic: false,
 		},
 		{
@@ -49,7 +50,7 @@ assert.deepEqual(
 			value: 125,
 			source: siteProfile.seoTiers.metric,
 			snapshotDate: "2026-09-25",
-			tier: "P1",
+			tier: deriveSeoTier(125, siteProfile.seoTiers),
 			synthetic: false,
 		},
 	],

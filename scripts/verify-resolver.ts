@@ -76,13 +76,15 @@ for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 	}
 }
 
-assert.deepEqual(matchLegacyRoute("/nedvizhimost/"), {
-	kind: "route",
-	destination: "/kvartiry/",
-	statusCode: 301,
-});
 assert.deepEqual(legacyRouteManifest.routes, siteProfile.legacyRoutes);
 assert.deepEqual(legacyRouteManifest.patterns, siteProfile.legacyPatterns);
+for (const route of siteProfile.legacyRoutes) {
+	assert.deepEqual(matchLegacyRoute(`${route.from}/`), {
+		kind: "route",
+		destination: route.to,
+		statusCode: route.statusCode,
+	});
+}
 assert.deepEqual(matchLegacyRoute("/obekty/dom-42"), {
 	kind: "property",
 	slug: "dom-42",
@@ -101,7 +103,9 @@ assert.deepEqual(
 		statusCode: 301,
 	},
 );
-assert.deepEqual(matchLegacyRoute("/kvartiry-rostova/"), { kind: "none" });
+assert.deepEqual(matchLegacyRoute("/not-a-configured-legacy-route/"), {
+	kind: "none",
+});
 assert.deepEqual(matchLegacyRoute("/kvartiry/"), { kind: "none" });
 
 const profile = siteProfileFixtures.multiGeo;

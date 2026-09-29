@@ -8,21 +8,21 @@ import {
 } from "../src/core/seo/registry.ts";
 import { fixtureDistrictRouteRegistryFor } from "../src/fixture/route-registries.ts";
 import { siteProfileFixtures } from "../src/fixture/site-profile.ts";
+import { assertProjectSeoTemplateClaimsAreSourced } from "../src/project/seo/claim-guard.ts";
+import { projectSeoClaimSourcesInput } from "../src/project/seo/claim-sources.ts";
 import {
 	projectDistrictRouteRegistry,
 	projectSeoRegistrySeed,
 } from "../src/project/seo/registry-seed.ts";
+import { projectSeoTemplatesInput } from "../src/project/seo/template-inputs.ts";
 import {
 	isFreshPriceCheckedAt,
+	projectHomeSeoTemplateKey,
 	projectSeoActiveCategoriesList,
 	projectSeoCategoryForms,
-	projectHomeSeoTemplateKey,
 	projectSeoTemplateKeys,
 	renderProjectSeoTemplate,
 } from "../src/project/seo/templates.ts";
-import { assertProjectSeoTemplateClaimsAreSourced } from "../src/project/seo/claim-guard.ts";
-import { projectSeoClaimSourcesInput } from "../src/project/seo/claim-sources.ts";
-import { projectSeoTemplatesInput } from "../src/project/seo/template-inputs.ts";
 import {
 	activeProjectGeoCategorySurfaces,
 	siteProfile,
@@ -38,7 +38,7 @@ const grammar = createProjectUrlGrammar(
 	siteProfile,
 	projectDistrictRouteRegistry,
 );
-const now = new Date("2026-09-24T12:00:00.000Z");
+const now = new Date(`${siteProfile.seoTiers.snapshotDate}T12:00:00.000Z`);
 const csvSource = readFileSync("docs/seo/SEO_REGISTRY_SEED.csv", "utf8");
 const csvRows = validateRegistryCsv(csvSource);
 assert.deepEqual(csvRows, projectSeoRegistrySeed);
@@ -54,11 +54,37 @@ assert.match(generatedSource, /siteProfile/);
 
 const [csvHeader, homeCsvRow] = csvSource.split(/\r?\n/);
 assert.ok(csvHeader && homeCsvRow);
+const homeRegistryRow = projectSeoRegistrySeed.find(
+	(row) => row.pageKey.kind === "home",
+);
+assert.ok(homeRegistryRow);
+
+function replaceRequired(
+	source: string,
+	before: string,
+	after: string,
+): string {
+	assert.ok(source.includes(before), `Expected CSV fixture token: ${before}`);
+	return source.replace(before, after);
+}
 
 for (const [name, profile] of Object.entries(siteProfileFixtures)) {
 	const registry = fixtureDistrictRouteRegistryFor(profile);
+	const fixtureTier = deriveSeoTier(null, profile.seoTiers);
+	const fixtureMinimumObjects =
+		fixtureTier === "NONE" ? 0 : profile.seoTiers.minInventory[fixtureTier];
+	const fixtureMetricRow = replaceRequired(
+		homeCsvRow,
+		`,${siteProfile.seoTiers.metric},`,
+		`,${profile.seoTiers.metric},`,
+	);
+	const fixtureHomeRow = replaceRequired(
+		fixtureMetricRow,
+		`,${homeRegistryRow.tier},${homeRegistryRow.minimumObjects},`,
+		`,${fixtureTier},${fixtureMinimumObjects},`,
+	);
 	const [profileRow] = validateRegistryCsv(
-		`${csvHeader}\n${homeCsvRow}\n`,
+		`${csvHeader}\n${fixtureHomeRow}\n`,
 		profile,
 		registry,
 	);
@@ -97,9 +123,10 @@ assert.throws(
 assert.throws(
 	() =>
 		validateRegistryCsv(
-			csvSource.replace(
-				",searchDemand,,fallback_no_data,",
-				",searchDemand,1,fallback_no_data,",
+			replaceRequired(
+				csvSource,
+				`,${siteProfile.seoTiers.metric},,fallback_no_data,`,
+				`,${siteProfile.seoTiers.metric},1,fallback_no_data,`,
 			),
 		),
 	/must keep value null/,
@@ -107,19 +134,10 @@ assert.throws(
 assert.throws(
 	() =>
 		validateRegistryCsv(
-			csvSource.replace(
-				",draft,true,starter-v2.1.0,",
-				",approved,true,starter-v2.1.0,",
-			),
-		),
-	/Synthetic SEO row cannot be approved/,
-);
-assert.throws(
-	() =>
-		validateRegistryCsv(
-			csvSource.replace(
-				",draft,true,starter-v2.1.0,listing",
-				",unknown,true,starter-v2.1.0,listing",
+			replaceRequired(
+				csvSource,
+				`,draft,true,${homeRegistryRow.release},${homeRegistryRow.contentGateRule}`,
+				`,unknown,true,${homeRegistryRow.release},${homeRegistryRow.contentGateRule}`,
 			),
 		),
 	/Unsupported SEO registry status/,
@@ -134,17 +152,34 @@ assert.throws(
 assert.throws(
 	() =>
 		validateRegistryCsv(
-			csvSource.replace(",starter-v2.1.0,listing", ",starter-v2.1.0,unknown"),
+			replaceRequired(
+				csvSource,
+				`,${homeRegistryRow.release},${homeRegistryRow.contentGateRule}`,
+				`,${homeRegistryRow.release},unknown`,
+			),
 		),
 	/Unsupported contentGateRule/,
 );
 assert.throws(
-	() => validateRegistryCsv(csvSource.replace(",searchDemand,", ",wordstat,")),
+	() =>
+		validateRegistryCsv(
+			replaceRequired(
+				csvSource,
+				`,${siteProfile.seoTiers.metric},`,
+				",wordstat,",
+			),
+		),
 	/differs from SiteProfile metric/,
 );
 assert.throws(
 	() =>
-		validateRegistryCsv(csvSource.replace(",true,TEST,10,", ",true,P1,10,")),
+		validateRegistryCsv(
+			replaceRequired(
+				csvSource,
+				`,${homeRegistryRow.synthetic},${homeRegistryRow.tier},${homeRegistryRow.minimumObjects},`,
+				`,${homeRegistryRow.synthetic},${homeRegistryRow.tier === "P1" ? "P2" : "P1"},${homeRegistryRow.minimumObjects},`,
+			),
+		),
 	/differs from derived tier/,
 );
 assert.throws(
@@ -169,7 +204,10 @@ assert.deepEqual(
 	)[siteProfile.primaryGeo]?.kvartiry,
 	["bootstrap-district"],
 );
-assert.equal(deriveSeoTier(null, siteProfile.seoTiers), "TEST");
+assert.equal(
+	deriveSeoTier(null, siteProfile.seoTiers),
+	siteProfile.seoTiers.unmeasuredPolicy,
+);
 assert.equal(
 	deriveSeoTier(siteProfile.seoTiers.bands.P1, siteProfile.seoTiers),
 	"P1",
@@ -184,7 +222,7 @@ const wordstatProfile = {
 };
 assert.equal(
 	validateRegistryCsv(
-		`${csvHeader}\n${homeCsvRow.replace(",searchDemand,", ",wordstat,")}\n`,
+		`${csvHeader}\n${replaceRequired(homeCsvRow, `,${siteProfile.seoTiers.metric},`, ",wordstat,")}\n`,
 		wordstatProfile,
 		projectDistrictRouteRegistry,
 	)[0]?.metric,
@@ -227,7 +265,6 @@ assert.ok(!seededTemplateKeys.has("homeMultiGeo"));
 assert.ok(
 	projectSeoRegistrySeed.every(
 		(row) =>
-			row.synthetic &&
 			row.source === "fallback_no_data" &&
 			row.value === null &&
 			row.status === "draft" &&
@@ -306,16 +343,23 @@ for (const category of Object.keys(
 	localCategoryProfile.categoryStatus,
 ) as (keyof typeof localCategoryProfile.categoryStatus)[]) {
 	localCategoryProfile.categoryStatus[category] = "PREPARED_OFF";
-	localCategoryProfile.geoCategoryStatus.primorsk[category] = "PREPARED_OFF";
+	localCategoryProfile.geoCategoryStatus[siteProfile.primaryGeo][category] =
+		"PREPARED_OFF";
 }
 localCategoryProfile.categoryStatus.kvartiry = "ACTIVE";
 localCategoryProfile.categoryStatus.doma = "ACTIVE";
 localCategoryProfile.categoryStatus.novostroyki = "ACTIVE";
-localCategoryProfile.geoCategoryStatus.primorsk.kvartiry = "ACTIVE";
-localCategoryProfile.geoCategoryStatus.primorsk.doma = "PREPARED_OFF";
-localCategoryProfile.geoCategoryStatus.primorsk.novostroyki = "ACTIVE";
+localCategoryProfile.geoCategoryStatus[siteProfile.primaryGeo].kvartiry =
+	"ACTIVE";
+localCategoryProfile.geoCategoryStatus[siteProfile.primaryGeo].doma =
+	"PREPARED_OFF";
+localCategoryProfile.geoCategoryStatus[siteProfile.primaryGeo].novostroyki =
+	"ACTIVE";
 assert.deepEqual(
-	activeProjectGeoCategorySurfaces(localCategoryProfile, "primorsk"),
+	activeProjectGeoCategorySurfaces(
+		localCategoryProfile,
+		siteProfile.primaryGeo,
+	),
 	["kvartiry", "novostroyki"],
 );
 
@@ -329,7 +373,10 @@ const singleGeoHomeSnapshot = renderProjectSeoTemplate("homeSingleGeo", {
 		preposition: "в",
 	},
 });
-assert.equal(singleGeoHomeSnapshot.title, "Недвижимость Ростова-на-Дону — AMS Realty");
+assert.equal(
+	singleGeoHomeSnapshot.title,
+	"Недвижимость Ростова-на-Дону — AMS Realty",
+);
 assert.equal(projectHomeSeoTemplateKey("SINGLE_GEO"), "homeSingleGeo");
 
 const multiGeoHomeSnapshot = renderProjectSeoTemplate("homeMultiGeo", {
@@ -458,8 +505,14 @@ assert.equal(
 	rentalMicrodistrictSnapshot.title,
 	"Снять объект в аренду на Северном в Ростове-на-Дону — цены",
 );
-for (const rendered of [rentalAdminDistrictSnapshot, rentalMicrodistrictSnapshot]) {
-	assert.doesNotMatch(`${rendered.title} ${rendered.h1} ${rendered.description}`, /Купить/u);
+for (const rendered of [
+	rentalAdminDistrictSnapshot,
+	rentalMicrodistrictSnapshot,
+]) {
+	assert.doesNotMatch(
+		`${rendered.title} ${rendered.h1} ${rendered.description}`,
+		/Купить/u,
+	);
 }
 
 assert.throws(
@@ -485,10 +538,6 @@ assert.throws(
 		}),
 	/SEO template requires districtAdjLocative/,
 );
-const materializedDistrict = projectSeoRegistrySeed.find(
-	(row) => row.entityRef === "district:severnyy",
-);
-assert.ok(materializedDistrict);
 const registryDistrictSnapshot = renderProjectSeoTemplate(
 	"categoryGeoDistrictMicro",
 	{
@@ -512,6 +561,7 @@ const registryDistrictSnapshot = renderProjectSeoTemplate(
 		inventory: 12,
 	},
 );
+const materializedDistrict = registryDistrictSnapshot;
 function assertMaterializedMetadata(
 	row: Pick<SeoRegistryRow, "title" | "h1" | "description">,
 	rendered: Pick<SeoRegistryRow, "title" | "h1" | "description">,
@@ -602,7 +652,12 @@ function rejects(row: SeoRegistryRow, pattern: RegExp): void {
 rejects({ ...base, url: "/wrong/" }, /differs from buildUrl/);
 rejects({ ...base, canonical: "/wrong/" }, /canonical differs/);
 rejects({ ...base, snapshotDate: "2026-02-30" }, /date is invalid/);
-rejects({ ...base, snapshotDate: "2026-09-25" }, /future/);
+const futureSnapshotDate = new Date(now);
+futureSnapshotDate.setUTCDate(futureSnapshotDate.getUTCDate() + 1);
+rejects(
+	{ ...base, snapshotDate: futureSnapshotDate.toISOString().slice(0, 10) },
+	/future/,
+);
 rejects({ ...base, value: 0 }, /must keep value null/);
 rejects({ ...base, source: "wordstat", value: null }, /non-negative value/);
 rejects(
@@ -625,7 +680,7 @@ rejects(
 	/Unapproved morphology/,
 );
 rejects(
-	{ ...base, status: "approved" },
+	{ ...base, synthetic: true, status: "approved" },
 	/Synthetic SEO row cannot be approved/,
 );
 

@@ -16,8 +16,8 @@ import {
 	renderClientReadinessConfig,
 	renderClientSeoArtifacts,
 	renderProjectCopy,
-	renderProjectLiterals,
 	renderProjectFontConfig,
+	renderProjectLiterals,
 	renderSeoTemplateInputs,
 	renderSiteProfileConfig,
 	reservedRootsForSiteProfile,
@@ -68,16 +68,30 @@ const presetSha = clonePresetHash(preset);
 const resolveRepositoryFile = (relativePath, label) => {
 	const target = resolve(root, relativePath);
 	const rootRelative = relative(root, target);
-	if (!rootRelative || rootRelative.startsWith("..") || isAbsolute(rootRelative)) {
+	if (
+		!rootRelative ||
+		rootRelative.startsWith("..") ||
+		isAbsolute(rootRelative)
+	) {
 		throw new Error(`${label} must stay inside the repository.`);
 	}
-	if (!existsSync(target)) throw new Error(`${label} does not exist: ${relativePath}`);
+	if (!existsSync(target))
+		throw new Error(`${label} does not exist: ${relativePath}`);
 	return target;
 };
 resolveRepositoryFile(preset.brand.logoFile, "brand.logoFile");
 resolveRepositoryFile(preset.brand.faviconFile, "brand.faviconFile");
 const sourceTag = String(args.get("--source-tag") || "");
 validateStarterTag(sourceTag);
+const preparedAt = String(args.get("--date") || new Date().toISOString());
+const preparedPreset = {
+	...preset,
+	seoTiers: {
+		...preset.seoTiers,
+		snapshotDate: preparedAt.slice(0, 10),
+	},
+};
+const preparedProfile = siteProfileConfigForPreset(preparedPreset);
 
 const provenancePath = join(root, "docs", "CLONE_PROVENANCE.md");
 const bootstrapPath = join(root, "docs", "CLIENT_BOOTSTRAP.json");
@@ -125,13 +139,19 @@ const starterManifest = readStarterOwnedManifest(root);
 const starterHashes = hashStarterOwnedFiles(root, starterManifest);
 const releaseManifestPath = args.get("--release-manifest");
 if (!releaseManifestPath || releaseManifestPath === true) {
-	throw new Error("clone:prepare requires --release-manifest=<released manifest JSON>.");
+	throw new Error(
+		"clone:prepare requires --release-manifest=<released manifest JSON>.",
+	);
 }
 readStarterReleaseManifest(
 	isAbsolute(String(releaseManifestPath))
 		? String(releaseManifestPath)
 		: resolve(process.cwd(), String(releaseManifestPath)),
-	{ expectedTag: sourceTag, expectedSha: sourceSha, expectedHashes: starterHashes },
+	{
+		expectedTag: sourceTag,
+		expectedSha: sourceSha,
+		expectedHashes: starterHashes,
+	},
 );
 
 const configPath = join(root, "src", "project", "site.config.ts");
@@ -157,6 +177,7 @@ const removalGroups = [
 	"scripts/capture-starter-visual-proof.mjs",
 	"scripts/verify-atlas-css-parity.mjs",
 	"scripts/verify-final-client-clone.mjs",
+	"scripts/verify-clone-runtime-matrix.mjs",
 	"scripts/verify-clone-readiness.mjs",
 	"scripts/verify-clone-prepare.mjs",
 	"scripts/generate-align-inventory.mjs",
@@ -218,7 +239,7 @@ siteConfig = replaceLiteral(
 writeFileSync(configPath, siteConfig);
 writeFileSync(
 	join(root, "src", "project", "site-profile.config.ts"),
-	renderSiteProfileConfig(preset),
+	renderSiteProfileConfig(preparedPreset),
 );
 writeFileSync(
 	join(root, "src", "project", "project-literals.json"),
@@ -249,17 +270,16 @@ const readinessPath = join(
 );
 writeFileSync(readinessPath, renderClientReadinessConfig(preset));
 
-const preparedAt = String(args.get("--date") || new Date().toISOString());
 const bootstrap = buildCloneBootstrap(
-	preset,
-	reservedRootsForSiteProfile(siteProfileConfigForPreset(preset)),
+	preparedPreset,
+	reservedRootsForSiteProfile(preparedProfile),
 	presetSha,
 	preparedAt,
 );
 writeFileSync(bootstrapPath, `${JSON.stringify(bootstrap, null, "\t")}\n`);
 const seoArtifacts = renderClientSeoArtifacts(
-	preset,
-	siteProfileConfigForPreset(preset),
+	preparedPreset,
+	preparedProfile,
 	preparedAt,
 );
 mkdirSync(join(root, "docs", "seo"), { recursive: true });
@@ -311,13 +331,16 @@ writeFileSync(
 	join(root, "docs", "CLONE_GENERATED_OUTPUTS.json"),
 	`${JSON.stringify(outputManifest, null, "\t")}\n`,
 );
-const starterVersion = validateStarterVersion({
-	schemaVersion: 1,
-	tag: sourceTag,
-	sha: sourceSha,
-	manifestVersion: starterManifest.schemaVersion,
-	hashes: starterHashes,
-}, { expectedTag: sourceTag, expectedSha: sourceSha });
+const starterVersion = validateStarterVersion(
+	{
+		schemaVersion: 1,
+		tag: sourceTag,
+		sha: sourceSha,
+		manifestVersion: starterManifest.schemaVersion,
+		hashes: starterHashes,
+	},
+	{ expectedTag: sourceTag, expectedSha: sourceSha },
+);
 writeFileSync(
 	join(root, ".starter-version"),
 	`${JSON.stringify(starterVersion, null, "\t")}\n`,
