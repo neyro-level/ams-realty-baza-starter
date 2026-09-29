@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { cloneThemeProofs } from "./verify-clone-theme-proof.mjs";
@@ -46,12 +52,46 @@ const viewports = [
 	{ name: "wide", width: 1440, height: 1000 },
 ];
 const routes = [
-	"/",
-	"/primorsk/kvartiry/",
-	"/primorsk/kvartiry/?rooms=2",
-	"/novostroyki/zhk-severnyy-bereg/",
-	"/uslugi/",
+	{ path: "/", status: 200, kind: "home" },
+	{ path: "/primorsk/", status: 200, kind: "geo-hub" },
+	{ path: "/primorsk/kvartiry/", status: 200, kind: "catalog" },
+	{
+		path: "/primorsk/kvartiry/?rooms=2",
+		status: 200,
+		kind: "filtered-catalog",
+	},
+	{
+		path: "/novostroyki/zhk-severnyy-bereg/",
+		status: 200,
+		kind: "development-a",
+	},
+	{ path: "/zastroyshchiki/", status: 200, kind: "developer-root" },
+	{
+		path: "/zastroyshchiki/stroy-invest/",
+		status: 200,
+		kind: "developer-entity",
+	},
+	{
+		path: "/kvartiry/svetlaya-kvartira-v-centre-1001/",
+		status: 200,
+		kind: "secondary-property",
+	},
+	{ path: "/uslugi/", status: 200, kind: "service" },
+	{ path: "/politika-konfidencialnosti/", status: 200, kind: "legal" },
+	{ path: "/definitely-missing/", status: 404, kind: "404" },
 ];
+
+const tierFixtures = readFileSync(
+	"src/project/fixture-data/starter-dataset.ts",
+	"utf8",
+);
+const lifecycle = readFileSync(
+	"src/core/lifecycle/entity-lifecycle.ts",
+	"utf8",
+);
+for (const tier of ["A", "B", "C"])
+	assert.match(tierFixtures, new RegExp(`dataTier: "${tier}"`));
+assert.match(lifecycle, /kind: "gone"; statusCode: 410/);
 
 const port = 9400 + (process.pid % 400);
 const profile = mkdtempSync(join(tmpdir(), "ams-s14-browser-"));
@@ -93,9 +133,14 @@ function createCdpClient(webSocketDebuggerUrl) {
 	const socket = new WebSocket(webSocketDebuggerUrl);
 	let sequence = 0;
 	const pending = new Map();
+	const listeners = new Map();
 	socket.onmessage = ({ data }) => {
 		const message = JSON.parse(data);
-		if (!message.id) return;
+		if (!message.id) {
+			for (const listener of listeners.get(message.method) ?? [])
+				listener(message.params);
+			return;
+		}
 		const waiter = pending.get(message.id);
 		if (!waiter) return;
 		pending.delete(message.id);
@@ -117,6 +162,9 @@ function createCdpClient(webSocketDebuggerUrl) {
 		},
 		close() {
 			socket.close();
+		},
+		on(method, listener) {
+			listeners.set(method, [...(listeners.get(method) ?? []), listener]);
 		},
 	};
 }
@@ -161,25 +209,45 @@ try {
 	await client.ready;
 	await client.send("Page.enable");
 	await client.send("Runtime.enable");
+	await client.send("Log.enable");
 	await client.send("Accessibility.enable");
+	const consoleErrors = [];
+	let activeRouteStatus = 200;
+	let expectedNotFoundResourceErrors = 0;
+	client.on("Runtime.exceptionThrown", (event) =>
+		consoleErrors.push(event.exceptionDetails?.text ?? "runtime exception"),
+	);
+	client.on("Log.entryAdded", ({ entry }) => {
+		if (entry.level !== "error") return;
+		if (activeRouteStatus === 404 && entry.text.includes("status of 404")) {
+			expectedNotFoundResourceErrors += 1;
+			return;
+		}
+		consoleErrors.push(entry.text);
+	});
 
 	const matrix = [];
 	let checkedLinks = [];
-	for (const route of routes) {
+	for (const routeCase of routes) {
+		const route = routeCase.path;
 		const routeResponse = await fetch(new URL(route, baseUrl), {
 			redirect: "manual",
 		});
 		assert.equal(
 			routeResponse.status,
-			200,
+			routeCase.status,
 			`Representative route failed: ${route}`,
 		);
 		for (const viewport of viewports) {
+			activeRouteStatus = routeCase.status;
 			await client.send("Emulation.setDeviceMetricsOverride", {
 				width: viewport.width,
 				height: viewport.height,
 				deviceScaleFactor: 1,
 				mobile: viewport.width < 768,
+			});
+			await client.send("Emulation.setEmulatedMedia", {
+				features: [{ name: "prefers-reduced-motion", value: "reduce" }],
 			});
 			await client.send("Page.navigate", { url: new URL(route, baseUrl).href });
 			await waitForDocument(client);
@@ -205,6 +273,10 @@ try {
 					.filter((id) => document.getElementById(id)),
 				analyticsEvents: [...document.querySelectorAll('[data-analytics-event]')]
 					.map((node) => node.getAttribute('data-analytics-event')),
+				keyboardFocus: (() => { const node = document.querySelector('main a[href], main button, main input, main select, main textarea'); if (!node) return null; node.focus(); return document.activeElement === node; })(),
+				forms: document.querySelectorAll('form').length,
+				brokenImages: [...document.images].filter((image) => image.complete && image.naturalWidth === 0).length,
+				reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
 				brand: {
 					accent: getComputedStyle(document.documentElement).getPropertyValue('--brand-accent').trim(),
 					accentHover: getComputedStyle(document.documentElement).getPropertyValue('--brand-accent-hover').trim(),
@@ -226,6 +298,21 @@ try {
 			assert.ok(
 				value.overflow <= 1,
 				`${route} overflows by ${value.overflow}px`,
+			);
+			assert.notEqual(
+				value.keyboardFocus,
+				false,
+				`${route} keyboard focus failed`,
+			);
+			assert.equal(
+				value.brokenImages,
+				0,
+				`${route} has broken media without fallback`,
+			);
+			assert.equal(
+				value.reducedMotion,
+				true,
+				`${route} did not honor reduced-motion emulation`,
 			);
 			assert.equal(
 				value.brand.accent,
@@ -280,18 +367,27 @@ try {
 					returnByValue: true,
 				});
 				const baselineGeometry = baselineInspection.result.value;
-				assert.equal(baselineGeometry.length, value.geometry.length, `${route} geometry node count drifted`);
+				assert.equal(
+					baselineGeometry.length,
+					value.geometry.length,
+					`${route} geometry node count drifted`,
+				);
 				maxGeometryDrift = 0;
 				for (let index = 0; index < value.geometry.length; index += 1) {
 					assert.equal(value.geometry[index].tag, baselineGeometry[index].tag);
 					for (const field of ["x", "y", "width", "height"]) {
 						maxGeometryDrift = Math.max(
 							maxGeometryDrift,
-							Math.abs(value.geometry[index][field] - baselineGeometry[index][field]),
+							Math.abs(
+								value.geometry[index][field] - baselineGeometry[index][field],
+							),
 						);
 					}
 				}
-				assert.ok(maxGeometryDrift <= 1, `${route} geometry drifted by ${maxGeometryDrift}px`);
+				assert.ok(
+					maxGeometryDrift <= 1,
+					`${route} geometry drifted by ${maxGeometryDrift}px`,
+				);
 			}
 			if (captureDirectory) {
 				const routeKey =
@@ -305,12 +401,15 @@ try {
 			}
 			matrix.push({
 				route,
+				kind: routeCase.kind,
+				status: routeCase.status,
 				viewport: viewport.name,
 				width: viewport.width,
 				height: viewport.height,
 				h1: value.h1,
 				overflow: value.overflow,
 				unnamedControls: unnamedControls.length,
+				forms: value.forms,
 				brand: value.brand,
 				maxGeometryDrift,
 				screenshotSha256: createHash("sha256")
@@ -319,6 +418,11 @@ try {
 			});
 		}
 	}
+	assert.deepEqual(
+		consoleErrors,
+		[],
+		`browser console errors: ${consoleErrors.join(" | ")}`,
+	);
 
 	const uniqueLinks = [
 		...new Map(checkedLinks.map((item) => [item.href, item])).values(),
@@ -340,6 +444,11 @@ try {
 				baselineUrl,
 				brandProofTheme,
 				checkVisibleInternalLinks,
+				staticCoverage: {
+					developmentTiers: ["A", "B", "C"],
+					lifecycleStatus: 410,
+					expectedNotFoundResourceErrors,
+				},
 				matrix,
 				checkedInternalLinks: uniqueLinks,
 				status: "PASS",
