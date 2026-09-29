@@ -210,6 +210,16 @@
 		],
 		"sources": ["SOUZ-MODULE-JOURNAL", "SOUZ-30"]
 	},
+	"developerRootContract": {
+		"appliesWhen": { "geoMode": "SINGLE_GEO", "surfaceStatus": "ACTIVE" },
+		"path": "/zastroyshchiki/",
+		"statusCode": 200,
+		"robots": "noindex,follow",
+		"includeInSitemap": false,
+		"sourceOfTruth": "reference-profile-contract",
+		"syntheticRegistryFallbackAllowed": false,
+		"sources": ["SOUZ-4.4", "SOUZ-18", "SOUZ-30"]
+	},
 	"expectedPreset": {
 		"geoMode": "SINGLE_GEO",
 		"primaryGeo": "rostov-na-donu",

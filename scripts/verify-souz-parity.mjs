@@ -247,6 +247,22 @@ function assertJournalContract(reference) {
 	}
 }
 
+function assertDeveloperRootContract(reference) {
+	assert.deepEqual(reference.developerRootContract, {
+		appliesWhen: { geoMode: "SINGLE_GEO", surfaceStatus: "ACTIVE" },
+		path: "/zastroyshchiki/",
+		statusCode: 200,
+		robots: "noindex,follow",
+		includeInSitemap: false,
+		sourceOfTruth: "reference-profile-contract",
+		syntheticRegistryFallbackAllowed: false,
+		sources: ["SOUZ-4.4", "SOUZ-18", "SOUZ-30"],
+	});
+	for (const ref of reference.developerRootContract.sources) {
+		assert.ok(Object.hasOwn(reference.source.sections, ref));
+	}
+}
+
 function assertEveryFieldHasSource(reference) {
 	const sourcePrefixes = Object.keys(reference.fieldSources).sort(
 		(left, right) => right.length - left.length,
@@ -375,6 +391,7 @@ assertReferenceScope(reference);
 assertDistrictSeoClassification(reference);
 assertStaticServiceSurfaces(reference);
 assertJournalContract(reference);
+assertDeveloperRootContract(reference);
 assertEveryFieldHasSource(reference);
 verifyParity(reference, rawPreset);
 
@@ -436,6 +453,16 @@ assert.throws(
 	"Missing journal activation requirement must fail",
 );
 
+const indexableDeveloperRoot = structuredClone(reference);
+indexableDeveloperRoot.developerRootContract.robots = "index,follow";
+indexableDeveloperRoot.developerRootContract.includeInSitemap = true;
+indexableDeveloperRoot.developerRootContract.syntheticRegistryFallbackAllowed = true;
+assert.throws(
+	() => assertDeveloperRootContract(indexableDeveloperRoot),
+	undefined,
+	"SINGLE_GEO developer root must remain noindex and outside sitemap",
+);
+
 const parsedPreset = readClonePreset(presetPath);
 const acceptedProfile = siteProfileConfigForPreset(parsedPreset);
 assert.equal(acceptedProfile.primaryGeo, "rostov-na-donu");
@@ -446,5 +473,5 @@ assert.equal(acceptedProfile.categoryStatus.arenda, "OUT");
 verifyNegativeFixtures(reference, rawPreset, driftFixture);
 
 console.log(
-	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, journal activation guarded, ${driftFixture.cases.length + 6} negative drift cases)`,
+	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, journal and developer-root contracts guarded, ${driftFixture.cases.length + 7} negative drift cases)`,
 );
