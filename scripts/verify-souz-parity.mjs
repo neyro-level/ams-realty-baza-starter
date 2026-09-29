@@ -31,8 +31,31 @@ function isRecord(value) {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function assertKeyedSubset(actual, expected, key, path) {
+	assert.ok(Array.isArray(actual), `${path} must be an array`);
+	const actualByKey = new Map(actual.map((item) => [item[key], item]));
+	assert.equal(
+		actualByKey.size,
+		actual.length,
+		`${path} contains duplicate ${key} values`,
+	);
+	for (const expectedItem of expected) {
+		const stableKey = expectedItem[key];
+		assert.ok(actualByKey.has(stableKey), `${path} is missing ${stableKey}`);
+		assertSubset(
+			actualByKey.get(stableKey),
+			expectedItem,
+			`${path}/${key}:${stableKey}`,
+		);
+	}
+}
+
 function assertSubset(actual, expected, path = "") {
 	if (Array.isArray(expected)) {
+		if (path.endsWith("/districts")) {
+			assertKeyedSubset(actual, expected, "slug", path);
+			return;
+		}
 		assert.ok(Array.isArray(actual), `${path || "/"} must be an array`);
 		assert.ok(
 			actual.length >= expected.length,
@@ -205,23 +228,25 @@ function assertStaticServiceSurfaces(reference) {
 	const activeByKey = new Map(
 		contract.active.map((surface) => [surface.key, surface]),
 	);
-	assert.deepEqual(
-		[...activeByKey.keys()],
-		[
-			"home",
-			"geoHub",
-			"newbuild",
-			"apartments",
-			"developers",
-			"mortgage",
-			"sell",
-			"about",
-			"reviews",
-			"contacts",
-			"privacy",
-			"consent",
-		],
+	assert.equal(
+		activeByKey.size,
+		contract.active.length,
+		"Duplicate surface key",
 	);
+	assert.deepEqual([...activeByKey.keys()].sort(), [
+		"about",
+		"apartments",
+		"consent",
+		"contacts",
+		"developers",
+		"geoHub",
+		"home",
+		"mortgage",
+		"newbuild",
+		"privacy",
+		"reviews",
+		"sell",
+	]);
 	assert.equal(activeByKey.get("reviews").path, "/otzyvy");
 	assert.equal(
 		contract.active.some(({ path }) => path === "/uslugi"),
@@ -448,6 +473,20 @@ assertMetadataTemplateExamples(reference);
 assertEveryFieldHasSource(reference);
 verifyParity(reference, rawPreset);
 
+const reorderedPreset = structuredClone(rawPreset);
+reorderedPreset.geos[0].districts.reverse();
+verifyParity(reference, reorderedPreset);
+
+const duplicateDistrict = structuredClone(rawPreset);
+duplicateDistrict.geos[0].districts.push(
+	structuredClone(duplicateDistrict.geos[0].districts[0]),
+);
+assert.throws(
+	() => verifyParity(reference, duplicateDistrict),
+	undefined,
+	"Duplicate district slug must fail",
+);
+
 const inflatedReference = structuredClone(reference);
 inflatedReference.referenceScope.classification = "completeRealClientGeoParity";
 inflatedReference.referenceScope.completeRealClientGeoParity = true;
@@ -485,6 +524,20 @@ assert.throws(
 	() => assertStaticServiceSurfaces(servicesInsteadOfReviews),
 	undefined,
 	"/uslugi must not silently replace /otzyvy",
+);
+
+const reorderedSurfaces = structuredClone(reference);
+reorderedSurfaces.staticServiceSurfaces.active.reverse();
+assertStaticServiceSurfaces(reorderedSurfaces);
+
+const duplicateSurface = structuredClone(reference);
+duplicateSurface.staticServiceSurfaces.active.push(
+	structuredClone(duplicateSurface.staticServiceSurfaces.active[0]),
+);
+assert.throws(
+	() => assertStaticServiceSurfaces(duplicateSurface),
+	undefined,
+	"Duplicate static/service key must fail",
 );
 
 const missingReviews = structuredClone(reference);
@@ -559,5 +612,5 @@ assert.equal(acceptedProfile.categoryStatus.arenda, "OUT");
 verifyNegativeFixtures(reference, rawPreset, driftFixture);
 
 console.log(
-	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, 2 exact metadata examples, journal, developer-root and typed legacy-detail contracts guarded, ${driftFixture.cases.length + 11} negative drift cases)`,
+	`SOUZ SOURCE INTEGRITY PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, stable slug/path collection semantics, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, 2 exact metadata examples, journal, developer-root and typed legacy-detail contracts guarded, ${driftFixture.cases.length + 13} negative drift cases)`,
 );

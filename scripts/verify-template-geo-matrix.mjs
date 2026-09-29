@@ -79,17 +79,30 @@ function assertExactGeo(matrix) {
 	assert.equal(matrix.administrativeDistricts.length, 8);
 	assert.equal(matrix.microdistricts.length, 4);
 
-	for (const [index, expected] of expectedAdministrativeDistricts.entries()) {
-		const actual = matrix.administrativeDistricts[index];
+	const administrativeBySlug = new Map(
+		matrix.administrativeDistricts.map((district) => [district.slug, district]),
+	);
+	assert.equal(
+		administrativeBySlug.size,
+		matrix.administrativeDistricts.length,
+	);
+	for (const expected of expectedAdministrativeDistricts) {
+		const actual = administrativeBySlug.get(expected[1]);
+		assert.ok(actual, `Missing administrative district ${expected[1]}`);
 		assert.deepEqual(
 			[actual.name, actual.slug, actual.locative, actual.genitive],
 			expected,
-			`Administrative district ${index} drift`,
+			`Administrative district ${expected[1]} drift`,
 		);
 		assert.equal(typeof actual.published, "boolean");
 	}
-	for (const [index, expected] of expectedMicrodistricts.entries()) {
-		const actual = matrix.microdistricts[index];
+	const microdistrictsBySlug = new Map(
+		matrix.microdistricts.map((district) => [district.slug, district]),
+	);
+	assert.equal(microdistrictsBySlug.size, matrix.microdistricts.length);
+	for (const expected of expectedMicrodistricts) {
+		const actual = microdistrictsBySlug.get(expected[1]);
+		assert.ok(actual, `Missing microdistrict ${expected[1]}`);
 		assert.deepEqual(
 			[
 				actual.name,
@@ -99,7 +112,7 @@ function assertExactGeo(matrix) {
 				actual.preposition,
 			],
 			expected,
-			`Microdistrict ${index} drift`,
+			`Microdistrict ${expected[1]} drift`,
 		);
 		assert.equal(typeof actual.published, "boolean");
 	}
@@ -128,6 +141,21 @@ function verify(matrix) {
 
 const matrix = readMatrix();
 verify(matrix);
+
+const reorderedMatrix = structuredClone(matrix);
+reorderedMatrix.administrativeDistricts.reverse();
+reorderedMatrix.microdistricts.reverse();
+verify(reorderedMatrix);
+
+const duplicateSyntheticDistrict = structuredClone(matrix);
+duplicateSyntheticDistrict.administrativeDistricts.push(
+	structuredClone(duplicateSyntheticDistrict.administrativeDistricts[0]),
+);
+assert.throws(
+	() => verify(duplicateSyntheticDistrict),
+	undefined,
+	"Duplicate synthetic district slug must fail",
+);
 
 const unsafeSeed = structuredClone(matrix);
 unsafeSeed.safeguards.productionSeed = "allowed";
@@ -187,5 +215,5 @@ assert.throws(
 );
 
 console.log(
-	"verify:template-geo-matrix PASS (1 fictional city, 8 administrative districts, 4 microdistricts, all 4 SEO classes, 5 safeguards, 7 negative cases)",
+	"GENERIC SYNTHETIC CAPABILITY PASS (1 fictional city, stable slug collection semantics, 8 administrative districts, 4 microdistricts, all 4 SEO classes, 5 safeguards, 8 negative cases)",
 );
