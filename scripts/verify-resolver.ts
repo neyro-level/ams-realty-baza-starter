@@ -93,6 +93,15 @@ assert.deepEqual(matchLegacyRoute("/obekty/dom-42/"), {
 	slug: "dom-42",
 	statusCode: 301,
 });
+assert.deepEqual(
+	matchLegacyRoute("/kvartiry-rostova/svetlaya-kvartira-v-centre/"),
+	{
+		kind: "legacyApartment",
+		slug: "svetlaya-kvartira-v-centre",
+		statusCode: 301,
+	},
+);
+assert.deepEqual(matchLegacyRoute("/kvartiry-rostova/"), { kind: "none" });
 assert.deepEqual(matchLegacyRoute("/kvartiry/"), { kind: "none" });
 
 const profile = siteProfileFixtures.multiGeo;

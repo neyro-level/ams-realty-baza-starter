@@ -3,8 +3,6 @@ import {
 	createUrlGrammar,
 	type UrlGrammarInput,
 } from "../core/routing/index.ts";
-import { legacyRouteRoots } from "./routing/legacy-route-manifest.ts";
-import { projectStaticRoutes } from "./static-routes.ts";
 
 export type ProjectDistrictRouteRegistry = NonNullable<
 	UrlGrammarInput["districtSlugsByGeoCategory"]
@@ -27,11 +25,12 @@ export function createProjectUrlGrammar(
 
 	return createUrlGrammar({
 		geoSlugs,
-		staticPaths: projectStaticRoutes
+		staticPaths: profile.staticRoutes
 			.map((route) => route.path)
 			.filter((path) => path !== "/"),
 		moduleRootSlugs: [
-			...legacyRouteRoots,
+			...profile.legacyRoutes.map((route) => route.from),
+			...profile.legacyPatterns.map((pattern) => pattern.from),
 			...Object.values(profile.modules).flatMap(
 				(module) => module.reservedRoots,
 			),
@@ -39,4 +38,21 @@ export function createProjectUrlGrammar(
 		districtSlugsByGeoCategory,
 		facetSlugsByGeoCategory,
 	});
+}
+
+/**
+ * Legacy redirects are configuration, not a runtime repair layer: each target
+ * must already be a canonical URL recognised by the project grammar.
+ */
+export function validateProjectLegacyRouteTargets(profile: SiteProfile): void {
+	const grammar = createProjectUrlGrammar(profile);
+	for (const [index, route] of profile.legacyRoutes.entries()) {
+		const pageKey = grammar.parseUrl(route.to);
+		const canonicalTarget = pageKey ? grammar.buildUrl(pageKey) : null;
+		if (canonicalTarget !== route.to) {
+			throw new Error(
+				`legacyRoutes[${index}].to must be a canonical project URL; received ${route.to}.`,
+			);
+		}
+	}
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { separateTrackingQueryParams } from "../../core/seo/tracking-query-params.ts";
 
 const slugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 export const MAX_CATALOG_PAGE = 10_000;
@@ -81,7 +82,9 @@ export type CatalogSearchParams = {
 export function parseCatalogSearchParams(
 	queryString: string,
 ): CatalogSearchParams | null {
-	const params = new URLSearchParams(queryString);
+	const params = new URLSearchParams(
+		separateTrackingQueryParams(queryString).functionalQueryString,
+	);
 	const allowed = new Set([
 		"page",
 		"sort",
@@ -220,7 +223,9 @@ export function catalogCanonicalPath(
 export function parsePageSearchParams(
 	queryString: string,
 ): { page: number; queryString: string } | null {
-	const params = new URLSearchParams(queryString);
+	const params = new URLSearchParams(
+		separateTrackingQueryParams(queryString).functionalQueryString,
+	);
 	if ([...params.keys()].some((key) => key !== "page")) return null;
 	if (params.getAll("page").length > 1) return null;
 	const raw = params.get("page");

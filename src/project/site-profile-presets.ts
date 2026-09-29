@@ -6,6 +6,7 @@ import {
 	siteProfileSchema,
 } from "../core/profile/index.ts";
 import type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";
+import { validateProjectLegacyRouteTargets } from "./url-grammar.ts";
 
 export const presetCatalogSurfaces = catalogSurfaceSlugs;
 export const supportedSitePresets = sitePresets;
@@ -192,7 +193,7 @@ export function createPresetSiteProfileConfig(
 		]),
 	) as ProjectSiteProfileConfig["developersSurface"]["byGeo"];
 
-	return siteProfileSchema.parse({
+	const profile = siteProfileSchema.parse({
 		preset: input.preset,
 		geoMode: input.geoMode,
 		primaryGeo: input.primaryGeo,
@@ -250,4 +251,6 @@ export function createPresetSiteProfileConfig(
 		modules: defaultModules,
 		entityPrefixes: { residentialComplex: "zhk-", cottageVillage: "kp-" },
 	});
+	validateProjectLegacyRouteTargets(profile);
+	return profile;
 }

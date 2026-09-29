@@ -15,6 +15,7 @@ import type {
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { resolveEntityPageLifecycle } from "@/core/lifecycle/entity-lifecycle";
+import { separateTrackingQueryParams } from "@/core/seo/tracking-query-params";
 import {
 	createRouteResolver,
 	decidePage as decideResolvedPage,
@@ -76,6 +77,7 @@ import {
 	publicGatewayCacheTags,
 	publicGatewayRouteCacheIdentity,
 } from "@/project/routing/public-gateway-cache";
+import { getCachedFilteredCatalogRoute } from "@/project/routing/filtered-catalog-cache";
 import {
 	projectSeoCategoryForms,
 	projectSeoActiveCategoriesList,
@@ -957,6 +959,8 @@ async function resolveRuntimeRoutePersisted(
 	pathname: string,
 	queryString = "",
 ): Promise<RuntimeRouteResolution> {
+	const functionalQueryString =
+		separateTrackingQueryParams(queryString).functionalQueryString;
 	const grammar = createProjectUrlGrammar(
 		siteProfile,
 		await getCachedDistrictRouteRegistry(),
@@ -965,13 +969,31 @@ async function resolveRuntimeRoutePersisted(
 	const cacheIdentity = publicGatewayRouteCacheIdentity(
 		siteProfile,
 		pageKey,
-		queryString,
+		functionalQueryString,
 	);
+	const catalogQuery =
+		pageKey?.kind === "categoryRoot" ||
+		pageKey?.kind === "categoryGeo" ||
+		pageKey?.kind === "categoryGeoDistrict" ||
+		pageKey?.kind === "categoryGeoFacet"
+			? parseCatalogSearchParams(functionalQueryString)
+			: null;
+	const filteredCatalogKey =
+		catalogQuery &&
+		catalogFilterKeysForQuery(catalogQuery).length > 0 &&
+		pageKey
+			? `filtered-catalog:${grammar.buildUrl(pageKey)}?${catalogQuery.queryString}`
+			: null;
+	if (filteredCatalogKey) {
+		return getCachedFilteredCatalogRoute(filteredCatalogKey, () =>
+			resolveRuntimeRouteUncached(pathname, functionalQueryString),
+		);
+	}
 	if (!cacheIdentity) {
-		return resolveRuntimeRouteUncached(pathname, queryString);
+		return resolveRuntimeRouteUncached(pathname, functionalQueryString);
 	}
 	const cached = unstable_cache(
-		() => resolveRuntimeRouteUncached(pathname, queryString),
+		() => resolveRuntimeRouteUncached(pathname, functionalQueryString),
 		["public-gateway-route", pathname, ...cacheIdentity.keyParts],
 		{
 			tags: publicGatewayCacheTags(pageKey),

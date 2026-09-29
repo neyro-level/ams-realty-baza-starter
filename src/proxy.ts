@@ -7,7 +7,10 @@ import {
 import { anonymousRawRestEdgeDecision } from "./core/security/anonymous-raw-rest.ts";
 import { projectCopy } from "./project/copy.ts";
 import { lookupCanonicalEntityLifecyclePreflight } from "./project/data-access/public/entity-lifecycle-preflight.ts";
-import { lookupCurrentPropertyLifecyclePreflight } from "./project/data-access/public/property-lifecycle-preflight.ts";
+import {
+	lookupCurrentPropertyLifecyclePreflight,
+	lookupLegacyApartmentLifecyclePreflight,
+} from "./project/data-access/public/property-lifecycle-preflight.ts";
 import { matchLegacyRoute } from "./project/routing/legacy-route-manifest.ts";
 import { siteProfile } from "./project/site-profile.ts";
 import { createProjectUrlGrammar } from "./project/url-grammar.ts";
@@ -33,6 +36,23 @@ export async function proxy(request: NextRequest) {
 			new URL(legacyRoute.destination, request.url),
 			legacyRoute.statusCode,
 		);
+	}
+	if (legacyRoute.kind === "legacyApartment") {
+		const decision = await lookupLegacyApartmentLifecyclePreflight(
+			legacyRoute.slug,
+		);
+		if (decision.kind === "notFound") {
+			return new NextResponse(null, { status: decision.statusCode });
+		}
+		if (decision.kind === "gone") {
+			return createEntityGoneResponse(legacyRoute.slug, projectCopy.entityGone);
+		}
+		if (decision.kind === "redirect") {
+			return NextResponse.redirect(
+				new URL(decision.destination, request.url),
+				decision.statusCode,
+			);
+		}
 	}
 	const propertySlug =
 		legacyRoute.kind === "property"

@@ -6,13 +6,16 @@ import {
 } from "../core/profile/index.ts";
 import { projectSiteProfileConfig } from "./site-profile.config.ts";
 import type { ProjectSiteProfileConfig } from "./site-profile.config.types.ts";
+import { validateProjectLegacyRouteTargets } from "./url-grammar.ts";
 
 export { createPresetSiteProfileConfig } from "./site-profile-presets.ts";
 
 export function createProjectSiteProfile(
 	input: ProjectSiteProfileConfig,
 ): SiteProfile {
-	return defineSiteProfile(input);
+	const profile = defineSiteProfile(input);
+	validateProjectLegacyRouteTargets(profile);
+	return profile;
 }
 
 export function activeProjectGeoCategorySurfaces(
