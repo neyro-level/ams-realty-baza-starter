@@ -146,6 +146,10 @@
 		},
 		{
 			"command": "verify:security-boundaries",
+			"capabilities": ["security-boundaries"]
+		},
+		{
+			"command": "verify:security-regression-contract",
 			"capabilities": ["security-regression"]
 		},
 		{
