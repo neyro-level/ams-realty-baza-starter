@@ -386,6 +386,7 @@ for (const entry of selectedMatrix) {
 					geoMode: entry.geoMode,
 					primaryGeo: primarySlug,
 					productionIndexing: "noindex",
+					searchConsole: structuredClone(clientExample.searchConsole),
 					region: {
 						slug: `${entry.name}-region`,
 						name: "Тестовый край",
