@@ -9,6 +9,12 @@ const manifestPath = path.join(root, "config/final-verification-manifest.json");
 const packagePath = path.join(root, "package.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 const packageJson = JSON.parse(readFileSync(packagePath, "utf8"));
+const pnpmEntrypoint = process.env.npm_execpath;
+
+assert.ok(
+	pnpmEntrypoint,
+	"final verification must be launched through pnpm so npm_execpath is available",
+);
 
 const requiredCapabilities = [
 	"schema",
@@ -115,15 +121,11 @@ const sha = execFileSync("git", ["rev-parse", "HEAD"], {
 
 for (const suite of manifest.suites) {
 	console.log(`\n=== ${suite.command} ===`);
-	execFileSync(
-		process.platform === "win32" ? "pnpm.cmd" : "pnpm",
-		["run", suite.command],
-		{
-			cwd: root,
-			stdio: "inherit",
-			env: process.env,
-		},
-	);
+	execFileSync(process.execPath, [pnpmEntrypoint, "run", suite.command], {
+		cwd: root,
+		stdio: "inherit",
+		env: process.env,
+	});
 }
 
 console.log(`verify: PASS exact SHA ${sha}`);
