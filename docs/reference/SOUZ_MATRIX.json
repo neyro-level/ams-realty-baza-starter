@@ -378,6 +378,18 @@
 				"sources": ["SOUZ-20"]
 			}
 		],
+		"requiredLegacyPatterns": [
+			{
+				"sourceFrom": "/kvartiry-rostova/{legacy-slug}/",
+				"from": "/kvartiry-rostova/{legacy-slug}",
+				"matchKind": "legacyApartment",
+				"resolution": "typed-entity-aware-property-lookup",
+				"target": "final-global-canonical-property-url",
+				"statusCode": 301,
+				"missingOrNonApartment": 404,
+				"sources": ["SOUZ-20"]
+			}
+		],
 		"forbiddenPreparedCategories": [
 			{
 				"category": "komnaty",

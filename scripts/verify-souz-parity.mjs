@@ -14,6 +14,14 @@ const driftFixturePath = resolve(
 	root,
 	"scripts/fixtures/souz-parity-drift.json",
 );
+const legacyManifestPath = resolve(
+	root,
+	"src/project/routing/legacy-route-manifest.ts",
+);
+const legacyPreflightPath = resolve(
+	root,
+	"src/project/data-access/public/property-lifecycle-preflight.ts",
+);
 
 function readJson(path) {
 	return JSON.parse(readFileSync(path, "utf8"));
@@ -263,6 +271,29 @@ function assertDeveloperRootContract(reference) {
 	}
 }
 
+function assertLegacyApartmentContract(reference) {
+	assert.deepEqual(reference.constraints.requiredLegacyPatterns, [
+		{
+			sourceFrom: "/kvartiry-rostova/{legacy-slug}/",
+			from: "/kvartiry-rostova/{legacy-slug}",
+			matchKind: "legacyApartment",
+			resolution: "typed-entity-aware-property-lookup",
+			target: "final-global-canonical-property-url",
+			statusCode: 301,
+			missingOrNonApartment: 404,
+			sources: ["SOUZ-20"],
+		},
+	]);
+	const manifestSource = readFileSync(legacyManifestPath, "utf8");
+	assert.match(manifestSource, /kind: "legacyApartment"/);
+	assert.match(manifestSource, /legacyApartmentPath/);
+	const preflightSource = readFileSync(legacyPreflightPath, "utf8");
+	assert.match(preflightSource, /lookupLegacyApartmentLifecyclePreflight/);
+	assert.match(preflightSource, /findPublicPropertyLifecycleBySlug/);
+	assert.match(preflightSource, /category !== "apartment"/);
+	assert.match(preflightSource, /grammar\.buildUrl/);
+}
+
 function assertEveryFieldHasSource(reference) {
 	const sourcePrefixes = Object.keys(reference.fieldSources).sort(
 		(left, right) => right.length - left.length,
@@ -392,6 +423,7 @@ assertDistrictSeoClassification(reference);
 assertStaticServiceSurfaces(reference);
 assertJournalContract(reference);
 assertDeveloperRootContract(reference);
+assertLegacyApartmentContract(reference);
 assertEveryFieldHasSource(reference);
 verifyParity(reference, rawPreset);
 
@@ -463,6 +495,14 @@ assert.throws(
 	"SINGLE_GEO developer root must remain noindex and outside sitemap",
 );
 
+const missingLegacyApartmentPattern = structuredClone(reference);
+missingLegacyApartmentPattern.constraints.requiredLegacyPatterns = [];
+assert.throws(
+	() => assertLegacyApartmentContract(missingLegacyApartmentPattern),
+	undefined,
+	"Missing legacy apartment detail pattern must fail",
+);
+
 const parsedPreset = readClonePreset(presetPath);
 const acceptedProfile = siteProfileConfigForPreset(parsedPreset);
 assert.equal(acceptedProfile.primaryGeo, "rostov-na-donu");
@@ -473,5 +513,5 @@ assert.equal(acceptedProfile.categoryStatus.arenda, "OUT");
 verifyNegativeFixtures(reference, rawPreset, driftFixture);
 
 console.log(
-	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, journal and developer-root contracts guarded, ${driftFixture.cases.length + 7} negative drift cases)`,
+	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, journal, developer-root and typed legacy-detail contracts guarded, ${driftFixture.cases.length + 8} negative drift cases)`,
 );
