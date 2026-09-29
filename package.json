@@ -170,6 +170,7 @@
 		"quality:architecture-guards": "node scripts/quality/architecture-rules.self-test.mjs && node scripts/quality/architecture-guard.mjs && node scripts/quality/local-api-mode.mjs && node scripts/quality/module-governance.mjs && node scripts/quality/sourcecraft-policy.mjs",
 		"verify": "node scripts/verify-final-manifest.mjs",
 		"verify:manifest": "node scripts/verify-final-manifest.mjs --check",
+		"verify:plan12-mandatory-capabilities": "node scripts/verify-plan12-mandatory-capabilities.mjs",
 		"verify:foundation": "pnpm verify"
 	},
 	"dependencies": {

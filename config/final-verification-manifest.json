@@ -4,6 +4,10 @@
 	"planVersion": "v4",
 	"suites": [
 		{
+			"command": "verify:plan12-mandatory-capabilities",
+			"capabilities": ["mandatory-capability-contract"]
+		},
+		{
 			"command": "contracts:test",
 			"capabilities": ["contract-line-endings"]
 		},
