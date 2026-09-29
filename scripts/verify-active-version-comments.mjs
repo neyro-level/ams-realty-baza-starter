@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const root = process.cwd();
@@ -92,7 +92,12 @@ const activeCodeFiles = [
 		ignoredScriptDirectories,
 	),
 ];
-const activeDocumentFiles = [join(root, "AGENTS.md"), ...activeDocs];
+// A prepared client owns its project router and active product documents. Their
+// release history is not part of the upstream starter-owned upgrade boundary.
+// The starter repository has no .starter-version and remains fully guarded.
+const activeDocumentFiles = existsSync(join(root, ".starter-version"))
+	? []
+	: [join(root, "AGENTS.md"), ...activeDocs];
 for (const path of activeCodeFiles) {
 	assertNoStaleVersion(readFileSync(path, "utf8"), path);
 }
