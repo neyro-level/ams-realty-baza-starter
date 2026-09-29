@@ -39,7 +39,7 @@ if (!isClientClone) {
 	);
 }
 
-for (const includedInVerify of [
+const requiredVerifyCommands = [
 	"verify:public-gateway",
 	"verify:feed-parser",
 	"verify:feed-ingest",
@@ -51,9 +51,22 @@ for (const includedInVerify of [
 	"verify:seo-contracts",
 	"verify:operational-recovery",
 	"verify:security-boundaries",
-]) {
+];
+const manifestBackedVerify =
+	scripts.verify === "node scripts/verify-final-manifest.mjs";
+const finalCommands = manifestBackedVerify
+	? new Set(
+			JSON.parse(read("config/final-verification-manifest.json")).suites.map(
+				(suite) => suite.command,
+			),
+		)
+	: null;
+
+for (const includedInVerify of requiredVerifyCommands) {
 	assert.ok(
-		scripts.verify.includes(includedInVerify),
+		manifestBackedVerify
+			? finalCommands.has(includedInVerify)
+			: scripts.verify.includes(includedInVerify),
 		`pnpm verify must include ${includedInVerify}`,
 	);
 }
