@@ -200,6 +200,16 @@
 			{ "path": "/uslugi", "decision": "REVIEW", "sources": ["SOUZ-20"] }
 		]
 	},
+	"journalContract": {
+		"souzR1": "activation-required-before-R1",
+		"genericStarterDefault": "optional",
+		"requiredRoutes": [
+			"/journal/",
+			"/journal/category/{slug}/",
+			"/journal/{slug}/"
+		],
+		"sources": ["SOUZ-MODULE-JOURNAL", "SOUZ-30"]
+	},
 	"expectedPreset": {
 		"geoMode": "SINGLE_GEO",
 		"primaryGeo": "rostov-na-donu",

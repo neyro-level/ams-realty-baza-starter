@@ -231,6 +231,22 @@ function assertStaticServiceSurfaces(reference) {
 	}
 }
 
+function assertJournalContract(reference) {
+	assert.deepEqual(reference.journalContract, {
+		souzR1: "activation-required-before-R1",
+		genericStarterDefault: "optional",
+		requiredRoutes: [
+			"/journal/",
+			"/journal/category/{slug}/",
+			"/journal/{slug}/",
+		],
+		sources: ["SOUZ-MODULE-JOURNAL", "SOUZ-30"],
+	});
+	for (const ref of reference.journalContract.sources) {
+		assert.ok(Object.hasOwn(reference.source.sections, ref));
+	}
+}
+
 function assertEveryFieldHasSource(reference) {
 	const sourcePrefixes = Object.keys(reference.fieldSources).sort(
 		(left, right) => right.length - left.length,
@@ -358,6 +374,7 @@ referencedSections(reference);
 assertReferenceScope(reference);
 assertDistrictSeoClassification(reference);
 assertStaticServiceSurfaces(reference);
+assertJournalContract(reference);
 assertEveryFieldHasSource(reference);
 verifyParity(reference, rawPreset);
 
@@ -411,6 +428,14 @@ assert.throws(
 	"Missing /otzyvy must fail",
 );
 
+const missingJournal = structuredClone(reference);
+delete missingJournal.journalContract;
+assert.throws(
+	() => assertJournalContract(missingJournal),
+	undefined,
+	"Missing journal activation requirement must fail",
+);
+
 const parsedPreset = readClonePreset(presetPath);
 const acceptedProfile = siteProfileConfigForPreset(parsedPreset);
 assert.equal(acceptedProfile.primaryGeo, "rostov-na-donu");
@@ -421,5 +446,5 @@ assert.equal(acceptedProfile.categoryStatus.arenda, "OUT");
 verifyNegativeFixtures(reference, rawPreset, driftFixture);
 
 console.log(
-	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, ${driftFixture.cases.length + 5} negative drift cases)`,
+	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, journal activation guarded, ${driftFixture.cases.length + 6} negative drift cases)`,
 );
