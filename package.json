@@ -70,6 +70,8 @@
 		"verify:db-restore-drill": "node scripts/verify-db-restore-drill.mjs",
 		"verify:clone-presets": "node scripts/verify-final-client-clone.mjs",
 		"verify:souz-parity": "node --experimental-strip-types scripts/verify-souz-parity.mjs",
+		"verify:template-geo-matrix": "node scripts/verify-template-geo-matrix.mjs",
+		"verify:reference-matrices": "pnpm verify:souz-parity && pnpm verify:template-geo-matrix",
 		"verify:client-readiness": "node scripts/verify-client-readiness-suite.mjs",
 		"verify:a11y-starter": "node scripts/verify-a11y-starter.mjs",
 		"verify:drift": "node scripts/quality/drift-audit.mjs",
