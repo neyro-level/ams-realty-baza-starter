@@ -89,6 +89,7 @@
 		"verify:public-cache": "node --experimental-strip-types scripts/verify-public-cache.ts",
 		"verify:public-cache:integration": "node --conditions=react-server ./node_modules/payload/bin.js run scripts/verify-public-cache-integration.ts",
 		"measure:public-gateway-budget": "node --conditions=react-server ./node_modules/payload/bin.js run scripts/measure-public-gateway-budget.ts",
+		"verify:performance-load-record": "node scripts/verify-performance-load-record.mjs",
 		"verify:profile-acceptance": "node --experimental-strip-types scripts/verify-profile-acceptance.ts",
 		"verify:s12-guards": "pnpm verify:public-cache && pnpm verify:profile-acceptance && pnpm verify:jobs-config",
 		"verify:site-profile": "node --experimental-strip-types scripts/verify-site-profile.ts && pnpm profile:check",

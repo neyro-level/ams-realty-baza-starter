@@ -181,7 +181,7 @@
 			"capabilities": ["clone-matrix-contract"]
 		},
 		{
-			"command": "measure:public-gateway-budget",
+			"command": "verify:performance-load-record",
 			"capabilities": ["performance-load"]
 		},
 		{
