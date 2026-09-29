@@ -543,8 +543,8 @@ try {
 				/^\s*--brand-[a-z0-9_-]+\s*:/gim,
 			),
 		].length,
-		27,
-		"client brand output must contain 24 base primitives plus three proof overrides",
+		24,
+		"client brand output must contain exactly 24 runtime brand primitives",
 	);
 	assert.match(
 		readFileSync(join(fixture, "src/project/font.generated.ts"), "utf8"),

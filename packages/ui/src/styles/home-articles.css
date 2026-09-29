@@ -1,4 +1,4 @@
-.home-articles { --home-articles-h2-line-height: var(--site-leading-section-tight); padding-block:34px 68px; background:var(--surface); }
+.home-articles { padding-block:34px 68px; background:var(--surface); }
 .home-articles__shell { width:min(100%,var(--site-frame-max)); margin:0 auto; padding-inline:24px; }
 .home-articles__carousel-shell { position:relative; }
 .home-articles__head { margin-bottom:16px; }
@@ -20,4 +20,4 @@
 .home-articles__card-body p { margin:0; display:-webkit-box; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; color:var(--text-secondary); font-size:var(--site-type-label); line-height:var(--site-type-support-leading); }
 @media (max-width:1100px) { .home-articles__grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:980px) { .home-articles__head { flex-direction:column; align-items:start; } }
-@media (max-width:640px) { .home-articles { --home-articles-h2-line-height: var(--site-leading-heading-tight); padding-block:30px 58px; } .home-articles__shell { padding-inline:16px; } .home-articles__track { overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; scrollbar-width:none; scroll-snap-type:x mandatory; } .home-articles__track::-webkit-scrollbar { display:none; } .home-articles__grid { display:flex; width:max-content; max-width:none; gap:32px; padding-bottom:4px; padding-right:16px; } .home-articles__card { min-width:0; flex:0 0 calc(100vw - 48px); max-width:400px; scroll-snap-align:start; } }
+@media (max-width:640px) { .home-articles { padding-block:30px 58px; } .home-articles__shell { padding-inline:16px; } .home-articles__track { overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; scrollbar-width:none; scroll-snap-type:x mandatory; } .home-articles__track::-webkit-scrollbar { display:none; } .home-articles__grid { display:flex; width:max-content; max-width:none; gap:32px; padding-bottom:4px; padding-right:16px; } .home-articles__card { min-width:0; flex:0 0 calc(100vw - 48px); max-width:400px; scroll-snap-align:start; } }

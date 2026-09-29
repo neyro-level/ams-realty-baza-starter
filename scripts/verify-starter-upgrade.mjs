@@ -24,14 +24,23 @@ const newGlobals = Buffer.from(".platform { color: new; }\n");
 const migration = Buffer.from("export async function up() {}\n");
 const collectionOwner = Buffer.from("export const collection = 'example';\n");
 const regenerated = Buffer.from("new generated output\n");
+const clientBrand = { accent: "#8a1515", radius: "12px" };
+const generatedBrand = Buffer.from(
+	`:root { --brand-accent: ${clientBrand.accent}; --brand-radius-lg: ${clientBrand.radius}; }\n`,
+);
 const regenerationScript = Buffer.from([
-	'import { mkdirSync, writeFileSync } from "node:fs";',
+	'import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";',
 	'import { join } from "node:path";',
+	'const input = JSON.parse(readFileSync(join(process.cwd(), "docs", "CLIENT_BOOTSTRAP.json"), "utf8")).brand;',
+	'const brand = ":root { --brand-accent: " + input.accent + "; --brand-radius-lg: " + input.radius + "; }\\n";',
+	'if (process.argv.includes("--check")) {',
+	'  if (!existsSync(join(process.cwd(), "src", "project", "brand.css")) || readFileSync(join(process.cwd(), "src", "project", "brand.css"), "utf8") !== brand) throw new Error("Generated brand output is not reproducible from client input.");',
+	'  process.exit(0);',
+	'}',
 	'mkdirSync(join(process.cwd(), "src", "project"), { recursive: true });',
 	'writeFileSync(join(process.cwd(), "src", "project", "generated.txt"), "new generated output\\n");',
-	'writeFileSync(join(process.cwd(), "src", "project", "brand.css"), ":root { --brand: new; }\\n");',
+	'writeFileSync(join(process.cwd(), "src", "project", "brand.css"), brand);',
 ].join("\n"));
-const generatedBrand = Buffer.from(":root { --brand: new; }\n");
 const previousPackage = {
 	name: "client-realty",
 	private: true,
@@ -73,6 +82,7 @@ function archive(entries = [
 			schemaVersion: 1,
 			steps: [{
 				script: "scripts/regenerate-example.mjs",
+				verifyBeforeRegeneration: true,
 				outputs: {
 					"src/project/generated.txt": hash(regenerated),
 					"src/project/brand.css": hash(generatedBrand),
@@ -88,9 +98,11 @@ function fixture() {
 	mkdirSync(join(root, "src/core"), { recursive: true });
 	mkdirSync(join(root, "src/app"), { recursive: true });
 	mkdirSync(join(root, "src/project"), { recursive: true });
+	mkdirSync(join(root, "docs"), { recursive: true });
 	writeFileSync(join(root, "src/core/example.txt"), oldContent);
 	writeFileSync(join(root, "src/app/globals.css"), oldGlobals);
-	writeFileSync(join(root, "src/project/brand.css"), ":root { --brand: old; }\n");
+	writeFileSync(join(root, "docs", "CLIENT_BOOTSTRAP.json"), JSON.stringify({ brand: clientBrand }));
+	writeFileSync(join(root, "src/project/brand.css"), generatedBrand);
 	writeFileSync(join(root, "package.json"), `${JSON.stringify(previousPackage, null, "\t")}\n`);
 	writeFileSync(join(root, "src/project/generated.txt"), "client-stale generated output\n");
 	writeFileSync(join(root, ".starter-version"), JSON.stringify({ schemaVersion: 1, tag: "starter-v2.1.0", sha: oldSha, manifestVersion: 1, hashes: { "src/app/globals.css": hash(oldGlobals), "src/core/example.txt": hash(oldContent) } }));
@@ -109,6 +121,11 @@ function fixture() {
 		assert.deepEqual(readFileSync(join(root, "src/project/collections/Example.ts")), collectionOwner);
 		assert.deepEqual(readFileSync(join(root, "src/project/generated.txt")), regenerated);
 		assert.deepEqual(readFileSync(join(root, "src/project/brand.css")), generatedBrand);
+		assert.deepEqual(
+			JSON.parse(readFileSync(join(root, "docs", "CLIENT_BOOTSTRAP.json"), "utf8")).brand,
+			clientBrand,
+			"client accent and radii input must remain unchanged",
+		);
 		assert.equal(readFileSync(join(root, "src/app/globals.css"), "utf8"), newGlobals.toString("utf8"));
 		const packageAfter = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 		assert.equal(packageAfter.name, "client-realty");
@@ -120,6 +137,27 @@ function fixture() {
 		assert.equal(JSON.parse(readFileSync(join(root, ".starter-version"), "utf8")).sha, newSha);
 		assert.equal(runStarterUpgrade({ root, archivePath }).status, "already-current");
 		assert.deepEqual(readFileSync(join(root, "src/project/generated.txt")), regenerated, "regeneration is idempotent");
+	} finally { rmSync(root, { recursive: true, force: true }); }
+}
+
+{
+	const { root, archivePath } = fixture();
+	try {
+		rmSync(join(root, "src/project/brand.css"));
+		const result = runStarterUpgrade({ root, archivePath });
+		assert.equal(result.status, "applied");
+		assert.deepEqual(readFileSync(join(root, "src/project/brand.css")), generatedBrand);
+	} finally { rmSync(root, { recursive: true, force: true }); }
+}
+
+{
+	const { root, archivePath } = fixture();
+	try {
+		writeFileSync(join(root, "src/project/brand.css"), "/* manual modification */\n");
+		assert.throws(() => runStarterUpgrade({ root, archivePath }), /not reproducible/);
+		assert.equal(JSON.parse(readFileSync(join(root, ".starter-upgrade/journal.json"), "utf8")).status, "pending");
+		assert.equal(runStarterUpgrade({ root, recover: true }).status, "recovered");
+		assert.equal(readFileSync(join(root, "src/app/globals.css"), "utf8"), oldGlobals.toString("utf8"));
 	} finally { rmSync(root, { recursive: true, force: true }); }
 }
 
@@ -170,6 +208,7 @@ for (const [mutate, pattern] of [
 	[(value) => { value.regeneration.steps[0].outputs["src/project/generated.txt"] = "0".repeat(64); }, /Generated output does not match/],
 	[(value) => { value.regeneration.steps[0].script = "src/project/generated.txt"; }, /archived scripts/],
 	[(value) => { value.entries.push({ ...value.entries[0], path: "src/project/generated.txt" }); }, /Generated output must not be archived/],
+	[(value) => { delete value.regeneration.steps[0].verifyBeforeRegeneration; }, /Generated brand output must verify/],
 ]) {
 	const value = archive();
 	mutate(value);

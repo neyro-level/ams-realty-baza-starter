@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { cloneThemeProofs } from "./verify-clone-theme-proof.mjs";
 
 const baseUrl = process.env.STARTER_VISUAL_BASE_URL;
 assert.ok(baseUrl, "STARTER_VISUAL_BASE_URL is required");
@@ -12,11 +13,12 @@ const brandProofTheme = process.env.STARTER_BRAND_PROOF_THEME ?? "current";
 const checkVisibleInternalLinks =
 	process.env.STARTER_VISUAL_CHECK_LINKS !== "false";
 assert.ok(
-	["current", "blue"].includes(brandProofTheme),
-	"STARTER_BRAND_PROOF_THEME must be current or blue",
+	Object.hasOwn(cloneThemeProofs, brandProofTheme),
+	`STARTER_BRAND_PROOF_THEME must be one of: ${Object.keys(cloneThemeProofs).join(", ")}`,
 );
 const captureDirectory = process.env.STARTER_VISUAL_CAPTURE_DIR;
 if (captureDirectory) mkdirSync(captureDirectory, { recursive: true });
+const brandProofFixture = cloneThemeProofs[brandProofTheme];
 
 const browserCandidates = [
 	process.env.CHROME_PATH,
@@ -181,9 +183,9 @@ try {
 			});
 			await client.send("Page.navigate", { url: new URL(route, baseUrl).href });
 			await waitForDocument(client);
-			if (brandProofTheme === "blue") {
+			if (brandProofTheme !== "current") {
 				await client.send("Runtime.evaluate", {
-					expression: `document.documentElement.dataset.brandProof = "blue"`,
+					expression: `(() => { const style = document.createElement("style"); style.dataset.brandProofFixture = "true"; style.textContent = ${JSON.stringify(brandProofFixture.css)}; document.head.append(style); })()`,
 				});
 				await delay(100);
 			}
@@ -227,7 +229,7 @@ try {
 			);
 			assert.equal(
 				value.brand.accent,
-				brandProofTheme === "blue" ? "#1557b0" : "#8a1515",
+				brandProofFixture.accent,
 				`${route} must resolve the selected brand theme`,
 			);
 			if (route.includes("rooms=2")) assert.equal(value.filterStatus, true);

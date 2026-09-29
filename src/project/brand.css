@@ -25,10 +25,3 @@
   --brand-radius-full: 999px;
   --brand-font-sans: var(--font-project), ui-sans-serif, system-ui, sans-serif;
 }
-
-/* Verification-only theme: proves that semantic/component tokens stay derived. */
-:root[data-brand-proof="blue"] {
-  --brand-accent: #1557b0;
-  --brand-accent-hover: #0b3f82;
-  --brand-accent-soft: #f0f5fc;
-}

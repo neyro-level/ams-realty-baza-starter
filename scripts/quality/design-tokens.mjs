@@ -44,6 +44,20 @@ const knownDefinitions = new Set([
 	...brandDefinitions,
 	...externalDefinitions,
 ]);
+export function findExternalTokenMappings(files) {
+	return files.flatMap(({ path, source }) =>
+		[...source.matchAll(/(?:^|[;{])\s*(--[a-z0-9_-]+)\s*:/gim)].map(
+			(match) => `${path}:${match[1]}`,
+		),
+	);
+}
+
+const externalMappings = findExternalTokenMappings(
+	componentCssFiles.map((path) => ({
+		path: relative(root, path).replaceAll("\\", "/"),
+		source: readFileSync(path, "utf8"),
+	})),
+);
 const externalValues = componentCssFiles.flatMap((path) => {
 	const css = readFileSync(path, "utf8");
 	return [...css.matchAll(/^\s*(--[a-z0-9_-]+)\s*:\s*([^;]+);/gim)]
@@ -115,21 +129,30 @@ const allowedExternalHooks = new Set([
 	"request-modal__link",
 	"site-primary-action",
 ]);
+export function findRawPageDesignValues(files) {
+	return files.flatMap(({ path, source }) => {
+		const failures = [];
+		for (const [index, line] of source.split(/\r?\n/).entries()) {
+			if (
+				/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|font-weight:\s*[0-9]+|border-radius:\s*[0-9]+|(?:[0-9]*\.)?[0-9]+(?:ms|s)\b/i.test(
+					line,
+				)
+			) {
+				failures.push(`${path}:${index + 1}:raw design value`);
+			}
+			if (/box-shadow:/.test(line) && !line.includes("var(--")) {
+				failures.push(`${path}:${index + 1}:raw shadow`);
+			}
+		}
+		return failures;
+	});
+}
+
 const pageStyleFailures = componentCssFiles.flatMap((path) => {
 	const css = readFileSync(path, "utf8");
 	const relativePath = relative(root, path);
-	const failures = [];
+	const failures = findRawPageDesignValues([{ path: relativePath, source: css }]);
 	for (const [index, line] of css.split(/\r?\n/).entries()) {
-		if (
-			/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(|font-weight:\s*[0-9]+|border-radius:\s*[0-9]+|(?:[0-9]*\.)?[0-9]+(?:ms|s)\b/i.test(
-				line,
-			)
-		) {
-			failures.push(`${relativePath}:${index + 1}:raw design value`);
-		}
-		if (/box-shadow:/.test(line) && !line.includes("var(--")) {
-			failures.push(`${relativePath}:${index + 1}:raw shadow`);
-		}
 		if (/\.(?:journal|leadgen|promo)-/i.test(line)) {
 			failures.push(`${relativePath}:${index + 1}:excluded module selector`);
 		}
@@ -206,8 +229,14 @@ function isReservedToken(token) {
 	return reservedPrefixes.some((prefix) => token.startsWith(prefix));
 }
 
+const externalIntegrationPrefixes = ["--yarl__"];
+
+function isExternalIntegrationToken(token) {
+	return externalIntegrationPrefixes.some((prefix) => token.startsWith(prefix));
+}
+
 const themeBlock =
-	tokenCss.match(/@theme inline[\s\S]*?\{([\s\S]*?)\}/)?.[1] ?? "";
+	tokenCss.match(/^@theme inline\s*\{([\s\S]*?)^\}/m)?.[1] ?? "";
 const themeKeys = new Set(
 	[...themeBlock.matchAll(/^\s*(--[a-z0-9_-]+)\s*:/gim)].map(
 		(match) => match[1],
@@ -257,6 +286,21 @@ const rawBrandColorFindings = codeCorpus.flatMap((file) =>
 		? [relative(root, file.path).replaceAll("\\", "/")]
 		: [],
 );
+const proofColorPatterns = [/#1557b0\b/i, /#0b3f82\b/i, /#f0f5fc\b/i];
+export function findProofColorRuntimeFindings(files) {
+	return files.flatMap(({ path, source }) =>
+		!path.startsWith("scripts/") &&
+		proofColorPatterns.some((pattern) => pattern.test(source))
+			? [path]
+			: [],
+	);
+}
+const proofColorRuntimeFindings = findProofColorRuntimeFindings(
+	codeCorpus.map((file) => ({
+		path: relative(root, file.path).replaceAll("\\", "/"),
+		source: file.text,
+	})),
+);
 const neutralEffectRgbAllowlist = new Set([
 	"0,0,0",
 	"16,16,17",
@@ -276,7 +320,7 @@ const unapprovedEffectColors = [
 	.filter((rgb) => !neutralEffectRgbAllowlist.has(rgb));
 
 const deadTokens = [...definitions].filter((token) => {
-	if (themeKeys.has(token) || isReservedToken(token)) return false;
+	if (themeKeys.has(token) || isReservedToken(token) || isExternalIntegrationToken(token)) return false;
 	const needle = `var(${token}`;
 	return (
 		!codeCorpus.some((file) => file.text.includes(needle)) &&
@@ -439,6 +483,27 @@ if (
 		"documented module token fixture was not classified MODULE-RESERVED",
 	);
 }
+if (
+	findExternalTokenMappings([
+		{ path: "fixture.css", source: ".fixture { --component-accent: var(--accent); }" },
+	]).length !== 1
+) {
+	fixtureFailures.push("negative external token mapping fixture was not detected");
+}
+if (
+	findRawPageDesignValues([
+		{ path: "fixture.css", source: ".fixture { color: #1557b0; box-shadow: 0 1px 2px #000; }" },
+	]).length !== 2
+) {
+	fixtureFailures.push("negative raw page design-value fixture was not detected");
+}
+if (
+	findProofColorRuntimeFindings([
+		{ path: "packages/ui/src/fixture.tsx", source: 'style={{ color: "#1557b0" }}' },
+	]).length !== 1
+) {
+	fixtureFailures.push("negative runtime proof-color fixture was not detected");
+}
 
 const missingRequired = required.filter((token) => !definitions.has(token));
 const failures = [
@@ -458,10 +523,16 @@ const failures = [
 	...externalValues.map(
 		(item) => `raw token value outside globals.css ${item}`,
 	),
+	...externalMappings.map(
+		(item) => `semantic/component token mapping outside globals.css ${item}`,
+	),
 	...unresolved.map((item) => `unresolved UI token ${item}`),
 	...forbiddenStyles.map((item) => `forbidden primitive style literal ${item}`),
 	...pageStyleFailures.map((item) => `page CSS violation ${item}`),
 	...deadTokens.map((token) => `dead token ${token}`),
+	...proofColorRuntimeFindings.map(
+		(file) => `test proof color outside test/verification code: ${file}`,
+	),
 	...reservationFailures,
 	...fixtureFailures,
 	...moduleDrift,
@@ -472,8 +543,8 @@ if (!tokenCss.includes("@theme inline"))
 	failures.push("missing Tailwind @theme mapping");
 if (!tokenCss.includes('@import "../project/brand.css"'))
 	failures.push("globals.css must import the project brand primitive source");
-if (!brandCss.includes(':root[data-brand-proof="blue"]'))
-	failures.push("brand.css is missing the verification-only blue proof theme");
+if (brandCss.includes("data-brand-proof"))
+	failures.push("generated brand.css must not ship a verification-only proof theme");
 
 export function analyzeDesignTokens() {
 	return {

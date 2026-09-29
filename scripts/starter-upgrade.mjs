@@ -97,6 +97,14 @@ export function validateUpgradeArchive(value) {
 		if (!step.outputs || typeof step.outputs !== "object" || Array.isArray(step.outputs) || !Object.keys(step.outputs).length) {
 			throw new Error(`Regeneration step ${index} must declare output hashes.`);
 		}
+		if (
+			step.verifyBeforeRegeneration !== undefined &&
+			typeof step.verifyBeforeRegeneration !== "boolean"
+		) {
+			throw new Error(
+				`Regeneration step ${index} verifyBeforeRegeneration must be a boolean.`,
+			);
+		}
 		for (const [outputPath, outputHash] of Object.entries(step.outputs)) {
 			const path = safeRelativePath(outputPath, `regeneration.steps[${index}].outputs`);
 			if (!/^[0-9a-f]{64}$/.test(outputHash)) {
@@ -107,6 +115,11 @@ export function validateUpgradeArchive(value) {
 			}
 			if (regenerated.has(path)) {
 				throw new Error(`Regeneration output is declared more than once: ${path}.`);
+			}
+			if (path === "src/project/brand.css" && step.verifyBeforeRegeneration !== true) {
+				throw new Error(
+					"Generated brand output must verify its existing deterministic result before regeneration.",
+				);
 			}
 			regenerated.set(path, outputHash);
 		}
@@ -156,7 +169,11 @@ export function validateUpgradeArchive(value) {
 		contents,
 		compositePaths,
 		packageMerge,
-		regeneration: regeneration.steps.map((step) => ({ script: step.script, outputs: step.outputs })),
+		regeneration: regeneration.steps.map((step) => ({
+			script: step.script,
+			outputs: step.outputs,
+			verifyBeforeRegeneration: step.verifyBeforeRegeneration === true,
+		})),
 		regenerated,
 	};
 }
@@ -392,6 +409,16 @@ export function runStarterUpgrade({ root = process.cwd(), archivePath, recover =
 	if (interruptAfter && applied >= interruptAfter) throw new Error("Synthetic starter upgrade interruption.");
 	for (const step of next.regeneration) {
 		const script = safeTarget(absoluteRoot, step.script, { allowMissingLeaf: false });
+		const generatedOutputsExist = Object.keys(step.outputs).every((path) => {
+			const output = safeTarget(absoluteRoot, path, { allowMissingLeaf: false });
+			return existsSync(output) && lstatSync(output).isFile();
+		});
+		if (step.verifyBeforeRegeneration && generatedOutputsExist) {
+			execFileSync(process.execPath, [script, "--check"], {
+				cwd: absoluteRoot,
+				stdio: "pipe",
+			});
+		}
 		execFileSync(process.execPath, [script], { cwd: absoluteRoot, stdio: "pipe" });
 		for (const [path, expectedHash] of Object.entries(step.outputs)) {
 			const output = safeTarget(absoluteRoot, path, { allowMissingLeaf: false });

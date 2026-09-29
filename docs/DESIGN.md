@@ -24,7 +24,7 @@ Anti-goals: новый visual language без owner approval; вторая primi
 
 | Class | Meaning |
 |---|---|
-| BRAND | `--brand-*` primitives, принадлежащие только `src/project/brand.css`; current theme и verification-only blue proof theme. |
+| BRAND | `--brand-*` primitives, принадлежащие только `src/project/brand.css`; runtime содержит только current theme, а blue proof создаётся изолированным test fixture. |
 | CORE | Required semantic tokens enforced by `scripts/quality/design-tokens.mjs` (`--background`, section rhythm, radii, motion, fonts). |
 | SHADCN | `@theme inline` mappings that expose CORE/PROJECT values to Tailwind utilities. |
 | PROJECT | Starter/Atlas page tokens with live `var(--*)` usage in `packages/ui` or `src`, including live corporate prefixes `about-company`, `sale`, `new-building`. |

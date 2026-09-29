@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { extname, join, relative } from "node:path";
 import { analyzeDesignTokens } from "./quality/design-tokens.mjs";
 import {
 	readClonePreset,
@@ -10,6 +11,26 @@ import {
 const brandCss = readFileSync("src/project/brand.css", "utf8");
 const globalsCss = readFileSync("src/app/globals.css", "utf8");
 const starterBrandPreset = readClonePreset("docs/CLONE_PRESET.example.json");
+
+function walk(directory) {
+	return readdirSync(directory).flatMap((entry) => {
+		if (entry === "node_modules" || entry === ".next") return [];
+		const path = join(directory, entry);
+		return statSync(path).isDirectory()
+			? walk(path)
+			: new Set([".css", ".ts", ".tsx"]).has(extname(path))
+				? [path]
+				: [];
+	});
+}
+
+export function findRawBrandPrimitiveDefinitions(files) {
+	return files.flatMap(({ path, source }) =>
+		[...source.matchAll(/(?:^|[;{])\s*["']?(--brand-[a-z0-9_-]+)["']?\s*:/gim)].map(
+			(match) => `${path}:${match[1]}`,
+		),
+	);
+}
 
 function block(selector) {
 	const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -22,6 +43,10 @@ function values(source) {
 			(match) => [match[1], match[2].trim()],
 		),
 	);
+}
+
+function normalizeLineEndings(source) {
+	return source.replaceAll("\r\n", "\n");
 }
 
 function rgb(hex) {
@@ -44,10 +69,34 @@ function contrast(foreground, background) {
 const analysis = analyzeDesignTokens();
 assert.deepEqual(analysis.failures, [], analysis.failures.join("\n"));
 assert.ok(analysis.brandPrimitives >= 20 && analysis.brandPrimitives <= 30);
+assert.deepEqual(
+	findRawBrandPrimitiveDefinitions([{ path: "fixture.css", source: ":root { --brand-accent: #000; }" }]),
+	["fixture.css:--brand-accent"],
+	"raw brand primitive negative fixture must be detected",
+);
+
+const rawBrandPrimitiveLeaks = findRawBrandPrimitiveDefinitions(
+	[...walk("src"), ...walk("packages")]
+		.map((path) => ({
+			absolutePath: path,
+			path: relative(".", path).replaceAll("\\", "/"),
+		}))
+		.filter(({ path }) => path !== "src/project/brand.css")
+		.map(({ absolutePath, path }) => ({ path, source: readFileSync(absolutePath, "utf8") })),
+);
+assert.deepEqual(
+	rawBrandPrimitiveLeaks,
+	[],
+	"raw client brand primitives must be defined only in src/project/brand.css",
+);
 
 const current = values(block(":root"));
 const proof = new Map(current);
-for (const [key, value] of values(block(':root[data-brand-proof="blue"]'))) proof.set(key, value);
+for (const [key, value] of Object.entries({
+	"--brand-accent": "#1557b0",
+	"--brand-accent-hover": "#0b3f82",
+	"--brand-accent-soft": "#f0f5fc",
+})) proof.set(key, value);
 
 for (const theme of [current, proof]) {
 	assert.ok(
@@ -65,12 +114,13 @@ for (const key of ["--brand-accent", "--brand-accent-hover", "--brand-accent-sof
 }
 assert.ok(globalsCss.includes('@import "../project/brand.css"'));
 assert.equal(/rgba?\(\s*(?:138\s*,\s*21\s*,\s*21|158\s*,\s*28\s*,\s*28)/i.test(globalsCss), false);
-assert.equal(brandCss, renderBrandCss(starterBrandPreset));
+assert.equal(brandCss.includes("data-brand-proof"), false, "generated runtime brand CSS must not ship a verification theme");
+assert.equal(normalizeLineEndings(brandCss), renderBrandCss(starterBrandPreset));
 assert.equal(
-	readFileSync("src/project/font.generated.ts", "utf8"),
+	normalizeLineEndings(readFileSync("src/project/font.generated.ts", "utf8")),
 	renderProjectFontConfig(starterBrandPreset),
 );
 
 console.log(
-	`verify:brand-ownership: ok (${analysis.brandPrimitives} primitives; current and blue proof WCAG AA)`,
+	`verify:brand-ownership: ok (${analysis.brandPrimitives} primitives; current and fixture blue proof WCAG AA)`,
 );
