@@ -192,6 +192,45 @@ function assertDistrictSeoClassification(reference) {
 	}
 }
 
+function assertStaticServiceSurfaces(reference) {
+	const contract = reference.staticServiceSurfaces;
+	const activeByKey = new Map(
+		contract.active.map((surface) => [surface.key, surface]),
+	);
+	assert.deepEqual(
+		[...activeByKey.keys()],
+		[
+			"home",
+			"geoHub",
+			"newbuild",
+			"apartments",
+			"developers",
+			"mortgage",
+			"sell",
+			"about",
+			"reviews",
+			"contacts",
+			"privacy",
+			"consent",
+		],
+	);
+	assert.equal(activeByKey.get("reviews").path, "/otzyvy");
+	assert.equal(
+		contract.active.some(({ path }) => path === "/uslugi"),
+		false,
+		"/uslugi must not replace /otzyvy",
+	);
+	assert.deepEqual(contract.legacyDecisions, [
+		{ path: "/uslugi", decision: "REVIEW", sources: ["SOUZ-20"] },
+	]);
+	for (const surface of [...contract.active, ...contract.legacyDecisions]) {
+		assert.ok(surface.sources.length > 0, `${surface.path} sources`);
+		for (const ref of surface.sources) {
+			assert.ok(Object.hasOwn(reference.source.sections, ref));
+		}
+	}
+}
+
 function assertEveryFieldHasSource(reference) {
 	const sourcePrefixes = Object.keys(reference.fieldSources).sort(
 		(left, right) => right.length - left.length,
@@ -318,6 +357,7 @@ assert.equal(reference.source.version, "4.1.1 FINAL");
 referencedSections(reference);
 assertReferenceScope(reference);
 assertDistrictSeoClassification(reference);
+assertStaticServiceSurfaces(reference);
 assertEveryFieldHasSource(reference);
 verifyParity(reference, rawPreset);
 
@@ -350,6 +390,27 @@ assert.throws(
 	"Souz district existence must not infer page publication",
 );
 
+const servicesInsteadOfReviews = structuredClone(reference);
+servicesInsteadOfReviews.staticServiceSurfaces.active.find(
+	({ key }) => key === "reviews",
+).path = "/uslugi";
+assert.throws(
+	() => assertStaticServiceSurfaces(servicesInsteadOfReviews),
+	undefined,
+	"/uslugi must not silently replace /otzyvy",
+);
+
+const missingReviews = structuredClone(reference);
+missingReviews.staticServiceSurfaces.active =
+	missingReviews.staticServiceSurfaces.active.filter(
+		({ key }) => key !== "reviews",
+	);
+assert.throws(
+	() => assertStaticServiceSurfaces(missingReviews),
+	undefined,
+	"Missing /otzyvy must fail",
+);
+
 const parsedPreset = readClonePreset(presetPath);
 const acceptedProfile = siteProfileConfigForPreset(parsedPreset);
 assert.equal(acceptedProfile.primaryGeo, "rostov-na-donu");
@@ -360,5 +421,5 @@ assert.equal(acceptedProfile.categoryStatus.arenda, "OUT");
 verifyNegativeFixtures(reference, rawPreset, driftFixture);
 
 console.log(
-	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, ${driftFixture.cases.length + 3} negative drift cases)`,
+	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, 4 fail-closed district classifications, 12 active/service surfaces, ${driftFixture.cases.length + 5} negative drift cases)`,
 );

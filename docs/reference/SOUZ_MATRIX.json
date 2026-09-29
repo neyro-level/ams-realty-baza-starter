@@ -141,6 +141,65 @@
 			"sources": ["PLAN12-OD12-01"]
 		}
 	},
+	"staticServiceSurfaces": {
+		"active": [
+			{ "key": "home", "path": "/", "sources": ["SOUZ-18", "SOUZ-30"] },
+			{
+				"key": "geoHub",
+				"path": "/rostov-na-donu/",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{
+				"key": "newbuild",
+				"path": "/novostroyki/",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{
+				"key": "apartments",
+				"path": "/rostov-na-donu/kvartiry/",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{
+				"key": "developers",
+				"path": "/zastroyshchiki/",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{
+				"key": "mortgage",
+				"path": "/ipoteka",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{ "key": "sell", "path": "/prodat", "sources": ["SOUZ-18", "SOUZ-30"] },
+			{
+				"key": "about",
+				"path": "/o-kompanii",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{
+				"key": "reviews",
+				"path": "/otzyvy",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{
+				"key": "contacts",
+				"path": "/kontakty",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{
+				"key": "privacy",
+				"path": "/politika-konfidencialnosti",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			},
+			{
+				"key": "consent",
+				"path": "/soglasie-na-obrabotku-personalnyh-dannyh",
+				"sources": ["SOUZ-18", "SOUZ-30"]
+			}
+		],
+		"legacyDecisions": [
+			{ "path": "/uslugi", "decision": "REVIEW", "sources": ["SOUZ-20"] }
+		]
+	},
 	"expectedPreset": {
 		"geoMode": "SINGLE_GEO",
 		"primaryGeo": "rostov-na-donu",
