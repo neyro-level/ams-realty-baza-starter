@@ -71,13 +71,33 @@ function referencedSections(reference) {
 	)) {
 		assert.equal(typeof section.heading, "string", `${sectionId} heading`);
 		if (sectionId.startsWith("SOUZ-")) {
-			assert.match(
-				section.sourceLines,
-				/^\d+-\d+$/,
-				`${sectionId} sourceLines`,
+			const hasLineRange = /^\d+-\d+$/.test(section.sourceLines ?? "");
+			const hasExactSection =
+				typeof section.sourceSection === "string" &&
+				section.sourceSection.length > 0;
+			assert.ok(
+				hasLineRange || hasExactSection,
+				`${sectionId} requires sourceLines or sourceSection`,
 			);
 		} else {
 			assert.equal(typeof section.decision, "string", `${sectionId} decision`);
+		}
+	}
+	for (const refs of Object.values(reference.scopeSources)) {
+		for (const ref of refs) {
+			assert.ok(known.has(ref), `Unknown scope source reference: ${ref}`);
+			used.add(ref);
+		}
+	}
+	for (const [behavior, coverage] of Object.entries(
+		reference.behaviorCoverage,
+	)) {
+		assert.equal(typeof coverage.claim, "string", `${behavior} claim`);
+		assert.ok(coverage.claim.length > 0, `${behavior} claim is empty`);
+		assert.ok(coverage.sources.length > 0, `${behavior} sources are empty`);
+		for (const ref of coverage.sources) {
+			assert.ok(known.has(ref), `Unknown behavior source reference: ${ref}`);
+			used.add(ref);
 		}
 	}
 	for (const refs of Object.values(reference.fieldSources)) {
@@ -114,6 +134,33 @@ function referencedSections(reference) {
 		);
 	}
 	return known;
+}
+
+function assertReferenceScope(reference) {
+	assert.equal(reference.referenceScope.classification, "sourceBackedSubset");
+	assert.equal(reference.referenceScope.completeRealClientGeoParity, false);
+	assert.equal(reference.referenceScope.representedBehaviorsOnly, true);
+
+	const sourcePrefixes = Object.keys(reference.scopeSources).sort(
+		(left, right) => right.length - left.length,
+	);
+	for (const path of collectLeafPaths(reference.referenceScope)) {
+		const owner = sourcePrefixes.find(
+			(prefix) => path === prefix || path.startsWith(`${prefix}/`),
+		);
+		assert.ok(owner, `Reference scope field has no source: ${path}`);
+	}
+
+	assert.deepEqual(Object.keys(reference.behaviorCoverage).sort(), [
+		"activeRouteSkeleton",
+		"apartmentDistrictPageTiers",
+		"canonicalMetadataTemplates",
+		"legacyMigrationPolicy",
+		"moduleAndJournalRequirements",
+		"projectConfig",
+		"r1PageResponsibilityMatrix",
+		"representedDistrictSubset",
+	]);
 }
 
 function assertEveryFieldHasSource(reference) {
@@ -240,8 +287,26 @@ assert.equal(
 );
 assert.equal(reference.source.version, "4.1.1 FINAL");
 referencedSections(reference);
+assertReferenceScope(reference);
 assertEveryFieldHasSource(reference);
 verifyParity(reference, rawPreset);
+
+const inflatedReference = structuredClone(reference);
+inflatedReference.referenceScope.classification = "completeRealClientGeoParity";
+inflatedReference.referenceScope.completeRealClientGeoParity = true;
+assert.throws(
+	() => assertReferenceScope(inflatedReference),
+	undefined,
+	"Reference matrix must reject a complete real-client parity claim",
+);
+
+const unbackedReference = structuredClone(reference);
+unbackedReference.behaviorCoverage.activeRouteSkeleton.sources = [];
+assert.throws(
+	() => referencedSections(unbackedReference),
+	undefined,
+	"Reference matrix must reject a behavior without source coverage",
+);
 
 const parsedPreset = readClonePreset(presetPath);
 const acceptedProfile = siteProfileConfigForPreset(parsedPreset);
@@ -253,5 +318,5 @@ assert.equal(acceptedProfile.categoryStatus.arenda, "OUT");
 verifyNegativeFixtures(reference, rawPreset, driftFixture);
 
 console.log(
-	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${driftFixture.cases.length} negative drift cases)`,
+	`verify:souz-parity PASS (${collectLeafPaths(reference.expectedPreset).length} guarded reference fields, ${Object.keys(reference.source.sections).length} source sections, ${Object.keys(reference.behaviorCoverage).length} covered behaviors, ${driftFixture.cases.length + 2} negative drift cases)`,
 );

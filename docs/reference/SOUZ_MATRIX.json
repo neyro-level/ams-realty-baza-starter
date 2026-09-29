@@ -1,10 +1,29 @@
 {
 	"schemaVersion": 1,
+	"referenceScope": {
+		"classification": "sourceBackedSubset",
+		"completeRealClientGeoParity": false,
+		"representedBehaviorsOnly": true
+	},
+	"scopeSources": {
+		"/classification": ["PLAN12-OD12-01"],
+		"/completeRealClientGeoParity": ["PLAN12-OD12-01"],
+		"/representedBehaviorsOnly": ["PLAN12-OD12-01"]
+	},
 	"source": {
 		"planId": "AMS-SOUZ-HOME-GEO-CATALOG-PLATFORM-BUILD",
 		"version": "4.1.1 FINAL",
 		"file": "AMS_SOUZ_HOME_FINAL_MASTER_PLAN_V4_1_1.md",
-		"requiredSections": ["SOUZ-4.4", "SOUZ-17.3", "SOUZ-20"],
+		"requiredSections": [
+			"SOUZ-4.4",
+			"SOUZ-9.4",
+			"SOUZ-9.5",
+			"SOUZ-17.3",
+			"SOUZ-18",
+			"SOUZ-20",
+			"SOUZ-30",
+			"SOUZ-MODULE-JOURNAL"
+		],
 		"sections": {
 			"SOUZ-4.4": {
 				"heading": "4.4. Souz R1 project config [PROJECT]",
@@ -14,13 +33,33 @@
 				"heading": "5. INTENT OWNERSHIP / SEMANTIC SNAPSHOT [PROJECT]",
 				"sourceLines": "684-722"
 			},
+			"SOUZ-9.4": {
+				"heading": "9.4. Represented district subset",
+				"sourceSection": "§9.4"
+			},
+			"SOUZ-9.5": {
+				"heading": "9.5. Apartment district page tiers",
+				"sourceSection": "§9.5"
+			},
 			"SOUZ-17.3": {
 				"heading": "17.3. Canonical metadata templates [PLATFORM]",
 				"sourceLines": "2063-2117"
 			},
+			"SOUZ-18": {
+				"heading": "18. Active route skeleton",
+				"sourceSection": "§18"
+			},
 			"SOUZ-20": {
 				"heading": "20. LEGACY MIGRATION POLICY [PROJECT]",
 				"sourceLines": "2197-2258"
+			},
+			"SOUZ-30": {
+				"heading": "30. R1 page responsibility matrix",
+				"sourceSection": "§30"
+			},
+			"SOUZ-MODULE-JOURNAL": {
+				"heading": "Module and journal requirements relevant to R1",
+				"sourceSection": "module/journal requirements relevant to R1"
 			},
 			"PLAN11-OD11-01": {
 				"heading": "Plan 11 OD11-01 — komnaty status",
@@ -33,7 +72,45 @@
 			"PLAN11-OD11-04": {
 				"heading": "Plan 11 OD11-04 — owner-approved city and district morphology",
 				"decision": "APPROVED"
+			},
+			"PLAN12-OD12-01": {
+				"heading": "Plan 12 OD12-01 — universal starter geo fixture boundary",
+				"decision": "SOUZ_SOURCE_BACKED_SUBSET"
 			}
+		}
+	},
+	"behaviorCoverage": {
+		"projectConfig": {
+			"claim": "The represented R1 project configuration is limited to fields guarded by this matrix.",
+			"sources": ["SOUZ-4.4"]
+		},
+		"representedDistrictSubset": {
+			"claim": "Only the owner-approved represented district subset is covered; complete real-client district parity is not claimed.",
+			"sources": ["SOUZ-9.4", "PLAN11-OD11-04", "PLAN12-OD12-01"]
+		},
+		"apartmentDistrictPageTiers": {
+			"claim": "Apartment district page tiers are a source-covered behavior, not evidence of a complete district inventory.",
+			"sources": ["SOUZ-9.5", "PLAN12-OD12-01"]
+		},
+		"canonicalMetadataTemplates": {
+			"claim": "Canonical metadata behavior uses only approved morphology and source-backed template semantics.",
+			"sources": ["SOUZ-17.3", "PLAN11-OD11-04"]
+		},
+		"activeRouteSkeleton": {
+			"claim": "Only the active route skeleton represented by the reference preset is covered.",
+			"sources": ["SOUZ-18"]
+		},
+		"legacyMigrationPolicy": {
+			"claim": "Legacy behavior is governed per exact route; no bulk or inferred redirect is claimed.",
+			"sources": ["SOUZ-20"]
+		},
+		"r1PageResponsibilityMatrix": {
+			"claim": "R1 page responsibilities are covered only for represented reference surfaces.",
+			"sources": ["SOUZ-30"]
+		},
+		"moduleAndJournalRequirements": {
+			"claim": "Relevant module and journal requirements are source-covered without inventing client content facts.",
+			"sources": ["SOUZ-MODULE-JOURNAL"]
 		}
 	},
 	"expectedPreset": {
@@ -222,7 +299,7 @@
 		"/marketStatus": ["SOUZ-4.4"],
 		"/geos": ["SOUZ-4.4"],
 		"/geos/0/morphology": ["SOUZ-17.3", "PLAN11-OD11-04"],
-		"/geos/0/districts": ["SOUZ-17.3", "PLAN11-OD11-04"],
+		"/geos/0/districts": ["SOUZ-9.4", "SOUZ-17.3", "PLAN11-OD11-04"],
 		"/seoFacets/vtorichka": ["SOUZ-5"]
 	}
 }
