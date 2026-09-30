@@ -25,6 +25,7 @@
 		"tokens:report": "node scripts/quality/token-report.mjs",
 		"verify:brand-ownership": "node scripts/verify-brand-ownership.mjs",
 		"verify:clone-theme-proof": "node scripts/verify-clone-theme-proof.mjs",
+		"verify:constitution-lock": "node scripts/verify-constitution-lock.mjs",
 		"verify:token-scale": "node scripts/quality/token-scale.mjs",
 		"ui:clone-audit": "node scripts/quality/ui-clone-audit.mjs",
 		"visual:atlas-css-parity": "node scripts/verify-atlas-css-parity.mjs",

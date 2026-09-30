@@ -1,9 +1,12 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 12 EXECUTION_COMPLETE / TASK MANAGER CLEAN / NO ACTIVE IMPLEMENTATION PLAN`.
+Статус: `ACTIVE / FINAL AUDIT FREEZE v2 APPROVED / TASK MANAGER ACTIVE`.
 SourceCraft — primary, GitHub — одностороннее зеркало. Текущая release identity
-и proof state принадлежат `STARTER_RELEASE_STATE.md`. Активной execution queue
-нет: Plan №12 v4 завершён и, как Plans №6–11, остаётся evidence, а не очередью.
+и proof state принадлежат `STARTER_RELEASE_STATE.md`. Новый approved execution
+source — root-level
+`AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md` version `v2`; runtime
+state принадлежит локальному stealth Task Manager / Beads graph. Plan №12 v4 и
+Plans №6–11 остаются evidence, а не очередью.
 
 ## Source of Truth
 
@@ -15,9 +18,11 @@ SourceCraft — primary, GitHub — одностороннее зеркало. �
 | Текущие приоритеты и owner gates | `04_BACKLOG.md` |
 | Условия PR, merge и release | `05_RELEASE_CHECKLIST.md` |
 | Текущие SHA, tag, Gate и proof state | `STARTER_RELEASE_STATE.md` |
+| Текущий approved execution source | `../AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md` |
+| Текущий Task Manager inventory | `orchestration/master-plan-final-audit-freeze.inventory.json` |
 | Статусы исторических plans/evidence | `HISTORICAL_DOCUMENT_POLICY.md` |
 | Решения конкретного starter instance и module state | `PROJECT.md` |
-| Дизайн-система и UI-правила | `DESIGN.md` |
+| Repository UI Core v5.0 authority, дизайн-система и UI-правила | `DESIGN.md` |
 | Эксплуатация starter demo | `OPERATIONS.md` |
 | Подготовка коммерческого client clone | `CLONE_ONBOARDING.md` |
 | Короткий вход и его проверяемая схема | `CLONE_INTAKE.souz.json`, `CLONE_INTAKE.schema.json` |
@@ -29,6 +34,10 @@ SourceCraft — primary, GitHub — одностороннее зеркало. �
 
 ## Execution state
 
+- `../AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md` — exact
+  approved Final Audit Freeze plan `v2 APPROVED`; imported into Beads via
+  `orchestration/master-plan-final-audit-freeze.inventory.json`. Production,
+  release tag and GitHub mirror are outside this graph.
 - `AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md` — exact
   approved Plan №12 v4, `EXECUTION_COMPLETE / EVIDENCE`. Task Manager: `103/103`
   закрыто, `0` open/READY/in-progress; десять delivery PR `!182–!191` слиты,
@@ -55,11 +64,13 @@ SourceCraft — primary, GitHub — одностороннее зеркало. �
 
 ## Порядок чтения
 
-1. `../AGENTS.md` и этот файл.
-2. Релевантная часть `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md`.
-3. Один или несколько документов Source of Truth из таблицы по scope.
-4. Профильный ADR, module manifest или research только по прямой необходимости.
-5. Evidence и history — только когда нужно подтвердить прошлое решение.
+1. `../AGENTS.md`.
+2. `../AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` — canonical Core 5.5.
+3. `DESIGN.md` — repository UI Core v5.0 authority.
+4. Один или несколько документов Source of Truth из таблицы по scope.
+5. Профильный ADR, module manifest или research только по прямой необходимости.
+6. `package.json`, код и runtime config — фактическая implementation detail.
+7. Evidence и history — только когда нужно подтвердить прошлое решение.
 
 ## Evidence и история
 

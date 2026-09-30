@@ -7,9 +7,11 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Активного execution plan нет. Plan №12 v4 полностью исполнен: локальный
-  stealth Task Manager содержит `103/103` закрытых записей и `0` open/READY/
-  in-progress. Approved source и inventory сохраняются неизменными как
+- Активный execution plan: Final Audit Freeze
+  `AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md` version
+  `v2 APPROVED`, imported into local stealth Task Manager / Beads via
+  `docs/orchestration/master-plan-final-audit-freeze.inventory.json`. Beads is
+  the runtime execution state. Plan №12 v4 полностью исполнен и сохраняется как
   `EXECUTION_COMPLETE / EVIDENCE`; итог — `docs/evidence/plan12/FINAL_REPORT.md`.
 - Планы №6–11 также исполнены и читаются только как historical evidence.
 - Текущее состояние release/tag/SHA/Gate хранится только в
@@ -23,15 +25,15 @@
 ## Reading order
 
 1. `docs/README.md`.
-2. Релевантный раздел `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md`.
-3. `docs/01_PRD.md`, `02_PRODUCT_STRUCTURE.md`, `03_ARCHITECTURE.md` и
+2. `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` — canonical Core 5.5.
+3. `docs/DESIGN.md` — repository UI Core v5.0 authority.
+4. `docs/01_PRD.md`, `02_PRODUCT_STRUCTURE.md`, `03_ARCHITECTURE.md` и
    `04_BACKLOG.md` по scope.
-4. `docs/PROJECT.md` — решения этого starter instance.
-5. `docs/DESIGN.md` или `docs/OPERATIONS.md` по scope.
-6. `docs/STARTER_RELEASE_STATE.md` — текущая release identity и proof state.
-7. `docs/evidence/plan12/FINAL_REPORT.md` — последний закрытый execution scope.
+5. `docs/PROJECT.md` — решения этого starter instance.
+6. `docs/OPERATIONS.md` по scope.
+7. `docs/STARTER_RELEASE_STATE.md` — текущая release identity и proof state.
 8. `docs/HISTORICAL_DOCUMENT_POLICY.md` перед чтением любого plan/evidence.
-9. Approved Plan №12 читать только для требований и provenance закрытого scope.
+9. Approved Final Audit Freeze v2 читать только как текущий execution source.
 10. Профильный ADR/module/research документ, только когда он входит в scope.
 
 ## Invariants

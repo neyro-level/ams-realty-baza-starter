@@ -65,9 +65,10 @@ Major upgrade требует отдельного решения и targeted pro
 - `starter-owned.json` schema v2 определяет только обновляемый starter layer;
   clone остаётся snapshot exact tag+SHA, а upgrade — явной conflict-safe
   операцией без runtime dependency.
-- Preset schema v3 генерирует project brand primitives в
-  `src/project/brand.css`; `src/app/globals.css` владеет только semantic и
-  component mapping.
+- Final Audit Freeze owner decision `OD-FA-01` returns factual runtime
+  design-system values to `src/app/globals.css`. Preset schema / clone intake
+  remains client-owned input; `src/project/brand.css` is transitional
+  compatibility only until EPIC-01 migrates generation into `globals.css`.
 - `src/project/indexing-policy.ts` и canonical resolver/Gate — authority для
   indexability. Tracking registry не участвует в content/canonical/cache и тем
   же списком формирует Yandex `Clean-param`.

@@ -1,6 +1,6 @@
 # Design
 
-Статус: `Active / REALTY_BASE / UI Core verification enabled`.
+Статус: `Active / REALTY_BASE / UI Core v5.0 authority / constitution-lock enabled`.
 
 ## Theme
 
@@ -16,7 +16,14 @@ Anti-goals: новый visual language без owner approval; вторая primi
 
 ## Source of truth
 
-`src/project/brand.css` — единственный источник 20–30 generated project brand primitives: base/status colors, approved main radii и font family. `src/app/globals.css` — единственный semantic/component token map: typography scale/weights, containers, section rhythm, easing, shadows, component roles и shadcn mappings. Он потребляет brand primitives только через `var()`/`color-mix()`.
+This document is the repository-owned UI Core v5.0 authority for the starter
+until an explicit owner-approved upstream UI Core file replaces it.
+
+Owner decision `OD-FA-01` supersedes the Plan 12 runtime split:
+`src/app/globals.css` is the runtime factual design-value owner. Clone
+preset/intake remains the client-owned input for generated project values.
+`src/project/brand.css` is transitional compatibility only until EPIC-01 moves
+generation into `globals.css`; after migration it has no runtime authority.
 
 Brand primitives генерируются из approved preset schema v3 при подготовке
 snapshot clone. `starter:upgrade` не превращает client brand в starter-owned
@@ -29,8 +36,8 @@ snapshot clone. `starter:upgrade` не превращает client brand в star
 
 | Class | Meaning |
 |---|---|
-| BRAND | `--brand-*` primitives, принадлежащие только `src/project/brand.css`; runtime содержит только current theme, а blue proof создаётся изолированным test fixture. |
-| CORE | Required semantic tokens enforced by `scripts/quality/design-tokens.mjs` (`--background`, section rhythm, radii, motion, fonts). |
+| BRAND | Transitional `--brand-*` compatibility values generated from clone preset/intake until EPIC-01. They are consumed only by `globals.css`; after migration this class must disappear from runtime authority. |
+| CORE | Required runtime tokens enforced by `scripts/quality/design-tokens.mjs` (`--background`, section rhythm, radii, motion, fonts). |
 | SHADCN | `@theme inline` mappings that expose CORE/PROJECT values to Tailwind utilities. |
 | PROJECT | Starter/Atlas page tokens with live `var(--*)` usage in `packages/ui` or `src`, including live corporate prefixes `about-company`, `sale`, `new-building`. |
 | MODULE-RESERVED | None in this starter. Unused future-module prefixes without a `docs/modules/` contract were removed in EPIC-19. Journal DTO remains contract-only in `packages/contracts` without unused CSS tokens. |
@@ -59,7 +66,15 @@ Reusable visual rhythm goes through tokens and `Section` / `Container` variants.
 
 ## Geometry vs design-values
 
-Numeric brand primitives live only in `brand.css`. Semantic/component colors, type sizes, weights, derived radii, shadows and durations live in `globals.css`; accent shadows derive from `--brand-accent` через `color-mix()`. Neutral/effect raw RGB values follow the explicit guard allowlist. Component CSS consumes only semantic/component variables. Repeated section spacing uses `--section-space-*` / `--site-section-space-desktop`.
+Runtime factual design values live in `globals.css`. Until EPIC-01 finishes the
+migration, `brand.css` may provide transitional generated compatibility values
+that are imported and consumed only by `globals.css`. Semantic/component colors,
+type sizes, weights, derived radii, shadows and durations remain in
+`globals.css`; accent shadows may derive from transitional `--brand-*` values
+through `color-mix()` during the migration. Neutral/effect raw RGB values follow
+the explicit guard allowlist. Component CSS consumes only semantic/component
+variables. Repeated section spacing uses `--section-space-*` /
+`--site-section-space-desktop`.
 
 Typography scale consolidation preserves role names while aliases replace only
 values whose source difference is below `0.5px`. The mechanical guard records

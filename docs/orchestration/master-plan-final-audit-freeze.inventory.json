@@ -1,0 +1,1102 @@
+{
+  "schema_version": 2,
+  "beads_prefix": "afz",
+  "source": {
+    "plan_id": "AMS-REALTY-BAZA-STARTER-FINAL-AUDIT-FREEZE",
+    "path": "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+    "version": "v2",
+    "status": "APPROVED",
+    "approved_by": "owner",
+    "approved_at": "2026-09-30T23:03:11+03:00",
+    "sha256": "e26a8b261dbee67cc5574f004a8e069da2fdcacb8fdf0b1a679271234739d176",
+    "epic_anchors": [
+      "EPIC-00",
+      "EPIC-01",
+      "EPIC-02",
+      "EPIC-03",
+      "EPIC-04",
+      "EPIC-05",
+      "EPIC-06",
+      "EPIC-07"
+    ]
+  },
+  "repositories": [
+    {
+      "key": "starter",
+      "remote": "https://git.sourcecraft.dev/integrator-p/ams-realty-baza-starter.git",
+      "default_branch": "main"
+    }
+  ],
+  "nodes": [
+    {
+      "key": "E00",
+      "title": "CANONICAL CONSTITUTION LOCK",
+      "type": "epic",
+      "source_anchor": "EPIC-00",
+      "goal": "Lock Core 5.5 and the repository UI Core authority, recording OD-FA-01 as an explicit owner-approved supersession.",
+      "scope": [
+        "Core 5.5 reconciliation with OD-FA-01",
+        "docs/DESIGN.md as repository UI Core v5.0 authority",
+        "constitution lock manifest and verifier"
+      ],
+      "acceptance_criteria": [
+        "Core 5.5 is reconciled with OD-FA-01",
+        "repository UI Core v5.0 authority is locked by hash",
+        "pnpm verify:constitution-lock exists and passes"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "AGENTS.md",
+        "docs/README.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md",
+        "docs/DESIGN.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "scope expands beyond OD-FA-01 and constitution lock",
+        "production, release tag, GitHub mirror or live rollout",
+        "new secret, paid irreversible action or destructive external mutation",
+        "red or unverifiable required check"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:foundation",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E00-T1",
+      "title": "Reconcile Core/UI authority and constitution lock",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E00",
+      "source_anchor": "EPIC-00",
+      "goal": "Implement EPIC-00: reconcile Core 5.5 and docs/DESIGN.md with OD-FA-01, add the constitution lock manifest and verifier.",
+      "scope": [
+        "EPIC-00 tasks T00-01 through T00-05",
+        "No unrelated architecture normalization"
+      ],
+      "acceptance_criteria": [
+        "Core 5.5 and docs/DESIGN.md reflect OD-FA-01",
+        "config/ams-constitution.lock.json locks Core and UI authority hashes",
+        "pnpm verify:constitution-lock validates the lock"
+      ],
+      "required_checks": [
+        "pnpm verify:constitution-lock",
+        "pnpm verify:version-comments",
+        "pnpm quality:architecture-guards",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md",
+        "docs/DESIGN.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "missing owner decision for a further constitution change",
+        "unrelated code rewrite",
+        "production or release action"
+      ],
+      "priority": 0,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:foundation"
+      ]
+    },
+    {
+      "key": "E00-D",
+      "title": "Deliver EPIC-00 constitution lock",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E00",
+      "source_anchor": "EPIC-00",
+      "goal": "Create, gate and merge the EPIC-00 delivery PR according to the plan.",
+      "scope": [
+        "SourceCraft PR for EPIC-00",
+        "Exact-head gate and merge evidence"
+      ],
+      "acceptance_criteria": [
+        "PR source/target/head are recorded",
+        "Risk-based exact-head gate passes",
+        "Accepted main SHA is recorded"
+      ],
+      "required_checks": [
+        "full diff review",
+        "risk-based SourceCraft gate",
+        "post-merge SHA verification"
+      ],
+      "depends_on": [
+        "E00-T1"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test",
+        "commit",
+        "push",
+        "pull_request",
+        "merge"
+      ],
+      "stop_conditions": [
+        "red gate or changed exact head",
+        "production or release action"
+      ],
+      "priority": 0,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E01",
+      "title": "UI DESIGN VALUE OWNERSHIP RECONCILIATION",
+      "type": "epic",
+      "source_anchor": "EPIC-01",
+      "goal": "Return runtime design-value ownership to globals.css without losing clone theming.",
+      "scope": [
+        "Remove brand.css as runtime design owner",
+        "Generate project values into globals.css",
+        "Update token, drift and clone guards"
+      ],
+      "acceptance_criteria": [
+        "globals.css is the only factual runtime design-value owner",
+        "clone brand customization remains deterministic",
+        "UI Core drift has no P0/P1 findings"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/DESIGN.md",
+        "src/app/globals.css",
+        "src/project/brand.css"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "new visual-system fork",
+        "unapproved UI redesign",
+        "production or release action"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:foundation",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E01-T1",
+      "title": "Move runtime design values to globals.css",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "EPIC-01",
+      "goal": "Implement EPIC-01 design-value ownership reconciliation.",
+      "scope": [
+        "EPIC-01 tasks T01-01 through T01-06",
+        "Design-token guards and clone theme proof"
+      ],
+      "acceptance_criteria": [
+        "src/project/brand.css is not a runtime design owner after migration",
+        "globals.css generation is deterministic and hash-tracked",
+        "two-theme proof remains test-only"
+      ],
+      "required_checks": [
+        "pnpm verify:constitution-lock",
+        "pnpm verify:brand-ownership",
+        "pnpm quality:design-tokens",
+        "pnpm verify:token-scale",
+        "pnpm verify:drift",
+        "pnpm verify:ui-core",
+        "pnpm verify:clone-theme-proof",
+        "pnpm verify:clone-prepare",
+        "pnpm typecheck",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "E00-D"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/DESIGN.md",
+        "scripts/quality/design-tokens.mjs",
+        "scripts/verify-brand-ownership.mjs"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "unapproved visual redesign",
+        "unrelated UI primitive replacement",
+        "production or release action"
+      ],
+      "priority": 0,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:foundation"
+      ]
+    },
+    {
+      "key": "E01-D",
+      "title": "Deliver EPIC-01 UI ownership",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E01",
+      "source_anchor": "EPIC-01",
+      "goal": "Create, gate and merge the EPIC-01 delivery PR according to the plan.",
+      "scope": [
+        "SourceCraft PR for EPIC-01",
+        "Exact-head gate and merge evidence"
+      ],
+      "acceptance_criteria": [
+        "PR source/target/head are recorded",
+        "Risk-based exact-head gate passes",
+        "Accepted main SHA is recorded"
+      ],
+      "required_checks": [
+        "full diff review",
+        "risk-based SourceCraft gate",
+        "post-merge SHA verification"
+      ],
+      "depends_on": [
+        "E01-T1"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test",
+        "commit",
+        "push",
+        "pull_request",
+        "merge"
+      ],
+      "stop_conditions": [
+        "red gate or changed exact head",
+        "production or release action"
+      ],
+      "priority": 0,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E02",
+      "title": "DEPENDENCY SECURITY PATCH BASELINE",
+      "type": "epic",
+      "source_anchor": "EPIC-02",
+      "goal": "Release the starter only on a currently supported patched dependency baseline.",
+      "scope": [
+        "pnpm, Next.js, Payload family and undici patch line",
+        "dependency security verification"
+      ],
+      "acceptance_criteria": [
+        "no known unapproved Critical/High in direct runtime baseline",
+        "patch versions are exact and evidenced",
+        "frozen install is reproducible"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "major upgrade without owner decision",
+        "unapproved vulnerability exception",
+        "production or release action"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:dependency",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E02-T1",
+      "title": "Patch dependency baseline and verification",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "EPIC-02",
+      "goal": "Implement EPIC-02 dependency patch baseline and security verification scripts.",
+      "scope": [
+        "EPIC-02 tasks T02-01 through T02-06",
+        "No unrelated package upgrades"
+      ],
+      "acceptance_criteria": [
+        "chosen patch versions are recorded with official sources",
+        "pnpm verify:dependency-security exists and passes",
+        "pnpm verify:safe-outbound exists and passes"
+      ],
+      "required_checks": [
+        "pnpm install --frozen-lockfile",
+        "pnpm verify:dependency-security",
+        "pnpm verify:security-boundaries",
+        "pnpm verify:safe-outbound",
+        "pnpm verify:jobs-config",
+        "pnpm verify:seo-contracts",
+        "pnpm verify:product-regression",
+        "RISK_SCOPE=dependency-runtime pnpm verify:merge-risky",
+        "pnpm build"
+      ],
+      "depends_on": [
+        "E01-D"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "major upgrade required",
+        "official security evidence unavailable",
+        "red install/build/check"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:dependency"
+      ]
+    },
+    {
+      "key": "E02-D",
+      "title": "Deliver EPIC-02 dependency baseline",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E02",
+      "source_anchor": "EPIC-02",
+      "goal": "Create, gate and merge the EPIC-02 delivery PR according to the plan.",
+      "scope": [
+        "SourceCraft PR for EPIC-02",
+        "Exact-head gate and merge evidence"
+      ],
+      "acceptance_criteria": [
+        "PR source/target/head are recorded",
+        "Risk-based exact-head gate passes",
+        "Accepted main SHA is recorded"
+      ],
+      "required_checks": [
+        "full diff review",
+        "risk-based SourceCraft gate",
+        "post-merge SHA verification"
+      ],
+      "depends_on": [
+        "E02-T1"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test",
+        "commit",
+        "push",
+        "pull_request",
+        "merge"
+      ],
+      "stop_conditions": [
+        "red gate or changed exact head",
+        "production or release action"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E03",
+      "title": "CLIENT S3 ACTIVATION BOUNDARY",
+      "type": "epic",
+      "source_anchor": "EPIC-03",
+      "goal": "Keep starter local while proving an explicitly activated client clone becomes truly S3-only.",
+      "scope": [
+        "typed storage mode owner",
+        "conditional Media config",
+        "disposable S3 activation fixture"
+      ],
+      "acceptance_criteria": [
+        "starter still uses local PG and MEDIA_DIR",
+        "client S3 mode has zero runtime dependency on MEDIA_DIR",
+        "fixtures prove both modes"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "scripts/clone-activate-timeweb-storage.mjs",
+        "src/project/storage/local-fs.ts"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "real Timeweb call or real bucket provisioning",
+        "starter runtime topology changes to S3",
+        "production or release action"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:storage",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E03-T1",
+      "title": "Implement client S3 activation boundary",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "EPIC-03",
+      "goal": "Implement EPIC-03 client S3 activation boundary and disposable fixtures.",
+      "scope": [
+        "EPIC-03 tasks T03-01 through T03-06",
+        "No real infrastructure actions"
+      ],
+      "acceptance_criteria": [
+        "timeweb S3 client mode does not require MEDIA_DIR",
+        "activation is idempotent",
+        "negative and positive fixtures pass without real network calls"
+      ],
+      "required_checks": [
+        "pnpm verify:timeweb-blueprint",
+        "pnpm verify:clone-readiness",
+        "pnpm verify:clone-prepare",
+        "pnpm verify:client-clone-proof",
+        "pnpm verify:clone-matrix",
+        "pnpm verify:client-readiness --mode=fixture-client",
+        "pnpm typecheck",
+        "pnpm build"
+      ],
+      "depends_on": [
+        "E02-D"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "scripts/clone-activate-timeweb-storage.mjs",
+        "docs/CLONE_ONBOARDING.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "real Timeweb/S3/network action required",
+        "starter demo topology would change",
+        "secret value required"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:storage"
+      ]
+    },
+    {
+      "key": "E03-D",
+      "title": "Deliver EPIC-03 storage boundary",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E03",
+      "source_anchor": "EPIC-03",
+      "goal": "Create, gate and merge the EPIC-03 delivery PR according to the plan.",
+      "scope": [
+        "SourceCraft PR for EPIC-03",
+        "Exact-head gate and merge evidence"
+      ],
+      "acceptance_criteria": [
+        "PR source/target/head are recorded",
+        "Risk-based exact-head gate passes",
+        "Accepted main SHA is recorded"
+      ],
+      "required_checks": [
+        "full diff review",
+        "risk-based SourceCraft gate",
+        "post-merge SHA verification"
+      ],
+      "depends_on": [
+        "E03-T1"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test",
+        "commit",
+        "push",
+        "pull_request",
+        "merge"
+      ],
+      "stop_conditions": [
+        "red gate or changed exact head",
+        "production or release action"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E04",
+      "title": "CORE 5.5 / UI 5.0 COMPLIANCE AUDIT",
+      "type": "epic",
+      "source_anchor": "EPIC-04",
+      "goal": "Create executable compliance maps and eliminate undocumented deviations.",
+      "scope": [
+        "Core 5.5 compliance matrix",
+        "UI Core v5.0 matrix",
+        "mechanical guard coverage"
+      ],
+      "acceptance_criteria": [
+        "0 undocumented Hard Contract deviations",
+        "0 P0 findings",
+        "0 P1 architecture drift"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md",
+        "docs/DESIGN.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "cosmetic path migration without boundary need",
+        "new architecture decision without owner approval",
+        "production or release action"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:compliance",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E04-T1",
+      "title": "Build Core/UI compliance matrices and guards",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "EPIC-04",
+      "goal": "Implement EPIC-04 compliance audit artifacts and guard coverage.",
+      "scope": [
+        "EPIC-04 tasks T04-01 through T04-06",
+        "No unnecessary refactor"
+      ],
+      "acceptance_criteria": [
+        "docs/CORE_5_5_COMPLIANCE_MATRIX.md exists",
+        "UI matrix covers listed surfaces",
+        "mechanical guards cover listed risk boundaries"
+      ],
+      "required_checks": [
+        "pnpm quality:architecture",
+        "pnpm quality:architecture-guards",
+        "pnpm quality:guards",
+        "pnpm verify:security-boundaries",
+        "pnpm verify:public-gateway",
+        "pnpm verify:schema",
+        "pnpm verify:ui-core"
+      ],
+      "depends_on": [
+        "E03-D"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md",
+        "docs/DESIGN.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "unapproved architecture change",
+        "guard cannot prove claimed compliance",
+        "production or release action"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:compliance"
+      ]
+    },
+    {
+      "key": "E04-D",
+      "title": "Deliver EPIC-04 compliance audit",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E04",
+      "source_anchor": "EPIC-04",
+      "goal": "Create, gate and merge the EPIC-04 delivery PR according to the plan.",
+      "scope": [
+        "SourceCraft PR for EPIC-04",
+        "Exact-head gate and merge evidence"
+      ],
+      "acceptance_criteria": [
+        "PR source/target/head are recorded",
+        "Risk-based exact-head gate passes",
+        "Accepted main SHA is recorded"
+      ],
+      "required_checks": [
+        "full diff review",
+        "risk-based SourceCraft gate",
+        "post-merge SHA verification"
+      ],
+      "depends_on": [
+        "E04-T1"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test",
+        "commit",
+        "push",
+        "pull_request",
+        "merge"
+      ],
+      "stop_conditions": [
+        "red gate or changed exact head",
+        "production or release action"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E05",
+      "title": "RELEASE STATE / DOCUMENT GOVERNANCE",
+      "type": "epic",
+      "source_anchor": "EPIC-05",
+      "goal": "Make implementation and release state impossible to misread.",
+      "scope": [
+        "release-state field hardening",
+        "release-state verifier",
+        "clone hygiene check"
+      ],
+      "acceptance_criteria": [
+        "one unambiguous current release authority",
+        "no stale Plan 12 open-state claim",
+        "no moving main treated as released baseline"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/STARTER_RELEASE_STATE.md",
+        "docs/README.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "historical evidence rewrite",
+        "release tag creation",
+        "production action"
+      ],
+      "priority": 1,
+      "labels": [
+        "wave:governance",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "E05-T1",
+      "title": "Harden release state and clone hygiene",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "EPIC-05",
+      "goal": "Implement EPIC-05 release-state verifier and document governance hardening.",
+      "scope": [
+        "EPIC-05 tasks T05-01 through T05-05",
+        "Active docs only"
+      ],
+      "acceptance_criteria": [
+        "pnpm verify:release-state exists and passes",
+        "STARTER_RELEASE_STATE separates repository, accepted, verified and released identities",
+        "clone hygiene keeps useful canon but removes starter execution history"
+      ],
+      "required_checks": [
+        "pnpm verify:release-state",
+        "pnpm verify:version-comments",
+        "pnpm verify:clone-onboarding",
+        "pnpm verify:clone-prepare",
+        "pnpm verify:clone-readiness",
+        "pnpm lint"
+      ],
+      "depends_on": [
+        "E04-D"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/STARTER_RELEASE_STATE.md",
+        "docs/HISTORICAL_DOCUMENT_POLICY.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "historical evidence rewrite",
+        "tag/release action required",
+        "production action"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "risk:standard",
+        "wave:governance"
+      ]
+    },
+    {
+      "key": "E05-D",
+      "title": "Deliver EPIC-05 release-state governance",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E05",
+      "source_anchor": "EPIC-05",
+      "goal": "Create, gate and merge the EPIC-05 delivery PR according to the plan.",
+      "scope": [
+        "SourceCraft PR for EPIC-05",
+        "Exact-head gate and merge evidence"
+      ],
+      "acceptance_criteria": [
+        "PR source/target/head are recorded",
+        "Risk-based exact-head gate passes",
+        "Accepted main SHA is recorded"
+      ],
+      "required_checks": [
+        "full diff review",
+        "risk-based SourceCraft gate",
+        "post-merge SHA verification"
+      ],
+      "depends_on": [
+        "E05-T1"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test",
+        "commit",
+        "push",
+        "pull_request",
+        "merge"
+      ],
+      "stop_conditions": [
+        "red gate or changed exact head",
+        "production or release action"
+      ],
+      "priority": 1,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:standard"
+      ]
+    },
+    {
+      "key": "E06",
+      "title": "FINAL COMMERCIAL FREEZE GATE",
+      "type": "epic",
+      "source_anchor": "EPIC-06",
+      "goal": "Produce the first current immutable-ready starter candidate for new commercial projects.",
+      "scope": [
+        "exact-head verification",
+        "fresh clone matrix",
+        "S3 activation proof without infrastructure",
+        "final report and release candidate state"
+      ],
+      "acceptance_criteria": [
+        "all required checks pass on one exact SourceCraft SHA",
+        "clone matrix passes",
+        "final report exists",
+        "candidate immutable SHA is known"
+      ],
+      "depends_on": [],
+      "delivery_mode": "MERGE_AFTER_GATE",
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/STARTER_RELEASE_STATE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "P0 or P1 remains open",
+        "required DB suite skipped",
+        "real Timeweb call required",
+        "release tag or production action"
+      ],
+      "priority": 0,
+      "labels": [
+        "wave:final-freeze",
+        "approval:owner-approved",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E06-T1",
+      "title": "Run final commercial freeze gate",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "implementation",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "EPIC-06",
+      "goal": "Implement EPIC-06 exact-head final verification, final report and release candidate state.",
+      "scope": [
+        "EPIC-06 tasks T06-01 through T06-06",
+        "No release tag creation"
+      ],
+      "acceptance_criteria": [
+        "all required checks pass on one exact SHA",
+        "docs/evidence/final-freeze/FINAL_REPORT.md exists",
+        "STARTER_RELEASE_STATE records candidate SHA with production NOT AUTHORIZED"
+      ],
+      "required_checks": [
+        "pnpm install --frozen-lockfile",
+        "pnpm verify:constitution-lock",
+        "pnpm verify:dependency-security",
+        "pnpm verify:release-state",
+        "pnpm verify",
+        "pnpm verify:schema",
+        "pnpm verify:integration:required",
+        "pnpm verify:ui-core",
+        "pnpm verify:client-readiness",
+        "pnpm verify:clone-matrix",
+        "pnpm verify:starter-release"
+      ],
+      "depends_on": [
+        "E05-D"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/STARTER_RELEASE_STATE.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "edit",
+        "test",
+        "commit",
+        "push"
+      ],
+      "stop_conditions": [
+        "release tag requested without separate owner command",
+        "production action required",
+        "required check cannot be run or fails"
+      ],
+      "priority": 0,
+      "labels": [
+        "role:implementation",
+        "risk:risky",
+        "wave:final-freeze"
+      ]
+    },
+    {
+      "key": "E06-D",
+      "title": "Deliver EPIC-06 commercial freeze candidate",
+      "type": "task",
+      "role": "implementation",
+      "work_kind": "delivery",
+      "repository_key": "starter",
+      "parent_key": "E06",
+      "source_anchor": "EPIC-06",
+      "goal": "Create, gate and merge the EPIC-06 delivery PR according to the plan.",
+      "scope": [
+        "SourceCraft PR for EPIC-06",
+        "Exact-head gate and merge evidence"
+      ],
+      "acceptance_criteria": [
+        "PR source/target/head are recorded",
+        "Risk-based exact-head gate passes",
+        "Accepted main SHA is recorded"
+      ],
+      "required_checks": [
+        "full diff review",
+        "risk-based SourceCraft gate",
+        "post-merge SHA verification"
+      ],
+      "depends_on": [
+        "E06-T1"
+      ],
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/05_RELEASE_CHECKLIST.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "test",
+        "commit",
+        "push",
+        "pull_request",
+        "merge"
+      ],
+      "stop_conditions": [
+        "red gate or changed exact head",
+        "production or release action"
+      ],
+      "priority": 0,
+      "labels": [
+        "role:implementation",
+        "work:delivery",
+        "delivery:merge-after-gate",
+        "risk:risky"
+      ]
+    },
+    {
+      "key": "E07",
+      "title": "IMMUTABLE STARTER RELEASE",
+      "type": "epic",
+      "source_anchor": "EPIC-07",
+      "goal": "Owner-gated immutable starter-v2 release after EPIC-06, not part of autonomous implementation.",
+      "scope": [
+        "Release tag creation only after explicit owner release command",
+        "No implementation task is imported for this epic"
+      ],
+      "acceptance_criteria": [
+        "No release tag is created by Developer without a separate owner command",
+        "Future client plans use exact starter-v2 tag and SourceCraft SHA"
+      ],
+      "depends_on": [],
+      "delivery_mode": "PR_ONLY",
+      "required_context": [
+        "AMS_REALTY_BAZA_STARTER_FINAL_AUDIT_MASTER_PLAN_V1_0.md",
+        "docs/STARTER_RELEASE_STATE.md"
+      ],
+      "allowed_actions": [
+        "read",
+        "plan"
+      ],
+      "stop_conditions": [
+        "owner has not issued explicit release command",
+        "production or live rollout requested implicitly"
+      ],
+      "priority": 2,
+      "labels": [
+        "needs-owner",
+        "release:owner-gated",
+        "approval:owner-approved",
+        "delivery:pr-only"
+      ]
+    }
+  ]
+}
