@@ -13,10 +13,10 @@ Secrets source=Secret Master / self-hosted Infisical
 ```
 
 Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Планы
-№8–11 — historical/evidence; текущий execution source — approved Plan №12 v4.
-Canonical SHA, tag, последний Gate и proof state принадлежат только
+№8–12 исполнены и являются historical/evidence; активного execution source нет.
+Canonical checkpoint, tag, последний Gate и proof state принадлежат только
 `STARTER_RELEASE_STATE.md`. GitHub mirror, новый immutable tag и production —
-отдельные owner actions после Plan №12.
+отдельные owner actions.
 
 ## Delivery baseline
 

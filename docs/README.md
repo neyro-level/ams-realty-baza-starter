@@ -1,10 +1,9 @@
 # AMS Realty Baza Starter — карта документации
 
-Статус: `ACTIVE / PLAN 12 v4 APPROVED / TASK MANAGER CLEAN / DEVELOPER ACTIVE`.
+Статус: `ACTIVE / PLAN 12 EXECUTION_COMPLETE / TASK MANAGER CLEAN / NO ACTIVE IMPLEMENTATION PLAN`.
 SourceCraft — primary, GitHub — одностороннее зеркало. Текущая release identity
-и proof state принадлежат `STARTER_RELEASE_STATE.md`; текущая execution queue —
-только approved Plan №12 v4 и его reconciled Beads graph. Plan №11 завершён и
-остаётся evidence, а не активной очередью.
+и proof state принадлежат `STARTER_RELEASE_STATE.md`. Активной execution queue
+нет: Plan №12 v4 завершён и, как Plans №6–11, остаётся evidence, а не очередью.
 
 ## Source of Truth
 
@@ -22,17 +21,19 @@ SourceCraft — primary, GitHub — одностороннее зеркало. �
 | Эксплуатация starter demo | `OPERATIONS.md` |
 | Подготовка коммерческого client clone | `CLONE_ONBOARDING.md` |
 | Короткий вход и его проверяемая схема | `CLONE_INTAKE.souz.json`, `CLONE_INTAKE.schema.json` |
-| Текущий approved execution source | `AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md` |
+| Последний закрытый approved execution source | `AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md` |
+| Итог выполнения Plan №12 | `evidence/plan12/FINAL_REPORT.md` |
 | Geo/catalog URL, status, resolution и lifecycle | `platform/GEO_CATALOG_CONTRACT.md` |
 | Граница reusable platform и project composition | `adr/ADR-PLATFORM-LAYOUT.md` |
 | Кандидаты на отдельный future upstream workstream | `UPSTREAM_CANDIDATES.md` |
 
 ## Execution state
 
-- `AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md` —
-  текущий approved Plan №12 v4; validated graph: `10 epic + 89 task`,
-  reconciliation `CLEAN`, Developer execution активен. Production, release tag
-  и GitHub mirror этим планом не разрешены.
+- `AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md` — exact
+  approved Plan №12 v4, `EXECUTION_COMPLETE / EVIDENCE`. Task Manager: `103/103`
+  закрыто, `0` open/READY/in-progress; десять delivery PR `!182–!191` слиты,
+  финальный implementation checkpoint — SourceCraft `main@47afbde`. Итоговый
+  отчёт — `evidence/plan12/FINAL_REPORT.md`.
 - `AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md` —
   `EXECUTION_COMPLETE / EVIDENCE`; post-merge delivery подтверждён в
   `evidence/plan11/POST_MERGE_DELIVERY.md`.
@@ -43,9 +44,9 @@ SourceCraft — primary, GitHub — одностороннее зеркало. �
   Plan №10 не входили.
 - `AMS_MASTER_PLAN_9_STARTER_V2_1_CLONE_READINESS.md` — exact approved source
   исполненного scope S0-S14, `v6 APPROVED / EXECUTION_COMPLETE`.
-- Новый release tag и production не входят в Plan №12 Developer graph и
+- Новый release tag и production не входили в Plan №12 Developer graph и
   требуют отдельной явной команды владельца. GitHub остаётся только
-  односторонним зеркалом canonical SourceCraft `main`; синхронизация зеркала —
+  односторонним зеркалом canonical SourceCraft `main`; его синхронизация —
   отдельная операционная команда, а не release gate.
 
 `package.json`, код, migrations и конфигурация остаются runtime truth. Если они
@@ -84,5 +85,5 @@ execution queue и не задают current release state.
 - `research/ATLAS_BASELINE.md` — provenance визуального donor.
 
 Production, следующий `starter-v2.MINOR.PATCH` и client clone остаются отдельными
-owner actions S15. Репозиторное зеркало не разрешает S15 и production. Наличие завершённого implementation scope или
-demo-контура не равно актуальному release proof.
+owner actions S15. Репозиторное зеркало не разрешает S15 и production. Наличие
+завершённого implementation scope или demo-контура не равно актуальному release proof.

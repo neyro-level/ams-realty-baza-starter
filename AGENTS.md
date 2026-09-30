@@ -7,12 +7,11 @@
 - Delivery: `COMMERCIAL`.
 - Secrets source of truth: Secret Master, self-hosted Infisical `https://infisical.ams24.ru`; Doppler is legacy/import source only until old secrets are migrated.
 - Backend/data owner: Payload CMS + PostgreSQL; Prisma и второй backend/auth запрещены.
-- Текущий execution source — локальный approved Plan №12 v4
-  `docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md`.
-  Его operational graph импортирован в stealth Beads и reconciled `CLEAN`:
-  `10 epic + 89 task`, drift `0`, cycles `0`; `.beads` не коммитится.
-- Plan №11 исполнен и читается только как `EXECUTION_COMPLETE / EVIDENCE`.
-  Post-merge evidence: `docs/evidence/plan11/POST_MERGE_DELIVERY.md`.
+- Активного execution plan нет. Plan №12 v4 полностью исполнен: локальный
+  stealth Task Manager содержит `103/103` закрытых записей и `0` open/READY/
+  in-progress. Approved source и inventory сохраняются неизменными как
+  `EXECUTION_COMPLETE / EVIDENCE`; итог — `docs/evidence/plan12/FINAL_REPORT.md`.
+- Планы №6–11 также исполнены и читаются только как historical evidence.
 - Текущее состояние release/tag/SHA/Gate хранится только в
   `docs/STARTER_RELEASE_STATE.md`; исторические планы не переопределяют его.
 - Статусы старых plans/evidence определяет
@@ -30,18 +29,18 @@
 4. `docs/PROJECT.md` — решения этого starter instance.
 5. `docs/DESIGN.md` или `docs/OPERATIONS.md` по scope.
 6. `docs/STARTER_RELEASE_STATE.md` — текущая release identity и proof state.
-7. `docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md`
-   — текущий approved execution source Plan №12 v4.
-8. `docs/HISTORICAL_DOCUMENT_POLICY.md` перед чтением старого plan/evidence.
-9. Профильный ADR/module/research документ, только когда он входит в scope.
+7. `docs/evidence/plan12/FINAL_REPORT.md` — последний закрытый execution scope.
+8. `docs/HISTORICAL_DOCUMENT_POLICY.md` перед чтением любого plan/evidence.
+9. Approved Plan №12 читать только для требований и provenance закрытого scope.
+10. Профильный ADR/module/research документ, только когда он входит в scope.
 
 ## Invariants
 
 - Один независимый stream = одна branch/worktree = один Pull Request.
 - Repository mode: `SOURCECRAFT_PRIMARY_GITHUB_MIRROR`. Ветки, PR, exact-head Gate, merge и будущий freeze tag принадлежат SourceCraft; GitHub получает только односторонний fast-forward mirror canonical SourceCraft `main`. Reverse/bidirectional sync запрещён.
-- Планы №6–11 исполнены и не являются очередью работ. `starter-freeze` —
+- Планы №6–12 исполнены и не являются очередью работ. `starter-freeze` —
   исторический tag; новый `starter-v2.MINOR.PATCH` выбирается и создаётся только
-  отдельной release-командой после завершения Plan №12. Production и mirror
+  отдельной release-командой. Production и последующие mirror-синхронизации
   также требуют отдельных явных команд.
 - Независимый reviewer / Task Manager Code Reviewer запускается только по явному триггеру владельца (`проведи review`, `аудит кода`, `позови ревьюера`) или для отдельно зафиксированного high-risk/high-complexity scope. Создание Pull Request и обычная READY-задача не запускают независимый review автоматически.
 - Автономность не отменяет COMMERCIAL Gate и fail-closed stop при красных проверках или изменившемся SHA.

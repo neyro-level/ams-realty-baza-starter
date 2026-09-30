@@ -4,9 +4,9 @@
 `MEDIA_DIR` на AMS Server. Он проверяет шаблон, но не задаёт production-топологию
 клиентского клона. Закупка клиентской инфраструктуры **не входит в этот план**.
 
-Планы №8–11 исполнены и являются history/evidence. Текущий implementation
-source — approved Plan №12 v4. Точные принятый `main`, release tag, последний
-Gate, clone matrix, upgrade proof и live status читаются только из
+Планы №8–12 исполнены и являются history/evidence; активного implementation
+source нет. Точные checkpoint, release tag, последний Gate, clone matrix,
+upgrade proof и live status читаются только из
 `docs/STARTER_RELEASE_STATE.md`. GitHub mirror, новый tag и production остаются
 отдельными owner actions и не выводятся из факта merge.
 

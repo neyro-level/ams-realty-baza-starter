@@ -1,6 +1,6 @@
 # Backlog
 
-Статус: `ACTIVE / PLAN 12 v4 APPROVED / TASK MANAGER CLEAN / DEVELOPER ACTIVE`.
+Статус: `ACTIVE / PLAN 12 EXECUTION_COMPLETE / TASK MANAGER CLEAN / NO ACTIVE IMPLEMENTATION PLAN`.
 
 Планы №6–8 исполнены. Локальный Task Manager по Plan №8 закрыт: `28/28`, без
 READY или in-progress задач. Завершённые планы и inventories находятся в
@@ -14,16 +14,16 @@ tag и production не входили в Developer graph и не разреше�
 команды владельца. Репозиторное зеркало выполняется отдельно и не разрешает
 release.
 
-Планы №10 и №11 исполнены и остаются `EXECUTION_COMPLETE / EVIDENCE`.
+Планы №10–12 исполнены и остаются `EXECUTION_COMPLETE / EVIDENCE`.
 Текущие accepted SHA/tag/Gate/proof status принадлежат
 `STARTER_RELEASE_STATE.md`, а не этим историческим планам.
 
 ## NOW
 
-- Текущий execution source — approved Plan №12 v4; operational graph содержит
-  `10 epic + 89 task`, reconciliation `CLEAN`, drift `0`, cycles `0`.
-- Developer последовательно выполняет READY-задачи Plan №12. Production,
-  release tag и GitHub mirror исключены из его authority.
+- Активной implementation queue нет. Plan №12 v4 закрыт: `103/103` Task Manager
+  records имеют статус `closed`; `open=0`, `READY=0`, `in_progress=0`.
+- Approved Plan №12 и inventory неизменны и используются только как contract /
+  evidence. Итоговый отчёт: `evidence/plan12/FINAL_REPORT.md`.
 - Approved ownership: brand primitives — `src/project/brand.css`, semantic и
   component tokens — `src/app/globals.css`; starter update boundary —
   `starter-owned.json` schema v2; clone input — preset schema v3.
@@ -37,7 +37,7 @@ release.
 
 ## NEXT — только по команде владельца
 
-- После полного Plan №12 proof выбрать и создать следующий immutable
+- После отдельной release-команды выбрать и создать следующий immutable
   `starter-v2.MINOR.PATCH` только по отдельной release-команде владельца.
 - Выполнить release starter demo на `start-baza.ams24.ru`, включая immutable
   artifact, rollout, live smoke и rollback point.
@@ -57,6 +57,10 @@ release.
 
 ## Завершённое evidence
 
+- Plan №12: `EXECUTION_COMPLETE`; 10 epic delivery PR `!182–!191`, все exact-head
+  Gate PASS; финальный implementation checkpoint
+  `47afbde798c77d10725681e9401dee78e471d7d5`; отчёт
+  `evidence/plan12/FINAL_REPORT.md`.
 - Plan №8: implementation `bd570ee40db9e25f73a24013be836dd3876282ac`,
   docs-only reconciliation `c5803cfbac5d2c1817451fdee6aa96e3b975934e`,
   итоговый отчёт `plan8/S8_25_FINAL_EXECUTION_REPORT.md`.
