@@ -43,6 +43,7 @@ try {
 		"deploy/clients/timeweb/env.client.example",
 		"deploy/clients/timeweb/payload/activation.patch.md",
 		"deploy/clients/timeweb/payload/s3-plugin.example.ts",
+		"deploy/clients/timeweb/proofs/CLIENT_TIMEWEB_PROOF.md",
 	]) {
 		copyFileSync(path.join(root, relativePath), path.join(dir, relativePath));
 	}
@@ -72,6 +73,7 @@ try {
 		"deploy/clients/timeweb/env.client.example",
 		"deploy/clients/timeweb/payload/activation.patch.md",
 		"deploy/clients/timeweb/payload/s3-plugin.example.ts",
+		"deploy/clients/timeweb/proofs/CLIENT_TIMEWEB_PROOF.md",
 		"src/project/site.config.ts",
 		"docs/PROJECT.md",
 	]);
@@ -104,6 +106,50 @@ try {
 			path.join(dir, "src", "project", "client-readiness.config.ts"),
 			"utf8",
 		).includes('mediaStorage: "timeweb-s3"'),
+	);
+	const activatedEnvSource = readFileSync(
+		path.join(dir, "src", "project", "env.ts"),
+		"utf8",
+	);
+	assert.ok(activatedEnvSource.includes("function runtimeStorageKeys()"));
+	assert.ok(activatedEnvSource.includes("return timewebS3RuntimeKeys"));
+	assert.ok(activatedEnvSource.includes('return ["MEDIA_DIR"]'));
+	execFileSync(
+		process.execPath,
+		[
+			"--experimental-strip-types",
+			"--input-type=module",
+			"-e",
+			[
+				'import assert from "node:assert/strict";',
+				'import { evaluateRuntimeEnv, requiredKeysForMode } from "./src/project/env.ts";',
+				'const keys = requiredKeysForMode("runtime");',
+				'assert.equal(keys.includes("MEDIA_DIR"), false);',
+				'for (const key of ["S3_ENDPOINT","S3_REGION","S3_BUCKET","S3_ACCESS_KEY_ID","S3_SECRET_ACCESS_KEY","S3_PREFIX"]) assert.ok(keys.includes(key), `${key} must be required`);',
+				"const s3Runtime = {",
+				'  NODE_ENV: "production",',
+				'  AMS_PROFILE: "REALTY_BASE",',
+				'  TZ: "Europe/Moscow",',
+				'  DATABASE_URI: "postgresql://127.0.0.1:5432/ams_realtbase",',
+				'  PAYLOAD_SECRET: "fixture-runtime-payload-secret-at-least-32-chars",',
+				'  NEXT_PUBLIC_SERVER_URL: "https://start-baza.ams24.ru",',
+				'  REVALIDATE_SECRET: "fixture-runtime-revalidate-secret-32chars",',
+				'  INTERNAL_REVALIDATE_BASE_URL: "http://127.0.0.1:3000",',
+				'  S3_ENDPOINT: "https://s3.twcstorage.ru",',
+				'  S3_REGION: "ru-1",',
+				'  S3_BUCKET: "fixture-bucket",',
+				'  S3_ACCESS_KEY_ID: "fixture-access-key",',
+				'  S3_SECRET_ACCESS_KEY: "fixture-secret-key",',
+				'  S3_PREFIX: "media",',
+				"};",
+				'const positive = evaluateRuntimeEnv(s3Runtime, "runtime");',
+				'assert.equal(positive.missing.includes("MEDIA_DIR"), false);',
+				'assert.equal(positive.missing.includes("S3_BUCKET"), false);',
+				'const negative = evaluateRuntimeEnv({ ...s3Runtime, S3_BUCKET: "" }, "runtime");',
+				'assert.ok(negative.missing.includes("S3_BUCKET"));',
+			].join("\n"),
+		],
+		{ cwd: dir, stdio: "inherit" },
 	);
 
 	const beforeRepeat = git(["diff"]);

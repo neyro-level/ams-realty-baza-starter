@@ -74,7 +74,8 @@ released-tag status проверяется по `STARTER_RELEASE_STATE.md`.
   resources; значения секретов не попадают в Git или командную строку.
 - Command: `pnpm clone:activate-timeweb-storage`.
 - Output: version-pinned S3 adapter и client-owned storage config; повтор —
-  безопасный no-op.
+  безопасный no-op. В режиме `client + timeweb-s3` runtime требует S3 keys из
+  Secret Master и не требует `MEDIA_DIR`; starter demo остаётся на `MEDIA_DIR`.
 - STOP: topology не утверждена, нет отдельного bucket/credentials или команда
   пытается изменить starter demo runtime.
 

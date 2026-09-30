@@ -25,6 +25,8 @@ export function validateBlueprint(input) {
 	const compose = input.files.get("compose/client.compose.yml.example") ?? "";
 	const nginx = input.files.get("nginx/site.conf.example") ?? "";
 	const proof = input.files.get("proofs/CLIENT_TIMEWEB_PROOF.md") ?? "";
+	const envSource = input.envSource ?? "";
+	const activationSource = input.activationSource ?? "";
 
 	for (const file of requiredFiles)
 		if (!input.files.has(file)) add(`missing:${file}`);
@@ -73,9 +75,32 @@ export function validateBlueprint(input) {
 	for (const marker of [
 		"Real Managed PostgreSQL connection | NOT PROVEN",
 		"Real Payload Admin S3 upload | NOT PROVEN",
+		"No client `MEDIA_DIR` dependency | PROVEN LOCALLY",
 		"Restore drill | NOT PROVEN",
 	]) {
 		if (!proof.includes(marker)) add(`proof-marker:${marker}`);
+	}
+	for (const marker of [
+		"S3_ENDPOINT: optionalUrl",
+		"S3_REGION: optionalString",
+		"S3_BUCKET: optionalString",
+		"S3_ACCESS_KEY_ID: optionalString",
+		"S3_SECRET_ACCESS_KEY: optionalString",
+		"S3_PREFIX: optionalString",
+		"function runtimeStorageKeys()",
+		'clientReadinessConfig.mediaStorage === "timeweb-s3"',
+		"return timewebS3RuntimeKeys",
+		'return ["MEDIA_DIR"]',
+		"return [...runtimeBaseKeys, ...runtimeStorageKeys()]",
+	]) {
+		if (!envSource.includes(marker)) add(`env-boundary:${marker}`);
+	}
+	for (const marker of [
+		"function ensureS3EnvSchema(source)",
+		"function ensureS3RuntimeRequirements(source)",
+		"clone:activate-timeweb-storage: already activated; no changes",
+	]) {
+		if (!activationSource.includes(marker)) add(`activation-boundary:${marker}`);
 	}
 	const hasStorageAdapter = Boolean(
 		input.packageJson.dependencies?.["@payloadcms/storage-s3"] ||
@@ -105,7 +130,21 @@ const siteConfig = fs.readFileSync(
 const projectKind = siteConfig.includes('projectKind: "client"')
 	? "client"
 	: "starter-demo";
-assert.deepEqual(validateBlueprint({ files, packageJson, projectKind }), []);
+const envSource = fs.readFileSync(path.join(root, "src/project/env.ts"), "utf8");
+const activationSource = fs.readFileSync(
+	path.join(root, "scripts/clone-activate-timeweb-storage.mjs"),
+	"utf8",
+);
+assert.deepEqual(
+	validateBlueprint({
+		files,
+		packageJson,
+		projectKind,
+		envSource,
+		activationSource,
+	}),
+	[],
+);
 
 const invalidFiles = new Map(files);
 invalidFiles.set(
@@ -113,10 +152,25 @@ invalidFiles.set(
 	`${invalidFiles.get("compose/client.compose.yml.example")}\nservices:\n  second-owner:\n    environment:\n      JOBS_AUTORUN: true\n`,
 );
 assert.ok(
-	validateBlueprint({ files: invalidFiles, packageJson, projectKind }).includes(
-		"jobs-owner-count",
-	),
+	validateBlueprint({
+		files: invalidFiles,
+		packageJson,
+		projectKind,
+		envSource,
+		activationSource,
+	}).includes("jobs-owner-count"),
 	"negative fixture must reject a second jobs owner",
+);
+
+assert.ok(
+	validateBlueprint({
+		files,
+		packageJson,
+		projectKind,
+		envSource: envSource.replace("return timewebS3RuntimeKeys", "return [\"MEDIA_DIR\"]"),
+		activationSource,
+	}).includes("env-boundary:return timewebS3RuntimeKeys"),
+	"negative fixture must reject client S3 runtime that still requires MEDIA_DIR",
 );
 
 console.log(

@@ -7,7 +7,7 @@
 | Real Managed PostgreSQL connection | NOT PROVEN | TLS connection and exact non-secret resource identity |
 | Clean Payload migrations | NOT PROVEN | migration log from the immutable application artifact |
 | Real Payload Admin S3 upload | NOT PROVEN | upload/read/delete plus expected access behavior |
-| No client `MEDIA_DIR` dependency | NOT PROVEN | runtime/config and filesystem evidence |
+| No client `MEDIA_DIR` dependency | PROVEN LOCALLY | `pnpm verify:timeweb-blueprint`; `pnpm verify:clone-readiness` |
 | Physical backup schedule | NOT PROVEN | provider schedule and retention evidence |
 | Restore drill | NOT PROVEN | staging restore, integrity check and smoke result |
 | Exactly one jobs owner | NOT PROVEN | rollout-state and jobs-health evidence |

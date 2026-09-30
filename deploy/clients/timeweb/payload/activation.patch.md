@@ -10,8 +10,9 @@ apply it manually to the starter.
    factory under `src/project/`, updates the single env owner and runs typecheck.
 3. Confirm `timewebS3Plugin` is the only Payload Media storage adapter and
    `S3_PREFIX` is unique to this client/environment.
-4. Remove the client production dependency on `staticDir`/`MEDIA_DIR` while
-   keeping external feed image URLs unchanged.
+4. Confirm runtime required keys switch to S3 credentials and no longer require
+   `MEDIA_DIR` for `client + timeweb-s3`, while external feed image URLs stay
+   unchanged.
 5. Keep `PAYLOAD_DB_PUSH=false`; create and review migrations for any collection
    change.
 6. Decide public/private URL, ACL and signed-download behavior explicitly from

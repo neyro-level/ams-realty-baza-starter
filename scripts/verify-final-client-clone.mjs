@@ -254,6 +254,7 @@ for (const entry of selectedMatrix) {
 	);
 	let step = "create disposable worktree";
 	let containerName = "";
+	let containerStarted = false;
 	let serverProcess = null;
 	let serverOutput = "";
 	let taskFailure = null;
@@ -546,6 +547,7 @@ for (const entry of selectedMatrix) {
 				"127.0.0.1::5432",
 				"postgres:18-alpine",
 			]);
+			containerStarted = true;
 			await waitForPostgres(containerName);
 			const mapped = docker(["port", containerName, "5432/tcp"]);
 			const databasePort = mapped.split(":").at(-1).trim();
@@ -688,15 +690,17 @@ for (const entry of selectedMatrix) {
 			try {
 				docker(["rm", "-f", containerName]);
 			} catch {}
-			try {
-				if (dockerContainerExists(containerName))
+			if (containerStarted) {
+				try {
+					if (dockerContainerExists(containerName))
+						cleanupFailure ??= new Error(
+							`Disposable container leaked: ${containerName}`,
+						);
+				} catch (error) {
 					cleanupFailure ??= new Error(
-						`Disposable container leaked: ${containerName}`,
+						`Unable to prove disposable container cleanup: ${String(error?.message ?? error)}`,
 					);
-			} catch (error) {
-				cleanupFailure ??= new Error(
-					`Unable to prove disposable container cleanup: ${String(error?.message ?? error)}`,
-				);
+				}
 			}
 		}
 		try {

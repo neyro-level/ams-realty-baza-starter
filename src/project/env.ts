@@ -42,6 +42,12 @@ const runtimeEnvSchema = z.object({
 	DATABASE_POOL_MAX: optionalInteger.default(10),
 	PAYLOAD_SECRET: optionalString,
 	MEDIA_DIR: optionalString,
+	S3_ENDPOINT: optionalUrl,
+	S3_REGION: optionalString,
+	S3_BUCKET: optionalString,
+	S3_ACCESS_KEY_ID: optionalString,
+	S3_SECRET_ACCESS_KEY: optionalString,
+	S3_PREFIX: optionalString,
 
 	OUTBOUND_ALLOWED_HOSTS: optionalString,
 	EXTERNAL_IMAGE_HOSTS: optionalString,
@@ -95,17 +101,36 @@ export function detectRuntimeEnvMode(
 	return "development";
 }
 
+const runtimeBaseKeys = [
+	"AMS_PROFILE",
+	"TZ",
+	"DATABASE_URI",
+	"PAYLOAD_SECRET",
+	"NEXT_PUBLIC_SERVER_URL",
+];
+const timewebS3RuntimeKeys = [
+	"S3_ENDPOINT",
+	"S3_REGION",
+	"S3_BUCKET",
+	"S3_ACCESS_KEY_ID",
+	"S3_SECRET_ACCESS_KEY",
+	"S3_PREFIX",
+];
+
+function runtimeStorageKeys(): string[] {
+	if (
+		(siteConfig.projectKind as "starter-demo" | "client") === "client" &&
+		clientReadinessConfig.mediaStorage === "timeweb-s3"
+	) {
+		return timewebS3RuntimeKeys;
+	}
+	return ["MEDIA_DIR"];
+}
+
 export function requiredKeysForMode(mode: RuntimeEnvMode): string[] {
 	if (mode === "migrate") return ["DATABASE_URI", "PAYLOAD_SECRET"];
 	if (mode !== "runtime") return [];
-	return [
-		"AMS_PROFILE",
-		"TZ",
-		"DATABASE_URI",
-		"PAYLOAD_SECRET",
-		"NEXT_PUBLIC_SERVER_URL",
-		"MEDIA_DIR",
-	];
+	return [...runtimeBaseKeys, ...runtimeStorageKeys()];
 }
 
 function isHttpOrigin(value: string): boolean {

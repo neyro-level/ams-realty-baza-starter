@@ -41,6 +41,86 @@ function replaceOnce(source, needle, replacement, label) {
 	return source.replace(needle, replacement);
 }
 
+function ensureS3EnvSchema(source) {
+	if (source.includes("S3_SECRET_ACCESS_KEY: optionalString")) return source;
+	return replaceOnce(
+		source,
+		"\tMEDIA_DIR: optionalString,",
+		[
+			"\tMEDIA_DIR: optionalString,",
+			"\tS3_ENDPOINT: optionalUrl,",
+			"\tS3_REGION: optionalString,",
+			"\tS3_BUCKET: optionalString,",
+			"\tS3_ACCESS_KEY_ID: optionalString,",
+			"\tS3_SECRET_ACCESS_KEY: optionalString,",
+			"\tS3_PREFIX: optionalString,",
+		].join("\n"),
+		"client S3 env schema",
+	);
+}
+
+function ensureS3RuntimeRequirements(source) {
+	if (
+		source.includes("function runtimeStorageKeys()") &&
+		source.includes('clientReadinessConfig.mediaStorage === "timeweb-s3"') &&
+		source.includes('"S3_SECRET_ACCESS_KEY"')
+	) {
+		return source;
+	}
+
+	return replaceOnce(
+		source,
+		[
+			"export function requiredKeysForMode(mode: RuntimeEnvMode): string[] {",
+			'\tif (mode === "migrate") return ["DATABASE_URI", "PAYLOAD_SECRET"];',
+			'\tif (mode !== "runtime") return [];',
+			"\treturn [",
+			'\t\t"AMS_PROFILE",',
+			'\t\t"TZ",',
+			'\t\t"DATABASE_URI",',
+			'\t\t"PAYLOAD_SECRET",',
+			'\t\t"NEXT_PUBLIC_SERVER_URL",',
+			'\t\t"MEDIA_DIR",',
+			"\t];",
+			"}",
+		].join("\n"),
+		[
+			"const runtimeBaseKeys = [",
+			'\t"AMS_PROFILE",',
+			'\t"TZ",',
+			'\t"DATABASE_URI",',
+			'\t"PAYLOAD_SECRET",',
+			'\t"NEXT_PUBLIC_SERVER_URL",',
+			"];",
+			"const timewebS3RuntimeKeys = [",
+			'\t"S3_ENDPOINT",',
+			'\t"S3_REGION",',
+			'\t"S3_BUCKET",',
+			'\t"S3_ACCESS_KEY_ID",',
+			'\t"S3_SECRET_ACCESS_KEY",',
+			'\t"S3_PREFIX",',
+			"];",
+			"",
+			"function runtimeStorageKeys(): string[] {",
+			"\tif (",
+			'\t\t(siteConfig.projectKind as "starter-demo" | "client") === "client" &&',
+			'\t\tclientReadinessConfig.mediaStorage === "timeweb-s3"',
+			"\t) {",
+			"\t\treturn timewebS3RuntimeKeys;",
+			"\t}",
+			'\treturn ["MEDIA_DIR"];',
+			"}",
+			"",
+			"export function requiredKeysForMode(mode: RuntimeEnvMode): string[] {",
+			'\tif (mode === "migrate") return ["DATABASE_URI", "PAYLOAD_SECRET"];',
+			'\tif (mode !== "runtime") return [];',
+			"\treturn [...runtimeBaseKeys, ...runtimeStorageKeys()];",
+			"}",
+		].join("\n"),
+		"client S3 runtime requirements",
+	);
+}
+
 function packageVersion() {
 	const pkg = JSON.parse(read("package.json"));
 	return pkg.dependencies?.[adapter] ?? pkg.devDependencies?.[adapter] ?? null;
@@ -121,56 +201,11 @@ payloadConfig = replaceOnce(
 write("payload.config.ts", payloadConfig);
 
 let envSource = read("src/project/env.ts");
-envSource = replaceOnce(
-	envSource,
-	"\tMEDIA_DIR: optionalString,",
-	[
-		"\tMEDIA_DIR: optionalString,",
-		"\tS3_ENDPOINT: optionalUrl,",
-		"\tS3_REGION: optionalString,",
-		"\tS3_BUCKET: optionalString,",
-		"\tS3_ACCESS_KEY_ID: optionalString,",
-		"\tS3_SECRET_ACCESS_KEY: optionalString,",
-		"\tS3_PREFIX: optionalString,",
-	].join("\n"),
-	"client S3 env schema",
-);
+envSource = ensureS3EnvSchema(envSource);
 write("src/project/env.ts", envSource);
 
 envSource = read("src/project/env.ts");
-envSource = replaceOnce(
-	envSource,
-	["\treturn [", "\t\t\"AMS_PROFILE\",", "\t\t\"TZ\","].join("\n"),
-	[
-		"\tconst required = [",
-		"\t\t\"AMS_PROFILE\",",
-		"\t\t\"TZ\",",
-	].join("\n"),
-	"runtime env required list",
-);
-envSource = replaceOnce(
-	envSource,
-	"\t\t\"MEDIA_DIR\",\n\t];",
-	[
-		"\t\t\"MEDIA_DIR\",",
-		"\t];",
-		"\tif (",
-		'\t\tsiteConfig.projectKind === "client" &&',
-		'\t\tclientReadinessConfig.mediaStorage === "timeweb-s3"',
-		"\t) {",
-		"\t\trequired.push(",
-		'\t\t\t"S3_ENDPOINT",',
-		'\t\t\t"S3_REGION",',
-		'\t\t\t"S3_BUCKET",',
-		'\t\t\t"S3_ACCESS_KEY_ID",',
-		'\t\t\t"S3_SECRET_ACCESS_KEY",',
-		'\t\t\t"S3_PREFIX",',
-		"\t\t);",
-		"\t}",
-		"\treturn required;",
-	].join("\n"),
-	"client S3 runtime requirements",
-);
+envSource = ensureS3RuntimeRequirements(envSource);
 write("src/project/env.ts", envSource);
 
 let readiness = read("src/project/client-readiness.config.ts");

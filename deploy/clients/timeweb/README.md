@@ -23,7 +23,9 @@ prove a live Timeweb connection.
 3. Commit the client identity change so the checkout is clean, then run
    `pnpm clone:activate-timeweb-storage`. It installs the exact compatible
    `@payloadcms/storage-s3@3.90.2` peer for Payload `3.90.2`, applies the
-   versioned config and validates types. The starter dependency set stays clean.
+   versioned config and validates types. In the activated `client +
+   timeweb-s3` mode runtime env requires the S3 keys instead of `MEDIA_DIR`.
+   The starter dependency set stays clean.
 4. Fill `S3_ENDPOINT=https://s3.twcstorage.ru`, `S3_REGION=ru-1`, bucket,
    credentials and the client-safe `S3_PREFIX` from the Timeweb dashboard and
    Secret Master. Do not commit credentials.
