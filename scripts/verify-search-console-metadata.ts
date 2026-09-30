@@ -9,8 +9,8 @@ const installedNext = JSON.parse(
 	readFileSync("node_modules/next/package.json", "utf8"),
 ) as { version: string };
 
-assert.equal(packageJson.dependencies.next, "16.3.5");
-assert.equal(installedNext.version, "16.3.5");
+assert.equal(packageJson.dependencies.next, "16.3.8");
+assert.equal(installedNext.version, "16.3.8");
 assert.equal(
 	searchConsoleVerificationMetadata({ yandex: null, google: null }),
 	undefined,
@@ -22,4 +22,4 @@ assert.deepEqual(
 	}),
 	{ yandex: "yandex-verification-token", google: "google-site-verification-token" },
 );
-console.log("Search Console metadata contract passed for Next 16.3.5.");
+console.log("Search Console metadata contract passed for Next 16.3.8.");

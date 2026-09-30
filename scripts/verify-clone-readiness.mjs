@@ -92,7 +92,7 @@ try {
 	assert.equal(
 		JSON.parse(readFileSync(path.join(dir, "package.json"), "utf8"))
 			.dependencies["@payloadcms/storage-s3"],
-		"3.90.1",
+		"3.90.2",
 	);
 	assert.ok(
 		readFileSync(path.join(dir, "payload.config.ts"), "utf8").includes(

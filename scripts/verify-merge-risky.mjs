@@ -41,6 +41,7 @@ const scopes = {
 	"dependency-runtime": {
 		requiresDatabase: false,
 		commands: [
+			"verify:dependency-security",
 			"verify:product-regression",
 			"verify:production-topology",
 			"verify:release-artifact",

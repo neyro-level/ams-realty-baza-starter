@@ -9,7 +9,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const adapter = "@payloadcms/storage-s3";
-const exactVersion = "3.90.1";
+const exactVersion = "3.90.2";
 const targetPlugin = "src/project/timeweb-s3.plugin.ts";
 
 function read(relativePath) {

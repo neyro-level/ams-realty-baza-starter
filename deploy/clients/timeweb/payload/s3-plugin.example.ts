@@ -1,5 +1,5 @@
 // @ts-nocheck -- activation source copied to src/project/timeweb-s3.plugin.ts.
-// Exact compatibility: @payloadcms/storage-s3@3.90.1 + payload@3.90.1.
+// Exact compatibility: @payloadcms/storage-s3@3.90.2 + payload@3.90.2.
 import { s3Storage } from "@payloadcms/storage-s3";
 import { runtimeEnv } from "./env.ts";
 

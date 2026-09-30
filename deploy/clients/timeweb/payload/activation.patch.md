@@ -6,7 +6,7 @@ apply it manually to the starter.
 1. Verify `projectKind: "client"`, commit the client identity and start from a
    clean checkout.
 2. Run `pnpm clone:activate-timeweb-storage`. The command verifies Payload
-   `3.90.1`, installs exact `@payloadcms/storage-s3@3.90.1`, copies the pinned
+   `3.90.2`, installs exact `@payloadcms/storage-s3@3.90.2`, copies the pinned
    factory under `src/project/`, updates the single env owner and runs typecheck.
 3. Confirm `timewebS3Plugin` is the only Payload Media storage adapter and
    `S3_PREFIX` is unique to this client/environment.

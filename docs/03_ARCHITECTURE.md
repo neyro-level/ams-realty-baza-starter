@@ -56,7 +56,7 @@ Canonical checkpoint, tag, последний Gate и proof state принадл
 - Zod, pnpm, Tailwind CSS 4, shadcn/ui, Lucide;
 - Payload Jobs, streaming SAX parser, **local persistent media** (S3 plugin not used by starter), Nginx, SourceCraft.
 
-Текущий lock snapshot: Next.js `16.3.5`, React `19.2.8`, Payload `3.90.1`.
+Текущий lock snapshot: Next.js `16.3.8`, React `19.2.8`, Payload `3.90.2`.
 Фактические версии всегда определяют `package.json`, lockfile и runtime files.
 Major upgrade требует отдельного решения и targeted proof.
 
@@ -246,7 +246,7 @@ starter. Фоновое и автоматическое обновление з�
 
 ## Version-sensitive framework boundaries
 
-- Next.js `16.3.5` intentionally uses `src/proxy.ts` with the named
+- Next.js `16.3.8` intentionally uses `src/proxy.ts` with the named
   `export function proxy`. The former `src/middleware.ts` convention is
   deprecated in this Next line and is forbidden in this project. Pinned
   reference: [Next.js 16 Proxy](https://nextjs.org/docs/16/app/api-reference/file-conventions/proxy).
