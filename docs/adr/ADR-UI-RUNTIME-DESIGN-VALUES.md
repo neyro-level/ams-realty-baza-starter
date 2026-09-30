@@ -8,9 +8,8 @@ For the Final Audit Freeze starter line, factual runtime design-system values
 return to `src/app/globals.css`.
 
 Clone preset/intake remains the client-owned input for generated project
-values. `src/project/brand.css` is allowed only as transitional generated
-compatibility input until EPIC-01 moves generation into `globals.css`; after
-that migration it has no runtime authority.
+values. `src/project/brand.css` is allowed only as deprecated compatibility
+stub and has no runtime authority.
 
 ## Supersedes
 

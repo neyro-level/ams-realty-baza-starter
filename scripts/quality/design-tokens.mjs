@@ -3,9 +3,9 @@ import { extname, join, relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "../..");
 const tokenSource = join(root, "src/app/globals.css");
-const brandSource = join(root, "src/project/brand.css");
+const brandCompatibilitySource = join(root, "src/project/brand.css");
 const tokenCss = readFileSync(tokenSource, "utf8");
-const brandCss = readFileSync(brandSource, "utf8");
+const brandCompatibilityCss = readFileSync(brandCompatibilitySource, "utf8");
 
 function walk(directory, extensions) {
 	return readdirSync(directory).flatMap((entry) => {
@@ -23,14 +23,14 @@ const definitions = new Set(
 	[...tokenCss.matchAll(/^\s*(--[a-z0-9_-]+)\s*:/gim)].map((match) => match[1]),
 );
 const brandDefinitions = new Set(
-	[...brandCss.matchAll(/^\s*(--brand-[a-z0-9_-]+)\s*:/gim)].map(
+	[...tokenCss.matchAll(/^\s*(--brand-[a-z0-9_-]+)\s*:/gim)].map(
 		(match) => match[1],
 	),
 );
 
 const componentCssFiles = walk(join(root, "src"), new Set([".css"]))
 	.concat(walk(join(root, "packages"), new Set([".css"])))
-	.filter((path) => path !== tokenSource && path !== brandSource);
+	.filter((path) => path !== tokenSource);
 const externalDefinitions = new Set(
 	componentCssFiles.flatMap((path) => {
 		const css = readFileSync(path, "utf8");
@@ -247,23 +247,9 @@ const codeCorpus = [
 	...walk(join(root, "packages"), new Set([".css", ".ts", ".tsx"])),
 	...walk(join(root, "scripts"), new Set([".mjs", ".ts"])),
 ]
-	.filter((path) => path !== tokenSource && path !== brandSource)
+	.filter((path) => path !== tokenSource)
 	.map((path) => ({ path, text: readFileSync(path, "utf8") }));
 
-const brandPrimitiveValues = [
-	...brandCss.matchAll(
-		/^\s*--brand-[a-z0-9_-]+\s*:\s*(#[0-9a-f]{3,8}|-?(?:\d*\.)?\d+(?:px|rem)|[^;]*font[^;]*);/gim,
-	),
-].map((match) => match[1].trim());
-const duplicateBrandValues = [...new Set(brandPrimitiveValues)].flatMap(
-	(value) => {
-		const pattern = value.startsWith("#")
-			? new RegExp(value.replace("#", "#"), "i")
-			: null;
-		if (!pattern) return [];
-		return tokenCss.match(pattern) ? [value] : [];
-	},
-);
 const guardedBrandColorNames = new Set([
 	"--brand-accent",
 	"--brand-accent-hover",
@@ -274,7 +260,7 @@ const guardedBrandColorNames = new Set([
 	"--brand-status-info",
 ]);
 const rawBrandColorPatterns = [
-	...brandCss.matchAll(
+	...tokenCss.matchAll(
 		/^\s*(--brand-[a-z0-9_-]+)\s*:\s*(#[0-9a-f]{3,8})\s*;/gim,
 	),
 ]
@@ -506,15 +492,15 @@ if (
 }
 
 const missingRequired = required.filter((token) => !definitions.has(token));
+const brandCompatibilityDefinitions = [
+	...brandCompatibilityCss.matchAll(/^\s*(--[a-z0-9_-]+)\s*:/gim),
+].map((match) => match[1]);
 const failures = [
 	...(brandDefinitions.size < 20 || brandDefinitions.size > 30
 		? [`brand primitive count ${brandDefinitions.size} is outside 20..30`]
 		: []),
-	...duplicateBrandValues.map(
-		(value) => `brand primitive value duplicated in globals.css: ${value}`,
-	),
 	...rawBrandColorFindings.map(
-		(file) => `raw brand color outside brand.css: ${file}`,
+		(file) => `raw brand color outside src/app/globals.css: ${file}`,
 	),
 	...unapprovedEffectColors.map(
 		(rgb) => `raw effect RGB is absent from the explicit neutral allowlist: ${rgb}`,
@@ -541,15 +527,27 @@ const failures = [
 
 if (!tokenCss.includes("@theme inline"))
 	failures.push("missing Tailwind @theme mapping");
-if (!tokenCss.includes('@import "../project/brand.css"'))
-	failures.push("globals.css must import the project brand primitive source");
-if (brandCss.includes("data-brand-proof"))
-	failures.push("generated brand.css must not ship a verification-only proof theme");
+if (
+	!tokenCss.includes("CLONE_BRAND_VALUES_BEGIN") ||
+	!tokenCss.includes("CLONE_BRAND_VALUES_END")
+) {
+	failures.push("globals.css clone brand values block is missing");
+}
+if (tokenCss.includes('@import "../project/brand.css"'))
+	failures.push("globals.css must not import deprecated src/project/brand.css");
+if (brandCompatibilityDefinitions.length > 0) {
+	failures.push(
+		`src/project/brand.css must not define custom properties: ${brandCompatibilityDefinitions.join(", ")}`,
+	);
+}
+if (brandCompatibilityCss.includes("data-brand-proof"))
+	failures.push("deprecated brand.css must not ship a verification-only proof theme");
 
 export function analyzeDesignTokens() {
 	return {
 		tokenSource: "src/app/globals.css",
-		brandSource: "src/project/brand.css",
+		brandSource: "src/app/globals.css",
+		brandCompatibilitySource: "src/project/brand.css",
 		brandPrimitives: brandDefinitions.size,
 		definitions: definitions.size,
 		uiSourceFiles: uiFiles.length,

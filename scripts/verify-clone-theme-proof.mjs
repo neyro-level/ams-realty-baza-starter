@@ -79,7 +79,7 @@ function rawBrandDefinitionLeaks() {
 	return [join(root, "src"), join(root, "packages")]
 		.flatMap(walk)
 		.filter((path) => [".css", ".ts", ".tsx"].includes(extname(path)))
-		.filter((path) => path !== join(root, "src/project/brand.css"))
+		.filter((path) => path !== join(root, "src/app/globals.css"))
 		.flatMap((path) =>
 			/(?:^|[;{])\s*["']?--brand-[a-z0-9_-]+["']?\s*:/gim.test(readFileSync(path, "utf8"))
 				? [relative(root, path).replaceAll("\\", "/")]
@@ -89,9 +89,7 @@ function rawBrandDefinitionLeaks() {
 
 if (resolve(process.argv[1] ?? "") === import.meta.filename) {
 	const uiFiles = runtimeUiFiles();
-	const semanticMapPath = join(root, "src/app/globals.css");
 	const uiHashBefore = digestFiles(uiFiles);
-	const semanticHashBefore = digestFiles([semanticMapPath]);
 	const fixture = mkdtempSync(join(tmpdir(), "ams-clone-theme-proof-"));
 	try {
 		writeFileSync(join(fixture, "starter-brand.css"), starterCss);
@@ -106,17 +104,13 @@ if (resolve(process.argv[1] ?? "") === import.meta.filename) {
 		);
 		assert.ok(changedPrimitives.length >= 15, "proof themes must differ in at least 15 brand primitives");
 		assert.notEqual(renderProjectFontConfig(starterPreset), renderProjectFontConfig(oceanPreset));
+		assert.notEqual(starterCss, oceanCss, "generated globals brand blocks must differ by theme");
 		assert.equal(digestFiles(uiFiles), uiHashBefore, "UI source changed while generating client themes");
-		assert.equal(
-			digestFiles([semanticMapPath]),
-			semanticHashBefore,
-			"semantic token map changed while generating client themes",
-		);
-		assert.deepEqual(rawBrandDefinitionLeaks(), [], "raw brand primitive leaked outside brand.css");
+		assert.deepEqual(rawBrandDefinitionLeaks(), [], "raw brand primitive leaked outside globals.css");
 		const analysis = analyzeDesignTokens();
 		assert.deepEqual(analysis.failures, [], analysis.failures.join("\n"));
 		console.log(
-			`verify:clone-theme-proof: PASS (2 themes, ${changedPrimitives.length} changed primitives, UI and semantic hashes stable, no raw brand leaks)`,
+			`verify:clone-theme-proof: PASS (2 themes, ${changedPrimitives.length} changed primitives, UI source stable, no raw brand leaks)`,
 		);
 	} finally {
 		rmSync(fixture, { recursive: true, force: true });

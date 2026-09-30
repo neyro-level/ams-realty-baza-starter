@@ -29,6 +29,7 @@
 			{ "path": "src/app/robots.txt/route.ts", "type": "file" },
 			{ "path": "src/app/sitemap.ts", "type": "file" },
 			{ "path": "src/app/globals.css", "type": "file" },
+			{ "path": "src/project/brand.css", "type": "file" },
 			{ "path": "src/project/cache", "type": "tree" },
 			{ "path": "src/project/collections", "type": "tree" },
 			{ "path": "src/project/data-access", "type": "tree" },
@@ -99,7 +100,6 @@
 		"generated": [
 			{ "path": "src/app/(payload)/admin/importMap.d.ts", "type": "file" },
 			{ "path": "src/app/(payload)/admin/importMap.js", "type": "file" },
-			{ "path": "src/project/brand.css", "type": "file" },
 			{ "path": "src/project/copy.ts", "type": "file" },
 			{ "path": "src/project/font.generated.ts", "type": "file" },
 			{ "path": "src/project/payload-types.ts", "type": "file" },

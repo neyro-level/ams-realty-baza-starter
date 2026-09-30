@@ -4,7 +4,9 @@ import { renderBrandCss } from "./clone-preset.mjs";
 
 const root = resolve(process.cwd());
 const bootstrapPath = join(root, "docs", "CLIENT_BOOTSTRAP.json");
-const outputPath = join(root, "src", "project", "brand.css");
+const outputPath = join(root, "src", "app", "globals.css");
+const blockPattern =
+	/\/\* CLONE_BRAND_VALUES_BEGIN:[\s\S]*?\/\* CLONE_BRAND_VALUES_END \*\//;
 
 if (!existsSync(bootstrapPath)) {
 	throw new Error("Brand regeneration requires client docs/CLIENT_BOOTSTRAP.json input.");
@@ -16,15 +18,17 @@ if (!bootstrap.brand || typeof bootstrap.brand !== "object") {
 }
 
 const expected = renderBrandCss({ brand: bootstrap.brand });
+const currentOutput = readFileSync(outputPath, "utf8").replaceAll("\r\n", "\n");
+if (!blockPattern.test(currentOutput)) {
+	throw new Error("Generated globals brand block is missing.");
+}
 if (process.argv.slice(2).includes("--check")) {
-	if (!existsSync(outputPath)) {
-		throw new Error("Generated brand output is missing.");
+	const currentBlock = currentOutput.match(blockPattern)?.[0] ?? "";
+	if (currentBlock.trim() !== expected.trim()) {
+		throw new Error("Generated globals brand block is not reproducible from client input.");
 	}
-	if (readFileSync(outputPath, "utf8").replaceAll("\r\n", "\n") !== expected) {
-		throw new Error("Generated brand output is not reproducible from client input.");
-	}
-	console.log("regenerate-brand-css: existing output matches client input");
+	console.log("regenerate-brand-css: existing globals brand block matches client input");
 } else {
-	writeFileSync(outputPath, expected);
-	console.log("regenerate-brand-css: wrote deterministic brand output");
+	writeFileSync(outputPath, currentOutput.replace(blockPattern, expected.trim()));
+	console.log("regenerate-brand-css: wrote deterministic globals brand block");
 }

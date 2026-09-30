@@ -24,9 +24,10 @@ release.
   records имеют статус `closed`; `open=0`, `READY=0`, `in_progress=0`.
 - Approved Plan №12 и inventory неизменны и используются только как contract /
   evidence. Итоговый отчёт: `evidence/plan12/FINAL_REPORT.md`.
-- Approved ownership: brand primitives — `src/project/brand.css`, semantic и
-  component tokens — `src/app/globals.css`; starter update boundary —
-  `starter-owned.json` schema v2; clone input — preset schema v3.
+- Approved ownership: brand primitives, semantic и component tokens —
+  `src/app/globals.css`; `src/project/brand.css` is deprecated compatibility
+  only; starter update boundary — `starter-owned.json` schema v2; clone input —
+  preset schema v3.
 - Souz reference ограничен source-backed subset; universal geo coverage
   доказывается отдельной synthetic non-production fixture.
 - Поддерживать канонические документы и runtime без скрытого расширения scope.

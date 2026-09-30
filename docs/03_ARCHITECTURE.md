@@ -67,8 +67,8 @@ Major upgrade требует отдельного решения и targeted pro
   операцией без runtime dependency.
 - Final Audit Freeze owner decision `OD-FA-01` returns factual runtime
   design-system values to `src/app/globals.css`. Preset schema / clone intake
-  remains client-owned input; `src/project/brand.css` is transitional
-  compatibility only until EPIC-01 migrates generation into `globals.css`.
+  remains client-owned input; `src/project/brand.css` is deprecated
+  compatibility only and has no runtime design-value authority.
 - `src/project/indexing-policy.ts` и canonical resolver/Gate — authority для
   indexability. Tracking registry не участвует в content/canonical/cache и тем
   же списком формирует Yandex `Clean-param`.

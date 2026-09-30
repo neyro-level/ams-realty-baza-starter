@@ -307,7 +307,7 @@ export function compileCloneIntake(input) {
 			status: "ready",
 			logoPath: "/brand/logo.svg",
 			faviconPath: "/icon.svg",
-			tokenSource: "src/project/brand.css",
+			tokenSource: "src/app/globals.css",
 		},
 		brand: validateCloneBrand(structuredClone(input.brand)),
 		feed: { status: "ready", mode: "external-urls" },

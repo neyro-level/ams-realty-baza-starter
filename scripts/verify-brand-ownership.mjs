@@ -33,8 +33,20 @@ export function findRawBrandPrimitiveDefinitions(files) {
 }
 
 function block(selector) {
+	const generatedBlock =
+		globalsCss.match(
+			/\/\* CLONE_BRAND_VALUES_BEGIN:[\s\S]*?\/\* CLONE_BRAND_VALUES_END \*\//,
+		)?.[0] ?? "";
 	const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-	return brandCss.match(new RegExp(`${escaped}\\s*\\{([\\s\\S]*?)\\}`))?.[1] ?? "";
+	return generatedBlock.match(new RegExp(`${escaped}\\s*\\{([\\s\\S]*?)\\}`))?.[1] ?? "";
+}
+
+function generatedBrandBlock() {
+	return (
+		globalsCss.match(
+			/\/\* CLONE_BRAND_VALUES_BEGIN:[\s\S]*?\/\* CLONE_BRAND_VALUES_END \*\//,
+		)?.[0] ?? ""
+	);
 }
 
 function values(source) {
@@ -81,13 +93,20 @@ const rawBrandPrimitiveLeaks = findRawBrandPrimitiveDefinitions(
 			absolutePath: path,
 			path: relative(".", path).replaceAll("\\", "/"),
 		}))
-		.filter(({ path }) => path !== "src/project/brand.css")
+		.filter(({ path }) => path !== "src/app/globals.css")
 		.map(({ absolutePath, path }) => ({ path, source: readFileSync(absolutePath, "utf8") })),
 );
 assert.deepEqual(
 	rawBrandPrimitiveLeaks,
 	[],
-	"raw client brand primitives must be defined only in src/project/brand.css",
+	"raw client brand primitives must be defined only in src/app/globals.css",
+);
+assert.deepEqual(
+	findRawBrandPrimitiveDefinitions([
+		{ path: "src/project/brand.css", source: brandCss },
+	]),
+	[],
+	"src/project/brand.css must not define runtime brand primitives",
 );
 
 const current = values(block(":root"));
@@ -112,10 +131,15 @@ for (const theme of [current, proof]) {
 for (const key of ["--brand-accent", "--brand-accent-hover", "--brand-accent-soft"]) {
 	assert.notEqual(current.get(key), proof.get(key), `${key} must change in the blue proof theme`);
 }
-assert.ok(globalsCss.includes('@import "../project/brand.css"'));
+assert.ok(globalsCss.includes("CLONE_BRAND_VALUES_BEGIN"));
+assert.ok(globalsCss.includes("CLONE_BRAND_VALUES_END"));
+assert.equal(globalsCss.includes('@import "../project/brand.css"'), false);
 assert.equal(/rgba?\(\s*(?:138\s*,\s*21\s*,\s*21|158\s*,\s*28\s*,\s*28)/i.test(globalsCss), false);
-assert.equal(brandCss.includes("data-brand-proof"), false, "generated runtime brand CSS must not ship a verification theme");
-assert.equal(normalizeLineEndings(brandCss), renderBrandCss(starterBrandPreset));
+assert.equal(brandCss.includes("data-brand-proof"), false, "deprecated brand CSS must not ship a verification theme");
+assert.equal(
+	normalizeLineEndings(generatedBrandBlock()).trim(),
+	renderBrandCss(starterBrandPreset).trim(),
+);
 assert.equal(
 	normalizeLineEndings(readFileSync("src/project/font.generated.ts", "utf8")),
 	renderProjectFontConfig(starterBrandPreset),

@@ -229,6 +229,14 @@ const replaceLiteral = (source, pattern, replacement, label) => {
 		throw new Error(`site.config.ts ${label} owner is missing.`);
 	return source.replace(pattern, replacement);
 };
+const replaceGeneratedBrandValues = (source, generated) => {
+	const pattern =
+		/\/\* CLONE_BRAND_VALUES_BEGIN:[\s\S]*?\/\* CLONE_BRAND_VALUES_END \*\//;
+	if (!pattern.test(source)) {
+		throw new Error("globals.css clone brand values block is missing.");
+	}
+	return source.replace(pattern, generated.trim());
+};
 let siteConfig = config;
 siteConfig = replaceLiteral(
 	siteConfig,
@@ -237,6 +245,14 @@ siteConfig = replaceLiteral(
 	"projectKind",
 );
 writeFileSync(configPath, siteConfig);
+const globalsPath = join(root, "src", "app", "globals.css");
+writeFileSync(
+	globalsPath,
+	replaceGeneratedBrandValues(
+		readFileSync(globalsPath, "utf8"),
+		renderBrandCss(preset),
+	),
+);
 writeFileSync(
 	join(root, "src", "project", "site-profile.config.ts"),
 	renderSiteProfileConfig(preparedPreset),
@@ -252,10 +268,6 @@ writeFileSync(
 writeFileSync(
 	join(root, "src", "project", "seo", "template-inputs.ts"),
 	renderSeoTemplateInputs(preset),
-);
-writeFileSync(
-	join(root, "src", "project", "brand.css"),
-	renderBrandCss(preset),
 );
 writeFileSync(
 	join(root, "src", "project", "font.generated.ts"),
@@ -306,7 +318,7 @@ const generatedOutputs = [
 	"src/project/project-literals.json",
 	"src/project/copy.ts",
 	"src/project/seo/template-inputs.ts",
-	"src/project/brand.css",
+	"src/app/globals.css",
 	"src/project/font.generated.ts",
 	"src/project/client-readiness.config.ts",
 	"docs/CLIENT_BOOTSTRAP.json",

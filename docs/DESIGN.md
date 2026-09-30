@@ -22,8 +22,8 @@ until an explicit owner-approved upstream UI Core file replaces it.
 Owner decision `OD-FA-01` supersedes the Plan 12 runtime split:
 `src/app/globals.css` is the runtime factual design-value owner. Clone
 preset/intake remains the client-owned input for generated project values.
-`src/project/brand.css` is transitional compatibility only until EPIC-01 moves
-generation into `globals.css`; after migration it has no runtime authority.
+`src/project/brand.css` is deprecated compatibility only and has no runtime
+design-value authority.
 
 Brand primitives генерируются из approved preset schema v3 при подготовке
 snapshot clone. `starter:upgrade` не превращает client brand в starter-owned
@@ -36,7 +36,7 @@ snapshot clone. `starter:upgrade` не превращает client brand в star
 
 | Class | Meaning |
 |---|---|
-| BRAND | Transitional `--brand-*` compatibility values generated from clone preset/intake until EPIC-01. They are consumed only by `globals.css`; after migration this class must disappear from runtime authority. |
+| BRAND | `--brand-*` values generated from clone preset/intake into the marked runtime block in `globals.css`. Components consume semantic/component tokens, not brand primitives directly. |
 | CORE | Required runtime tokens enforced by `scripts/quality/design-tokens.mjs` (`--background`, section rhythm, radii, motion, fonts). |
 | SHADCN | `@theme inline` mappings that expose CORE/PROJECT values to Tailwind utilities. |
 | PROJECT | Starter/Atlas page tokens with live `var(--*)` usage in `packages/ui` or `src`, including live corporate prefixes `about-company`, `sale`, `new-building`. |
@@ -66,13 +66,13 @@ Reusable visual rhythm goes through tokens and `Section` / `Container` variants.
 
 ## Geometry vs design-values
 
-Runtime factual design values live in `globals.css`. Until EPIC-01 finishes the
-migration, `brand.css` may provide transitional generated compatibility values
-that are imported and consumed only by `globals.css`. Semantic/component colors,
-type sizes, weights, derived radii, shadows and durations remain in
-`globals.css`; accent shadows may derive from transitional `--brand-*` values
-through `color-mix()` during the migration. Neutral/effect raw RGB values follow
-the explicit guard allowlist. Component CSS consumes only semantic/component
+Runtime factual design values live in `globals.css`. Brand primitives are
+generated into the marked `CLONE_BRAND_VALUES` block in `globals.css`; the
+deprecated `brand.css` compatibility stub must not define runtime custom
+properties or be imported. Semantic/component colors, type sizes, weights,
+derived radii, shadows and durations remain in `globals.css`; accent shadows may
+derive from `--brand-*` values through `color-mix()`. Neutral/effect raw RGB
+values follow the explicit guard allowlist. Component CSS consumes only semantic/component
 variables. Repeated section spacing uses `--section-space-*` /
 `--site-section-space-desktop`.
 
@@ -99,7 +99,7 @@ sizes remain when collapsing them would cross that limit or alter composition.
 
 - Neutral/effect RGB bases outside brand primitives are limited by
   `neutralEffectRgbAllowlist` in `scripts/quality/design-tokens.mjs`; burgundy
-  accent/danger RGB is never allowlisted outside `brand.css`.
+  accent/danger RGB is never allowlisted outside the generated globals block.
 
 - Feed images Variant B (unoptimized + allowlist), see Media.
 - Atlas donor `home-page.css` удалён из live package source; starter public home

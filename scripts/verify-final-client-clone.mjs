@@ -275,7 +275,7 @@ for (const entry of selectedMatrix) {
 			"src/project/client-readiness.config.ts",
 			"src/app/icon.svg",
 			"src/app/layout.tsx",
-			"src/project/brand.css",
+			"src/app/globals.css",
 			"src/project/font.generated.ts",
 			"src/project/project-literals.json",
 			"src/project/seo/templates.ts",
@@ -421,7 +421,7 @@ for (const entry of selectedMatrix) {
 						status: "ready",
 						logoPath: "/brand/logo.svg",
 						faviconPath: "/icon.svg",
-						tokenSource: "src/project/brand.css",
+						tokenSource: "src/app/globals.css",
 					},
 					feed:
 						entry.preset === "NEWBUILD_FIRST"
