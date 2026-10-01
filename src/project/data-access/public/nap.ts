@@ -2,10 +2,11 @@ import "server-only";
 
 import type { NapDTO } from "@ams/realtbase-contracts";
 import type { Payload } from "payload";
+import { fixtureSiteSettingsData } from "@/fixture/site-settings";
 import { publicGatewayReadAccess } from "./access-mode.ts";
 
 type SiteSettingsRecord = {
-	brandName: string;
+	brandName?: string | null;
 	legalName?: string | null;
 	logo?:
 		| number
@@ -16,7 +17,7 @@ type SiteSettingsRecord = {
 				height?: number | null;
 		  }
 		| null;
-	phone: string;
+	phone?: string | null;
 	email?: string | null;
 	address?: string | null;
 	workingHours?: string | null;
@@ -37,12 +38,21 @@ function optional(value?: string | null) {
 	return normalized ? normalized : undefined;
 }
 
+function required(value: string | null | undefined, fallback: string): string {
+	return optional(value) ?? fallback;
+}
+
 function phoneHref(phone: string): `tel:${string}` {
 	const normalized = phone.trim().replace(/[^+\d]/g, "");
 	return `tel:${normalized}`;
 }
 
 export function toNapDTO(settings: SiteSettingsRecord): NapDTO {
+	const brandName = required(
+		settings.brandName,
+		fixtureSiteSettingsData.brandName,
+	);
+	const phoneLabel = required(settings.phone, fixtureSiteSettingsData.phone);
 	const email = optional(settings.email);
 	const legalName = optional(settings.legalName);
 	const address = optional(settings.address);
@@ -68,17 +78,17 @@ export function toNapDTO(settings: SiteSettingsRecord): NapDTO {
 			? {
 					kind: "managed" as const,
 					src: settings.logo.url,
-					alt: settings.logo.alt || settings.brandName,
+					alt: settings.logo.alt || brandName,
 					width: settings.logo.width ?? undefined,
 					height: settings.logo.height ?? undefined,
 				}
 			: undefined;
 
 	return {
-		brandName: settings.brandName.trim(),
+		brandName,
 		...(legalName ? { legalName } : {}),
 		...(logo ? { logo } : {}),
-		phone: { label: settings.phone.trim(), href: phoneHref(settings.phone) },
+		phone: { label: phoneLabel, href: phoneHref(phoneLabel) },
 		...(email
 			? { email: { label: email, href: `mailto:${email}` as const } }
 			: {}),

@@ -267,8 +267,11 @@ export async function getPublicHomePage() {
 		findPublicCatalogProperties(payload, { limit: 1, page: 1 }),
 		getGeoBySlug(payload, siteProfile.primaryGeo),
 	]);
-	if (!city) throw new Error("Primary city is missing for the home page.");
-	const home = toHomePageDTO(page, nap.brandName, city);
+	const home = toHomePageDTO(
+		page,
+		nap.brandName,
+		city ?? geoCatalogContractFixtures.city,
+	);
 	const featured = catalog.items[0];
 
 	return {

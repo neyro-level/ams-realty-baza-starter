@@ -30,6 +30,12 @@ const sourceArchive = join(proofRoot, "source.tar");
 const releaseManifestPath = join(proofRoot, "release-manifest.json");
 const evidencePath = join(proofRoot, "old-client-evidence.json");
 const upgradeArchivePath = join(proofRoot, "upgrade-archive.json");
+const brandBlockPattern =
+	/\/\* CLONE_BRAND_VALUES_BEGIN:[\s\S]*?\/\* CLONE_BRAND_VALUES_END \*\//;
+const legacyBrandImportPattern =
+	/^@import\s+["']\.\.\/project\/brand\.css["'];\r?\n?/m;
+const uiStylesImportPattern =
+	/^@import\s+["']@ams\/realtbase-ui\/styles\.css["'];\r?\n?/m;
 
 function git(cwd, args) {
 	return execFileSync("git", args, {
@@ -73,17 +79,46 @@ function requireClientFile(relativePath) {
 	return path;
 }
 
-function runClientPnpm(args, extraEnv = {}) {
-	const pnpmEntrypoint = process.env.npm_execpath;
-	assert.ok(
-		pnpmEntrypoint && existsSync(pnpmEntrypoint),
-		"pnpm entrypoint is required for post-upgrade verification",
+function renderNextGlobals(globalsSource, brandBlock) {
+	const source = globalsSource.toString("utf8").replaceAll("\r\n", "\n");
+	const block = brandBlock.toString("utf8").trim();
+	if (brandBlockPattern.test(source)) {
+		return Buffer.from(source.replace(brandBlockPattern, block));
+	}
+	if (legacyBrandImportPattern.test(source)) {
+		return Buffer.from(source.replace(legacyBrandImportPattern, `${block}\n`));
+	}
+	assert.match(
+		source,
+		uiStylesImportPattern,
+		"client globals.css brand block, legacy import, or UI styles import is missing",
 	);
-	return execFileSync(process.execPath, [pnpmEntrypoint, ...args], {
+	return Buffer.from(
+		source.replace(uiStylesImportPattern, (match) => `${match}${block}\n`),
+	);
+}
+
+function clientPnpmSpecifier() {
+	const packageJson = JSON.parse(
+		readFileSync(join(sourceRoot, "package.json"), "utf8"),
+	);
+	const packageManager = String(packageJson.packageManager ?? "");
+	const match = /^pnpm@([^+\s]+)(?:\+.*)?$/.exec(packageManager);
+	assert.ok(
+		match,
+		`client packageManager must pin pnpm, got ${packageManager || "<missing>"}`,
+	);
+	return `pnpm@${match[1]}`;
+}
+
+function runClientPnpm(args, extraEnv = {}) {
+	const corepackCommand = process.platform === "win32" ? "corepack.cmd" : "corepack";
+	return execFileSync(corepackCommand, [clientPnpmSpecifier(), ...args], {
 		cwd: sourceRoot,
 		encoding: "utf8",
 		env: { ...process.env, CI: "1", ...extraEnv },
 		maxBuffer: 64 * 1024 * 1024,
+		shell: process.platform === "win32",
 		stdio: ["ignore", "pipe", "pipe"],
 	});
 }
@@ -248,6 +283,7 @@ try {
 	);
 	for (const relativePath of [
 		"src/project/brand.css",
+		"src/app/globals.css",
 		"src/project/site-profile.config.ts",
 		"src/project/copy.ts",
 		"src/project/legal.config.ts",
@@ -362,6 +398,8 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 				existsSync(join(root, path)) &&
 				(existsSync(join(sourceRoot, path)) || !starterVersion.hashes[path]),
 		);
+	const deletedUpgradePaths = ["scripts/verify-clone-runtime-matrix.mjs"];
+	const regeneratedUpgradePaths = [];
 	const requiredDeltaPaths = [
 		...new Set([
 			...changedPlatformPaths,
@@ -374,10 +412,15 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 			"src/core/seo/final-robots.ts",
 			"src/core/seo/tracking-query-params.ts",
 			"src/project/seo/templates.ts",
+			"src/project/env.ts",
 			"src/project/url-grammar.ts",
+			"docs/CLONE_PRESET.example.json",
+			"docs/CLONE_PRESET.souz.example.json",
+			"docs/CORE_5_5_COMPLIANCE_MATRIX.md",
 			"next.config.ts",
 			"package.json",
 			"pnpm-lock.yaml",
+			"pnpm-workspace.yaml",
 			"src/app/globals.css",
 			"packages/ui/src/styles.css",
 			"packages/ui/src/styles/home-articles.css",
@@ -393,7 +436,13 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 			"scripts/verify-starter-fixture.ts",
 			"scripts/starter-upgrade.mjs",
 		]),
-	].sort();
+	]
+		.filter(
+			(path) =>
+				!deletedUpgradePaths.includes(path) &&
+				!regeneratedUpgradePaths.includes(path),
+		)
+		.sort();
 	const entries = requiredDeltaPaths.map((path) => {
 		if (path === collectionPath) return archiveEntry(path, upgradedCollection);
 		if (path === migrationPath) return archiveEntry(path, migrationSource);
@@ -418,10 +467,9 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 				sha256(readFileSync(join(sourceRoot, entry.path))),
 			]),
 	);
-	const previousBrand = readFileSync(
-		requireClientFile("src/project/brand.css"),
-	);
-	const nextBrand = execFileSync(
+	const previousGlobals = readFileSync(requireClientFile("src/app/globals.css"));
+	const templateGlobals = committedFile("src/app/globals.css");
+	const nextBrandBlock = execFileSync(
 		process.execPath,
 		[
 			"--experimental-strip-types",
@@ -439,13 +487,14 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 			stdio: ["ignore", "pipe", "pipe"],
 		},
 	);
+	const nextGlobals = renderNextGlobals(templateGlobals, nextBrandBlock);
 	const upgradeArchive = {
 		schemaVersion: 1,
 		from: { tag: fixtureTag, sha: preFixSha },
 		tag: targetTag,
 		sha: targetSha,
 		entries,
-		deletes: ["scripts/verify-clone-runtime-matrix.mjs"],
+		deletes: deletedUpgradePaths,
 		adopt,
 		migrationOwners: {
 			[migrationPath]: [collectionPath],
@@ -476,11 +525,13 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 			steps: [
 				{
 					script: "scripts/regenerate-brand-css.mjs",
+					allowTemplateContent: true,
 					verifyBeforeRegeneration: true,
+					removeOutputs: ["src/project/brand.css"],
 					previousOutputs: {
-						"src/project/brand.css": sha256(previousBrand),
+						"src/app/globals.css": sha256(previousGlobals),
 					},
-					outputs: { "src/project/brand.css": sha256(nextBrand) },
+					outputs: { "src/app/globals.css": sha256(nextGlobals) },
 				},
 			],
 		},
@@ -611,7 +662,7 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 		rmSync(proofRoot, { recursive: true, force: true });
 		process.exit(0);
 	}
-	const generatedPath = "src/project/brand.css";
+	const generatedPath = "src/app/globals.css";
 	const generatedTarget = requireClientFile(generatedPath);
 	const generatedOriginal = readFileSync(generatedTarget);
 	const generatedDrift = Buffer.from("/* manual generated-file drift */\n");
@@ -621,7 +672,7 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 	assert.equal(driftResult.stdout, "");
 	assert.match(
 		driftResult.stderr,
-		/Generated output has drifted before regeneration: src\/project\/brand\.css\./,
+		/Generated output has drifted before regeneration: src\/app\/globals\.css\./,
 	);
 	assert.deepEqual(readFileSync(generatedTarget), generatedDrift);
 	assert.deepEqual(
@@ -662,8 +713,8 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 		assert.deepEqual(readFileSync(requireClientFile(path)), expected, path);
 	}
 	assert.deepEqual(
-		readFileSync(requireClientFile("src/project/brand.css")),
-		nextBrand,
+		readFileSync(requireClientFile("src/app/globals.css")),
+		nextGlobals,
 	);
 	assert.equal(
 		readJson(requireClientFile("docs/CLIENT_BOOTSTRAP.json")).brand.accent,
@@ -683,6 +734,7 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 			entry.path,
 		);
 	}
+	const upgradedLockHash = sha256(readFileSync(requireClientFile("pnpm-lock.yaml")));
 	const upgradedVersion = readJson(requireClientFile(".starter-version"));
 	assert.equal(upgradedVersion.tag, targetTag);
 	assert.equal(upgradedVersion.sha, targetSha);
@@ -691,6 +743,9 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 		...validatedUpgrade.hashes,
 	};
 	delete expectedUpgradedHashes["scripts/verify-clone-runtime-matrix.mjs"];
+	for (const [path, hash] of validatedUpgrade.regenerated) {
+		expectedUpgradedHashes[path] = hash;
+	}
 	assert.deepEqual(upgradedVersion.hashes, expectedUpgradedHashes);
 	assert.equal(
 		existsSync(join(sourceRoot, "scripts", "verify-clone-runtime-matrix.mjs")),
@@ -762,8 +817,8 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 		runClientPnpm(args, checkEnv);
 	}
 	assert.equal(
-		git(sourceRoot, ["status", "--porcelain", "--", "pnpm-lock.yaml"]),
-		"",
+		sha256(readFileSync(requireClientFile("pnpm-lock.yaml"))),
+		upgradedLockHash,
 		"frozen install and verification must not rewrite the upgraded lockfile",
 	);
 
@@ -795,7 +850,7 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
 			(args) => `pnpm ${args.join(" ")}`,
 		),
 		clientProof: {
-			brand: "src/project/brand.css",
+			brand: "src/app/globals.css",
 			siteProfile: "src/project/site-profile.config.ts",
 			seoRegistry: "docs/seo/SEO_REGISTRY_SEED.csv",
 			copy: "src/project/copy.ts",

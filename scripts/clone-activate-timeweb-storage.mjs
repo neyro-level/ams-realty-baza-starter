@@ -62,10 +62,36 @@ function ensureS3EnvSchema(source) {
 function ensureS3RuntimeRequirements(source) {
 	if (
 		source.includes("function runtimeStorageKeys()") &&
-		source.includes('clientReadinessConfig.mediaStorage === "timeweb-s3"') &&
+		source.includes('clientMediaStorage === "timeweb-s3"') &&
 		source.includes('"S3_SECRET_ACCESS_KEY"')
 	) {
 		return source;
+	}
+	if (
+		source.includes("function runtimeStorageKeys()") &&
+		source.includes('clientReadinessConfig.mediaStorage === "timeweb-s3"') &&
+		source.includes('"S3_SECRET_ACCESS_KEY"')
+	) {
+		let migrated = source;
+		if (!migrated.includes("const clientMediaStorage = clientReadinessConfig.mediaStorage as")) {
+			migrated = replaceOnce(
+				migrated,
+				"function runtimeStorageKeys(): string[] {",
+				[
+					"const clientMediaStorage = clientReadinessConfig.mediaStorage as",
+					'\t| "timeweb-s3"',
+					'\t| "approved-object-storage"',
+					"\t| null;",
+					"",
+					"function runtimeStorageKeys(): string[] {",
+				].join("\n"),
+				"client S3 media storage type guard",
+			);
+		}
+		return migrated.replace(
+			'clientReadinessConfig.mediaStorage === "timeweb-s3"',
+			'clientMediaStorage === "timeweb-s3"',
+		);
 	}
 
 	return replaceOnce(
@@ -101,10 +127,15 @@ function ensureS3RuntimeRequirements(source) {
 			'\t"S3_PREFIX",',
 			"];",
 			"",
+			"const clientMediaStorage = clientReadinessConfig.mediaStorage as",
+			'\t| "timeweb-s3"',
+			'\t| "approved-object-storage"',
+			"\t| null;",
+			"",
 			"function runtimeStorageKeys(): string[] {",
 			"\tif (",
 			'\t\t(siteConfig.projectKind as "starter-demo" | "client") === "client" &&',
-			'\t\tclientReadinessConfig.mediaStorage === "timeweb-s3"',
+			'\t\tclientMediaStorage === "timeweb-s3"',
 			"\t) {",
 			"\t\treturn timewebS3RuntimeKeys;",
 			"\t}",

@@ -117,10 +117,15 @@ const timewebS3RuntimeKeys = [
 	"S3_PREFIX",
 ];
 
+const clientMediaStorage = clientReadinessConfig.mediaStorage as
+	| "timeweb-s3"
+	| "approved-object-storage"
+	| null;
+
 function runtimeStorageKeys(): string[] {
 	if (
 		(siteConfig.projectKind as "starter-demo" | "client") === "client" &&
-		clientReadinessConfig.mediaStorage === "timeweb-s3"
+		clientMediaStorage === "timeweb-s3"
 	) {
 		return timewebS3RuntimeKeys;
 	}

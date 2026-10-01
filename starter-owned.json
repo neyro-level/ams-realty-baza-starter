@@ -13,7 +13,8 @@
 		{ "path": "next.config.ts", "type": "file" },
 		{ "path": "payload.config.ts", "type": "file" },
 		{ "path": "package.json", "type": "file" },
-		{ "path": "pnpm-lock.yaml", "type": "file" }
+		{ "path": "pnpm-lock.yaml", "type": "file" },
+		{ "path": "pnpm-workspace.yaml", "type": "file" }
 	],
 	"ownership": {
 		"platform": [
@@ -37,6 +38,7 @@
 			{ "path": "src/project/routing", "type": "tree" },
 			{ "path": "src/project/site-profile-presets.ts", "type": "file" },
 			{ "path": "src/project/site-profile.ts", "type": "file" },
+			{ "path": "src/project/env.ts", "type": "file" },
 			{ "path": "src/project/public-origin.ts", "type": "file" },
 			{ "path": "src/project/url-grammar.ts", "type": "file" },
 			{ "path": "src/project/seo", "type": "tree", "except": ["src/project/seo/registry-seed.ts"] },
@@ -50,6 +52,10 @@
 			{ "path": "next.config.ts", "type": "file" },
 			{ "path": "payload.config.ts", "type": "file" },
 			{ "path": "pnpm-lock.yaml", "type": "file" },
+			{ "path": "pnpm-workspace.yaml", "type": "file" },
+			{ "path": "docs/CLONE_PRESET.example.json", "type": "file" },
+			{ "path": "docs/CLONE_PRESET.souz.example.json", "type": "file" },
+			{ "path": "docs/CORE_5_5_COMPLIANCE_MATRIX.md", "type": "file" },
 			{ "path": "docs/CLONE_ONBOARDING.md", "type": "file" },
 			{ "path": "docs/UPSTREAM_CANDIDATES.md", "type": "file" },
 			{ "path": "docs/platform", "type": "tree" },
@@ -83,6 +89,7 @@
 					"src/project/routing",
 					"src/project/site-profile-presets.ts",
 					"src/project/site-profile.ts",
+					"src/project/env.ts",
 					"src/project/public-origin.ts",
 					"src/project/url-grammar.ts",
 					"src/project/seo",

@@ -221,6 +221,14 @@ export function validateUpgradeArchive(value) {
 				`Regeneration step ${index} verifyBeforeRegeneration must be a boolean.`,
 			);
 		}
+		if (
+			step.allowTemplateContent !== undefined &&
+			typeof step.allowTemplateContent !== "boolean"
+		) {
+			throw new Error(
+				`Regeneration step ${index} allowTemplateContent must be a boolean.`,
+			);
+		}
 		const previousOutputs = step.previousOutputs;
 		if (
 			previousOutputs !== undefined &&
@@ -232,6 +240,15 @@ export function validateUpgradeArchive(value) {
 				`Regeneration step ${index} previousOutputs must be an object.`,
 			);
 		}
+		const removeOutputs = step.removeOutputs ?? [];
+		if (
+			!Array.isArray(removeOutputs) ||
+			new Set(removeOutputs).size !== removeOutputs.length
+		) {
+			throw new Error(
+				`Regeneration step ${index} removeOutputs must be an array of unique paths.`,
+			);
+		}
 		for (const [outputPath, outputHash] of Object.entries(step.outputs)) {
 			const path = safeRelativePath(
 				outputPath,
@@ -240,7 +257,7 @@ export function validateUpgradeArchive(value) {
 			if (!/^[0-9a-f]{64}$/.test(outputHash)) {
 				throw new Error(`Regeneration output hash is invalid: ${path}.`);
 			}
-			if (contents.has(path)) {
+			if (contents.has(path) && step.allowTemplateContent !== true) {
 				throw new Error(
 					`Generated output must not be archived as a platform file: ${path}.`,
 				);
@@ -275,6 +292,17 @@ export function validateUpgradeArchive(value) {
 				throw new Error(
 					`Previous regeneration output hash is invalid: ${path}.`,
 				);
+		}
+		for (const outputPath of removeOutputs) {
+			const path = safeRelativePath(
+				outputPath,
+				`regeneration.steps[${index}].removeOutputs`,
+			);
+			if (Object.hasOwn(step.outputs, path)) {
+				throw new Error(
+					`Removed regeneration output is also declared as next output: ${path}.`,
+				);
+			}
 		}
 	}
 	const migrationPaths = [...contents.keys()].filter((path) =>
@@ -351,6 +379,10 @@ export function validateUpgradeArchive(value) {
 		adopted,
 		regeneration: regeneration.steps.map((step) => ({
 			script: step.script,
+			allowTemplateContent: step.allowTemplateContent === true,
+			removeOutputs: (step.removeOutputs ?? []).map((path) =>
+				safeRelativePath(path, "regeneration remove output"),
+			),
 			outputs: step.outputs,
 			previousOutputs: step.previousOutputs,
 			verifyBeforeRegeneration: step.verifyBeforeRegeneration === true,
@@ -608,6 +640,7 @@ export function runStarterUpgrade({
 	const compositePaths = new Set(next.compositePaths);
 	const nextVersionHashes = { ...previous.hashes, ...next.hashes };
 	for (const path of next.deleted) delete nextVersionHashes[path];
+	for (const [path, hash] of next.regenerated) nextVersionHashes[path] = hash;
 	if (
 		previous.tag === next.tag &&
 		previous.sha === next.sha &&
@@ -730,8 +763,11 @@ export function runStarterUpgrade({
 			throw new Error("Clone generated-output manifest is invalid.");
 		}
 		manifest.outputs["package.json"] = digest(Buffer.from(mergedPackage));
-		for (const [path, hash] of next.regenerated) {
-			if (Object.hasOwn(manifest.outputs, path)) {
+		for (const step of next.regeneration) {
+			for (const path of step.removeOutputs ?? []) {
+				delete manifest.outputs[path];
+			}
+			for (const [path, hash] of Object.entries(step.outputs)) {
 				manifest.outputs[path] = hash;
 			}
 		}

@@ -15,10 +15,10 @@ Git, migrations и runtime-конфигурация остаются факти�
 | Поле | Текущее значение | Доказательство |
 |---|---|---|
 | Canonical SourceCraft repository | `integrator-p/ams-realty-baza-starter` | `origin` |
-| Repository main SHA | `f60a3078d6df4db42af3b1851297be086c87d9ad` | SourceCraft `main` after EPIC-04 squash merge |
-| Accepted implementation SHA | `f60a3078d6df4db42af3b1851297be086c87d9ad` | Accepted `main` includes EPIC-00…04 delivery state |
-| Last fully verified SHA | `5ac3c3007a57f6e89d9d1757dde9114835903c6f` | SourceCraft `merge-risky` run `531`; tree-equivalent to accepted `main` after squash |
-| Final commercial-freeze candidate SHA | `NOT CREATED` | EPIC-06 final freeze gate has not run |
+| Repository main SHA | `3efc6844c0fe44301b604c2b2049aa45600f66d1` | SourceCraft `main` after EPIC-05 squash merge |
+| Accepted implementation SHA | `3efc6844c0fe44301b604c2b2049aa45600f66d1` | Accepted `main` includes EPIC-00…05 delivery state |
+| Last fully verified SHA | `c8ca568d9c047e4bcb503b58d50b20ed5ca48b4d` | EPIC-06 local `pnpm verify` PASS on exact candidate SHA; SourceCraft Gate pending |
+| Final commercial-freeze candidate SHA | `c8ca568d9c047e4bcb503b58d50b20ed5ca48b4d` | EPIC-06 local final freeze proof complete; SourceCraft PR/Gate/merge pending |
 | Plan №12 implementation checkpoint | `47afbde798c77d10725681e9401dee78e471d7d5` | SourceCraft PR `!191`; содержит все delivery PR `!182–!191` |
 | Current canonical branch | SourceCraft `main` at repository SHA above | Moving `main` is repository state, not an immutable released clone baseline |
 | GitHub mirror snapshot | `main@47afbde798c77d10725681e9401dee78e471d7d5`, public, one-way, `STALE` versus current SourceCraft main | Отдельная owner-команда `2026-09-30`; mirror sync requires separate owner command |
@@ -29,9 +29,9 @@ Git, migrations и runtime-конфигурация остаются факти�
 | Current immutable released starter tag | `NOT CREATED` | No current `starter-v2.MINOR.PATCH` release exists |
 | Released tag SHA | `NOT CREATED` | Release tag creation requires a separate owner release command |
 | Historical starter-freeze tag | `starter-freeze` → `ca1b884d43e808d17e1eb18b05bad70ea358dd1c` (`HISTORICAL`) | Historical SourceCraft tag refs; must not be used as current clone baseline |
-| Last SourceCraft Gate | `PASS`, `merge-risky`, run `531`, scope `ci-governance`, exact head `5ac3c3007a57f6e89d9d1757dde9114835903c6f` | SourceCraft CI run `531`; merged as accepted `main` `f60a3078d6df4db42af3b1851297be086c87d9ad` |
-| Clone matrix | `PASS` for five approved profiles and final client-clone guard | Plan №12 EPIC‑10 exact head `da7c4932da2f8a7d6a97eb337a12d4de70542e1e`; Gate run `512` |
-| Upgrade propagation proof | `PASS` on exact head `3888adc9b9c1561d1282d432d5fad50df7a62bdd` | Plan №12 EPIC‑08: immutable old-client fixture, conflict/generated-drift guards, non-empty PostgreSQL 18 migration, frozen install, client readiness and build |
+| Last SourceCraft Gate | `PASS`, `merge-risky`, run `531`, scope `ci-governance`, exact head `5ac3c3007a57f6e89d9d1757dde9114835903c6f` | Last SourceCraft Gate before EPIC-06; EPIC-06 SourceCraft Gate pending |
+| Clone matrix | `PASS` for five approved profiles and final client-clone guard | EPIC-06 `pnpm verify` on exact candidate `c8ca568d9c047e4bcb503b58d50b20ed5ca48b4d`; Docker runtime proof skipped because Docker daemon unavailable |
+| Upgrade propagation proof | `PASS` on exact candidate `c8ca568d9c047e4bcb503b58d50b20ed5ca48b4d` | Old-client fixture `950901f2`, manifest `894972ec0750`, source `f8a1f4d83e89`, upgrade `11ae28559ad9`; includes local PostgreSQL 18 migration-safety fixture |
 | Plan №12 execution | `EXECUTION_COMPLETE`; `103/103` closed, `0` open/READY/in-progress | Task Manager + `evidence/plan12/FINAL_REPORT.md` |
 | Open P0 | `0` known | `docs/04_BACKLOG.md` active blocker registry |
 | Open P1 | `0` known | `docs/04_BACKLOG.md` active blocker registry |
