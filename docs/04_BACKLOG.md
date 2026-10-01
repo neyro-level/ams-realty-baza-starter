@@ -35,6 +35,9 @@ release.
   рабочим потоком от актуального SourceCraft `main`.
 - Production не выпускался; demo-контур не считается подтверждением актуального
   release SHA.
+- Active blocker registry: `P0=0`; `P1=0`; `P2=0`. Это единственная активная
+  severity-сводка для `STARTER_RELEASE_STATE.md`; исторические plans/evidence
+  не являются текущим blocker registry.
 
 ## NEXT — только по команде владельца
 

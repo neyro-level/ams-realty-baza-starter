@@ -2,7 +2,7 @@
 
 Статус документа: `ACTIVE`
 
-Срез проверен: `2026-09-30`
+Срез проверен: `2026-10-01`
 
 Контур: reusable AMS Realty starter; SourceCraft — primary, GitHub — mirror-only.
 
@@ -15,30 +15,37 @@ Git, migrations и runtime-конфигурация остаются факти�
 | Поле | Текущее значение | Доказательство |
 |---|---|---|
 | Canonical SourceCraft repository | `integrator-p/ams-realty-baza-starter` | `origin` |
+| Repository main SHA | `f60a3078d6df4db42af3b1851297be086c87d9ad` | SourceCraft `main` after EPIC-04 squash merge |
+| Accepted implementation SHA | `f60a3078d6df4db42af3b1851297be086c87d9ad` | Accepted `main` includes EPIC-00…04 delivery state |
+| Last fully verified SHA | `5ac3c3007a57f6e89d9d1757dde9114835903c6f` | SourceCraft `merge-risky` run `531`; tree-equivalent to accepted `main` after squash |
+| Final commercial-freeze candidate SHA | `NOT CREATED` | EPIC-06 final freeze gate has not run |
 | Plan №12 implementation checkpoint | `47afbde798c77d10725681e9401dee78e471d7d5` | SourceCraft PR `!191`; содержит все delivery PR `!182–!191` |
-| Current canonical branch | SourceCraft `main`; exact SHA разрешается live и обязан содержать checkpoint выше | Не хранить самоссылочный SHA документационного merge как release identity |
-| GitHub mirror snapshot | `main@47afbde798c77d10725681e9401dee78e471d7d5`, public, one-way | Отдельная owner-команда `2026-09-30`; на момент проверки равен SourceCraft checkpoint |
+| Current canonical branch | SourceCraft `main` at repository SHA above | Moving `main` is repository state, not an immutable released clone baseline |
+| GitHub mirror snapshot | `main@47afbde798c77d10725681e9401dee78e471d7d5`, public, one-way, `STALE` versus current SourceCraft main | Отдельная owner-команда `2026-09-30`; mirror sync requires separate owner command |
 | AMS Realty Platform Core | `5.5` | `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` |
 | AMS UI Core | `v5.0` | Plan №12 v4 architecture header; `docs/DESIGN.md` acceptance matrix |
-| Runtime versions | Node `>=24.20.0 <25`; pnpm `11.5.1`; Next.js `16.3.5`; React `19.2.8`; Payload `3.90.1` | `package.json` and lockfile |
+| Runtime versions | Node `>=24.20.0 <25`; pnpm `11.28.2`; Next.js `16.3.8`; React `19.2.8`; Payload `3.90.2`; `@payloadcms/db-postgres` `3.90.2`; `@payloadcms/next` `3.90.2` | `package.json` and `pnpm-lock.yaml` |
 | Ownership manifest | `starter-owned.json`, `schemaVersion: 2` | committed manifest on accepted `main` |
-| Current released starter tag | `starter-freeze` → `ca1b884d43e808d17e1eb18b05bad70ea358dd1c` (`HISTORICAL`) | SourceCraft tag refs; no current `starter-v2.*` release exists |
-| Last exact-head Gate | `PASS`, `merge-risky`, run `512`, scope `dependency-runtime`, exact head `da7c4932da2f8a7d6a97eb337a12d4de70542e1e` | SourceCraft CI run `512`; merged as checkpoint `47afbde798c77d10725681e9401dee78e471d7d5` |
+| Current immutable released starter tag | `NOT CREATED` | No current `starter-v2.MINOR.PATCH` release exists |
+| Released tag SHA | `NOT CREATED` | Release tag creation requires a separate owner release command |
+| Historical starter-freeze tag | `starter-freeze` → `ca1b884d43e808d17e1eb18b05bad70ea358dd1c` (`HISTORICAL`) | Historical SourceCraft tag refs; must not be used as current clone baseline |
+| Last SourceCraft Gate | `PASS`, `merge-risky`, run `531`, scope `ci-governance`, exact head `5ac3c3007a57f6e89d9d1757dde9114835903c6f` | SourceCraft CI run `531`; merged as accepted `main` `f60a3078d6df4db42af3b1851297be086c87d9ad` |
 | Clone matrix | `PASS` for five approved profiles and final client-clone guard | Plan №12 EPIC‑10 exact head `da7c4932da2f8a7d6a97eb337a12d4de70542e1e`; Gate run `512` |
 | Upgrade propagation proof | `PASS` on exact head `3888adc9b9c1561d1282d432d5fad50df7a62bdd` | Plan №12 EPIC‑08: immutable old-client fixture, conflict/generated-drift guards, non-empty PostgreSQL 18 migration, frozen install, client readiness and build |
 | Plan №12 execution | `EXECUTION_COMPLETE`; `103/103` closed, `0` open/READY/in-progress | Task Manager + `evidence/plan12/FINAL_REPORT.md` |
-| Open P0 | `0` known | Plan №12 final reconciliation and Gate run `512` |
-| Open P1 | `0` known | Plan №12 final reconciliation and Gate run `512` |
-| Open P2 | `0` known | Plan №12 final reconciliation and Gate run `512` |
-| Production/live proof | `NOT RUN / NOT AUTHORIZED` for this candidate | Plan №12 excluded production and release tag; mirror sync is not live proof |
+| Open P0 | `0` known | `docs/04_BACKLOG.md` active blocker registry |
+| Open P1 | `0` known | `docs/04_BACKLOG.md` active blocker registry |
+| Open P2 | `0` known | `docs/04_BACKLOG.md` active blocker registry |
+| Production/live proof | `NOT RUN / NOT AUTHORIZED` for the current candidate | Production, release tag and live proof require separate owner command |
 
 ## Release boundary
 
-The Plan №12 implementation checkpoint is not an immutable commercial starter release. The
-historical `starter-freeze` tag must not be used as proof of the current
-candidate. A new tag must follow `starter-v2.MINOR.PATCH`, point to the final
-accepted SourceCraft `main`, and be created only by the separate owner-triggered
-post-implementation release gate after EPIC‑01…10 are closed and `P0=P1=0`.
+The Plan №12 implementation checkpoint and current moving SourceCraft `main` are
+not immutable commercial starter releases. The historical `starter-freeze` tag
+must not be used as proof of the current candidate. A new tag must follow
+`starter-v2.MINOR.PATCH`, point to the final accepted SourceCraft `main`, and be
+created only by the separate owner-triggered post-implementation release gate
+after the approved freeze graph is closed and `P0=P1=0`.
 
 Client project plans must pin both the immutable released starter tag and its
 exact SourceCraft SHA. A moving `main` is not an accepted clone baseline.

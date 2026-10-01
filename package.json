@@ -54,6 +54,7 @@
 		"verify:integration:required": "node scripts/verify-integration-required.mjs",
 		"verify:merge-standard": "pnpm verify:daily && pnpm verify:s12-guards",
 		"verify:merge-risky": "node scripts/verify-merge-risky.mjs",
+		"verify:release-state": "node scripts/verify-release-state.mjs",
 		"verify:clone-readiness": "node scripts/verify-clone-readiness.mjs && node --experimental-strip-types scripts/verify-clone-init.mjs && node scripts/verify-clone-prepare.mjs",
 		"verify:clone-prepare": "node --experimental-strip-types scripts/verify-clone-prepare.mjs",
 		"verify:starter-ownership": "node scripts/verify-starter-ownership.mjs",

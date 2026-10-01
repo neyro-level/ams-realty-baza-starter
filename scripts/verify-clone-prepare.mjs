@@ -150,6 +150,10 @@ try {
 		"docs/proofs",
 		"docs/orchestration",
 		"docs/research",
+		"docs/evidence/plan10",
+		"docs/evidence/plan11",
+		"docs/evidence/plan12",
+		"docs/evidence/final-audit-freeze",
 		"deploy/compose",
 		"deploy/nginx",
 		"scripts",
@@ -197,6 +201,13 @@ try {
 		"docs/orchestration/a.json",
 		"docs/research/ATLAS_BASELINE.md",
 		"docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md",
+		"docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md",
+		"docs/AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md",
+		"docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md",
+		"docs/evidence/plan10/FINAL_REPORT.md",
+		"docs/evidence/plan11/FINAL_REPORT.md",
+		"docs/evidence/plan12/FINAL_REPORT.md",
+		"docs/evidence/final-audit-freeze/EPIC-02_DEPENDENCY_BASELINE.md",
 		"deploy/compose/start-baza.compose.yml",
 		"deploy/nginx/start-baza.ams24.ru.conf",
 		"scripts/verify-atlas-css-parity.mjs",
@@ -587,11 +598,30 @@ try {
 		]),
 	);
 	assert.ok(!existsSync(join(fixture, "docs/legacy")));
+	assert.ok(!existsSync(join(fixture, "docs/proofs")));
+	assert.ok(!existsSync(join(fixture, "docs/orchestration")));
+	assert.ok(!existsSync(join(fixture, "docs/evidence/plan10")));
+	assert.ok(!existsSync(join(fixture, "docs/evidence/plan11")));
+	assert.ok(!existsSync(join(fixture, "docs/evidence/plan12")));
+	assert.ok(!existsSync(join(fixture, "docs/evidence/final-audit-freeze")));
 	assert.ok(
 		!existsSync(
 			join(fixture, "docs/AMS_MASTER_PLAN_8_GEO_CATALOG_PLATFORM.md"),
 		),
 	);
+	assert.ok(
+		!existsSync(join(fixture, "docs/AMS_MASTER_PLAN_10_CLONE_READY_2_1.md")),
+	);
+	assert.ok(
+		!existsSync(join(fixture, "docs/AMS_MASTER_PLAN_11_CLONE_FACTORY_2_2.md")),
+	);
+	assert.ok(
+		!existsSync(
+			join(fixture, "docs/AMS_REALTY_BAZA_STARTER_FINAL_COMMERCIAL_FREEZE_MASTER_PLAN_V2_0.md"),
+		),
+	);
+	assert.ok(!existsSync(join(fixture, "deploy/compose/start-baza.compose.yml")));
+	assert.ok(!existsSync(join(fixture, "deploy/nginx/start-baza.ams24.ru.conf")));
 	assert.match(
 		readFileSync(join(fixture, "src/project/site.config.ts"), "utf8"),
 		/projectKind: "client"/,
