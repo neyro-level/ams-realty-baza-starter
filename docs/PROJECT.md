@@ -2,13 +2,13 @@
 
 Статус: `Demo / REALTY_BASE`. Текущий starter runtime: local PostgreSQL +
 `MEDIA_DIR` на AMS Server. Он проверяет шаблон, но не задаёт production-топологию
-клиентского клона. Закупка клиентской инфраструктуры **не входит в этот план**.
+клиентского клона. Закупка клиентской инфраструктуры **не входит в текущий
+starter scope**.
 
-Планы №8–12 исполнены и являются history/evidence; активного implementation
-source нет. Точные checkpoint, release tag, последний Gate, clone matrix,
-upgrade proof и live status читаются только из
-`docs/STARTER_RELEASE_STATE.md`. GitHub mirror, новый tag и production остаются
-отдельными owner actions и не выводятся из факта merge.
+Активного implementation source нет. Release tag, runtime versions и live
+status читаются только из `docs/STARTER_RELEASE_STATE.md`. GitHub mirror, новый
+tag и production остаются отдельными owner actions и не выводятся из факта
+merge.
 
 ## Зафиксировано
 
@@ -73,10 +73,7 @@ upgrade proof и live status читаются только из
 | Client fixture boundary | `projectKind=client` never falls back to starter demo properties when Payload data is absent; empty client data produces an empty/not-found runtime result |
 | Clone topology | `clone:prepare` is storage-neutral; Timeweb S3 activation remains a separate explicit `clone:activate-timeweb-storage` decision |
 | Development model | Одна `developments` entity с `kind = residential_complex | cottage_village` и strict kind-specific validation |
-| Plan 8 delivery | `EXECUTION_COMPLETE`; production и release tag остаются отдельными owner actions; repository mirror — отдельная операционная синхронизация |
-| Plan 9 delivery | S0-S14 `EXECUTION_COMPLETE`; accepted implementation baseline `5ff1e4ec7b572bab72ebc8cfa5a9af7597009188` is contained in current SourceCraft `main`; S15 excluded |
-| Release tag | Текущий released tag и следующий target не выводятся из plan history; authority — `STARTER_RELEASE_STATE.md`, создание нового `starter-v2.MINOR.PATCH` требует отдельной owner release command |
-| Plan 10 delivery | `EXECUTION_COMPLETE`; 22/22 tasks closed through PR 174/175/176; canonical implementation merge `c08ea05721d434670885ad45b0f473f2642a155c`. Production, tag and actual live proof were not authorized by plan execution |
+| Release tag | Authority — `STARTER_RELEASE_STATE.md`; создание нового `starter-v2.MINOR.PATCH` требует отдельной owner release command |
 
 ## Optional modules
 
@@ -93,7 +90,7 @@ runtime code or collections by itself.
 | `agents` | `disabled` | `docs/modules/agents.md` |
 <!-- MODULE_GOVERNANCE_END -->
 
-Next.js `16.3.5` edge: intentional canonical
+Next.js `16.3.8` edge: intentional canonical
 [`src/proxy.ts`](https://nextjs.org/docs/16/app/api-reference/file-conventions/proxy)
 with `export function proxy`; `src/middleware.ts` is forbidden. Anonymous
 `/api/{collection}` for deny-list and system-only slugs returns JSON

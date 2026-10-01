@@ -1,6 +1,6 @@
 # ADR D-09-02 — CSV owner of the SEO Registry
 
-Status: accepted by approved Plan 9 v5.
+Status: accepted.
 
 ## Decision
 

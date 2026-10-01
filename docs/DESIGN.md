@@ -19,7 +19,6 @@ Anti-goals: новый visual language без owner approval; вторая primi
 This document is the repository-owned UI Core v5.0 authority for the starter
 until an explicit owner-approved upstream UI Core file replaces it.
 
-Owner decision `OD-FA-01` supersedes the Plan 12 runtime split:
 `src/app/globals.css` is the runtime factual design-value owner. Clone
 preset/intake remains the client-owned input for generated project values.
 `src/project/brand.css` is deprecated compatibility only and has no runtime
@@ -40,7 +39,7 @@ snapshot clone. `starter:upgrade` не превращает client brand в star
 | CORE | Required runtime tokens enforced by `scripts/quality/design-tokens.mjs` (`--background`, section rhythm, radii, motion, fonts). |
 | SHADCN | `@theme inline` mappings that expose CORE/PROJECT values to Tailwind utilities. |
 | PROJECT | Starter/Atlas page tokens with live `var(--*)` usage in `packages/ui` or `src`, including live corporate prefixes `about-company`, `sale`, `new-building`. |
-| MODULE-RESERVED | None in this starter. Unused future-module prefixes without a `docs/modules/` contract were removed in EPIC-19. Journal DTO remains contract-only in `packages/contracts` without unused CSS tokens. |
+| MODULE-RESERVED | None in this starter. Unused future-module prefixes without a `docs/modules/` contract are not reserved. Journal DTO remains contract-only in `packages/contracts` without unused CSS tokens. |
 | DEAD | No `var(--token)` and not a `@theme` key and not MODULE-RESERVED. Guard requires count = 0. |
 
 ACTIVE = CORE ∪ SHADCN ∪ PROJECT. Documented RESERVED is not dead.
@@ -104,15 +103,16 @@ sizes remain when collapsing them would cross that limit or alter composition.
 - Feed images Variant B (unoptimized + allowlist), see Media.
 - Atlas donor `home-page.css` удалён из live package source; starter public home
   composes domain-owned Tailwind/shadcn views.
-- Visual deviations vs Atlas donor: simpler starter shell/cards (REPORT ONLY after EPIC 8.3). Not a silent redesign.
+- Visual deviations vs Atlas donor: simpler starter shell/cards are report-only
+  unless owner approves a redesign.
 
 ## Representative pages and viewports
 
 Pages: `/`, `/primorsk/kvartiry/`, `/novostroyki/zhk-severnyy-bereg/`, `/uslugi/`.
 Viewports: `390×844`, `768×1024`, `1280×900`, `1440×1000`.
-Proof artifacts: `docs/evidence/plan9/S14_UI_CORE_V5_EVIDENCE.md` and
-`docs/evidence/plan9/S14_UI_CORE_V5_BROWSER_MATRIX.json`; bulk PNG stays
-outside the clone.
+Browser proof for future UI changes must cover the representative pages and
+viewports above. Bulk PNG artifacts stay outside the starter clone unless a
+specific owner-approved task requires checked-in visual fixtures.
 
 ### Canonical UI Core v5 acceptance matrix
 
@@ -173,4 +173,10 @@ System family claim.
 
 UI использует storage-neutral `MediaDTO`. Для изображений задаются stable aspect ratio, `sizes`, lazy loading ниже critical area и fallback. Target: mobile LCP не хуже 2.5 s, CLS не выше 0.1. Motion по умолчанию — CSS/Tailwind transform/opacity с `prefers-reduced-motion`; icons — Lucide.
 
-Feed image rendering (EPIC 8.7, measured for one-server starter): **Variant B**. External feed photos stay `unoptimized` with exact `EXTERNAL_IMAGE_HOSTS` allowlist, `sizes`, explicit aspect ratio, lazy below fold and `fetchPriority=high` on the LCP candidate. Local `/media` CMS files may use Next optimizer. Next `images.remotePatterns` are generated from the same `parseAllowedImageHosts` source as ingest validation; wildcards are forbidden. Safe outbound image fetch, if added, must use `getApprovedImageOutboundHosts()`.
+Feed image rendering: **Variant B** for the one-server starter. External feed
+photos stay `unoptimized` with exact `EXTERNAL_IMAGE_HOSTS` allowlist, `sizes`,
+explicit aspect ratio, lazy below fold and `fetchPriority=high` on the LCP
+candidate. Local `/media` CMS files may use Next optimizer. Next
+`images.remotePatterns` are generated from the same `parseAllowedImageHosts`
+source as ingest validation; wildcards are forbidden. Safe outbound image fetch,
+if added, must use `getApprovedImageOutboundHosts()`.

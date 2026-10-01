@@ -4,15 +4,10 @@
 
 Дата: 2026-09-24
 
-Authority: `AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8`, v6, `APPROVED`, P8-12.
-
 ## Контекст
 
-Контракты Base были переведены P8-05 из frozen `1.0.0` в draft major
-`2.0.0`, чтобы добавить NAP без обхода guarded lifecycle. Geo-catalog требует
-закончить тот же major: зафиксировать географию, застройщиков, проекты,
-категорийные объекты, listings, SEO и breadcrumbs до реализации новых Gateway
-methods и UI views.
+Base contract `2.0.0` фиксирует geo-catalog presentation DTO: географию,
+застройщиков, проекты, категорийные объекты, listings, SEO и breadcrumbs.
 
 ## Решение
 
@@ -23,7 +18,7 @@ methods и UI views.
   `PageKeyDTO` передаётся в `buildUrl`; DTO хранит и key, и полученный href.
 - `PropertyCardDTO` получает стабильный `publicUrlId`, `pageKey` и
   discriminated `categoryDetails`. Неиспользуемая категория `other` удаляется:
-  persisted domain допускает только шесть категорий Plan 8.
+  persisted domain допускает только шесть утверждённых категорий.
 - Добавляются `RegionDTO`, `CityDTO`, `DistrictDTO`, `GeoHubDTO`,
   `DeveloperCardDTO/DeveloperDetailsDTO`,
   `DevelopmentCardDTO/DevelopmentDetailsDTO`, `SeoMetaDTO`, расширенные
@@ -35,8 +30,7 @@ methods и UI views.
 
 ## Границы
 
-- P8-12 не добавляет Public Gateway methods, новые UI views или route cutover:
-  это P8-13, P8-17 и P8-23A.
+- DTO не добавляют Public Gateway methods, новые UI views или route cutover.
 - DTO не импортируют Payload, Next.js, project config или database types.
 - Отсутствующие optional business values не вычисляются и не выдумываются.
 - Старый `/obekty/[slug]` не является canonical href v2. Canonical property URL
@@ -47,7 +41,7 @@ methods и UI views.
 Изменение намеренно breaking и поэтому оформлено major `2.0.0`. Все текущие
 consumers и fixtures мигрируются в одной волне. При красном consumer/fixture
 proof, несовпадении approved ADR или lock metadata контракт не замораживается;
-до merge откатывается вся волна P8-12, а не отдельные поля.
+до merge откатывается весь связанный contract change, а не отдельные поля.
 
 ## Проверка
 

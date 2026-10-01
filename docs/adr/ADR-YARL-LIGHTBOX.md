@@ -10,7 +10,8 @@
 
 ## Почему
 
-YARL уже подключён в `packages/ui/src/styles.css` и MediaGallery. Замена пакета была бы redesign вне EPIC-08.
+YARL уже подключён в `packages/ui/src/styles.css` и MediaGallery. Замена пакета
+была бы redesign и требует отдельного owner-approved UI scope.
 
 ## Последствия
 

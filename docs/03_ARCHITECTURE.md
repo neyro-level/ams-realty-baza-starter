@@ -12,11 +12,11 @@ Git platform=SOURCECRAFT_PRIMARY_GITHUB_MIRROR
 Secrets source=Secret Master / self-hosted Infisical
 ```
 
-Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Планы
-№8–12 исполнены и являются historical/evidence; активного execution source нет.
-Canonical checkpoint, tag, последний Gate и proof state принадлежат только
-`STARTER_RELEASE_STATE.md`. GitHub mirror, новый immutable tag и production —
-отдельные owner actions.
+Перед merge в `main` нужен один ручной exact-head SourceCraft Gate. Активного
+execution source нет: новые изменения начинаются с Task Contract и отдельного
+branch/worktree от актуального SourceCraft `main`. Текущий tag boundary, runtime
+versions и live-proof status принадлежат `STARTER_RELEASE_STATE.md`. GitHub
+mirror, новый immutable tag и production - отдельные owner actions.
 
 ## Delivery baseline
 
@@ -35,18 +35,15 @@ Canonical checkpoint, tag, последний Gate и proof state принадл
   PostgreSQL запускается только для первых трёх scope, build — только для
   `dependency-runtime`; каждый RISKY сначала выполняет STANDARD и затем только
   доказательство выбранного риска.
-- Исполненные планы применяли Gate к delivery batch/epic, а не повторно к
-  каждому task checkpoint: constituent tasks сохраняют evidence, но один
-  exact-head SHA, один PR и один Gate закрывают batch. Несовместимые risk scopes
-  в одном batch запрещены.
+- Один PR закрывается одним exact-head Gate. Несовместимые risk scopes в одном
+  batch запрещены.
 - Demo release contract уже требует clean exact `main`, immutable Docker image,
   migrations из того же image, один jobs owner, live health/smoke и сохранённый
   previous image/env rollback point. Текущий Dockerfile копирует весь `/app` и
   не использует standalone allowlist; release hardening остаётся отдельной
   RISKY-задачей до первого client production и не выполняется этим inventory.
-- Наблюдаемый SourceCraft tag `starter-freeze` остаётся историческим. Следующий
-  `starter-v2.MINOR.PATCH` выбирается только в отдельном release scope и не
-  создаётся Developer-планом.
+- Следующий `starter-v2.MINOR.PATCH` выбирается только в отдельном release
+  scope и не создаётся ordinary WORK-задачей.
 
 ## Stack и ownership
 
@@ -60,14 +57,13 @@ Canonical checkpoint, tag, последний Gate и proof state принадл
 Фактические версии всегда определяют `package.json`, lockfile и runtime files.
 Major upgrade требует отдельного решения и targeted proof.
 
-## Plan 12 hardened contracts
+## Hardened current contracts
 
 - `starter-owned.json` schema v2 определяет только обновляемый starter layer;
   clone остаётся snapshot exact tag+SHA, а upgrade — явной conflict-safe
   операцией без runtime dependency.
-- Final Audit Freeze owner decision `OD-FA-01` returns factual runtime
-  design-system values to `src/app/globals.css`. Preset schema / clone intake
-  remains client-owned input; `src/project/brand.css` is deprecated
+- Runtime design-system values live in `src/app/globals.css`. Preset schema /
+  clone intake remains client-owned input; `src/project/brand.css` is deprecated
   compatibility only and has no runtime design-value authority.
 - `src/project/indexing-policy.ts` и canonical resolver/Gate — authority для
   indexability. Tracking registry не участвует в content/canonical/cache и тем
@@ -88,7 +84,7 @@ Major upgrade требует отдельного решения и targeted pro
 URL/status/profile semantics и cutover invariants. `02_PRODUCT_STRUCTURE.md`
 показывает current runtime рядом с target grammar.
 
-После P8-23A canonical PageKey routes обслуживаются одним catch-all dispatcher;
+Canonical PageKey routes обслуживаются одним catch-all dispatcher;
 explicit static routes, Payload Admin/API и security proxy остаются отдельными
 framework boundaries. HTML и metadata используют один cached resolution result.
 Переход выполнен expand-first:
@@ -99,8 +95,8 @@ profile/grammar contracts
   -> frozen DTO + Public Gateway
   -> resolver + Content Gate + reusable UI
   -> discovery/lifecycle proof
-  -> atomic route cutover (P8-23A)
-  -> evidence-based cleanup (P8-23B)
+  -> route cutover
+  -> guarded cleanup
 ```
 
 Target dependency direction:
@@ -211,7 +207,7 @@ preset. Повторный запуск с тем же входом обязан
 development Excel readiness. Генерируемые владельцы —
 `src/project/site-profile.config.ts` и `docs/CLIENT_BOOTSTRAP.json`.
 
-Clone preparation удаляет только starter-specific evidence/demo deploy assets;
+Clone preparation удаляет только starter-specific demo/development artifacts;
 Core 5.5, `packages/**`, migrations, guards и общие security/data contracts
 сохраняются byte-for-byte. Storage topology не скрыта внутри preparation:
 `clone:activate-timeweb-storage` остаётся отдельным idempotent шагом после
@@ -354,7 +350,7 @@ catalog routes кэшируются только канонические `page`
 - static tasks: `dispatchDueFeeds`, `jobsJanitor`, `leadRetentionCleanup`,
   `catalogLifecycle`, `recoverLeadDeliveries`; programmatic tasks:
   `importFeed`, `deliverLead`, `submitIndexNow`;
-- `index-now` is programmatic and event-driven after the P8-23A cutover. Its jobs
+- `index-now` is programmatic and event-driven after the route cutover. Its jobs
   contain only event ID, same-origin URLs and attempt number; the runtime key is
   read only from environment and never enters a job payload or diagnostic output;
 - imports queue имеет `limit: 1`; один application runtime является jobs owner;
@@ -408,6 +404,5 @@ ADR: `docs/adr/ADR-LOCAL-STARTER-STORAGE.md`.
 
 Production starter release использует immutable artifact из clean `main`. Процедуры — `OPERATIONS.md`.
 
-Историческая спецификация: `legacy/architecture/AMS_PROJECT_ARCHITECTURE_v1.0.md`. Текущее
-project-specific состояние определяют этот документ, `PROJECT.md`, ADR и код;
-исторический файл не переписывается и не заменяет runtime truth.
+Текущее project-specific состояние определяют этот документ, `PROJECT.md`, ADR
+и код.

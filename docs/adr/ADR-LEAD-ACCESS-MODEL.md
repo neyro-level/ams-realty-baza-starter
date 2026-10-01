@@ -2,12 +2,11 @@
 
 Статус: Accepted
 Дата: 2026-09-21
-Контекст: Plan №7 / EPIC-06
+Контекст: current lead access model
 
 ## Решение
 
-Текущий AMS Realty Platform Core 5.5 имеет приоритет над legacy Plan №5.
-Каноническая матрица:
+Текущий AMS Realty Platform Core 5.5 задаёт каноническую матрицу:
 
 | Capability | anonymous | editor | admin | owner | named system path |
 |---|---:|---:|---:|---:|---:|
@@ -31,7 +30,7 @@ delivery state transition через `owner-lead-delivery-retry` System Gateway.
 
 - Lead содержит наиболее чувствительные PII проекта.
 - Delivery row принадлежит системной state machine, а не общему Admin CRUD.
-- Роль `admin` не должна неявно получать owner capability из legacy-плана.
+- Роль `admin` не должна неявно получать owner capability.
 - System actor — именованный trusted path с `overrideAccess`, а не пользовательская роль.
 
 ## Проверка

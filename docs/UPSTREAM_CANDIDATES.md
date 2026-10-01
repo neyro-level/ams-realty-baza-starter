@@ -1,6 +1,6 @@
 # Upstream Candidates
 
-Статус: `ACTIVE / EMPTY REGISTER` (проверено в Plan №12 EPIC-09).
+Статус: `ACTIVE / EMPTY REGISTER`.
 
 Этот реестр хранит только наблюдения о потенциально reusable улучшениях,
 обнаруженных в проекте. Он не является backlog, вторым task store или

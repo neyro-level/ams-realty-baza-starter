@@ -125,7 +125,7 @@ REALTY_BASE
 **UI и дизайн**
 
 19. Один проект = один Design System. Новая страница — новая композиция, а не новый дизайн.
-20. Owner decision `OD-FA-01` supersedes the Plan 12 runtime split for the final-audit starter line: factual runtime design-system values are owned by `src/app/globals.css`. During the EPIC-00 → EPIC-01 transition `src/project/brand.css` may remain only as generated compatibility input consumed by `globals.css`; after the migration it has no runtime authority. Любой другой CSS использует semantic/component tokens через `var(--*)` и не создаёт второй набор design literals.
+20. Factual runtime design-system values are owned by `src/app/globals.css`. `src/project/brand.css` may remain only as deprecated compatibility stub and has no runtime authority. Любой другой CSS использует semantic/component tokens через `var(--*)` и не создаёт второй набор design literals.
 21. shadcn/ui — единственная primitive foundation. Второй Button/Input/Dialog/Card не создаётся.
 22. Server Components по умолчанию; `"use client"` — только на интерактивном leaf.
 23. Reusable UI не импортирует Payload, DB clients и persistence types.
@@ -165,7 +165,7 @@ REALTY_BASE
 | Schema | Payload collections/config + `migrations/` |
 | Project profile | `AMS_PROFILE` + `docs/PROJECT.md` |
 | Runtime factual design values | `src/app/globals.css` |
-| Clone preset/intake design input | approved clone preset / project intake; transitional `src/project/brand.css` only until EPIC-01 migration |
+| Clone preset/intake design input | approved clone preset / project intake; `src/project/brand.css` is compatibility only |
 | Semantic/component design values | `src/app/globals.css` |
 | Design policy | `docs/DESIGN.md` |
 | Client/project config | `docs/PROJECT.md` |
@@ -1730,16 +1730,14 @@ existing project component
 
 ## 13.2 Design values
 
-Owner decision `OD-FA-01` changes the final-audit starter direction for design
-values. The runtime owner is now single:
+Runtime design values have a single factual owner:
 
 - `src/app/globals.css` — factual runtime source of truth for design-system
   values, including project values generated from approved clone preset/intake,
   semantic/component maps, typography scales/weights, section rhythm, easing,
   containers, shadows and component roles;
-- `src/project/brand.css` — transitional generated compatibility input only
-  until EPIC-01 migrates generation into `globals.css`; after that migration it
-  has no runtime authority.
+- `src/project/brand.css` — deprecated compatibility stub only; it has no
+  runtime authority.
 
 `globals.css` владеет:
 
@@ -3279,7 +3277,7 @@ folder guards
 
 Design values = src/app/globals.css
 Clone preset/intake = client-owned input
-src/project/brand.css = transitional only until EPIC-01 migration
+src/project/brand.css = compatibility only; no runtime authority
 Page layout CSS may consume var(--*)
 Design literals do not fork outside the locked runtime owner
 
@@ -3334,4 +3332,3 @@ not domain/UI rewrite
 **Конец канонического документа — AMS REALTY PLATFORM CORE STANDARD 5.5 — SOLO + AI.**
 
 ---
-

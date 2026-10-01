@@ -3,11 +3,11 @@
 	"core": {
 		"version": "5.5",
 		"path": "AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md",
-		"sha256": "d6109fe7384e5203ff4cc2f1eabf22464e7607f455ece7d7202c347a5a06823f"
+		"sha256": "31e8c624c2973091e91f35be031a38a1f16b4f238df642a06983dcd5195e447a"
 	},
 	"ui": {
 		"version": "5.0",
 		"path": "docs/DESIGN.md",
-		"sha256": "db06028c66ece3b76dcf4bd988113419ab094dfc70e9f2693561f0df9c177738"
+		"sha256": "492e61bfd483630bc8dc3698125e17ee62871f0e5141d7ee1b0fe1624591929c"
 	}
 }

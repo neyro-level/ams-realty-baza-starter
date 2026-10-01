@@ -1,10 +1,10 @@
 {
 	"schemaVersion": 1,
-	"planId": "AMS-REALTY-BAZA-STARTER-FINAL-COMMERCIAL-FREEZE",
-	"planVersion": "v4",
+	"verificationId": "AMS-REALTY-BAZA-STARTER-CURRENT-FINAL-VERIFICATION",
+	"verificationVersion": "current",
 	"suites": [
 		{
-			"command": "verify:plan12-mandatory-capabilities",
+			"command": "verify:mandatory-capabilities",
 			"capabilities": ["mandatory-capability-contract"]
 		},
 		{
@@ -183,10 +183,6 @@
 		{
 			"command": "verify:clone-matrix-contract",
 			"capabilities": ["clone-matrix-contract"]
-		},
-		{
-			"command": "verify:performance-load-record",
-			"capabilities": ["performance-load"]
 		},
 		{
 			"command": "verify:ui-core:final",

@@ -2,12 +2,10 @@
 
 Статус: `ACCEPTED`
 
-Authority: `AMS-REALTY-BAZA-CLONE-READY-2-1-10`, v4, `APPROVED`, B1-T2.
-
 ## Контекст
 
-Plan 10 заменяет persisted значение `administrative` на
-`admin_district`. Payload schema, migration, seed и SEO templates уже используют
+Current taxonomy uses persisted value `admin_district` instead of
+`administrative`. Payload schema, migration, seed и SEO templates уже используют
 новую taxonomy, поэтому публичный `DistrictDTO` не может сохранять
 старое значение.
 

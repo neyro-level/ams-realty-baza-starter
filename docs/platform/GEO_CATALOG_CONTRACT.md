@@ -2,12 +2,9 @@
 
 Status: `ACTIVE / IMPLEMENTED`
 
-Origin: `AMS-REALTY-BAZA-STARTER-GEO-CATALOG-8 v6` (`EXECUTION_COMPLETE`)
-
 This document is the active reusable contract for geo/catalog URL, page
-resolution, profile status and lifecycle semantics. P8-23A completed the public
-cutover and P8-23B completed guarded cleanup. Code, migrations and tests remain
-the runtime truth for implementation details.
+resolution, profile status and lifecycle semantics. Code, migrations and tests
+remain the runtime truth for implementation details.
 
 ## 1. Boundary and invariants
 
@@ -18,9 +15,9 @@ the runtime truth for implementation details.
   project + core + UI; reusable core/packages may not import project.
 - Project-owned static routes, brand, domain and geo literals are injected
   explicitly. Reusable core/packages do not contain client-specific literals.
-- Raw legacy geo/source data is retained after the accepted cutover cleanup.
-- Rollback of the cutover/cleanup uses the recorded P8-23A/P8-23B changes; the
-  removed proof-only runtime is not an active fallback.
+- Raw legacy geo/source data is retained unless a separate owner-approved cleanup
+  task says otherwise.
+- Removed proof-only runtime paths are not active fallbacks.
 - Starter topology remains local PostgreSQL + `MEDIA_DIR`; clone topology is a
   separate project decision.
 - Production indexing, release, mirror and tag creation require separate owner
@@ -268,20 +265,19 @@ current routes/data
   -> pure profile and grammar
   -> additive schema + normalized refs
   -> frozen DTO/Public Gateway
-  -> resolver/Gate/UI/discovery/lifecycle evidence
-  -> P8-23A atomic public cutover
-  -> P8-23B contract cleanup
+  -> resolver/Gate/UI/discovery/lifecycle proof
+  -> public route cutover
+  -> guarded contract cleanup
 ```
 
-P8-23A preserved Payload Admin/API/security and switched canonical public
-resolution. P8-23B removed only runtime proven replaced by the accepted
-cutover. `/nedvizhimost` and `/obekty/[slug]` remain bounded redirect-only
-compatibility adapters; raw legacy geo/source data remains retained.
+Payload Admin/API/security remains outside the public resolver boundary.
+`/nedvizhimost` and `/obekty/[slug]` remain bounded redirect-only compatibility
+adapters; raw legacy geo/source data remains retained.
 
 ## 11. Change control
 
-This contract was implemented by Plan 8 epics. A change to PageKey vocabulary,
-URL collision precedence, status semantics, lifecycle codes or dependency
-direction requires an explicit approved task or plan revision before implementation.
+Changing PageKey vocabulary, URL collision precedence, status semantics,
+lifecycle codes or dependency direction requires an explicit approved task
+before implementation.
 An ADR is created only for a genuinely hard-to-reverse deviation that cannot be
 stated unambiguously in Architecture or Clone Onboarding.

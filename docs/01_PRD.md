@@ -1,48 +1,53 @@
-# PRD — AMS Realty Baza Starter
+# PRD - AMS Realty Baza Starter
 
-Статус: `ACTIVE / GEO-CATALOG PLATFORM IMPLEMENTED`.
+Статус: `ACTIVE`.
 
 ## Продукт
 
-AMS Realty Baza Starter — коммерческая базовая платформа AMS для сайтов агентств недвижимости: публичный сайт и каталог, Payload Admin, безопасный импорт нескольких XML/YRL-фидов и надёжное сохранение и доставку лидов.
+AMS Realty Baza Starter - коммерческая базовая платформа AMS для сайтов
+агентств недвижимости: публичный сайт и каталог, Payload Admin, импорт
+нескольких XML/YRL-фидов, сохранение лидов и подключаемая доставка заявок.
 
 ## Пользователи
 
 - посетитель подбирает объект и отправляет заявку;
 - агентство управляет объектами, страницами и лидами через Payload Admin;
-- один владелец с AI разрабатывает, выпускает и обслуживает экземпляр.
+- владелец продукта с AI разрабатывает, выпускает и обслуживает экземпляр.
 
 ## Базовый объём
 
-- 15–50 страниц;
-- обычно 300–1 000 объектов, до примерно 2 000 active inventory records;
+- 15-50 публичных страниц;
+- обычно 300-1 000 объектов, до примерно 2 000 active inventory records;
 - несколько feed sources;
-- 1–2 администратора;
+- 1-2 администратора;
 - формы заявок и подключаемые каналы доставки;
-- отдельные Managed PostgreSQL, S3, домен и секреты на клиента.
+- отдельные PostgreSQL, media storage, домен и секреты на клиентском clone.
 
 ## Ценность первой версии
 
-Единый проверяемый foundation, который сохраняет визуальные паттерны Atlas, но не переносит его технический долг. UI зависит от presentation contracts, а Payload реализует эти contracts через Gateway и DTO.
+Единый проверяемый foundation, который сохраняет визуальные паттерны Atlas, но
+не переносит его технический долг. UI зависит от presentation contracts, а
+Payload реализует эти contracts через Public Gateway и DTO.
 
-## Реализованная geo-catalog platform
+## Реализованный scope
 
-Plan №8 преобразовал foundation в переносимую geo-first catalog platform:
-single-geo и multi-geo профили, каноническая URL-грамматика, нормализованные
-geo/taxonomy entities, developments/developers, Public Gateway/DTO, SEO Registry,
-Content Gate и проверяемый route cutover. Target-контракт:
-`platform/GEO_CATALOG_CONTRACT.md`.
+- Geo-first catalog: single-geo и multi-geo профили.
+- Каноническая URL-грамматика для geo hubs, категорий, карточек объектов,
+  застройщиков и development pages.
+- Нормализованные geo/taxonomy entities, developments/developers, properties,
+  leads, feed sources и import runs.
+- Public Gateway/DTO boundary между Payload и публичным UI.
+- SEO Registry, Content Gate, canonical/robots/discovery правила.
+- Clone preset/intake, starter-owned manifest и явный upgrade boundary.
 
-Canonical public cutover и post-cutover cleanup завершены. Текущие маршруты и
-совместимость описаны в `02_PRODUCT_STRUCTURE.md`; итоговое evidence —
-`plan8/S8_25_FINAL_EXECUTION_REPORT.md`.
+Reusable target-контракт каталога: `platform/GEO_CATALOG_CONTRACT.md`.
 
 ## Не входит без отдельного trigger
 
 Личный кабинет, Redis, broker, PostGIS, поисковый движок, второй backend/ORM,
-отдельный jobs runner и multi-currency. Bounded feed-image mirror и подготовка
-модуля новостроек реализованы только в границах, зафиксированных текущим
-runtime и `PROJECT.md`; это не включает личный кабинет или второй backend.
+отдельный jobs runner, multi-currency, production release, новый immutable tag и
+клиентская инфраструктура. Bounded feed-image mirror и модуль новостроек
+существуют только в границах текущего runtime и `PROJECT.md`.
 
-Продуктовые границы определяет `02_PRODUCT_STRUCTURE.md`, технические —
-`03_ARCHITECTURE.md`, текущую работу — `04_BACKLOG.md`.
+Продуктовые границы определяет `02_PRODUCT_STRUCTURE.md`, технические -
+`03_ARCHITECTURE.md`, текущую работу - `04_BACKLOG.md`.

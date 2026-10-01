@@ -10,9 +10,9 @@ fail-closed. Production origin допускается только как approv
 
 ## Текущий публичный runtime
 
-P8-23A переключает динамический public runtime на canonical resolver. Статические
-маршруты остаются explicit; два реально публичных legacy donor URL сохранены
-как redirect-only compatibility adapters без прежнего presentation/runtime.
+Динамический public runtime обслуживается canonical resolver. Статические
+маршруты остаются explicit; два реально публичных donor URL сохранены как
+redirect-only compatibility adapters без прежнего presentation/runtime.
 
 | Назначение | Текущий URL |
 |---|---|
@@ -61,8 +61,7 @@ P8-23A переключает динамический public runtime на canon
 
 Reusable target-контракт: `platform/GEO_CATALOG_CONTRACT.md`. Он фиксирует
 PageKey, URL grammar, resolution order, status/profile model и lifecycle
-семантику. Контракт реализован; P8-23A выполнил atomic public cutover, P8-23B —
-guarded cleanup.
+семантику. Контракт реализован в текущем runtime.
 
 | Target surface | Canonical grammar | Текущий статус |
 |---|---|---|
@@ -81,10 +80,10 @@ guarded cleanup.
 Инварианты target-грамматики: не более трёх сегментов, lowercase, canonical
 trailing slash, property URL не содержит geo, parent района не входит в URL.
 Legacy `/nedvizhimost` и `/obekty/[slug]` делают один прямой `301` на итоговый
-canonical URL. Только нормализация trailing slash использует `308`. Отдельная
-proof-only lifecycle HTTP boundary удалена в P8-23B: реальные
+canonical URL. Только нормализация trailing slash использует `308`. Реальные
 canonical `301/410` обслуживает bounded preflight в `src/proxy.ts`. Raw legacy
-geo/source fields и history redirects не удалялись.
+geo/source fields и redirect history не удаляются без отдельного owner-approved
+cleanup scope.
 
 ## Runtime ownership
 
@@ -93,11 +92,8 @@ geo/source fields и history redirects не удалялись.
 - **Canonical contract:** `platform/GEO_CATALOG_CONTRACT.md`.
 - **Implementation:** schema, profile, grammar, resolver, Gate, UI и discovery
   работают в текущем runtime.
-- **Cutover evidence:** P8-23A —
-  `docs/plan8/S8_23A_RUNTIME_CUTOVER_EVIDENCE.md`.
-- **Cleanup evidence:** P8-23B —
-  `docs/plan8/S8_23B_POST_CUTOVER_CLEANUP_EVIDENCE.md`. Raw legacy geo/source
-  data сохранены.
+- **Data preservation:** raw source fields and redirect history are retained
+  unless a separate owner-approved cleanup task says otherwise.
 
 ## Clone profile and registry ownership
 

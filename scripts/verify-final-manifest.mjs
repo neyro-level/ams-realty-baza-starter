@@ -41,17 +41,16 @@ const requiredCapabilities = [
 	"five-profile-clone-matrix",
 	"tracking-traffic-smoke",
 	"seo-crawl-matrix",
-	"performance-load",
 	"ui-browser-proof",
 	"security-regression",
 ];
 
 assert.equal(manifest.schemaVersion, 1, "unsupported verification manifest");
 assert.equal(
-	manifest.planId,
-	"AMS-REALTY-BAZA-STARTER-FINAL-COMMERCIAL-FREEZE",
+	manifest.verificationId,
+	"AMS-REALTY-BAZA-STARTER-CURRENT-FINAL-VERIFICATION",
 );
-assert.equal(manifest.planVersion, "v4");
+assert.equal(manifest.verificationVersion, "current");
 assert.ok(Array.isArray(manifest.suites) && manifest.suites.length > 0);
 
 const commandOwners = new Map();

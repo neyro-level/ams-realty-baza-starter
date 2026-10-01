@@ -38,9 +38,9 @@ Tag, SHA и release manifest должны описывать один опубл
 Этот маршрут выполняется последовательно. Переход к следующему шагу разрешён
 только после проверки output текущего. Неизвестное решение — `STOP`, а не
 скрытый default. Исходная точка — отдельный clean repository на опубликованном
-`starter-v2.MINOR.PATCH` с release manifest того же tag/SHA. Plan 11 не создаёт
-tag, а Plan 12 также не разрешает использовать непубликованный target. Текущий
-released-tag status проверяется по `STARTER_RELEASE_STATE.md`.
+`starter-v2.MINOR.PATCH` с release manifest того же tag/SHA. Непубликованный
+target и moving `main` использовать запрещено. Текущий released-tag status
+проверяется по `STARTER_RELEASE_STATE.md`.
 
 ### 1. Intake
 

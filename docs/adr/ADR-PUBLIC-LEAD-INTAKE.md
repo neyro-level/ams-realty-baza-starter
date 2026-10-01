@@ -2,7 +2,7 @@
 
 Статус: Accepted  
 Дата: 2026-09-18  
-Контекст: EPIC 5 / public lead intake + transactional outbox
+Контекст: public lead intake + transactional outbox
 
 ## Решение
 
@@ -22,7 +22,7 @@ Idempotency: browser создаёт UUID `requestAttemptId`; exact retry сох�
 
 Fraud fingerprint: keyed HMAC по `PAYLOAD_SECRET`, без raw IP/UA.
 
-## P8-19: extended attribution contract
+## Extended attribution contract
 
 The runtime intake contract adds `legal`, `development_price` and `quiz` plus an
 optional normalized `context` (`geo`, `surface`, `district`, `propertyUrlId`,

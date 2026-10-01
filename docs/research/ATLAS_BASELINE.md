@@ -104,7 +104,7 @@ Atlas `@starter/site-ui` содержит 22 primitive files и 101 view file: 9
 | `new-building` (8), `journal` (12), `leadgen` (8), `corporate/Employee*`, `corporate/Careers*`, session collections | `MODULE` | не входят в BASE автоматически |
 | `leadgen/leadgen-promo-final-cta.shared.ts` | `MODULE` | helper переносится только вместе с leadgen-модулем |
 | Atlas application wrappers и content compositions | `ATLAS-SPECIFIC` | использовать как visual/composition reference; copy и identity не переносить |
-| package root `.` umbrella export и wildcard subpath exports | `BASE` | donor reference; RealtBase public API сужается в EPIC 3 по фактическим consumers |
+| package root `.` umbrella export и wildcard subpath exports | `BASE` | donor reference; RealtBase public API is narrowed by actual consumers |
 | Payload Admin components и backend/data/job UI из donor | `DROP` | CMS остаётся native; technical owner — Core 5.5 implementation |
 
 ## Client leaves
@@ -134,11 +134,21 @@ Client boundary переносится только когда без него �
 | `packages/site-ui/src/styles/promo.css` | `ATLAS-SPECIFIC` | reference для commercial composition, не общий BASE stylesheet |
 | `src/app/(site)/globals.css`, `src/app/styles/base.css` | `ATLAS-SPECIFIC` | application wiring Atlas; RealtBase сохраняет собственный `globals.css` |
 
-Atlas semantic roles для color/surface/text/border/focus/status, typography, containers, section rhythm, radii, media и motion входят в normalization input. Numeric values остаются donor evidence до EPIC 4; они не становятся RealtBase tokens автоматически.
+Atlas semantic roles для color/surface/text/border/focus/status, typography,
+containers, section rhythm, radii, media и motion входят в normalization input.
+Numeric values остаются donor reference material; они не становятся RealtBase
+tokens автоматически.
 
 ### Normalized CSS parity proof
 
-EPIC 4 сохраняет Atlas geometry и visual treatment без глобального загрязнения route-owned styles: `shell.css`, `request-modal.css` и `site-footer.css` подключаются через package root, а `home-page.css` и выделенный `home-articles.css` экспортируются отдельно для маршрута главной. Скрипт `pnpm visual:atlas-css-parity` сравнивает pinned Atlas до и после подключения нормализованного CSS. Зафиксированный результат: 24/24 pixel-identical кадров для шести сценариев на mobile, tablet, desktop и wide; machine-readable evidence — `docs/research/atlas-css-parity.json`.
+Atlas geometry и visual treatment сохраняются без глобального загрязнения
+route-owned styles: `shell.css`, `request-modal.css` и `site-footer.css`
+подключаются через package root, а `home-page.css` и выделенный
+`home-articles.css` экспортируются отдельно для маршрута главной. Скрипт
+`pnpm visual:atlas-css-parity` сравнивает pinned Atlas до и после подключения
+нормализованного CSS. Зафиксированный результат: 24/24 pixel-identical кадров
+для шести сценариев на mobile, tablet, desktop и wide; machine-readable parity
+data — `docs/research/atlas-css-parity.json`.
 
 ## Media inventory
 
@@ -154,11 +164,11 @@ RealtBase media продолжает использовать `MediaDTO`; physic
 
 | RealtBase contract | Atlas evidence | Класс / действие |
 |---|---|---|
-| `PropertyCardDTO`, `PropertyDetailsDTO`, `PropertyListDTO` | card/detail/page/snapshot DTO и Zod schemas существуют | `BASE`; пересобрать минимальный Core 5.5 shape в EPIC 2 |
+| `PropertyCardDTO`, `PropertyDetailsDTO`, `PropertyListDTO` | card/detail/page/snapshot DTO и Zod schemas существуют | `BASE`; shape belongs to current Core 5.5 contracts |
 | `PropertyFilterDTO` | query + 10 facet groups существуют | `BASE`; зафиксировано `filters only`, option counts не переносить |
 | `MediaDTO` | donor в основном передаёт строки/локальные gallery shapes | `BASE GAP`; привести к `kind/src/alt/width/height` |
 | `SiteHeaderDTO`, `SiteFooterDTO` | shell/nav/footer view DTO существуют | `BASE`; удалить Atlas identity/copy |
-| `BreadcrumbDTO`, `PageSEOContract` | page-specific evidence существует, единого minimal contract недостаточно | `BASE GAP`; определить в EPIC 2 |
+| `BreadcrumbDTO`, `PageSEOContract` | page-specific reference exists, единого minimal contract недостаточно | `BASE GAP`; define only through current Core 5.5 contract work |
 | `LeadFormContext` | form type и property context существуют | `BASE GAP`; добавить `consentVersion`, `consentHref`, `consentRequired` до freeze |
 | new-buildings, journal, employee/review contracts | отдельные domain DTO | `MODULE` |
 | Atlas tenant config/content DTO | brand/city/legal/copy | `ATLAS-SPECIFIC` |

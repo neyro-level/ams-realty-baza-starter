@@ -129,7 +129,7 @@ surface, and lifecycle events are operational infrastructure.
 
 ## Current Required Proof
 
-The Task Manager EPIC-04 implementation must pass:
+Any current core-compliance change must pass:
 
 ```text
 pnpm quality:architecture

@@ -54,5 +54,5 @@ assert.throws(
 assert.equal(owners.has("missing-fixture"), false);
 
 console.log(
-	`verify:plan12-mandatory-capabilities PASS (${Object.keys(expectedOwners).length} exact owners + duplicate/missing negative fixtures)`,
+	`verify:mandatory-capabilities PASS (${Object.keys(expectedOwners).length} exact owners + duplicate/missing negative fixtures)`,
 );

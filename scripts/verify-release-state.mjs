@@ -46,10 +46,6 @@ function codeValue(value) {
 	return match?.[1] ?? value.trim();
 }
 
-function assertShaField(rows, key) {
-	assert.match(codeValue(cell(rows, key)), fullSha, `${key} must contain a full lowercase Git SHA`);
-}
-
 function assertNotMovingReleaseBaseline(value, key) {
 	assert.doesNotMatch(
 		value,
@@ -111,13 +107,14 @@ const constitutionLock = readJson(constitutionLockPath);
 
 for (const key of [
 	"Canonical SourceCraft repository",
-	"Repository main SHA",
-	"Accepted implementation SHA",
-	"Last fully verified SHA",
-	"Final commercial-freeze candidate SHA",
+	"Repository mode",
+	"GitHub mirror",
+	"AMS Realty Platform Core",
+	"AMS UI Core",
+	"Runtime versions",
+	"Ownership manifest",
 	"Current immutable released starter tag",
 	"Released tag SHA",
-	"Last SourceCraft Gate",
 	"Open P0",
 	"Open P1",
 	"Open P2",
@@ -131,13 +128,15 @@ assert.equal(
 	"integrator-p/ams-realty-baza-starter",
 	"canonical repository drift",
 );
-assertShaField(rows, "Repository main SHA");
-assertShaField(rows, "Accepted implementation SHA");
-assertShaField(rows, "Last fully verified SHA");
-assert.doesNotMatch(
-	cell(rows, "Final commercial-freeze candidate SHA"),
-	fullSha,
-	"final freeze candidate must not be declared before EPIC-06",
+assert.equal(
+	codeValue(cell(rows, "Repository mode")),
+	"SOURCECRAFT_PRIMARY_GITHUB_MIRROR",
+	"repository mode drift",
+);
+assert.match(
+	cell(rows, "GitHub mirror"),
+	/mirror-only/i,
+	"GitHub mirror row must keep GitHub as mirror-only",
 );
 
 assertRuntimeVersion(rows, "Node", packageJson.engines.node);
@@ -175,11 +174,6 @@ if (codeValue(releaseTagValue) === "NOT CREATED") {
 	const actualTagSha = gitTagSha(tag);
 	assert.equal(actualTagSha, sha, "released tag/sha pair is inconsistent");
 }
-assert.match(
-	cell(rows, "Historical starter-freeze tag"),
-	/HISTORICAL/,
-	"starter-freeze must remain historical, not current",
-);
 
 const registry = parseSeverityRegistry(read(backlogPath));
 assert.equal(severityValue(rows, "Open P0"), registry.P0, "Open P0 differs from active blocker registry");
@@ -190,6 +184,7 @@ assert.ok(
 	packageJson.scripts?.["verify:release-state"]?.includes("scripts/verify-release-state.mjs"),
 	"package script verify:release-state is missing",
 );
+assert.doesNotMatch(releaseState, /Repository main SHA|Last fully verified SHA|Final commercial-freeze candidate SHA/i);
 assert.doesNotMatch(releaseState, /Current immutable released starter tag\s*\|\s*`?(?:main|latest|origin\/main)/i);
 
 console.log("verify:release-state: PASS");

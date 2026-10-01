@@ -35,14 +35,14 @@ function assertLockedAuthority(name, entry) {
 	if (name === "core") {
 		assert.equal(entry.version, "5.5", "core version must be 5.5");
 		assert.match(content, /AMS REALTY PLATFORM CORE STANDARD 5\.5/i);
-		assert.match(content, /OD-FA-01/);
 		assert.match(content, /src\/app\/globals\.css/);
+		assert.match(content, /src\/project\/brand\.css.*compatibility/i);
 	}
 	if (name === "ui") {
 		assert.equal(entry.version, "5.0", "ui version must be 5.0");
 		assert.match(content, /UI Core v5\.0 authority/);
-		assert.match(content, /OD-FA-01/);
 		assert.match(content, /src\/app\/globals\.css/);
+		assert.match(content, /src\/project\/brand\.css.*compatibility/i);
 	}
 }
 

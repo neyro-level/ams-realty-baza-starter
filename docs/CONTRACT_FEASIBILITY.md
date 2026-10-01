@@ -1,7 +1,7 @@
 # Contract Feasibility
 
-> Evidence document, сохранённый по каноническому пути для contract freeze
-> guard. Не является текущим backlog или заменой runtime tests.
+> Guard document, сохранённый по каноническому пути для contract freeze. Не
+> является backlog или заменой runtime tests.
 
 Статус: `VERIFIED`.
 
@@ -31,7 +31,7 @@ Payload — через Public Gateway. UI не читает XML/YRL и Payload d
 - точный образец клиентского фида подключается на этапе parser fixture. До него
   используется официальный YRL vocabulary и optional-поля скрываются при отсутствии.
 
-Atlas implementation evidence:
+Atlas-compatible implementation sources:
 
 - `src/core/ingest/yrl-parser.ts` — streaming XML → normalized offer;
 - `src/shared/types/feed-import.ts` — normalized schema;
@@ -90,7 +90,7 @@ Atlas implementation evidence:
 | `PropertyDetailsDTO.characteristics` | direct stored YRL characteristics | whitelist + labels | `O(1)` | approved property fields | VERIFIED |
 | `PropertyDetailsDTO.location.latitude` | YRL `<latitude>` | numeric validation | `O(1)` | `properties.lat` | VERIFIED |
 | `PropertyDetailsDTO.location.longitude` | YRL `<longitude>` | numeric validation | `O(1)` | `properties.lng` | VERIFIED |
-| `PropertyDetailsDTO.related` | same category/city, excluding current id | bounded query, stable sort, limit | `1 query` | existing fields/index decision in EPIC 7 | VERIFIED |
+| `PropertyDetailsDTO.related` | same category/city, excluding current id | bounded query, stable sort, limit | `1 query` | existing indexed fields | VERIFIED |
 | `PropertyListDTO.items` | public properties query | select allowlist + DTO map | `1 query` | approved | VERIFIED |
 | `PropertyListDTO.total` | same filter predicate | count | `count query` | approved | VERIFIED |
 | `PropertyListDTO.page` | validated URL query | clamp positive integer | `presentation only` | none | VERIFIED |
@@ -241,27 +241,26 @@ from choosing an obsolete consent version or arbitrary source page.
 
 ## Geo-catalog contract 2.0.0
 
-Plan 8 v6 и `ADR-CONTRACTS-V2-GEO-CATALOG` разрешают завершить начатый P8-05
-draft major. Ниже зафиксирована реализуемость новых presentation DTO. Public
-Gateway queries остаются scope P8-13; P8-12 доказывает форму, доступность
-источников и bounded composition без скрытого schema/runtime owner.
+Ниже зафиксирована реализуемость geo-catalog presentation DTO. Public Gateway
+queries, grammar, Content Gate and bounded composition are current runtime
+contracts without a hidden schema/runtime owner.
 
-| Contract | Source / composition | Query budget after P8-13 | Decision |
+| Contract | Source / composition | Query budget | Decision |
 |---|---|---|---|
-| `PageKeyDTO`, `PageLinkDTO` | pure URL grammar P8-04 | presentation only | VERIFIED RUNTIME |
-| `RegionDTO`, `CityDTO`, `DistrictDTO` | published geo collections P8-06; approved morphology only | one selected read or bounded relation join | VERIFIED SCHEMA + FIXTURE |
-| `GeoHubDTO` | city + bounded category/district/developer counts | bounded aggregate set, no per-card queries | VERIFIED CONTRACT; QUERY PROOF P8-13 |
-| `DeveloperCardDTO/DetailsDTO` | published developer P8-09 + bounded development count | selected read + bounded aggregate | VERIFIED SCHEMA + FIXTURE |
-| `DevelopmentCardDTO/DetailsDTO` | unified development P8-09; only kind-valid fields | selected read with fixed depth/limits | VERIFIED SCHEMA + FIXTURE |
-| `PropertyCardDTO.publicUrlId` | immutable sequence identity P8-08 | included in existing selected read | VERIFIED RUNTIME |
+| `PageKeyDTO`, `PageLinkDTO` | pure URL grammar | presentation only | VERIFIED RUNTIME |
+| `RegionDTO`, `CityDTO`, `DistrictDTO` | published geo collections; approved morphology only | one selected read or bounded relation join | VERIFIED SCHEMA + FIXTURE |
+| `GeoHubDTO` | city + bounded category/district/developer counts | bounded aggregate set, no per-card queries | VERIFIED CONTRACT |
+| `DeveloperCardDTO/DetailsDTO` | published developer + bounded development count | selected read + bounded aggregate | VERIFIED SCHEMA + FIXTURE |
+| `DevelopmentCardDTO/DetailsDTO` | unified development; only kind-valid fields | selected read with fixed depth/limits | VERIFIED SCHEMA + FIXTURE |
+| `PropertyCardDTO.publicUrlId` | immutable sequence identity | included in existing selected read | VERIFIED RUNTIME |
 | `PropertyCardDTO.pageKey/href` | category mapping + slug + publicUrlId → `buildUrl` | `O(1)` | VERIFIED FIXTURE |
-| `PropertyCategoryDetailsDTO` | allowlisted fields already persisted by P8-08 | `O(1)` mapping after selected read | VERIFIED SCHEMA + TYPECHECK |
-| `SeoMetaDTO` | explicit content/registry values and Content Gate decision | presentation only after source read | VERIFIED CONTRACT; POLICY P8-14/15 |
+| `PropertyCategoryDetailsDTO` | allowlisted persisted fields | `O(1)` mapping after selected read | VERIFIED SCHEMA + TYPECHECK |
+| `SeoMetaDTO` | explicit content/registry values and Content Gate decision | presentation only after source read | VERIFIED CONTRACT |
 | `BreadcrumbDTO` hrefs | ordered PageKeys → `buildUrl` | bounded `O(depth)` | VERIFIED FIXTURE |
-| `ListingPageDTO.items/total` | selected listing read + matching count | one page query + one count query | VERIFIED CONTRACT; QUERY PROOF P8-13 |
+| `ListingPageDTO.items/total` | selected listing read + matching count | one page query + one count query | VERIFIED CONTRACT |
 | `ListingPageDTO.pagination` | validated page/pageSize/total | `O(1)` | VERIFIED FIXTURE |
-| `ListingPageDTO.subLinks/nearby` | Gate-eligible PageKeys; nearby only from approved agglomeration | bounded aggregate, no cross-city count pollution | VERIFIED CONTRACT; POLICY P8-13/15 |
-| `ListingPageDTO.robots/canonical` | Content Gate + canonical URL grammar | presentation only | VERIFIED CONTRACT; POLICY P8-15 |
+| `ListingPageDTO.subLinks/nearby` | Gate-eligible PageKeys; nearby only from approved agglomeration | bounded aggregate, no cross-city count pollution | VERIFIED CONTRACT |
+| `ListingPageDTO.robots/canonical` | Content Gate + canonical URL grammar | presentation only | VERIFIED CONTRACT |
 
 Fixture acceptance covers a region, two configured geos, district, developer,
 residential development, category-aware property and listing. The verifier
@@ -273,7 +272,7 @@ fixture values are not demand research and cannot authorize indexability.
 
 Journal остаётся отдельным draft namespace и не входит в Base contract freeze.
 Модуль выключен, collection `posts` заранее не создаётся. Его draft fields уже
-имеют карту, но не создают dependency для Base и не блокируют EPIC 3–5.
+имеют карту, но не создают dependency для Base.
 
 | Field | Future source | Computation | Query cost | Base schema | Decision |
 |---|---|---|---|---|---|
@@ -296,12 +295,12 @@ Journal остаётся отдельным draft namespace и не входит
 3. Подтвердить правило по цене за м²: если её нет отдельным значением в источнике,
    поле не показываем. До ответа именно это принято безопасным default.
 4. Частоту обновления и правило снятия исчезнувших объявлений определить перед
-   реализацией ingest в EPIC 8; до этого они не влияют на UI-контракт.
+   реализацией ingest; до этого они не влияют на UI-контракт.
 
 ## Итог gate
 
 - все поля Base DTO имеют источник, стоимость и schema decision;
 - отсутствующие в Atlas функции отключены, а не опираются на неутверждённую схему;
-- UI extraction в EPIC 3 не заблокирован;
+- UI extraction не заблокирован;
 - consent proof и визуальная проверка fixture-сайта пройдены в
   `research/FIXTURE_ACCEPTANCE.md`; contract freeze разблокирован.

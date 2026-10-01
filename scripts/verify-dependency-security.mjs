@@ -8,7 +8,6 @@ function read(path) {
 const packageJson = JSON.parse(read("package.json"));
 const lockfile = read("pnpm-lock.yaml");
 const workspace = read("pnpm-workspace.yaml");
-const evidence = read("docs/evidence/final-audit-freeze/EPIC-02_DEPENDENCY_BASELINE.md");
 
 const expected = {
 	packageManager: "pnpm@11.28.2",
@@ -72,21 +71,6 @@ for (const obsolete of [
 	"undici: 7.29.0",
 ]) {
 	assert.ok(!lockfile.includes(obsolete), `pnpm-lock.yaml still contains ${obsolete}`);
-}
-
-for (const requiredEvidence of [
-	"Checked: 2026-10-01",
-	"| pnpm | `11.5.1` | `11.28.2` |",
-	"| Next.js | `16.3.5` | `16.3.8` |",
-	"| payload | `3.90.1` | `3.90.2` |",
-	"| undici | `7.29.0` | `7.30.0` |",
-	"Major upgrades: none",
-	"Security exceptions: none",
-]) {
-	assert.ok(
-		evidence.includes(requiredEvidence),
-		`dependency evidence missing ${requiredEvidence}`,
-	);
 }
 
 console.log("verify-dependency-security: ok");

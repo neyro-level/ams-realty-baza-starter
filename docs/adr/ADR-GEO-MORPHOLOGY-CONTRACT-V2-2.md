@@ -2,8 +2,6 @@
 
 Статус: `ACCEPTED`
 
-Authority: `AMS-REALTY-BAZA-CLONE-READY-2-1-10`, v4, `APPROVED`, B1-T2.
-
 ## Контекст
 
 Клиентский clone preset должен хранить точную морфологию городов и
@@ -16,7 +14,7 @@ Authority: `AMS-REALTY-BAZA-CLONE-READY-2-1-10`, v4, `APPROVED`, B1-T2.
 - добавить `во` в `CityDTO.preposition` и `DistrictDTO.preposition`;
 - сохранить `в` и `на`, поэтому изменение остаётся совместимым для
   текущих consumers;
-- обновить frozen lock только вместе с этим ADR и approved Plan 10.
+- обновить frozen lock только вместе с этим ADR.
 
 ## Откат
 
