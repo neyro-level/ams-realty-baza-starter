@@ -24,7 +24,11 @@ function git(args, cwd = dir) {
 function pnpm(args) {
 	const cli = process.env.npm_execpath;
 	if (!cli) throw new Error("pnpm CLI path is unavailable; run this through pnpm.");
-	return execFileSync(process.execPath, [cli, ...args], {
+	const isNativeExecutable = /\.(?:exe|cmd|bat)$/i.test(cli);
+	return execFileSync(isNativeExecutable ? cli : process.execPath, [
+		...(isNativeExecutable ? [] : [cli]),
+		...args,
+	], {
 		cwd: dir,
 		stdio: "inherit",
 	});

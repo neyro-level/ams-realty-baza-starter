@@ -120,7 +120,12 @@ const sha = execFileSync("git", ["rev-parse", "HEAD"], {
 
 for (const suite of manifest.suites) {
 	console.log(`\n=== ${suite.command} ===`);
-	execFileSync(process.execPath, [pnpmEntrypoint, "run", suite.command], {
+	const isNativeExecutable = /\.(?:exe|cmd|bat)$/i.test(pnpmEntrypoint);
+	execFileSync(isNativeExecutable ? pnpmEntrypoint : process.execPath, [
+		...(isNativeExecutable ? [] : [pnpmEntrypoint]),
+		"run",
+		suite.command,
+	], {
 		cwd: root,
 		stdio: "inherit",
 		env: process.env,

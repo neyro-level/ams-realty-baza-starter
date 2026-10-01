@@ -12,7 +12,8 @@ stub and has no runtime authority.
 
 ## Consequences
 
-- `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` and `docs/DESIGN.md`
-  are locked together by `config/ams-constitution.lock.json`.
+- `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` and
+  `AMS_UI_CORE_v5.0_FINAL.md` are locked together by
+  `config/ams-constitution.lock.json`.
 - Silent edits to either authority must fail `pnpm verify:constitution-lock`.
 - This ADR records the approved runtime authority boundary.

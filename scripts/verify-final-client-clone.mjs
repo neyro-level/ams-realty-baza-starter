@@ -71,7 +71,11 @@ function hash(value) {
 function pnpm(cwd, args, environment) {
 	const cli = process.env.npm_execpath;
 	assert.ok(cli, "pnpm CLI path is unavailable from npm_execpath");
-	return execFileSync(process.execPath, [cli, ...args], {
+	const isNativeExecutable = /\.(?:exe|cmd|bat)$/i.test(cli);
+	return execFileSync(isNativeExecutable ? cli : process.execPath, [
+		...(isNativeExecutable ? [] : [cli]),
+		...args,
+	], {
 		cwd,
 		env: environment,
 		stdio: "pipe",
@@ -581,9 +585,13 @@ for (const entry of selectedMatrix) {
 			pnpm(clone, ["clone:seed-geo"], runtimeEnvironment);
 			step = "start disposable client runtime";
 			serverProcess = spawn(
-				process.execPath,
+				/\.(?:exe|cmd|bat)$/i.test(process.env.npm_execpath ?? "")
+					? process.env.npm_execpath
+					: process.execPath,
 				[
-					process.env.npm_execpath,
+					...(/\.(?:exe|cmd|bat)$/i.test(process.env.npm_execpath ?? "")
+						? []
+						: [process.env.npm_execpath]),
 					"exec",
 					"next",
 					"start",

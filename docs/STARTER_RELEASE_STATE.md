@@ -25,8 +25,8 @@ git ls-remote github refs/heads/main
 | Repository mode | `SOURCECRAFT_PRIMARY_GITHUB_MIRROR` | `AGENTS.md`, `03_ARCHITECTURE.md` |
 | GitHub mirror | mirror-only; exact SHA equality must be checked by `git ls-remote github refs/heads/main` | Git remote state, not a manual doc field |
 | AMS Realty Platform Core | `5.5` | `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md` and constitution lock |
-| AMS UI Core | `v5.0` | `docs/DESIGN.md` and constitution lock |
-| Runtime versions | Node `>=24.20.0 <25`; pnpm `11.28.2`; Next.js `16.3.8`; React `19.2.8`; Payload `3.90.2`; `@payloadcms/db-postgres` `3.90.2`; `@payloadcms/next` `3.90.2` | `package.json` and `pnpm-lock.yaml` |
+| AMS UI Core | `v5.0` | `AMS_UI_CORE_v5.0_FINAL.md` and constitution lock |
+| Runtime versions | Node `>=24.21.0 <25`; pnpm `11.28.2`; Next.js `16.3.8`; React `19.2.8`; Payload `3.90.2`; `@payloadcms/db-postgres` `3.90.2`; `@payloadcms/next` `3.90.2` | `package.json`, `.node-version`, `Dockerfile`, `.sourcecraft/ci.yaml` and `pnpm-lock.yaml` |
 | Ownership manifest | `starter-owned.json`, `schemaVersion: 2` | committed manifest |
 | Current immutable released starter tag | `NOT CREATED` | Release tag creation requires a separate owner release command |
 | Released tag SHA | `NOT CREATED` | No current immutable release tag |

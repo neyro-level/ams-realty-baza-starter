@@ -30,6 +30,10 @@ function run(command, args) {
 function pnpm(args) {
 	const cli = process.env.npm_execpath;
 	if (!cli) throw new Error("pnpm CLI path is unavailable; run this through pnpm.");
+	if (/\.(?:exe|cmd|bat)$/i.test(cli)) {
+		run(cli, args);
+		return;
+	}
 	run(process.execPath, [cli, ...args]);
 }
 

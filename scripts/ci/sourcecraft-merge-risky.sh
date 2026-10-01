@@ -26,8 +26,8 @@ fi
 
 apt-get update
 apt-get install -y --no-install-recommends ca-certificates curl git xz-utils
-curl -fsSLO https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz
-tar -xJf node-v24.20.0-linux-x64.tar.xz -C /usr/local --strip-components=1
+curl -fsSLO https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
+tar -xJf node-v24.21.0-linux-x64.tar.xz -C /usr/local --strip-components=1
 corepack enable
 corepack prepare pnpm@11.28.2 --activate
 node scripts/ci/assert-exact-head.mjs

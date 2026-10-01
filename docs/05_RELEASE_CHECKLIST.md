@@ -51,6 +51,6 @@
 - после rollout выполнен live smoke изменённого сценария;
 - production URL, health и rollback point зафиксированы.
 
-Live demo infrastructure on AMS Server exists (`start-baza.ams24.ru`). Checklist
-PASS for a given SHA requires immutable image + live smoke on that SHA, not only
-the existence of the contour.
+Live demo infrastructure on AMS Server exists (`start-baza.ams24.ru`).
+Checklist PASS for a given SHA requires immutable image + live smoke on that SHA,
+not only the existence of the contour.

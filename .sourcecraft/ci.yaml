@@ -11,10 +11,10 @@ workflows:
       - name: verify-exact-head
         cubes:
           - name: verify
-            image: node:24.20.0-bookworm
+            image: node:24.21.0-bookworm
             script:
               - corepack enable
-              - corepack prepare pnpm@11.5.1 --activate
+              - corepack prepare pnpm@11.28.2 --activate
               - node scripts/ci/assert-exact-head.mjs
               - pnpm install --frozen-lockfile
               - pnpm verify:merge-standard

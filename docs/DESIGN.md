@@ -1,6 +1,11 @@
-# Design
+# Project Design System
 
-Статус: `Active / REALTY_BASE / UI Core v5.0 authority / constitution-lock enabled`.
+Статус: `Active / REALTY_BASE / Project Design System`.
+
+Этот документ описывает project-owned visual system starter instance. Он не
+заменяет каноническую UI-конституцию. Канонический UI Core зафиксирован в
+`../AMS_UI_CORE_v5.0_FINAL.md` и SHA-locked через
+`../config/ams-constitution.lock.json`.
 
 ## Theme
 
@@ -15,9 +20,6 @@ Dark theme: DISABLED.
 Anti-goals: новый visual language без owner approval; вторая primitive foundation; raw hex/rgb в компонентах; wildcard image hosts; хранение десятков мегабайт скриншотов в каждом clone.
 
 ## Source of truth
-
-This document is the repository-owned UI Core v5.0 authority for the starter
-until an explicit owner-approved upstream UI Core file replaces it.
 
 `src/app/globals.css` is the runtime factual design-value owner. Clone
 preset/intake remains the client-owned input for generated project values.

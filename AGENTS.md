@@ -24,12 +24,13 @@
 
 1. `docs/README.md`.
 2. `AMS_REALTY_PLATFORM_CORE_STANDARD_5.5_SOLO_AI_FINAL.md`.
-3. `docs/01_PRD.md`, `02_PRODUCT_STRUCTURE.md`, `03_ARCHITECTURE.md`.
-4. `docs/04_BACKLOG.md`, `05_RELEASE_CHECKLIST.md`,
+3. `AMS_UI_CORE_v5.0_FINAL.md` для UI-scope.
+4. `docs/01_PRD.md`, `02_PRODUCT_STRUCTURE.md`, `03_ARCHITECTURE.md`.
+5. `docs/04_BACKLOG.md`, `05_RELEASE_CHECKLIST.md`,
    `STARTER_RELEASE_STATE.md`.
-5. `docs/PROJECT.md`.
-6. `docs/DESIGN.md` or `docs/OPERATIONS.md` по scope.
-7. Профильный ADR/module/research документ, только когда он входит в scope.
+6. `docs/PROJECT.md`.
+7. `docs/DESIGN.md` or `docs/OPERATIONS.md` по scope.
+8. Профильный ADR/module/research документ, только когда он входит в scope.
 
 ## Invariants
 

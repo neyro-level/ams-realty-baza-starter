@@ -12,7 +12,8 @@ const releaseBuild = read("scripts/release-build.mjs");
 const pnpmWorkspace = read("pnpm-workspace.yaml");
 
 for (const expected of [
-	"node:24.20.0-bookworm-slim",
+	"node:24.21.0-bookworm-slim",
+	"corepack prepare pnpm@11.28.2 --activate",
 	"pnpm install --frozen-lockfile",
 	"pnpm exec next build --webpack",
 	'"pnpm", "start"',
